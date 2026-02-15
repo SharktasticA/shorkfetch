@@ -102,20 +102,156 @@ char *bytesToReadable(const char *from, const long long val)
 }
 
 /**
+ * Finds and erases a desired substring from an input string.
+ * @param buffer Input string
+ * @param bufferSize Size to use when allocating the result string
+ * @param needle Substring to find and erase
+ * @return String containing what's left after erasing
+ */
+char *findErase(const char *buffer, const size_t bufferSize, const char *needle)
+{
+    if (!buffer || !needle || bufferSize < 2) return strdup("");
+
+    size_t needleLen = strlen(needle);
+    if (needleLen == 0) return strdup("");
+
+    char *result = malloc(bufferSize);
+    if (!result) return strdup("");
+
+    strncpy(result, buffer, bufferSize);
+    result[bufferSize - 1] = '\0';
+
+    char *pos = result;
+    while ((pos = strstr(pos, needle)) != NULL)
+    {
+        size_t tailLen = strlen(pos + needleLen);
+        memmove(pos, pos + needleLen, tailLen + 1);
+    }
+
+    return result;
+}
+
+/**
+ * Removes predefined substrings from an input string. It's intended to
+ * simplify CPU and GPU names by removing things like "(R)", "(TM)",
+ * "Corporation", etc.
+ * @param buffer Input string
+ * @param bufferSize Size to use when allocating the result string
+ * @return String containing what's left after cleaning
+ */
+char *cleanProcessorName(const char *buffer, size_t bufferSize)
+{
+    if (!buffer || bufferSize < 2) return strdup("");
+
+    char *result = malloc(bufferSize);
+    if (!result) return strdup("");
+    
+    strncpy(result, buffer, bufferSize - 1);
+    result[bufferSize - 1] = '\0';
+
+    const char *patterns[] =
+    {
+        "AMD-",                             // For AMD K6
+        ", Inc.",
+        ", Inc",
+        "(R)",
+        "(tm)",
+        "(tm )",                            // For AMD Duron
+        "tm",
+        "(TM)",
+        " APU",
+        " Dual Core",                       // For AMD Athlon
+        " Corporation",
+        " CPU",
+        " Eight-Core",                      // For AMD FX
+        " Electronics Systems",             // For Matrox
+        " Interactive",                     // For 3dfx
+        " Ltd.",
+        " Microsystems",                    // For Trident
+        " processor",
+        " Processor",
+        " Quad Core",                       // For AMD Athlon
+        " Quad-Core",                       // For AMD FX
+        " Six-Core",                        // For AMD FX
+        " Technologies",                    // For VIA
+        " Technology LLC",                  // For Loongson
+        " w/ multimedia extensions",        // For AMD K6
+        " 2x Core/Bus Clock",               // For Cyrix 6x86
+        " 3x Core/Bus Clock",               // For Cyrix 5x86
+        " 75 - 200"                         // For Intel Pentium
+    };
+    const size_t patternCount = sizeof(patterns) / sizeof(patterns[0]);
+
+    for (size_t i = 0; i < patternCount; i++)
+    {
+        const char *pattern = patterns[i];
+        char *tmp = findErase(result, bufferSize, pattern);
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
+    }
+
+    // Dynamically generate substrings like "16-Core" or "16 Cores" to find
+    // and remove from AMD Ryzen or EPYC CPU names
+    int done = 0;
+    if (strstr(result, "AMD") && (strstr(result, "Ryzen") || strstr(result, "EPYC")))
+    {
+        for (int i = 2; i <= 192; i += 2)
+        {
+            if (done == 1) break;
+
+            char *withDash = malloc(10);
+            char *withSpace = malloc(11);
+            if (!withDash || !withSpace) 
+            {
+                free(withDash);
+                free(withSpace);
+                continue;
+            }
+            
+            snprintf(withDash, 10, " %d%s", i, "-Core");
+            snprintf(withSpace, 11, " %d%s", i, " Cores");
+
+            if (strstr(result, withDash))
+            {
+                done = 1;
+                char *tmp = findErase(result, bufferSize, withDash);
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+            else if (strstr(result, withSpace))
+            {
+                done = 1;
+                char *tmp = findErase(result, bufferSize, withSpace);
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+
+            free(withDash);
+            free(withSpace);
+        }
+    }
+
+    return result;
+}
+
+/**
  * Extracts a substring from an input string after a given separation character
  * and offset. Also removes any surrounding quotes or trailing newline
  * characters present. 
  * @param buffer Input string
  * @param point Character to find to separate from (e.g., '=' or ':')
  * @param offset How many characters after the point to separate at
- * @param outputSize Size to use when allocating the result string
+ * @param bufferSize Size to use when allocating the result string
  * @return String containing what's left after separation and cleaning
  */
-char *extractFromPoint(char *buffer, char point, int offset, int outputSize)
+char *extractFromPoint(char *buffer, size_t bufferSize, char point, int offset)
 {
-    if (!buffer || outputSize < 2) return strdup("");
+    if (!buffer || bufferSize < 2) return strdup("");
 
-    char *result = malloc(outputSize);
+    char *result = malloc(bufferSize);
     if (!result) return strdup("");
     result[0] = '\0';
 
@@ -127,8 +263,8 @@ char *extractFromPoint(char *buffer, char point, int offset, int outputSize)
     // Trim potential leading quote
     if (*start == '"') start++;
 
-    strncpy(result, start, outputSize - 1);
-    result[outputSize - 1] = '\0';
+    strncpy(result, start, bufferSize - 1);
+    result[bufferSize - 1] = '\0';
     size_t len = strlen(result);
 
     // Trim potential trailing newline 
@@ -210,7 +346,7 @@ char *getOS(void)
         {
             if (strncmp(buffer, "PRETTY_NAME=", 12) == 0)
             {
-                char *extract = extractFromPoint(buffer, '=', 1, 128);
+                char *extract = extractFromPoint(buffer, 128, '=', 1);
                 strncpy(os, extract, 127);
                 free(extract);
                 break;
@@ -331,20 +467,22 @@ char *getShell(void)
 char *getCPU(void)
 {
     char *cpu = malloc(134);
-    char *name = malloc(128);
+    char *vendor = malloc(16);
+    char *model = malloc(128);
     char *processor = malloc(4);
     char *cores = malloc(4);
     char *threads = malloc(4);
-    if (!cpu || !name || !processor || !cores || !threads) 
+    if (!cpu || !vendor || !model || !processor || !cores || !threads) 
     {
         free(cpu);
-        free(name);
+        free(vendor);
+        free(model);
         free(processor);
         free(cores);
         free(threads);
         return strdup("unknown");
     }
-    cpu[0] = name[0] = processor[0] = cores[0] = threads[0] = '\0';
+    cpu[0] = vendor[0] = model[0] = processor[0] = cores[0] = threads[0] = '\0';
 
     FILE *stream = fopen("/proc/cpuinfo", "r");
     if (stream)
@@ -354,33 +492,73 @@ char *getCPU(void)
         {
             if (strncmp(buffer, "processor", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, ':', 2, 4);
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
                 strncpy(processor, extract, 3);
+                free(extract);
+            }
+            else if (strncmp(buffer, "vendor_id", 9) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                strncpy(vendor, extract, 15);
                 free(extract);
             }
             else if (strncmp(buffer, "model name", 10) == 0)
             {
-                char *extract = extractFromPoint(buffer, ':', 2, 128);
-                strncpy(name, extract, 127);
+                char *extract = extractFromPoint(buffer, 128, ':', 2);
+                strncpy(model, extract, 127);
+                char *clean = cleanProcessorName(extract, 128);
                 free(extract);
+                strncpy(model, clean, 127);
+                free(clean);
             }
             else if (strncmp(buffer, "cpu cores", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, ':', 2, 4);
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
                 strncpy(cores, extract, 3);
                 free(extract);
             }
             else if (strncmp(buffer, "siblings", 8) == 0)
             {
-                char *extract = extractFromPoint(buffer, ':', 2, 4);
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
                 strncpy(threads, extract, 3);
                 free(extract);
             }
             
-            if (name[0] != '\0' && cores[0] != '\0' && threads[0] != '\0')
+            if (model[0] != '\0' && cores[0] != '\0' && threads[0] != '\0')
                 break;
         }
         fclose(stream);
+
+        if ((vendor[0] != '\0' && vendor[0] != 'u') && model[0] != '\0')
+        {
+            // Check if model name lacks the vendor name and if we need to try
+            // adding it in manually
+            if (!(strstr(model, "Intel ") || strstr(model, "AMD ") || strstr(model, "Cyrix ") || strstr(model, "IDT ") || strstr(model, "VIA ") || strstr(model, "Transmeta ")))
+            {
+                char *tmp = malloc(128);
+                if (tmp)
+                {
+                    if (strstr(vendor, "Intel") || strstr(vendor, "Iotel"))
+                        snprintf(tmp, 128, "%s %s", "Intel", model);
+                    else if (strstr(vendor, "AMD"))
+                        snprintf(tmp, 128, "%s %s", "AMD", model);
+                    else if (strstr(vendor, "Cyrix"))
+                        snprintf(tmp, 128, "%s %s", "Cyrix", model);
+                    else if (strstr(vendor, "Centaur"))
+                        snprintf(tmp, 128, "%s %s", "IDT/Centaur", model);
+                    else if (strstr(vendor, "VIA"))
+                        snprintf(tmp, 128, "%s %s", "VIA", model);
+                    else if (strstr(vendor, "Transmeta") || strstr(vendor, "TM"))
+                        snprintf(tmp, 128, "%s %s", "Transmeta", model);
+                    else
+                        snprintf(tmp, 128, "%s %s", vendor, model);
+                    
+                    strncpy(model, tmp, 128);
+                    free(tmp);
+                    model[127] = '\0';
+                }
+            }
+        }
 
         if (cores[0] == '\0' && threads[0] != '\0')
             strncpy(cores, threads, 3);
@@ -389,16 +567,17 @@ char *getCPU(void)
         {
             int processorInt = atoi(processor);
             processorInt++;
-            snprintf(cpu, 134, "%s (%dC)", name, processorInt);
+            snprintf(cpu, 134, "%s (%dC)", model, processorInt);
         }
         else if (strcmp(cores, threads) == 0)
-            snprintf(cpu, 134, "%s (%sC)", name, cores);
+            snprintf(cpu, 134, "%s (%sC)", model, cores);
         else
-            snprintf(cpu, 134, "%s (%sC/%sT)", name, cores, threads);
+            snprintf(cpu, 134, "%s (%sC/%sT)", model, cores, threads);
     }
     else strcpy(cpu, "unknown");
 
-    free(name);
+    free(vendor);
+    free(model);
     free(processor);
     free(cores);
     free(threads);
@@ -524,7 +703,12 @@ char *interpretGPU(GPU *gpuIDs)
     if (!vendor || !device)
         snprintf(gpu, 257, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
     else
+    {
         snprintf(gpu, 257, "%s %s", vendor, device);
+        char *clean = cleanProcessorName(gpu, 257);
+        strncpy(gpu, clean, 257);
+        free(clean);
+    }
 
     if (vendor) free(vendor);
     if (device) free(device);
