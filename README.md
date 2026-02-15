@@ -21,33 +21,38 @@ Run `make install` to install to `/usr/bin`. If you want to install it elsewhere
 
 
 
-## Example output
+## Screenshots
 
-### On SHORK 486 with '90s hardware
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/t480_debian-13.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td style="width: 50%;">Custom desktop running Debian 13</td>
+    <td style="width: 50%;">Lenovo ThinkPad T480 running Debian 13</td>
+  </tr>
+</table>
 
-    root@shork-486
-    --------------
-    OS:      SHORK 486 0.1
-    Kernel:  6.14.11
-    Uptime:  0 hours, 2 minutes
-    Shell:   sh
-    CPU:     486 (1C)
-    GPU:     3Dfx Voodoo 3
-    Memory:  1.8MiB / 3.1MiB (56%)
-    Swap:    0B / 8MiB (0%)
-    Root:    56.7MiB / 81.1MiB (69%)
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_mmx-voodoo-3-5436_shork-486.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_6x86-2164w_shork-486.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td style="width: 50%;">86Box emulating Intel Pentium MMX + 2 GPUs running SHORK 486</td>
+    <td style="width: 50%;">86Box emulating Cyrix 6x86 + 1 GPU running SHORK 486</td>
+  </tr>
+</table>
 
-### On Debian 13 with modern hardware
 
-    kali@SN-MAIN
-    ------------
-    OS:      Debian GNU/Linux 13 (trixie)
-    Kernel:  6.12.63+deb13-amd64
-    Uptime:  4 hours, 18 minutes
-    Shell:   bash
-    CPU:     AMD Ryzen 9 5950X (16C/32T)
-    GPU:     NVIDIA AD103 [GeForce RTX 4080]
-    Memory:  9.6GiB / 62.7GiB (15%)
-    Swap:    0B / 976MiB (0%)
-    Root:    416.2GiB / 455.9GiB (91%)
-
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_5x86_shork-486.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/vmware_shork-486.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td style="width: 50%;">86Box emulating Cyrix 5x86 running SHORK 486</td>
+    <td style="width: 50%;">VMware VM running SHORK 486</td>
+  </tr>
+</table>
