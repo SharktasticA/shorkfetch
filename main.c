@@ -132,6 +132,52 @@ char *findErase(const char *buffer, const size_t bufferSize, const char *needle)
 }
 
 /**
+ * Finds and replaces a given search term with a desired replacement term from an
+ * input string.
+ * @param buffer Input string
+ * @param bufferSize Size to use when allocating the result string
+ * @param needle Substring to find and replace
+ * @param replacement New string to insert
+ * @return String after term replacement
+ */
+char *findReplace(const char *buffer, const size_t bufferSize, const char *needle, const char *replacement)
+{
+    if (!buffer || !needle || !replacement || bufferSize < 2) return strdup("");
+
+    size_t needleLen = strlen(needle);
+    size_t replacementLen = strlen(replacement);
+    if (needleLen == 0 || replacementLen == 0) return strdup("");
+
+    char *result = malloc(bufferSize);
+    if (!result) return strdup("");
+
+    strncpy(result, buffer, bufferSize);
+    result[bufferSize - 1] = '\0';
+
+    char *pos = result;
+    while ((pos = strstr(pos, needle)) != NULL)
+    {
+        size_t tailLen = strlen(pos + needleLen);
+
+        if (replacementLen > needleLen)
+        {
+            size_t currentLen = strlen(result);
+            size_t newLen = currentLen + (replacementLen - needleLen) + 1;
+            char *tmp = realloc(result, newLen);
+            if (!tmp) break;
+            pos = tmp + (pos - result);
+            result = tmp;
+        }
+
+        memmove(pos + replacementLen, pos + needleLen, tailLen + 1);
+        memcpy(pos, replacement, replacementLen);
+        pos += replacementLen;
+    }
+
+    return result;
+}
+
+/**
  * Removes predefined substrings from an input string. It's intended to
  * simplify CPU and GPU names by removing things like "(R)", "(TM)",
  * "Corporation", etc.
@@ -232,6 +278,38 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
             free(withDash);
             free(withSpace);
         }
+    }
+
+    if (strstr(result, "Advanced Micro Devices"))
+    {
+        char *tmp = findReplace(result, bufferSize, "Advanced Micro Devices", "AMD");
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
+
+        if (strstr(result, "AMD [AMD/ATI]"))
+        {
+            char *tmp = findReplace(result, bufferSize, "AMD [AMD/ATI]", "AMD/ATI");
+            strncpy(result, tmp, bufferSize - 1);
+            result[bufferSize - 1] = '\0';
+            free(tmp);
+        }
+    }
+
+    if (strstr(result, "Pentium 4 - M"))
+    {
+        char *tmp = findReplace(result, bufferSize, "Pentium 4 - M", "Pentium 4-M");
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
+    }
+
+    while (strstr(result, "  "))
+    {
+        char *tmp = findReplace(result, bufferSize, "  ", " ");
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
     }
 
     return result;
