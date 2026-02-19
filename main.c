@@ -1,8 +1,10 @@
 /*
     ######################################################
-    ## A SHORK utility for displaying basic system and  ##
-    ## environment information in a summarised format,  ##
-    ## similar to fastfetch, neofetch, etc.             ##
+    ##            SHORK UTILITY - SHORKFETCH            ##
+    ######################################################
+    ## A lightweight Linux tool for displaying basic    ##
+    ## system & environment information in a summarised ##
+    ## format, similar to fastfetch, neofetch, etc.     ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
