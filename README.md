@@ -1,6 +1,6 @@
 # shorkfetch
 
-A SHORK utility for displaying basic system and environment information in a summarised format, similar to fastfetch, neofetch, etc. but without any art, graphics and perhaps with a limited amount of fields. It is primarily written for use with SHORK family operating systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed to be minimal, not taxing on 486-era hardware, and is statically linked. But it should work on modern Linux distributions just fine.
+A lightweight Linux tool for displaying basic system and environment information in a summarised format, similar to fastfetch, neofetch, etc. but without any art, graphics and perhaps with a limited amount of fields. It is primarily written for use with SHORK family operating systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed to be minimal and not taxing on 486-era hardware, and is statically linked. But it should work on modern Linux distributions just fine.
 
 
 
@@ -8,16 +8,21 @@ A SHORK utility for displaying basic system and environment information in a sum
 
 ### Requirements
 
-* C compiler (tested with GCC and i486-linux-musl-cross)
-* `make`, `ar`, `ranlib` and `strip`
+You just need a C compiler (tested with GCC and i486-linux-musl-cross)
 
 ### Compilation
 
-Simply run `make`.
+Simply run `make`
 
 ### Installation
 
-Run `make install` to install to `/usr/bin`. If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`.
+Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`.
+
+
+
+## Running
+
+Simply run `shorkfetch` to use
 
 
 
