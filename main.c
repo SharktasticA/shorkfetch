@@ -14,6 +14,8 @@
 
 
 
+#include "igpus.h"
+
 #include <dirent.h>
 #include <libgen.h>
 #include <stdio.h>
@@ -209,10 +211,12 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         "(TM)",
         " APU",
         " Dual Core",                       // For AMD Athlon
+        " Controller",
         " Corporation",
         " CPU",
         " Eight-Core",                      // For AMD FX
         " Electronics Systems",             // For Matrox
+        " Family",
         " Interactive",                     // For 3dfx
         " Ltd.",
         " Microsystems",                    // For Trident
@@ -296,6 +300,14 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
             result[bufferSize - 1] = '\0';
             free(tmp);
         }
+    }
+
+    if (strstr(result, "Generation Core") && strstr(result, "Graphics"))
+    {
+        char *tmp = findReplace(result, bufferSize, "Generation Core", "Gen Core");
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
     }
 
     if (strstr(result, "Pentium 4 - M"))
@@ -713,7 +725,7 @@ GPU* getGPUs(int *count)
 }
 
 /**
- * @param gpuIDs Pointer to up to 4 GPU structs containing detected GPUs
+ * @param gpuIDs GPU struct containing detected vendor and device IDs
  * @return String containing the GPU's vendor and device name or "unknown" along with vendor and device IDs as hex if interpreting failed
  */
 char *interpretGPU(GPU *gpuIDs)
@@ -721,6 +733,19 @@ char *interpretGPU(GPU *gpuIDs)
     char *gpu = malloc(257);
     if (!gpu) return strdup("unknown");
     gpu[0] = '\0';
+
+    // If Intel GPU, query pre-defined iGPU list
+    if (gpuIDs->vendor == 0x8086)
+    {
+        if (intelIGPUs[gpuIDs->device])
+        {
+            snprintf(gpu, 257, "Intel %s", intelIGPUs[gpuIDs->device]);
+            char *clean = cleanProcessorName(gpu, 257);
+            strncpy(gpu, clean, 257);
+            free(clean);
+            return gpu;
+        }
+    }
     
     char *pciids;
     if (access("/usr/share/misc/pci.ids", F_OK) == 0)
