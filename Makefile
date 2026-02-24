@@ -12,7 +12,7 @@ shorkfetch: $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o shorkfetch $(LDFLAGS)
 	$(STRIP) shorkfetch
 
-PREFIX ?= /usr/
+PREFIX ?= /usr
 BINDIR = $(PREFIX)/bin
 
 install: shorkfetch
