@@ -182,6 +182,47 @@ char *findReplace(const char *buffer, const size_t bufferSize, const char *needl
 }
 
 /**
+ * Extracts a substring from an input string after a given separation character
+ * and offset. Also removes any surrounding quotes or trailing newline
+ * characters present. 
+ * @param buffer Input string
+ * @param point Character to find to separate from (e.g., '=' or ':')
+ * @param offset How many characters after the point to separate at
+ * @param bufferSize Size to use when allocating the result string
+ * @return String containing what's left after separation and cleaning
+ */
+char *extractFromPoint(char *buffer, size_t bufferSize, char point, int offset)
+{
+    if (!buffer || bufferSize < 2) return strdup("");
+
+    char *result = malloc(bufferSize);
+    if (!result) return strdup("");
+    result[0] = '\0';
+
+    char *sep = strchr(buffer, point);
+    if (!sep) return result;
+
+    char *start = sep + offset;
+
+    // Trim potential leading quote
+    if (*start == '"') start++;
+
+    strncpy(result, start, bufferSize - 1);
+    result[bufferSize - 1] = '\0';
+    size_t len = strlen(result);
+
+    // Trim potential trailing newline 
+    if (len > 0 && result[len - 1] == '\n')
+        result[--len] = '\0';
+
+    // Trim potential trailing quote
+    if (len > 0 && result[len - 1] == '"')
+        result[len - 1] = '\0';
+
+    return result;
+}
+
+/**
  * Removes predefined substrings from an input string. It's intended to
  * simplify CPU and GPU names by removing things like "(R)", "(TM)",
  * "Corporation", etc.
@@ -198,6 +239,14 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
     
     strncpy(result, buffer, bufferSize - 1);
     result[bufferSize - 1] = '\0';
+    size_t strLen  = strlen(result);
+    if (strstr(result, "[") && result[strLen - 1] == ']')
+    {
+        result[strLen - 1] = '\0';
+        char *extract = extractFromPoint(result, bufferSize, '[', 1);
+        strncpy(result, extract, bufferSize - 1);
+        free(extract);
+    }
 
     const char *patterns[] =
     {
@@ -318,6 +367,14 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(tmp);
     }
 
+    while (strstr(result, " / "))
+    {
+        char *tmp = findReplace(result, bufferSize, " / ", "/");
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
+    }
+
     while (strstr(result, "  "))
     {
         char *tmp = findReplace(result, bufferSize, "  ", " ");
@@ -325,47 +382,6 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         result[bufferSize - 1] = '\0';
         free(tmp);
     }
-
-    return result;
-}
-
-/**
- * Extracts a substring from an input string after a given separation character
- * and offset. Also removes any surrounding quotes or trailing newline
- * characters present. 
- * @param buffer Input string
- * @param point Character to find to separate from (e.g., '=' or ':')
- * @param offset How many characters after the point to separate at
- * @param bufferSize Size to use when allocating the result string
- * @return String containing what's left after separation and cleaning
- */
-char *extractFromPoint(char *buffer, size_t bufferSize, char point, int offset)
-{
-    if (!buffer || bufferSize < 2) return strdup("");
-
-    char *result = malloc(bufferSize);
-    if (!result) return strdup("");
-    result[0] = '\0';
-
-    char *sep = strchr(buffer, point);
-    if (!sep) return result;
-
-    char *start = sep + offset;
-
-    // Trim potential leading quote
-    if (*start == '"') start++;
-
-    strncpy(result, start, bufferSize - 1);
-    result[bufferSize - 1] = '\0';
-    size_t len = strlen(result);
-
-    // Trim potential trailing newline 
-    if (len > 0 && result[len - 1] == '\n')
-        result[--len] = '\0';
-
-    // Trim potential trailing quote
-    if (len > 0 && result[len - 1] == '"')
-        result[len - 1] = '\0';
 
     return result;
 }
@@ -809,10 +825,11 @@ char *interpretGPU(GPU *gpuIDs)
         snprintf(gpu, 257, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
     else
     {
-        snprintf(gpu, 257, "%s %s", vendor, device);
-        char *clean = cleanProcessorName(gpu, 257);
-        strncpy(gpu, clean, 257);
-        free(clean);
+        char *cleanVendor = cleanProcessorName(vendor, 128);
+        char *cleanDevice = cleanProcessorName(device, 128);
+        snprintf(gpu, 257, "%s %s", cleanVendor, cleanDevice);
+        free(cleanVendor);
+        free(cleanDevice);
     }
 
     if (vendor) free(vendor);
