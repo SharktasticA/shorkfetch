@@ -414,21 +414,52 @@ char *getHeader(void)
     if (!username || username[0] == '\0') 
         username = "unknown";
 
-    char *hostname;
+    char *hostname = NULL;
+    
     FILE *stream = popen("hostname 2>/dev/null", "r");
     if (stream)
     {
-        char buffer[64];
+        char buffer[255];
         if (fgets(buffer, sizeof(buffer), stream) != NULL)
         {
             buffer[strcspn(buffer, "\n")] = '\0';
             hostname = strdup(buffer);
         }
-        else hostname = strdup("unknown");
         pclose(stream);
     }
-    else hostname = strdup("unknown");
-    
+
+    if (!hostname)
+    {
+        stream = popen("uname -n 2>/dev/null", "r");
+        if (stream)
+        {
+            char buffer[255];
+            if (fgets(buffer, sizeof(buffer), stream) != NULL)
+            {
+                buffer[strcspn(buffer, "\n")] = '\0';
+                hostname = strdup(buffer);
+            }
+            pclose(stream);
+        }
+    }
+
+    if (!hostname)
+    {
+        FILE *stream = fopen("/etc/hostname", "r");
+        if (stream)
+        {
+            char buffer[255];
+            if (fgets(buffer, sizeof(buffer), stream))
+            {
+                buffer[strcspn(buffer, "\n")] = '\0';
+                hostname = strdup(buffer);
+            }
+            fclose(stream);
+        }
+    }
+
+    if (!hostname) hostname = strdup("unknown");
+
     size_t len = strlen(username) + 1 + strlen(hostname) + 1;
     char *header = malloc(len);
     snprintf(header, len, "%s@%s", username, hostname);
