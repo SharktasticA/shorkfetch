@@ -351,6 +351,14 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         }
     }
 
+    if (strstr(result, "Core2"))
+    {
+        char *tmp = findReplace(result, bufferSize, "Core2", "Core 2");
+        strncpy(result, tmp, bufferSize - 1);
+        result[bufferSize - 1] = '\0';
+        free(tmp);
+    }
+
     if (strstr(result, "Generation Core") && strstr(result, "Graphics"))
     {
         char *tmp = findReplace(result, bufferSize, "Generation Core", "Gen Core");
