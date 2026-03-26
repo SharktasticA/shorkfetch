@@ -34,6 +34,26 @@ typedef struct {
 
 
 
+const char SHORK[15][24] = {
+    "^`.                    ",
+    "\\  \\                   ",
+    "/   `~~~--__           ",
+    "            `~~-_      ",
+    "        \\\\\\\\\\  o  `.   ",
+    "  ,    ,      __,,,,)  ",
+    "~;   ,---~~--`         ",
+    "'._.'                  ",
+    "                       ",
+    "                       ",
+    "                       ",
+    "                       ",
+    "                       ",
+    "                       ",
+    "                       "
+};
+
+
+
 /**
  * Converts a data value into a string formatted into a unit that makes sense for
  * its magnitude with its new unit added to the end.
@@ -980,8 +1000,23 @@ char *getRoot(void)
 
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    int showShork = 0;
+    int shorkLine = 0;
+    
+#ifdef WITH_ART
+    showShork = 1;
+    for (int i = 1; i < argc; i++)
+    {
+        if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
+        {
+            showShork = 0;
+            break;
+        }
+    }
+#endif
+
     char *ram = getRAM();
     char *swap = getSwap();
     char *header = getHeader();
@@ -996,31 +1031,77 @@ int main(void)
 
     if (header[0] != '\0') 
     {
-                                printf("%s\n", header);
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("%s\n", header);
+
+        if (showShork) printf("%s", SHORK[shorkLine++]);
         size_t len = strlen(header);
         for (size_t i = 0; i < len; i++) printf("-");
         printf("\n");
     }
 
-    if (os[0] != '\0')          printf("OS:      %s\n", os);
-    if (kernel[0] != '\0')      printf("Kernel:  %s\n", kernel);
-    if (uptime[0] != '\0')      printf("Uptime:  %s\n", uptime);
-    if (shell[0] != '\0')       printf("Shell:   %s\n", shell);
-    if (cpu[0] != '\0')         printf("CPU:     %s\n", cpu);
+    if (os[0] != '\0')          
+    {
+
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("OS:      %s\n", os);
+    }
+
+    if (kernel[0] != '\0')      
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("Kernel:  %s\n", kernel);
+    }
+
+    if (uptime[0] != '\0')      
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("Uptime:  %s\n", uptime);
+    }
+
+    if (shell[0] != '\0')       
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("Shell:   %s\n", shell);
+    }
+
+    if (cpu[0] != '\0')         
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("CPU:     %s\n", cpu);
+    }
 
     if (gpus)
     {
         for (int i = 0; i < noGPUs; i++)
         {
             char *gpu = interpretGPU(&gpus[i]);
-            if (gpu[0] != '\0')     printf("GPU:     %s\n", gpu);
+            if (gpu[0] != '\0')     
+            {
+                if (showShork) printf("%s", SHORK[shorkLine++]);
+                printf("GPU:     %s\n", gpu);
+            }
             free(gpu);
         }
     }
 
-    if (ram[0] != '\0')         printf("Memory:  %s\n", ram);
-    if (swap[0] != '\0')        printf("Swap:    %s\n", swap);
-    if (root[0] != '\0')        printf("Root:    %s\n", root);
+    if (ram[0] != '\0')         
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("Memory:  %s\n", ram);
+    }
+
+    if (swap[0] != '\0')        
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("Swap:    %s\n", swap);
+    }
+
+    if (root[0] != '\0')        
+    {
+        if (showShork) printf("%s", SHORK[shorkLine++]);
+        printf("Root:    %s\n", root);
+    }
     
     printf("\n");
 

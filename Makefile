@@ -6,6 +6,10 @@ STRIP ?= strip
 CFLAGS += -I.
 LDFLAGS += -static
 
+ifdef WITH_ART
+	CFLAGS += -DWITH_ART
+endif
+
 SRC = main.c
 
 shorkfetch: $(SRC)

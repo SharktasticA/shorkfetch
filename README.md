@@ -1,6 +1,6 @@
 # shorkfetch
 
-A lightweight Linux tool for displaying basic system and environment information in a summarised format, similar to fastfetch, neofetch, etc. but without any art, graphics and perhaps with a limited amount of fields. It is primarily written for use with SHORK family operating systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed to be minimal and not taxing on 486-era hardware, and is statically linked. But it should work on modern Linux distributions just fine.
+A lightweight Linux tool for displaying basic system and environment information in a summarised format, similar to fastfetch, neofetch, etc. but without any complex or customisable art and less fields, but also significantly faster. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed to be minimal and not taxing on 486-era hardware, and is statically linked. But it should work on modern Linux distributions just fine.
 
 
 
@@ -8,21 +8,25 @@ A lightweight Linux tool for displaying basic system and environment information
 
 ### Requirements
 
-You just need a C compiler (tested with GCC and i486-linux-musl-cross)
+You just need a C compiler (tested with GCC with either glibc or musl).
 
 ### Compilation
 
-Simply run `make`
+Simply run `make` to compile shorkfetch. 
+
+#### With ASCII art
+
+shorkfetch has pre-programmed ASCII art normally intended for use with SHORK Operating Systems. If you wish to enable it manually, you can instead run `make WITH_ART=1`. If you switch between compiling with or without that option, you may also need to run `make clean` before compiling again.
 
 ### Installation
 
-Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`.
+Run `make install` or `make install WITH_ART=1` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`.
 
 
 
 ## Running
 
-Simply run `shorkfetch` to use
+Simply run `shorkfetch` to use. If you compiled with `WITH_ART` but want to hide the ASCII art for a single use, you can also pass the `-na` or `--no-art` parameter.
 
 
 
