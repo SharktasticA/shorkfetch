@@ -10,6 +10,10 @@ ifdef WITH_ART
 	CFLAGS += -DWITH_ART
 endif
 
+ifdef WITH_COL
+    CFLAGS += -DWITH_COL=$(WITH_COL)
+endif
+
 SRC = main.c
 
 shorkfetch: $(SRC)

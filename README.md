@@ -12,21 +12,36 @@ You just need a C compiler (tested with GCC with either glibc or musl).
 
 ### Compilation
 
-Simply run `make` to compile shorkfetch. 
+Simply run `make` to compile shorkfetch. There are some flags you can use individually or together to add styling to shorkfetch. Note that if you switch between compiling with or without any of the flags, you will need to run `make clean` before compiling again.
 
 #### With ASCII art
 
-shorkfetch has pre-programmed ASCII art normally intended for use with SHORK Operating Systems. If you wish to enable it manually, you can instead run `make WITH_ART=1`. If you switch between compiling with or without that option, you may also need to run `make clean` before compiling again.
+shorkfetch has pre-programmed ASCII art normally intended for use with SHORK Operating Systems. To enable it, add the `WITH_ART` flag with any value assigned to it; for example, `make WITH_ART=1`. 
+
+#### With colour accent
+
+shorkfetch can have an accent colour for headings and the optional ASCII art. To enable it, add the `WITH_COL` flag with one of the colour names before; for example, `make WITH_COL=MAGENTA`. If the given colour is invalid, `BOLD_CYAN` is used as the fallback.
+
+    BLACK           BLUE            CYAN            GREEN  
+    MAGENTA         RED             WHITE           YELLOW
+    GREY            BOLD_BLUE       BOLD_CYAN       BOLD_GREEN
+    BOLD_MAGENTA    BOLD_RED        BOLD_WHITE      BOLD_YELLOW
 
 ### Installation
 
-Run `make install` or `make install WITH_ART=1` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`.
+Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`. You may include the `WITH_ART` and/or `WITH_COL` flags as well.
 
 
 
 ## Running
 
-Simply run `shorkfetch` to use. If you compiled with `WITH_ART` but want to hide the ASCII art for a single use, you can also pass the `-na` or `--no-art` parameter.
+Simply run `shorkfetch` to use.
+
+### Arguments
+
+* `-na`, `--no-art`: _If compiled with `WITH_ART` flag._ Allows you to hide the SHORK ASCII art for a single use.
+
+* `-nc`, `--no-col`: _If compiled with `WITH_COL` flag._ Allows you to disable the accent colour for a single use. 
 
 
 
