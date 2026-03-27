@@ -34,23 +34,25 @@ typedef struct {
 
 
 
-const char SHORK[15][24] = {
-    "^`.                    ",
-    "\\  \\                   ",
-    "/   `~~~--__           ",
-    "            `~~-_      ",
-    "        \\\\\\\\\\  o  `.   ",
-    "  ,    ,      __,,,,)  ",
-    "~;   ,---~~--`         ",
-    "'._.'                  ",
-    "                       ",
-    "                       ",
-    "                       ",
-    "                       ",
-    "                       ",
-    "                       ",
-    "                       "
+#ifdef WITH_ART
+const char SHORK[15][22] = {
+    "                     ",
+    "^`.                  ",
+    "\\  \\                 ",
+    "/   `~~-__           ",
+    "          `~~-_      ",
+    "        \\\\\\  o  `.   ",
+    "  ,    ,    __,,,,)  ",
+    "~;   ,-~~--`         ",
+    "'._.'                ",
+    "                     ",
+    "                     ",
+    "                     ",
+    "                     ",
+    "                     ",
+    "                     "
 };
+#endif
 
 
 
@@ -1031,10 +1033,14 @@ int main(int argc, char *argv[])
 
     if (header[0] != '\0') 
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("%s\n", header);
 
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         size_t len = strlen(header);
         for (size_t i = 0; i < len; i++) printf("-");
         printf("\n");
@@ -1043,31 +1049,41 @@ int main(int argc, char *argv[])
     if (os[0] != '\0')          
     {
 
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("OS:      %s\n", os);
     }
 
     if (kernel[0] != '\0')      
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("Kernel:  %s\n", kernel);
     }
 
     if (uptime[0] != '\0')      
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("Uptime:  %s\n", uptime);
     }
 
     if (shell[0] != '\0')       
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("Shell:   %s\n", shell);
     }
 
     if (cpu[0] != '\0')         
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("CPU:     %s\n", cpu);
     }
 
@@ -1078,7 +1094,9 @@ int main(int argc, char *argv[])
             char *gpu = interpretGPU(&gpus[i]);
             if (gpu[0] != '\0')     
             {
+                #ifdef WITH_ART
                 if (showShork) printf("%s", SHORK[shorkLine++]);
+                #endif
                 printf("GPU:     %s\n", gpu);
             }
             free(gpu);
@@ -1087,19 +1105,25 @@ int main(int argc, char *argv[])
 
     if (ram[0] != '\0')         
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("Memory:  %s\n", ram);
     }
 
     if (swap[0] != '\0')        
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("Swap:    %s\n", swap);
     }
 
     if (root[0] != '\0')        
     {
+        #ifdef WITH_ART
         if (showShork) printf("%s", SHORK[shorkLine++]);
+        #endif
         printf("Root:    %s\n", root);
     }
     
