@@ -1109,7 +1109,7 @@ int main(int argc, char *argv[])
 #ifdef WITH_ART
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
 #endif
-        size_t len = strlen(username) + 1 + strlen(hostname) + 1;
+        size_t len = strlen(username) + 1 + strlen(hostname);
         for (size_t i = 0; i < len; i++) printf("-");
         printf("\n");
     }
