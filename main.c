@@ -34,7 +34,6 @@ typedef struct {
 
 
 
-#ifdef WITH_COL
 #define COL_BLACK           "0;30"
 #define COL_BLUE            "0;34"
 #define COL_BOLD_BLUE       "1;34"
@@ -49,31 +48,29 @@ typedef struct {
 #define COL_GREY            "1;30"
 #define COL_MAGENTA         "0;35"
 #define COL_RED             "0;31"
+#define COL_RESET           "0"
 #define COL_WHITE           "0;37"
 #define COL_YELLOW          "0;33"
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
-#endif
 
-#ifdef WITH_ART
-const char SHORK[15][21] = {
-    "                    ",
-    "^`.                 ",
-    "\\  \\                ",
-    "/   `~~-__          ",
-    "          `~~-_     ",
-    "        \\\\\\  o `.   ",
-    "  ,    ,    __,,,)  ",
-    "~;   ,-~~--`        ",
-    "'._.'               ",
-    "                    ",
-    "                    ",
-    "                    ",
-    "                    ",
-    "                    ",
-    "                    "
+const char SHORK[15][20] = {
+    "                   ",
+    "^`.                ",
+    "\\  \\               ",
+    "/   `~~-__         ",
+    "          `~~-_    ",
+    "        \\\\\\  o `.  ",
+    "  ,    ,    __,,,) ",
+    "~;   ,-~~--`       ",
+    "'._.'              ",
+    "                   ",
+    "                   ",
+    "                   ",
+    "                   ",
+    "                   ",
+    "                   "
 };
-#endif
 
 
 
@@ -452,14 +449,14 @@ int readHexFile(const char *path)
     return val;
 }
 
-#ifdef WITH_COL
 /**
  * Validates if the WITH_COL value supplied matches a known colour. If not, bright cyan is used as a fallback.
  * @return ASCII escape code for colour
  */
 char *getAccentColour(void)
 {
-    char *colour = STR(WITH_COL);
+#ifdef COL
+    char *colour = STR(COL);
     if (strcmp(colour, "BLACK") == 0) return COL_BLACK;
     if (strcmp(colour, "BLUE") == 0) return COL_BLUE;
     if (strcmp(colour, "BOLD_BLUE") == 0) return COL_BOLD_BLUE;
@@ -473,12 +470,13 @@ char *getAccentColour(void)
     if (strcmp(colour, "GREEN") == 0) return COL_GREEN;
     if (strcmp(colour, "GREY") == 0) return COL_GREY;
     if (strcmp(colour, "MAGENTA") == 0) return COL_MAGENTA;
+    if (strcmp(colour, "OFF") == 0) return COL_RESET;
     if (strcmp(colour, "RED") == 0) return COL_RED;
     if (strcmp(colour, "WHITE") == 0) return COL_WHITE;
     if (strcmp(colour, "YELLOW") == 0) return COL_YELLOW;
+#endif
     return COL_BOLD_CYAN;
 }
-#endif
 
 
 
@@ -1054,36 +1052,21 @@ char *getUsername(void)
 
 int main(int argc, char *argv[])
 {
+    char *colAccent = getAccentColour();
+
+#ifdef NO_ART
     int showShork = 0;
+#else
+    int showShork = 1;
+#endif
     int shorkLine = 0;
-#ifdef WITH_ART
-    showShork = 1;
-#endif
 
-    char *colAccent = "0";
-    char *colReset = "0";
-
-#ifdef WITH_COL
-    colAccent = getAccentColour();
-#endif
-
-    showShork = 1;
     for (int i = 1; i < argc; i++)
     {
-#ifdef WITH_ART
         if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
-        {
             showShork = 0;
-            continue;
-        }
-#endif
-#ifdef WITH_COL
-        if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
-        {
-            colAccent = "0";
-            continue;
-        }
-#endif
+        else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
+            colAccent = COL_RESET;
     }
 
     char *ram = getRAM();
@@ -1101,14 +1084,10 @@ int main(int argc, char *argv[])
 
     if (username[0] != '\0' && hostname[0] != '\0') 
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%sm%s\033[%sm@\033[%sm%s\033[%sm\n", colAccent, username, colReset, colAccent, hostname, colReset);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%sm%s\033[%sm@\033[%sm%s\033[%sm\n", colAccent, username, COL_RESET, colAccent, hostname, COL_RESET);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
 
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
         size_t len = strlen(username) + 1 + strlen(hostname);
         for (size_t i = 0; i < len; i++) printf("-");
         printf("\n");
@@ -1116,43 +1095,32 @@ int main(int argc, char *argv[])
 
     if (os[0] != '\0')          
     {
-
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smOS:\033[%sm      %s\n", colAccent, colReset, os);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smOS:\033[%sm     %s\n", colAccent, COL_RESET, os);
     }
 
     if (kernel[0] != '\0')      
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smKernel:\033[%sm  %s\n", colAccent, colReset, kernel);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smKernel:\033[%sm %s\n", colAccent, COL_RESET, kernel);
     }
 
     if (uptime[0] != '\0')      
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smUptime:\033[%sm  %s\n", colAccent, colReset, uptime);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smUptime:\033[%sm %s\n", colAccent, COL_RESET, uptime);
     }
 
     if (shell[0] != '\0')       
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smShell:\033[%sm   %s\n", colAccent, colReset, shell);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smShell:\033[%sm  %s\n", colAccent, COL_RESET, shell);
     }
 
     if (cpu[0] != '\0')         
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smCPU:\033[%sm     %s\n", colAccent, colReset, cpu);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smCPU:\033[%sm    %s\n", colAccent, COL_RESET, cpu);
     }
 
     if (gpus)
@@ -1162,10 +1130,8 @@ int main(int argc, char *argv[])
             char *gpu = interpretGPU(&gpus[i]);
             if (gpu[0] != '\0')     
             {
-#ifdef WITH_ART
-                if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-                printf("\033[%smGPU:\033[%sm     %s\n", colAccent, colReset, gpu);
+                if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+                printf("\033[%smGPU:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
             }
             free(gpu);
         }
@@ -1173,26 +1139,20 @@ int main(int argc, char *argv[])
 
     if (ram[0] != '\0')         
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smMemory:\033[%sm  %s\n", colAccent, colReset, ram);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smMemory:\033[%sm %s\n", colAccent, COL_RESET, ram);
     }
 
     if (swap[0] != '\0')        
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smSwap:\033[%sm    %s\n", colAccent, colReset, swap);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smSwap:\033[%sm   %s\n", colAccent, COL_RESET, swap);
     }
 
     if (root[0] != '\0')        
     {
-#ifdef WITH_ART
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], colReset);
-#endif
-        printf("\033[%smRoot:\033[%sm    %s\n", colAccent, colReset, root);
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        printf("\033[%smRoot:\033[%sm   %s\n", colAccent, COL_RESET, root);
     }
     
     printf("\n");

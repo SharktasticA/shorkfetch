@@ -6,12 +6,12 @@ STRIP ?= strip
 CFLAGS += -I.
 LDFLAGS += -static
 
-ifdef WITH_ART
-	CFLAGS += -DWITH_ART
+ifdef COL
+    CFLAGS += -DCOL=$(COL)
 endif
 
-ifdef WITH_COL
-    CFLAGS += -DWITH_COL=$(WITH_COL)
+ifdef NO_ART
+	CFLAGS += -DNO_ART
 endif
 
 SRC = main.c

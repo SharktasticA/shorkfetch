@@ -14,22 +14,24 @@ You just need a C compiler (tested with GCC with either glibc or musl).
 
 Simply run `make` to compile shorkfetch. There are some flags you can use individually or together to add styling to shorkfetch. Note that if you switch between compiling with or without any of the flags, you will need to run `make clean` before compiling again.
 
-#### With ASCII art
+#### Custom colour accent
 
-shorkfetch has pre-programmed ASCII art normally intended for use with SHORK Operating Systems. To enable it, add the `WITH_ART` flag with any value assigned to it; for example, `make WITH_ART=1`. 
-
-#### With colour accent
-
-shorkfetch can have an accent colour for headings and the optional ASCII art. To enable it, add the `WITH_COL` flag with one of the colour names before; for example, `make WITH_COL=MAGENTA`. If the given colour is invalid, `BOLD_CYAN` is used as the fallback.
+shorkfetch has an accent colour it uses for the ASCII art, field titles, the username and the hostname. You can compile with a specific accent colour by using the `COL` flag with one of the available colour names; for example, `make COL=MAGENTA`. `BOLD_CYAN` is the default and used as a fallback if a given colour name is invalid.
 
     BLACK           BLUE            CYAN            GREEN  
     MAGENTA         RED             WHITE           YELLOW
     GREY            BOLD_BLUE       BOLD_CYAN       BOLD_GREEN
     BOLD_MAGENTA    BOLD_RED        BOLD_WHITE      BOLD_YELLOW
 
+Whilst the accent colour can be turned off when running with the `-nc`/`--no-col` argument, you can also permanently disable it by compiling with `COL=OFF` instead.
+
+#### Disable ASCII art
+
+shorkfetch has pre-programmed ASCII art normally intended for use with SHORK Operating Systems. Whilst this can be hidden when running with the `-na`/`--no-art` argument, you can also permanently disable it when compiling by using the `NO_ART` flag with any value assigned to it; for example, `make NO_ART=1`. 
+
 ### Installation
 
-Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`. You may include the `WITH_ART` and/or `WITH_COL` flags as well.
+Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`. You may include the `COL` and/or `NO_ART` flags as well.
 
 
 
@@ -39,9 +41,9 @@ Simply run `shorkfetch` to use.
 
 ### Arguments
 
-* `-na`, `--no-art`: _If compiled with `WITH_ART` flag._ Allows you to hide the SHORK ASCII art for a single use.
+* `-na`, `--no-art`: _If not compiled with `NO_ART` flag._ Allows you to hide the SHORK ASCII art for a single use.
 
-* `-nc`, `--no-col`: _If compiled with `WITH_COL` flag._ Allows you to disable the accent colour for a single use. 
+* `-nc`, `--no-col`: _If not compiled with `COL=WHITE` flag._ Allows you to disable the accent colour for a single use. 
 
 
 
