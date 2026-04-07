@@ -69,11 +69,20 @@ Simply run `shorkfetch` to use.
 
 <table style="table-layout: fixed; width: 100%;">
   <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/vmware_shork-486.png" style="width: 100%;" /></td>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/t480_debian-13.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_art_col_bul.png" style="width: 100%;" /></td>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_col_bul.png" style="width: 100%;" /></td>
   </tr>
   <tr>
-    <td style="width: 50%;">VMware VM running SHORK 486</td>
-    <td style="width: 50%;">Lenovo ThinkPad T480 running Debian 13</td>
+    <td style="width: 50%;">Custom PC running Debian 13 (+ ASCII art, accent colour & bullets)</td>
+    <td style="width: 50%;">Custom PC running Debian 13 (+ accent colour & custom bullets)</td>
+  </tr>
+</table>
+
+<table style="table-layout: fixed; width: 100%;">
+  <tr>
+    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shork-486.png" style="width: 100%;" /></td>
+  </tr>
+  <tr>
+    <td style="width: 50%;">86Box VM running SHORK 486</td>
   </tr>
 </table>
