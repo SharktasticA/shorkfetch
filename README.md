@@ -41,11 +41,9 @@ Simply run `shorkfetch` to use.
 
 ### Arguments
 
-* `-na`, `--no-art`: _If not compiled with `NO_ART` flag._ Allows you to hide the SHORK ASCII art for a single use.
-
-* `-nc`, `--no-col`: _If not compiled with `COL=WHITE` flag._ Allows you to disable the accent colour for a single use. 
-
-
+* `-h`, `--help`: Shows help information and exits
+* `-na`, `--no-art`: Disables the SHORK ASCII art (if compiled with art support)
+* `-nc`, `--no-col`: Disables all coloured output (if compiled with colour support)
 
 ## Screenshots
 

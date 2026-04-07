@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/statvfs.h>
 #include <sys/utsname.h>
 #include <unistd.h>
@@ -71,6 +72,7 @@ const char SHORK[15][20] = {
     "                   ",
     "                   "
 };
+static struct winsize TERM_SIZE;
 
 
 
@@ -476,6 +478,99 @@ char *getAccentColour(void)
     if (strcmp(colour, "YELLOW") == 0) return COL_YELLOW;
 #endif
     return COL_BOLD_CYAN;
+}
+
+
+
+/**
+ * Adds new lines to a given string based on the requested line width.
+ * @param buffer Input string
+ * @param width Characters per line
+ * @param indent Indent to include after newly inserted new line
+ * @return Number of lines in the string
+ */
+int formatNewLines(char *buffer, int width, char *indent)
+{
+    if (!buffer || width < 1) return 0;
+
+    size_t bufferStrLen = strlen(buffer);
+    size_t indentLen = indent ? strlen(indent) : 0;
+    int lines = 1;
+    int lastSpace = -1;
+    int widthCount = 1;
+
+    for (int i = 0; i < bufferStrLen; i++)
+    {
+        if (buffer[i] == '\033')
+        {
+            while (i < bufferStrLen && buffer[i] != 'm') i++;
+            if (i >= bufferStrLen) break;
+            continue; 
+        }
+        
+        if (buffer[i] == ' ') lastSpace = i;
+        else if (buffer[i] == '\n')
+        {
+            lines++;
+            widthCount = 0;
+            continue;
+        }
+
+        if (widthCount == width)
+        {
+            if (lastSpace != -1)
+            {
+                buffer[lastSpace] = '\n';
+                lines++;
+
+                if (indent && indentLen > 0)
+                {
+                    memmove(buffer + lastSpace + 1 + indentLen, buffer + lastSpace + 1, bufferStrLen - lastSpace);
+                    memcpy(buffer + lastSpace + 1, indent, indentLen);
+                    bufferStrLen += indentLen;
+                    if (lastSpace <= i) i += indentLen;
+                }
+            }
+            widthCount = i - lastSpace;
+        }
+
+        widthCount++;
+    }
+
+    return lines;
+}
+
+/**
+ * @return winsize struct containing the current terminal size in columns and rows
+ */
+struct winsize getTerminalSize(void)
+{
+    struct winsize ws;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
+    {
+        ws.ws_col = 80;
+        ws.ws_row = 24;
+    }
+    return ws;
+}
+
+void showHelp(void)
+{
+    char cmdDesc[100] = "A tool that displays basic system and environment information in a summarised format.\n";
+    formatNewLines(cmdDesc, TERM_SIZE.ws_col, NULL);
+    printf("%s\n", cmdDesc);
+
+    char usage[50] = "Usage: shorkfetch [OPTIONS]\n\n";
+    formatNewLines(usage, TERM_SIZE.ws_col, NULL);
+    printf("%s", usage);
+
+    char options[240] = "Options:\n-h, --help       Displays help information and exits\n-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
+    formatNewLines(options, TERM_SIZE.ws_col, "                 ");
+    printf("%s", options);
+
+    //char notes[80] = "Notes:\nThe host terminal size must be 0x0 before starting.\n";
+    //formatNewLines(notes, TERM_SIZE.ws_col, NULL);
+    //printf("%s", notes);
 }
 
 
@@ -1050,8 +1145,10 @@ char *getUsername(void)
 }
 
 
+
 int main(int argc, char *argv[])
 {
+    TERM_SIZE = getTerminalSize();
     char *colAccent = getAccentColour();
 
 #ifdef NO_ART
@@ -1063,7 +1160,12 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; i++)
     {
-        if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
+        if ((strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "--help") == 0))
+        {
+            showHelp();
+            return 0;
+        }
+        else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
         else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
             colAccent = COL_RESET;
