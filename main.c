@@ -1140,7 +1140,7 @@ int main(int argc, char *argv[])
     if (ram[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smMemory:\033[%sm %s\n", colAccent, COL_RESET, ram);
+        printf("\033[%smRAM:\033[%sm    %s\n", colAccent, COL_RESET, ram);
     }
 
     if (swap[0] != '\0')        
