@@ -564,7 +564,7 @@ void showHelp(void)
     formatNewLines(usage, TERM_SIZE.ws_col, NULL);
     printf("%s", usage);
 
-    char options[300] = "Options:\n-b, --bullets    Uses bullet points instead of field headings\n-h, --help       Displays help information and exits\n-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
+    char options[350] = "Options:\n-b, --bullets    Uses bullet points instead of field headings; can also be used to set a custom character\n-h, --help       Displays help information and exits\n-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
     formatNewLines(options, TERM_SIZE.ws_col, "                 ");
     printf("%s", options);
 
@@ -1167,9 +1167,30 @@ int main(int argc, char *argv[])
             showHelp();
             return 0;
         }
-        else if ((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullets") == 0))
+        else if (strncmp(argv[i], "-b", 2) == 0 || strncmp(argv[i], "--bullets", 9) == 0)
         {
             useBullets = 1;
+
+            char *bulletCand = NULL;
+            if (strncmp(argv[i], "-b=", 3) == 0)
+                bulletCand = &argv[i][3];
+            else if (strncmp(argv[i], "--bullets=", 10) == 0)
+                bulletCand = &argv[i][10];
+
+            if (bulletCand)
+            {
+                if (bulletCand[0] == '\0')
+                {
+                    printf("ERROR: custom bullet point character not given\n");
+                    return 1;
+                }
+                else if (bulletCand[1] != '\0')
+                {
+                    printf("ERROR: custom bullet point character can only be a single character\n");
+                    return 1;
+                }
+                bullet = bulletCand[0];
+            }
         }
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;

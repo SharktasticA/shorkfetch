@@ -41,7 +41,7 @@ Simply run `shorkfetch` to use.
 
 ### Arguments
 
-* `-b`, `--bullets`: Uses bullet points instead of field headings
+* `-b`, `--bullets`: Uses bullet points instead of field headings; can also be used to set a custom character
 * `-h`, `--help`: Shows help information and exits
 * `-na`, `--no-art`: Disables the SHORK ASCII art (if compiled with art support)
 * `-nc`, `--no-col`: Disables all coloured output (if compiled with colour support)
