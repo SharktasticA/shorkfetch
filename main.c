@@ -564,7 +564,7 @@ void showHelp(void)
     formatNewLines(usage, TERM_SIZE.ws_col, NULL);
     printf("%s", usage);
 
-    char options[240] = "Options:\n-h, --help       Displays help information and exits\n-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
+    char options[300] = "Options:\n-b, --bullets    Uses bullet points instead of field headings\n-h, --help       Displays help information and exits\n-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
     formatNewLines(options, TERM_SIZE.ws_col, "                 ");
     printf("%s", options);
 
@@ -1149,7 +1149,9 @@ char *getUsername(void)
 int main(int argc, char *argv[])
 {
     TERM_SIZE = getTerminalSize();
+    char bullet = '*';
     char *colAccent = getAccentColour();
+    int useBullets = 0;
 
 #ifdef NO_ART
     int showShork = 0;
@@ -1165,6 +1167,8 @@ int main(int argc, char *argv[])
             showHelp();
             return 0;
         }
+        else if ((strcmp(argv[i], "-b") == 0) || (strcmp(argv[i], "--bullets") == 0))
+            useBullets = 1;
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
         else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
@@ -1198,31 +1202,36 @@ int main(int argc, char *argv[])
     if (os[0] != '\0')          
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smOS:\033[%sm     %s\n", colAccent, COL_RESET, os);
+        if (!useBullets) printf("\033[%smOS:\033[%sm     %s\n", colAccent, COL_RESET, os);
+        else printf("\033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
     }
 
     if (kernel[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smKernel:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+        if (!useBullets) printf("\033[%smKernel:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+        else printf("\033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
     }
 
     if (uptime[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smUptime:\033[%sm %s\n", colAccent, COL_RESET, uptime);
+        if (!useBullets) printf("\033[%smUptime:\033[%sm %s\n", colAccent, COL_RESET, uptime);
+        else printf("\033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
     }
 
     if (shell[0] != '\0')       
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smShell:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+        if (!useBullets) printf("\033[%smShell:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+        else printf("\033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
     }
 
     if (cpu[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smCPU:\033[%sm    %s\n", colAccent, COL_RESET, cpu);
+        if (!useBullets) printf("\033[%smCPU:\033[%sm    %s\n", colAccent, COL_RESET, cpu);
+        else printf("\033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, cpu);
     }
 
     if (gpus)
@@ -1233,7 +1242,8 @@ int main(int argc, char *argv[])
             if (gpu[0] != '\0')     
             {
                 if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-                printf("\033[%smGPU:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                if (!useBullets) printf("\033[%smGPU:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                else printf("\033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, gpu);
             }
             free(gpu);
         }
@@ -1242,19 +1252,22 @@ int main(int argc, char *argv[])
     if (ram[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smRAM:\033[%sm    %s\n", colAccent, COL_RESET, ram);
+        if (!useBullets) printf("\033[%smRAM:\033[%sm    %s\n", colAccent, COL_RESET, ram);
+        else printf("\033[%sm%c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
     }
 
     if (swap[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smSwap:\033[%sm   %s\n", colAccent, COL_RESET, swap);
+        if (!useBullets) printf("\033[%smSwap:\033[%sm   %s\n", colAccent, COL_RESET, swap);
+        else printf("\033[%sm%c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
     }
 
     if (root[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%smRoot:\033[%sm   %s\n", colAccent, COL_RESET, root);
+        if (!useBullets) printf("\033[%smRoot:\033[%sm   %s\n", colAccent, COL_RESET, root);
+        else printf("\033[%sm%c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
     }
     
     printf("\n");
