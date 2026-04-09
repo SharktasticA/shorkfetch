@@ -1090,6 +1090,8 @@ char *getSwap(void)
         }
         fclose(stream);
 
+        if (total == 0) return strdup("");
+
         long used = total - freeSwap;
         int pct = total ? (int)((used * 100) / total) : 0;
 
