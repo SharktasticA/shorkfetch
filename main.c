@@ -334,57 +334,84 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(tmp);
     }
 
-    // Dynamically generate substrings like "16-Core" or "16 Cores" to find
-    // and remove from AMD Ryzen or EPYC CPU names
-    int done = 0;
-    if (strstr(result, "AMD") && (strstr(result, "Ryzen") || strstr(result, "EPYC")))
-    {
-        for (int i = 2; i <= 192; i += 2)
-        {
-            if (done == 1) break;
-
-            char *withDash = malloc(10);
-            char *withSpace = malloc(11);
-            if (!withDash || !withSpace) 
-            {
-                free(withDash);
-                free(withSpace);
-                continue;
-            }
-            
-            snprintf(withDash, 10, " %d%s", i, "-Core");
-            snprintf(withSpace, 11, " %d%s", i, " Cores");
-
-            if (strstr(result, withDash))
-            {
-                done = 1;
-                char *tmp = findErase(result, bufferSize, withDash);
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-            }
-            else if (strstr(result, withSpace))
-            {
-                done = 1;
-                char *tmp = findErase(result, bufferSize, withSpace);
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-            }
-
-            free(withDash);
-            free(withSpace);
-        }
-    }
-
     if (strstr(result, "Advanced Micro Devices"))
     {
         char *tmp = findReplace(result, bufferSize, "Advanced Micro Devices", "AMD");
         strncpy(result, tmp, bufferSize - 1);
         result[bufferSize - 1] = '\0';
         free(tmp);
+    }
 
-        if (strstr(result, "AMD [AMD/ATI]"))
+    if (strstr(result, "AMD"))
+    {
+        if (strstr(result, "486"))
+        {
+            if (strstr(result, " 486 DX"))
+            {
+                char *tmp = findReplace(result, bufferSize, " 486 DX", " Am486DX");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+
+                if (strstr(result, "486DX/2"))
+                {
+                    char *tmp = findReplace(result, bufferSize, "486DX/2", "486DX2");
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+                else if (strstr(result, "486DX/4"))
+                {
+                    char *tmp = findReplace(result, bufferSize, "486DX/4", "486DX4/Am5x86");
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+            }
+        }
+        else if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
+        {
+            // Dynamically generate substrings like "16-Core" or "16 Cores" to find
+            // and remove from AMD Ryzen or EPYC CPU names
+            int done = 0;
+            for (int i = 2; i <= 192; i += 2)
+            {
+                if (done == 1) break;
+
+                char *withDash = malloc(10);
+                char *withSpace = malloc(11);
+                if (!withDash || !withSpace) 
+                {
+                    free(withDash);
+                    free(withSpace);
+                    continue;
+                }
+                
+                snprintf(withDash, 10, " %d%s", i, "-Core");
+                snprintf(withSpace, 11, " %d%s", i, " Cores");
+
+                if (strstr(result, withDash))
+                {
+                    done = 1;
+                    char *tmp = findErase(result, bufferSize, withDash);
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+                else if (strstr(result, withSpace))
+                {
+                    done = 1;
+                    char *tmp = findErase(result, bufferSize, withSpace);
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+
+                free(withDash);
+                free(withSpace);
+            }
+        }
+        else if (strstr(result, "AMD [AMD/ATI]"))
         {
             char *tmp = findReplace(result, bufferSize, "AMD [AMD/ATI]", "AMD/ATI");
             strncpy(result, tmp, bufferSize - 1);
@@ -392,29 +419,101 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
             free(tmp);
         }
     }
-
-    if (strstr(result, "Core2"))
+    else if (strstr(result, "Intel"))
     {
-        char *tmp = findReplace(result, bufferSize, "Core2", "Core 2");
-        strncpy(result, tmp, bufferSize - 1);
-        result[bufferSize - 1] = '\0';
-        free(tmp);
-    }
+        if (strstr(result, "486"))
+        {
+            if (strstr(result, " 486 SX"))
+            {
+                char *tmp = findReplace(result, bufferSize, " 486 SX", " i486SX");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
 
-    if (strstr(result, "Generation Core") && strstr(result, "Graphics"))
-    {
-        char *tmp = findReplace(result, bufferSize, "Generation Core", "Gen Core");
-        strncpy(result, tmp, bufferSize - 1);
-        result[bufferSize - 1] = '\0';
-        free(tmp);
-    }
+                if (strstr(result, "486SX/2"))
+                {
+                    char *tmp = findReplace(result, bufferSize, "486SX/2", "486SX2");
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+            }
+            else if (strstr(result, "DX/4"))
+            {
+                char *tmp = findReplace(result, bufferSize, " 486 DX/4", "DX4");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+            else if (strstr(result, " 486 DX"))
+            {
+                char *tmp = findReplace(result, bufferSize, " 486 DX", " i486DX");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
 
-    if (strstr(result, "Pentium 4 - M"))
-    {
-        char *tmp = findReplace(result, bufferSize, "Pentium 4 - M", "Pentium 4-M");
-        strncpy(result, tmp, bufferSize - 1);
-        result[bufferSize - 1] = '\0';
-        free(tmp);
+                // We remove "-50" since 33MHz i486DXS also reports as 50MHz...
+                if (strstr(result, "486DX-50"))
+                {
+                    char *tmp = findReplace(result, bufferSize, "486DX-50", "486DX");
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+                else if (strstr(result, "486DX/2"))
+                {
+                    char *tmp = findReplace(result, bufferSize, "486DX/2", "486DX2");
+                    strncpy(result, tmp, bufferSize - 1);
+                    result[bufferSize - 1] = '\0';
+                    free(tmp);
+                }
+            }
+        }
+        if (strstr(result, "OverDrive"))
+        {
+            if (strstr(result, "OverDrive PODP5V63"))
+            {
+                char *tmp = findReplace(result, bufferSize, "OverDrive PODP5V63", "Pentium OverDrive");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+            else if (strstr(result, "OverDrive PODP5V83"))
+            {
+                char *tmp = findReplace(result, bufferSize, "OverDrive PODP5V83", "Pentium OverDrive");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+        }
+        else if (strstr(result, "Core"))
+        {
+            if (strstr(result, "Core2"))
+            {
+                char *tmp = findReplace(result, bufferSize, "Core2", "Core 2");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+
+            if (strstr(result, "Generation Core") && strstr(result, "Graphics"))
+            {
+                char *tmp = findReplace(result, bufferSize, "Generation Core", "Gen Core");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+        }
+        else
+        {
+            if (strstr(result, "Pentium 4 - M"))
+            {
+                char *tmp = findReplace(result, bufferSize, "Pentium 4 - M", "Pentium 4-M");
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+        }
     }
 
     while (strstr(result, " / "))
@@ -772,7 +871,8 @@ char *getCPU(void)
     char *processor = malloc(4);
     char *cores = malloc(4);
     char *threads = malloc(4);
-    if (!cpu || !vendor || !model || !processor || !cores || !threads) 
+    char *fpu = malloc(4);
+    if (!cpu || !vendor || !model || !processor || !cores || !threads || !fpu) 
     {
         free(cpu);
         free(vendor);
@@ -780,9 +880,10 @@ char *getCPU(void)
         free(processor);
         free(cores);
         free(threads);
+        free(fpu);
         return strdup("unknown");
     }
-    cpu[0] = vendor[0] = model[0] = processor[0] = cores[0] = threads[0] = '\0';
+    cpu[0] = vendor[0] = model[0] = processor[0] = cores[0] = threads[0] = fpu[0] = '\0';
 
     FILE *stream = fopen("/proc/cpuinfo", "r");
     if (stream)
@@ -806,10 +907,7 @@ char *getCPU(void)
             {
                 char *extract = extractFromPoint(buffer, 128, ':', 2);
                 strncpy(model, extract, 127);
-                char *clean = cleanProcessorName(extract, 128);
                 free(extract);
-                strncpy(model, clean, 127);
-                free(clean);
             }
             else if (strncmp(buffer, "cpu cores", 9) == 0)
             {
@@ -823,8 +921,20 @@ char *getCPU(void)
                 strncpy(threads, extract, 3);
                 free(extract);
             }
+            else if (strncmp(buffer, "fpu", 3) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                if (extract)
+                {
+                    if (strncmp(extract, "yes", 3) == 0)
+                        strncpy(fpu, "1", 2);
+                    else if (strncmp(extract, "no", 2) == 0)
+                        strncpy(fpu, "0", 2);
+                    free(extract);
+                }
+            }
             
-            if (model[0] != '\0' && cores[0] != '\0' && threads[0] != '\0')
+            if (model[0] != '\0' && cores[0] != '\0' && threads[0] != '\0' && fpu[0] != '\0')
                 break;
         }
         fclose(stream);
@@ -860,17 +970,41 @@ char *getCPU(void)
             }
         }
 
+        // If we have a 486SX with FPU, make sure FPU is included in the model name
+        if (strstr(model, "486") && strstr(model, "SX") && fpu[0] == '1')
+        {
+            char tmp[128];
+            snprintf(tmp, 128, "%s + x87", model);
+            strncpy(model, tmp, 127);
+            model[127] = '\0';
+        }
+
+        // If we have a vendorless and revisionless 486, we can at least infer if
+        // its purely SX or DX/SX + x87 from the presence of a FPU
+        if ((vendor[0] == '\0' || vendor[0] == 'u') && model[0] != '\0' && strcmp(model, "486") == 0)
+        {
+            if (fpu[0] == '0')
+                snprintf(model, 127, "486SX");
+            else if (fpu[0] == '1')
+                snprintf(model, 127, "486DX/486SX + x87");
+        }
+
+        // If we don't have a cores value, set it to the same as threads
+        // so we don't try to show them separately later
         if (cores[0] == '\0' && threads[0] != '\0')
             strncpy(cores, threads, 3);
-            
+
+        // If we don't have cores or threads, we use the processor field in its place
         if (cores[0] == '\0' && threads[0] == '\0')
         {
             int processorInt = atoi(processor);
             processorInt++;
             snprintf(cpu, 134, "%s (%dC)", model, processorInt);
         }
+        // If cores and threads are the same value, just show cores
         else if (strcmp(cores, threads) == 0)
             snprintf(cpu, 134, "%s (%sC)", model, cores);
+        // If cores and threads are different values, show both
         else
             snprintf(cpu, 134, "%s (%sC/%sT)", model, cores, threads);
     }
@@ -881,6 +1015,11 @@ char *getCPU(void)
     free(processor);
     free(cores);
     free(threads);
+    free(fpu);
+
+    char *cleanedCPU = cleanProcessorName(cpu, 134);
+    strncpy(cpu, cleanedCPU, 133);
+    free(cleanedCPU);
 
     return cpu;
 }

@@ -46,6 +46,8 @@ Simply run `shorkfetch` to use.
 * `-na`, `--no-art`: Disables the SHORK ASCII art (if compiled with art support)
 * `-nc`, `--no-col`: Disables all coloured output (if compiled with colour support)
 
+
+
 ## Screenshots
 
 <table style="table-layout: fixed; width: 100%;">
