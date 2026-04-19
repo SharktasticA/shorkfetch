@@ -56,6 +56,8 @@ typedef struct {
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+
+
 const char SHORK[15][20] = {
     "                   ",
     "^`.                ",
@@ -403,6 +405,22 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
             else if (strstr(result, IDT_REPLACES[i].match))
             {
                 char *tmp = findReplace(result, bufferSize, IDT_REPLACES[i].match, IDT_REPLACES[i].replacement);
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+            }
+        }
+    }
+    // Apply VIA-specific replacements
+    else if (strstr(result, "VIA"))
+    {
+        int replaces = 0;
+        for (int i = 0; i < VIA_REPLACES_LEN; i++)
+        {
+            if (VIA_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, VIA_REPLACES[i].match))
+            {
+                char *tmp = findReplace(result, bufferSize, VIA_REPLACES[i].match, VIA_REPLACES[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);

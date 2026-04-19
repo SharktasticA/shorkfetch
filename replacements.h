@@ -84,6 +84,8 @@ static const struct Replacement INTEL_REPLACES[] = {
     { "OverDrive PODP5V83",     "Pentium OverDrive",    0 },
     { "Pentium 60/66",          "Pentium (P5)",         0 },
     { "Pentium 75 - 200",       "Pentium (P54C)",       0 },
+    { "Pentium II (Deschutes)", "Pentium II/Celeron",   0 },
+    { "Celeron (Mendocino)",    "Celeron",              0 },
     { "Pentium 4 - M",          "Pentium 4-M",          0 },
     { "Core2",                  "Core 2",               0 },
     { "Generation Core",        "Gen Core",             0 }
@@ -97,5 +99,12 @@ static const struct Replacement IDT_REPLACES[] = {
     { "WinChip 2-3D",   "WinChip 2/3",  0 }
 };
 static const int IDT_REPLACES_LEN = sizeof(IDT_REPLACES) / sizeof(IDT_REPLACES[0]);
+
+
+
+static const struct Replacement VIA_REPLACES[] = {
+    { "Samuel", "Cyrix III",    0 }
+};
+static const int VIA_REPLACES_LEN = sizeof(VIA_REPLACES) / sizeof(VIA_REPLACES[0]);
 
 #endif
