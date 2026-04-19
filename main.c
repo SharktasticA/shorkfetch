@@ -15,6 +15,7 @@
 
 
 #include "igpus.h"
+#include "replacements.h"
 
 #include <dirent.h>
 #include <libgen.h>
@@ -320,8 +321,7 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         " Technology LLC",                  // For Loongson
         " w/ multimedia extensions",        // For AMD K6
         " 2x Core/Bus Clock",               // For Cyrix 6x86
-        " 3x Core/Bus Clock",               // For Cyrix 5x86
-        " 75 - 200"                         // For Intel Pentium
+        " 3x Core/Bus Clock"                // For Cyrix 5x86
     };
     const size_t patternCount = sizeof(patterns) / sizeof(patterns[0]);
 
@@ -344,32 +344,18 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
 
     if (strstr(result, "AMD"))
     {
-        if (strstr(result, "486"))
+        for (int i = 0; i < amdReplacementsLen; i++)
         {
-            if (strstr(result, " 486 DX"))
+            if (strstr(result, amdReplacements[i].match))
             {
-                char *tmp = findReplace(result, bufferSize, " 486 DX", " Am486DX");
+                char *tmp = findReplace(result, bufferSize, amdReplacements[i].match, amdReplacements[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);
-
-                if (strstr(result, "486DX/2"))
-                {
-                    char *tmp = findReplace(result, bufferSize, "486DX/2", "486DX2");
-                    strncpy(result, tmp, bufferSize - 1);
-                    result[bufferSize - 1] = '\0';
-                    free(tmp);
-                }
-                else if (strstr(result, "486DX/4"))
-                {
-                    char *tmp = findReplace(result, bufferSize, "486DX/4", "486DX4/Am5x86");
-                    strncpy(result, tmp, bufferSize - 1);
-                    result[bufferSize - 1] = '\0';
-                    free(tmp);
-                }
             }
         }
-        else if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
+
+        if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
         {
             // Dynamically generate substrings like "16-Core" or "16 Cores" to find
             // and remove from AMD Ryzen or EPYC CPU names
@@ -421,94 +407,24 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
     }
     else if (strstr(result, "Intel"))
     {
-        if (strstr(result, "486"))
+        for (int i = 0; i < intelReplacementsLen; i++)
         {
-            if (strstr(result, " 486 SX"))
+            if (strstr(result, intelReplacements[i].match))
             {
-                char *tmp = findReplace(result, bufferSize, " 486 SX", " i486SX");
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-
-                if (strstr(result, "486SX/2"))
-                {
-                    char *tmp = findReplace(result, bufferSize, "486SX/2", "486SX2");
-                    strncpy(result, tmp, bufferSize - 1);
-                    result[bufferSize - 1] = '\0';
-                    free(tmp);
-                }
-            }
-            else if (strstr(result, "DX/4"))
-            {
-                char *tmp = findReplace(result, bufferSize, " 486 DX/4", "DX4");
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-            }
-            else if (strstr(result, " 486 DX"))
-            {
-                char *tmp = findReplace(result, bufferSize, " 486 DX", " i486DX");
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-
-                // We remove "-50" since 33MHz i486DXS also reports as 50MHz...
-                if (strstr(result, "486DX-50"))
-                {
-                    char *tmp = findReplace(result, bufferSize, "486DX-50", "486DX");
-                    strncpy(result, tmp, bufferSize - 1);
-                    result[bufferSize - 1] = '\0';
-                    free(tmp);
-                }
-                else if (strstr(result, "486DX/2"))
-                {
-                    char *tmp = findReplace(result, bufferSize, "486DX/2", "486DX2");
-                    strncpy(result, tmp, bufferSize - 1);
-                    result[bufferSize - 1] = '\0';
-                    free(tmp);
-                }
-            }
-        }
-        if (strstr(result, "OverDrive"))
-        {
-            if (strstr(result, "OverDrive PODP5V63"))
-            {
-                char *tmp = findReplace(result, bufferSize, "OverDrive PODP5V63", "Pentium OverDrive");
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-            }
-            else if (strstr(result, "OverDrive PODP5V83"))
-            {
-                char *tmp = findReplace(result, bufferSize, "OverDrive PODP5V83", "Pentium OverDrive");
+                char *tmp = findReplace(result, bufferSize, intelReplacements[i].match, intelReplacements[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);
             }
         }
-        else if (strstr(result, "Core"))
+    }
+    else if (strstr(result, "IDT"))
+    {
+        for (int i = 0; i < idtReplacementsLen; i++)
         {
-            if (strstr(result, "Core2"))
+            if (strstr(result, idtReplacements[i].match))
             {
-                char *tmp = findReplace(result, bufferSize, "Core2", "Core 2");
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-            }
-
-            if (strstr(result, "Generation Core") && strstr(result, "Graphics"))
-            {
-                char *tmp = findReplace(result, bufferSize, "Generation Core", "Gen Core");
-                strncpy(result, tmp, bufferSize - 1);
-                result[bufferSize - 1] = '\0';
-                free(tmp);
-            }
-        }
-        else
-        {
-            if (strstr(result, "Pentium 4 - M"))
-            {
-                char *tmp = findReplace(result, bufferSize, "Pentium 4 - M", "Pentium 4-M");
+                char *tmp = findReplace(result, bufferSize, idtReplacements[i].match, idtReplacements[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);

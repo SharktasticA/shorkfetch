@@ -2,9 +2,8 @@
     ######################################################
     ##            SHORK UTILITY - SHORKFETCH            ##
     ######################################################
-    ## A lightweight Linux tool for displaying basic    ##
-    ## system & environment information in a summarised ##
-    ## format, similar to fastfetch, neofetch, etc.     ##
+    ## Hard-coded Intel iGPU names via Device ID lookup ##
+    ## to be used to replace messy data from pci.ids.   ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
