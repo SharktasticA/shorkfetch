@@ -912,16 +912,15 @@ char *getCPU(void)
             model[127] = '\0';
         }
 
-        // If we have a vendorless and revisionless 486, we can at least infer if its purely SX
-        // or DX/SX + x87 from the presence of an FPU. Despite being the most common scenario,
-        // we cannot guarantee the FPU is 487 since IBM 486BL2/3 will trigger the below code, cannot
-        // be distinguished from /proc/cpuinfo, yet works with a 387...
+        // If we have a vendorless and revisionless 486, we can at least infer if its purely 486SX, or
+        // a 486DX, 487SX (true 486SX + 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx  + 387), from the
+        // presence of an FPU
         if ((vendor[0] == '\0' || vendor[0] == 'u') && model[0] != '\0' && strcmp(model, "486") == 0)
         {
             if (fpu[0] == '0')
                 snprintf(model, 127, "486SX");
             else if (fpu[0] == '1')
-                snprintf(model, 127, "486DX/486SX + x87");
+                snprintf(model, 127, "486DX/487SX/486SX + 387");
         }
 
         // If we don't have a cores value, set it to the same as threads
