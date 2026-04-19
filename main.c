@@ -291,49 +291,17 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(extract);
     }
 
-    const char *patterns[] =
+    // Apply generic deletions
+    for (size_t i = 0; i < DELETIONS_LEN; i++)
     {
-        "AMD-",                             // For AMD K6
-        ", Inc.",
-        ", Inc",
-        "(R)",
-        "(tm)",
-        "(tm )",                            // For AMD Duron
-        "tm",
-        "(TM)",
-        " APU",
-        " Dual Core",                       // For AMD Athlon
-        " Controller",
-        " Corporation",
-        " CPU",
-        " Eight-Core",                      // For AMD FX
-        " Electronics Systems",             // For Matrox
-        " Family",
-        " Interactive",                     // For 3dfx
-        " Ltd.",
-        " Microsystems",                    // For Trident
-        " processor",
-        " Processor",
-        " Quad Core",                       // For AMD Athlon
-        " Quad-Core",                       // For AMD FX
-        " Six-Core",                        // For AMD FX
-        " Technologies",                    // For VIA
-        " Technology LLC",                  // For Loongson
-        " w/ multimedia extensions",        // For AMD K6
-        " 2x Core/Bus Clock",               // For Cyrix 6x86
-        " 3x Core/Bus Clock"                // For Cyrix 5x86
-    };
-    const size_t patternCount = sizeof(patterns) / sizeof(patterns[0]);
-
-    for (size_t i = 0; i < patternCount; i++)
-    {
-        const char *pattern = patterns[i];
+        const char *pattern = DELETIONS[i];
         char *tmp = findErase(result, bufferSize, pattern);
         strncpy(result, tmp, bufferSize - 1);
         result[bufferSize - 1] = '\0';
         free(tmp);
     }
 
+    // Shorten "Advanced Micro Devices" to "AMD"
     if (strstr(result, "Advanced Micro Devices"))
     {
         char *tmp = findReplace(result, bufferSize, "Advanced Micro Devices", "AMD");
@@ -342,16 +310,20 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(tmp);
     }
 
+    // Apply AMD-specific replacements
     if (strstr(result, "AMD"))
     {
-        for (int i = 0; i < amdReplacementsLen; i++)
+        int replaces = 0;
+        for (int i = 0; i < AMD_REPLACES_LEN; i++)
         {
-            if (strstr(result, amdReplacements[i].match))
+            if (AMD_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, AMD_REPLACES[i].match))
             {
-                char *tmp = findReplace(result, bufferSize, amdReplacements[i].match, amdReplacements[i].replacement);
+                char *tmp = findReplace(result, bufferSize, AMD_REPLACES[i].match, AMD_REPLACES[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);
+                replaces++;
             }
         }
 
@@ -405,26 +377,32 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
             free(tmp);
         }
     }
+    // Apply Intel-specific replacements
     else if (strstr(result, "Intel"))
     {
-        for (int i = 0; i < intelReplacementsLen; i++)
+        int replaces = 0;
+        for (int i = 0; i < INTEL_REPLACES_LEN; i++)
         {
-            if (strstr(result, intelReplacements[i].match))
+            if (INTEL_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, INTEL_REPLACES[i].match))
             {
-                char *tmp = findReplace(result, bufferSize, intelReplacements[i].match, intelReplacements[i].replacement);
+                char *tmp = findReplace(result, bufferSize, INTEL_REPLACES[i].match, INTEL_REPLACES[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);
             }
         }
     }
+    // Apply IDT/Centaur-specific replacements
     else if (strstr(result, "IDT"))
     {
-        for (int i = 0; i < idtReplacementsLen; i++)
+        int replaces = 0;
+        for (int i = 0; i < IDT_REPLACES_LEN; i++)
         {
-            if (strstr(result, idtReplacements[i].match))
+            if (IDT_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, IDT_REPLACES[i].match))
             {
-                char *tmp = findReplace(result, bufferSize, idtReplacements[i].match, idtReplacements[i].replacement);
+                char *tmp = findReplace(result, bufferSize, IDT_REPLACES[i].match, IDT_REPLACES[i].replacement);
                 strncpy(result, tmp, bufferSize - 1);
                 result[bufferSize - 1] = '\0';
                 free(tmp);
@@ -432,6 +410,7 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         }
     }
 
+    // Shorten " / " to "/"
     while (strstr(result, " / "))
     {
         char *tmp = findReplace(result, bufferSize, " / ", "/");
@@ -440,6 +419,7 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(tmp);
     }
 
+    // Remove double-spaces
     while (strstr(result, "  "))
     {
         char *tmp = findReplace(result, bufferSize, "  ", " ");
