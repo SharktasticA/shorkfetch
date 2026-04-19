@@ -886,23 +886,32 @@ char *getCPU(void)
             }
         }
 
-        // If we have a 486SX with FPU, make sure FPU is included in the model name
+        // If we have a 486SX with FPU, make sure 487 is included in the model name
         if (strstr(model, "486") && strstr(model, "SX") && fpu[0] == '1')
         {
             char tmp[128];
-            snprintf(tmp, 128, "%s + x87", model);
+            snprintf(tmp, 128, "%s + 487", model);
+            strncpy(model, tmp, 127);
+            model[127] = '\0';
+        }
+
+        // If we have a Cx486Dxxx with FPU, make sure 387 is included in the model name
+        if ((strstr(model, "Cx486DLC") || strstr(model, "Cx486DRx2")) && fpu[0] == '1')
+        {
+            char tmp[128];
+            snprintf(tmp, 128, "%s + 387", model);
             strncpy(model, tmp, 127);
             model[127] = '\0';
         }
 
         // If we have a vendorless and revisionless 486, we can at least infer if
-        // its purely SX or DX/SX + x87 from the presence of a FPU
+        // its purely SX or DX/SX + 487 from the presence of a FPU
         if ((vendor[0] == '\0' || vendor[0] == 'u') && model[0] != '\0' && strcmp(model, "486") == 0)
         {
             if (fpu[0] == '0')
                 snprintf(model, 127, "486SX");
             else if (fpu[0] == '1')
-                snprintf(model, 127, "486DX/486SX + x87");
+                snprintf(model, 127, "486DX/486SX + 487");
         }
 
         // If we don't have a cores value, set it to the same as threads

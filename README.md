@@ -1,8 +1,8 @@
 # shorkfetch
 
-A lightweight Linux tool for displaying basic system and environment information in a summarised format, similar to fastfetch, neofetch, etc. but without any complex or customisable art and less fields, but also significantly faster. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed to be minimal and not taxing on 486-era hardware, and is statically linked. But it should work on modern Linux distributions just fine.
+A Linux tool for displaying basic system and environment information in a summarised format. It is a *fetch clone (similar to neofetch, fastfetch, etc.) without complex or customisable art and less fields, but also significantly faster than most alternatives. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed suitable for use on a wide range of hardware going back to the 486 era. But it works on modern Linux systems just fine.
 
-
+shorkfetch also has a focus on providing clean CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus shorkfetch is designed to help address this.
 
 ## Building
 
