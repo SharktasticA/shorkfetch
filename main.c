@@ -855,10 +855,9 @@ char *getCPU(void)
         }
         fclose(stream);
 
+        // Check if model name lacks the vendor name and if we need to try adding it in manually
         if ((vendor[0] != '\0' && vendor[0] != 'u') && model[0] != '\0')
         {
-            // Check if model name lacks the vendor name and if we need to try
-            // adding it in manually
             if (!(strstr(model, "Intel ") || strstr(model, "AMD ") || strstr(model, "Cyrix ") || strstr(model, "IDT ") || strstr(model, "VIA ") || strstr(model, "Transmeta ")))
             {
                 char *tmp = malloc(128);
@@ -886,15 +885,6 @@ char *getCPU(void)
             }
         }
 
-        // If we have a 486SX with FPU, make sure 487 is included in the model name
-        if (strstr(model, "486") && strstr(model, "SX") && fpu[0] == '1')
-        {
-            char tmp[128];
-            snprintf(tmp, 128, "%s + 487", model);
-            strncpy(model, tmp, 127);
-            model[127] = '\0';
-        }
-
         // If we have a Cx486Dxxx with FPU, make sure 387 is included in the model name
         if ((strstr(model, "Cx486DLC") || strstr(model, "Cx486DRx2")) && fpu[0] == '1')
         {
@@ -904,14 +894,34 @@ char *getCPU(void)
             model[127] = '\0';
         }
 
-        // If we have a vendorless and revisionless 486, we can at least infer if
-        // its purely SX or DX/SX + 487 from the presence of a FPU
+        // If we have a Cx486S with FPU, make sure 487 is included in the model name
+        if (strstr(model, "Cx486S") && fpu[0] == '1')
+        {
+            char tmp[128];
+            snprintf(tmp, 128, "%s + 487", model);
+            strncpy(model, tmp, 127);
+            model[127] = '\0';
+        }
+
+        // If we have for certain an Intel 486SX with FPU, make sure 487 is included in the model name
+        if (strstr(model, "486") && strstr(model, "SX") && fpu[0] == '1')
+        {
+            char tmp[128];
+            snprintf(tmp, 128, "%s + 487", model);
+            strncpy(model, tmp, 127);
+            model[127] = '\0';
+        }
+
+        // If we have a vendorless and revisionless 486, we can at least infer if its purely SX
+        // or DX/SX + x87 from the presence of an FPU. Despite being the most common scenario,
+        // we cannot guarantee the FPU is 487 since IBM 486BL2/3 will trigger the below code, cannot
+        // be distinguished from /proc/cpuinfo, yet works with a 387...
         if ((vendor[0] == '\0' || vendor[0] == 'u') && model[0] != '\0' && strcmp(model, "486") == 0)
         {
             if (fpu[0] == '0')
                 snprintf(model, 127, "486SX");
             else if (fpu[0] == '1')
-                snprintf(model, 127, "486DX/486SX + 487");
+                snprintf(model, 127, "486DX/486SX + x87");
         }
 
         // If we don't have a cores value, set it to the same as threads
