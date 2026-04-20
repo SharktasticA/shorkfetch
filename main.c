@@ -997,7 +997,7 @@ char *getCPU(void)
         fclose(stream);
 
         // Check if model name lacks the vendor name and if we need to try adding it in manually
-        if ((vendor[0] != '\0' && vendor[0] != 'u') && model[0] != '\0')
+        if ((vendor[0] == '\0' && vendor[0] != 'u') && model[0] != '\0')
         {
             if (!(strstr(model, "Intel ") || strstr(model, "AMD ") || strstr(model, "Cyrix ") || strstr(model, "IDT ") || strstr(model, "VIA ") || strstr(model, "Transmeta ")))
             {
