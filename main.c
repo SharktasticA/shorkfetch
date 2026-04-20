@@ -482,6 +482,22 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
 
     if (COMPACT)
     {
+        // Remove clock speed from CPU name
+        if (strstr(result, "@") && strstr(result, "Hz"))
+        {
+            char *at = strstr(result, " @");
+            if (at)
+            {
+                char *leftBrac = strchr(at, '(');
+                // If brackets for core/thread count present, selective removal
+                if (leftBrac && leftBrac > at)
+                    memmove(at, leftBrac - 1, strlen(leftBrac - 1) + 1);
+                // If no brackets for core/thread count, just nuke @ and after
+                else
+                    *at = '\0';
+            }
+        }
+
         int replaces = 0;
         for (int i = 0; i < COMPACT_CPU_GPU_REPLACES_LEN; i++)
         {
@@ -1063,6 +1079,10 @@ char *getCPU(void)
             else if (fpu[0] == '1')
                 snprintf(model, 127, "486DX/487SX/486SX + 387");
         }
+
+        // Catch if literally no model name is availble
+        if (model[0] == '\0')
+            strcpy(cpu, "unknown");
 
         // If we don't have a cores value, set it to the same as threads
         // so we don't try to show them separately later
