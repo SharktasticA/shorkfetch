@@ -53,6 +53,7 @@ static const struct Replacement COMPACT_CPU_GPU_REPLACES[] = {
     { " Graphics",              "",     0 },
     { " Integrated",            "",     0 },
     { "Quadro ",                "",     0 },
+    { "Max-Q",                  "M-Q",  0 },
     { "Mobile ",                "",     0 },
     { "Radeon ",                "",     0 },
     { "Radeon/",                "",     0 }
