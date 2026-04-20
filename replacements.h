@@ -38,6 +38,7 @@ static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0
 
 
 static const struct Replacement COMPACT_CPU_GPU_REPLACES[] = {
+    { " Adapter",               "",     0 },
     { "Express ",               "",     0 },
     { "Extreme Graphics",       "ET",   0 },
     { " for ",                  " ",    0 },
