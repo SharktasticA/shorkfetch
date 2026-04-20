@@ -58,6 +58,7 @@ typedef struct {
 
 
 
+static int COMPACT = 0;
 const char SHORK[15][20] = {
     "                   ",
     "^`.                ",
@@ -78,77 +79,6 @@ const char SHORK[15][20] = {
 static struct winsize TERM_SIZE;
 
 
-
-/**
- * Converts a data value into a string formatted into a unit that makes sense for
- * its magnitude with its new unit added to the end.
- * @param from Unit the input value is in (e.g., "B", "KiB")
- * @param val Input value to convert
- * @return String containing the converted value and its new unit (e.g., "1.5MiB")
- */
-char *bytesToReadable(const char *from, const long long val)
-{
-    long long bytes = val;
-    if (strcmp(from, "KiB") == 0)
-        bytes *= 1024;
-    else if (strcmp(from, "MiB") == 0)
-        bytes *= 1024LL * 1024;
-    else if (strcmp(from, "GiB") == 0)
-        bytes *= 1024LL * 1024 * 1024;
-    else if (strcmp(from, "TiB") == 0)
-        bytes *= 1024LL * 1024 * 1024 * 1024;
-
-    const long long TiB = 1024LL * 1024 * 1024 * 1024;
-    const long long GiB = 1024LL * 1024 * 1024;
-    const long long MiB = 1024LL * 1024;
-    const long long KiB = 1024LL;
-
-    char *result = malloc(32);
-    if (!result) return strdup("");
-    long long whole, remainder;
-    int decimal;
-
-    if (bytes >= TiB)
-    {
-        whole = bytes / TiB;
-        remainder = bytes % TiB;
-        decimal = (int)((remainder * 10 + TiB / 2) / TiB);
-        if (decimal == 10) { whole++; decimal = 0; }
-        if (decimal == 0) snprintf(result, 32, "%lldTiB", whole);
-        else snprintf(result, 32, "%lld.%dTiB", whole, decimal);
-    }
-    else if (bytes >= GiB)
-    {
-        whole = bytes / GiB;
-        remainder = bytes % GiB;
-        decimal = (int)((remainder * 10 + GiB / 2) / GiB);
-        if (decimal == 10) { whole++; decimal = 0; }
-        if (decimal == 0) snprintf(result, 32, "%lldGiB", whole);
-        else snprintf(result, 32, "%lld.%dGiB", whole, decimal);
-    }
-    else if (bytes >= MiB)
-    {
-        whole = bytes / MiB;
-        remainder = bytes % MiB;
-        decimal = (int)((remainder * 10 + MiB / 2) / MiB);
-        if (decimal == 10) { whole++; decimal = 0; }
-        if (decimal == 0) snprintf(result, 32, "%lldMiB", whole);
-        else snprintf(result, 32, "%lld.%dMiB", whole, decimal);
-    }
-    else if (bytes >= KiB)
-    {
-        whole = bytes / KiB;
-        remainder = bytes % KiB;
-        decimal = (int)((remainder * 10 + KiB / 2) / KiB);
-        if (decimal == 10) { whole++; decimal = 0; }
-        if (decimal == 0) snprintf(result, 32, "%lldKiB", whole);
-        else snprintf(result, 32, "%lld.%dKiB", whole, decimal);
-    }
-    else
-        snprintf(result, 32, "%lldB", bytes);
-
-    return result;
-}
 
 /**
  * Finds and erases a desired substring from an input string.
@@ -195,7 +125,7 @@ char *findReplace(const char *buffer, const size_t bufferSize, const char *needl
 
     size_t needleLen = strlen(needle);
     size_t replacementLen = strlen(replacement);
-    if (needleLen == 0 || replacementLen == 0) return strdup("");
+    if (needleLen == 0) return strdup("");
 
     char *result = malloc(bufferSize);
     if (!result) return strdup("");
@@ -222,6 +152,110 @@ char *findReplace(const char *buffer, const size_t bufferSize, const char *needl
         memcpy(pos, replacement, replacementLen);
         pos += replacementLen;
     }
+
+    return result;
+}
+
+/**
+ * Converts a data value into a string formatted into a unit that makes sense for
+ * its magnitude with its new unit added to the end.
+ * @param from Unit the input value is in (e.g., "B", "KiB")
+ * @param val Input value to convert
+ * @return String containing the converted value and its new unit (e.g., "1.5MiB")
+ */
+char *bytesToReadable(const char *from, const long long val)
+{
+    long long bytes = val;
+    if (strcmp(from, "KiB") == 0)
+        bytes *= 1024;
+    else if (strcmp(from, "MiB") == 0)
+        bytes *= 1024LL * 1024;
+    else if (strcmp(from, "GiB") == 0)
+        bytes *= 1024LL * 1024 * 1024;
+    else if (strcmp(from, "TiB") == 0)
+        bytes *= 1024LL * 1024 * 1024 * 1024;
+
+    const long long TiB = 1024LL * 1024 * 1024 * 1024;
+    const long long GiB = 1024LL * 1024 * 1024;
+    const long long MiB = 1024LL * 1024;
+    const long long KiB = 1024LL;
+
+    const int resultSize = 32;
+    char *result = malloc(resultSize);
+    if (!result) return strdup("");
+    long long whole, remainder;
+    int decimal;
+
+    if (bytes >= TiB)
+    {
+        whole = bytes / TiB;
+        remainder = bytes % TiB;
+
+        if (COMPACT)
+        {
+            if (remainder > 0) whole++;
+            snprintf(result, resultSize, "%lldT", whole);
+            return result;
+        }
+
+        decimal = (int)((remainder * 10 + TiB / 2) / TiB);
+        if (decimal == 10) { whole++; decimal = 0; }
+        if (decimal == 0) snprintf(result, resultSize, "%lldTiB", whole);
+        else snprintf(result, resultSize, "%lld.%dTiB", whole, decimal);
+    }
+    else if (bytes >= GiB)
+    {
+        whole = bytes / GiB;
+        remainder = bytes % GiB;
+        
+        if (COMPACT)
+        {
+            if (remainder > 0) whole++;
+            snprintf(result, resultSize, "%lldG", whole);
+            return result;
+        }
+
+        decimal = (int)((remainder * 10 + GiB / 2) / GiB);
+        if (decimal == 10) { whole++; decimal = 0; }
+        if (decimal == 0) snprintf(result, resultSize, "%lldGiB", whole);
+        else snprintf(result, resultSize, "%lld.%dGiB", whole, decimal);
+    }
+    else if (bytes >= MiB)
+    {
+        whole = bytes / MiB;
+        remainder = bytes % MiB;
+        
+        if (COMPACT)
+        {
+            if (remainder > 0) whole++;
+            snprintf(result, resultSize, "%lldM", whole);
+            return result;
+        }
+
+        decimal = (int)((remainder * 10 + MiB / 2) / MiB);
+        if (decimal == 10) { whole++; decimal = 0; }
+        if (decimal == 0) snprintf(result, resultSize, "%lldMiB", whole);
+        else snprintf(result, resultSize, "%lld.%dMiB", whole, decimal);
+    }
+    else if (bytes >= KiB)
+    {
+        whole = bytes / KiB;
+        remainder = bytes % KiB;
+        
+        if (COMPACT)
+        {
+            if (remainder > 0) whole++;
+            snprintf(result, resultSize, "%lldK", whole);
+            return result;
+        }
+
+        decimal = (int)((remainder * 10 + KiB / 2) / KiB);
+        if (decimal == 10) { whole++; decimal = 0; }
+        if (decimal == 0) snprintf(result, resultSize, "%lldKiB", whole);
+        else snprintf(result, resultSize, "%lld.%dKiB", whole, decimal);
+    }
+    else
+        snprintf(result, resultSize, "%lldB", bytes);
 
     return result;
 }
@@ -446,6 +480,23 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(tmp);
     }
 
+    if (COMPACT)
+    {
+        int replaces = 0;
+        for (int i = 0; i < COMPACT_CPU_GPU_REPLACES_LEN; i++)
+        {
+            if (COMPACT_CPU_GPU_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, COMPACT_CPU_GPU_REPLACES[i].match))
+            {
+                char *tmp = findReplace(result, bufferSize, COMPACT_CPU_GPU_REPLACES[i].match, COMPACT_CPU_GPU_REPLACES[i].replacement);
+                strncpy(result, tmp, bufferSize - 1);
+                result[bufferSize - 1] = '\0';
+                free(tmp);
+                replaces++;
+            }
+        }
+    }
+
     return result;
 }
 
@@ -500,9 +551,10 @@ char *getAccentColour(void)
  * @param buffer Input string
  * @param width Characters per line
  * @param indent Indent to include after newly inserted new line
+ * @param trim Flags that any trailing newlines should be removed
  * @return Number of lines in the string
  */
-int formatNewLines(char *buffer, int width, char *indent)
+int formatNewLines(char *buffer, int width, char *indent, int trim)
 {
     if (!buffer || width < 1) return 0;
 
@@ -550,6 +602,17 @@ int formatNewLines(char *buffer, int width, char *indent)
         widthCount++;
     }
 
+    if (trim)
+    {
+        int end = strlen(buffer) - 1;
+        while (end >= 0 && buffer[end] == '\n')
+        {
+            buffer[end] = '\0';
+            end--;
+            lines--;
+        }
+    }
+
     return lines;
 }
 
@@ -569,21 +632,37 @@ struct winsize getTerminalSize(void)
 
 void showHelp(void)
 {
-    char cmdDesc[100] = "A tool that displays basic system and environment information in a summarised format.\n";
-    formatNewLines(cmdDesc, TERM_SIZE.ws_col, NULL);
-    printf("%s\n", cmdDesc);
+    char desc[100] = "A tool that displays basic system and environment information in a summarised format.\n";
+    formatNewLines(desc, TERM_SIZE.ws_col, NULL, 0);
+    printf("%s\n", desc);
 
     char usage[50] = "Usage: shorkfetch [OPTIONS]\n\n";
-    formatNewLines(usage, TERM_SIZE.ws_col, NULL);
+    formatNewLines(usage, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", usage);
 
-    char options[350] = "Options:\n-b, --bullets    Uses bullet points instead of field headings; can also be used to set a custom character\n-h, --help       Displays help information and exits\n-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
-    formatNewLines(options, TERM_SIZE.ws_col, "                 ");
+    char options[20] = "Options:\n";
+    formatNewLines(options, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", options);
 
-    //char notes[80] = "Notes:\nThe host terminal size must be 0x0 before starting.\n";
-    //formatNewLines(notes, TERM_SIZE.ws_col, NULL);
-    //printf("%s", notes);
+    char bullets[130] = "-b, --bullets    Uses bullet points instead of field headings; can also be used to set a custom character\n";
+    formatNewLines(bullets, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", bullets);
+
+    char compact[130] = "-c, --compact    Compacts field names (if not using bullets) and field values\n";
+    formatNewLines(compact, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", compact);
+
+    char help[70] = "-h, --help       Displays help information and exits\n";
+    formatNewLines(help, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", help, TERM_SIZE.ws_col, "                 ", 0);
+
+    char noArt[100] = "-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n";
+    formatNewLines(noArt, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", noArt, TERM_SIZE.ws_col, "                 ", 0);
+
+    char noCol[100] = "-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
+    formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", noCol);
 }
 
 
@@ -646,7 +725,8 @@ char *getHostname(void)
  */
 char *getOS(void)
 {
-    char *os = malloc(128);
+    const int osSize = 128;
+    char *os = malloc(osSize);
     if (!os) return strdup("unknown");
     os[0] = '\0';
 
@@ -659,8 +739,8 @@ char *getOS(void)
         {
             if (strncmp(buffer, "PRETTY_NAME=", 12) == 0)
             {
-                char *extract = extractFromPoint(buffer, 128, '=', 1);
-                strncpy(os, extract, 127);
+                char *extract = extractFromPoint(buffer, osSize, '=', 1);
+                strncpy(os, extract, osSize - 1);
                 free(extract);
                 break;
             }
@@ -674,15 +754,15 @@ char *getOS(void)
         FILE *stream = fopen("/etc/issue", "r");
         if (stream)
         {
-            char buffer[128];
+            char buffer[osSize];
             if (fgets(buffer, sizeof(buffer), stream))
             {
                 size_t len = strlen(buffer);
                 if (len > 0 && buffer[len - 1] == '\n') buffer[len - 1] = '\0';
                 char *p = strchr(buffer, '\\');
                 if (p) *p = '\0';
-                strncpy(os, buffer, 127);
-                os[127] = '\0';
+                strncpy(os, buffer, osSize - 1);
+                os[osSize - 1] = '\0';
             }
             fclose(stream);
         }
@@ -708,6 +788,37 @@ char *getOS(void)
     // Fallback
     if (os[0] == '\0')
         strcpy(os, "unknown");
+    
+    if (COMPACT)
+    {
+        // Remove trailing bracketed substring if present
+        size_t osLen = strlen(os);
+        if (osLen > 0 && os[osLen - 1] == ')')
+        {
+            for (int i = osLen - 1; i > 0; i--)
+            {
+                if (os[i] == '(' && i > 0 && os[i - 1] == ' ')
+                {
+                    os[i - 1] = '\0';
+                    break;
+                }
+            }
+        }
+    
+        int replaces = 0;
+        for (int i = 0; i < COMPACT_OS_REPLACES_LEN; i++)
+        {
+            if (COMPACT_OS_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(os, COMPACT_OS_REPLACES[i].match))
+            {
+                char *tmp = findReplace(os, osSize, COMPACT_OS_REPLACES[i].match, COMPACT_OS_REPLACES[i].replacement);
+                strncpy(os, tmp, osSize - 1);
+                os[osSize - 1] = '\0';
+                free(tmp);
+                replaces++;
+            }
+        }
+    }
 
     return os;
 }
@@ -719,10 +830,32 @@ char *getKernel(void)
 {
     struct utsname u;
     if (uname(&u) == -1) return strdup("unknown");
-    char *release = malloc(strlen(u.release) + 1);
-    if (!release) return strdup("unknown");
-    strcpy(release, u.release);
-    return release; 
+    const char *src = u.release;
+
+    if (!COMPACT)
+    {
+        char *release = malloc(strlen(src) + 1);
+        if (!release) return strdup("unknown");
+        strcpy(release, u.release);
+        return release; 
+    }
+    else
+    {
+        // Strip out any suffixes
+        int i = 0;
+        while (src[i])
+        {
+            char c = src[i];
+            if (!((c >= '0' && c <= '9') || c == '.')) break;
+            i++;
+        }
+
+        char *release = malloc(i + 1);
+        if (!release) return strdup("unknown");
+        memcpy(release, src, i);
+        release[i] = '\0';
+        return release;
+    }
 }
 
 /**
@@ -745,14 +878,24 @@ char *getUptime(void)
             int hours = (sec % 86400) / 3600;
             int minutes = (sec % 3600) / 60;
 
-            const char *dayUnit = (days == 1) ? "day" : "days";
-            const char *hourUnit = (hours == 1) ? "hour" : "hours";
-            const char *minUnit = (minutes == 1) ? "minute" : "minutes";
+            if (!COMPACT)
+            {
+                const char *dayUnit = (days == 1) ? "day" : "days";
+                const char *hourUnit = (hours == 1) ? "hour" : "hours";
+                const char *minUnit = (minutes == 1) ? "minute" : "minutes";
 
-            if (days > 0)
-                snprintf(uptime, 128, "%d %s, %d %s, %d %s", days, dayUnit, hours, hourUnit, minutes, minUnit);
+                if (days > 0)
+                    snprintf(uptime, 128, "%d %s, %d %s, %d %s", days, dayUnit, hours, hourUnit, minutes, minUnit);
+                else
+                    snprintf(uptime, 128, "%d %s, %d %s", hours, hourUnit, minutes, minUnit);
+            }
             else
-                snprintf(uptime, 128, "%d %s, %d %s", hours, hourUnit, minutes, minUnit);
+            {
+                if (days > 0)
+                    snprintf(uptime, 128, "%d:%d:%d", days, hours, minutes);
+                else
+                    snprintf(uptime, 128, "%d:%d", hours, minutes);
+            }
         }
         fclose(stream);
     }
@@ -927,18 +1070,21 @@ char *getCPU(void)
             strncpy(cores, threads, 3);
 
         // If we don't have cores or threads, we use the processor field in its place
-        if (cores[0] == '\0' && threads[0] == '\0')
+        if (!COMPACT && cores[0] == '\0' && threads[0] == '\0')
         {
             int processorInt = atoi(processor);
             processorInt++;
             snprintf(cpu, 134, "%s (%dC)", model, processorInt);
         }
         // If cores and threads are the same value, just show cores
-        else if (strcmp(cores, threads) == 0)
+        else if (!COMPACT && strcmp(cores, threads) == 0)
             snprintf(cpu, 134, "%s (%sC)", model, cores);
         // If cores and threads are different values, show both
-        else
+        else if (!COMPACT)
             snprintf(cpu, 134, "%s (%sC/%sT)", model, cores, threads);
+        // Fallback for compact mode
+        else
+            snprintf(cpu, 134, "%s", model);
     }
     else strcpy(cpu, "unknown");
 
@@ -1009,7 +1155,8 @@ GPU* getGPUs(int *count)
  */
 char *interpretGPU(GPU *gpuIDs)
 {
-    char *gpu = malloc(257);
+    const int gpuSize = 256;
+    char *gpu = malloc(gpuSize);
     if (!gpu) return strdup("unknown");
     gpu[0] = '\0';
 
@@ -1018,9 +1165,9 @@ char *interpretGPU(GPU *gpuIDs)
     {
         if (intelIGPUs[gpuIDs->device])
         {
-            snprintf(gpu, 257, "Intel %s", intelIGPUs[gpuIDs->device]);
-            char *clean = cleanProcessorName(gpu, 257);
-            strncpy(gpu, clean, 257);
+            snprintf(gpu, gpuSize, "Intel %s", intelIGPUs[gpuIDs->device]);
+            char *clean = cleanProcessorName(gpu, gpuSize);
+            strncpy(gpu, clean, gpuSize);
             free(clean);
             return gpu;
         }
@@ -1033,14 +1180,14 @@ char *interpretGPU(GPU *gpuIDs)
         pciids = "/usr/share/hwdata/pci.ids";
     else
     {
-        snprintf(gpu, 257, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
         return gpu;
     }
 
     FILE *stream = fopen(pciids, "r");
     if (!stream)
     {
-        snprintf(gpu, 257, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
         return gpu;
     }
 
@@ -1085,12 +1232,12 @@ char *interpretGPU(GPU *gpuIDs)
     fclose(stream);
 
     if (!vendor || !device)
-        snprintf(gpu, 257, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
     else
     {
-        char *cleanVendor = cleanProcessorName(vendor, 128);
-        char *cleanDevice = cleanProcessorName(device, 128);
-        snprintf(gpu, 257, "%s %s", cleanVendor, cleanDevice);
+        char *cleanVendor = cleanProcessorName(vendor, gpuSize / 2);
+        char *cleanDevice = cleanProcessorName(device, gpuSize / 2);
+        snprintf(gpu, gpuSize, "%s %s", cleanVendor, cleanDevice);
         free(cleanVendor);
         free(cleanDevice);
     }
@@ -1106,14 +1253,15 @@ char *interpretGPU(GPU *gpuIDs)
  */
 char *getRAM(void)
 {
-    char *ram = malloc(64);
+    const int ramSize = 64;
+    char *ram = malloc(ramSize);
     if (!ram) return strdup("");
     ram[0] = '\0';
 
     FILE *stream = fopen("/proc/meminfo", "r");
     if (stream)
     {
-        char buffer[128];
+        char buffer[ramSize * 2];
         long total = 0, freeMem = 0, buffers = 0, cached = 0;
         while (fgets(buffer, sizeof(buffer), stream))
         {
@@ -1127,11 +1275,16 @@ char *getRAM(void)
 
         freeMem = freeMem + buffers + cached;
         long used = total - freeMem;
-        int pct = total ? (int)((used * 100) / total) : 0;
-
         char *usedStr = bytesToReadable("KiB", used);
         char *totalStr = bytesToReadable("KiB", total);
-        snprintf(ram, 64, "%s / %s (%d%%)", usedStr, totalStr, pct);
+
+        if (!COMPACT)
+        {
+            int pct = total ? (int)((used * 100) / total) : 0;
+            snprintf(ram, ramSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
+        }
+        else snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
+        
         free(usedStr);
         free(totalStr);
     }
@@ -1144,14 +1297,15 @@ char *getRAM(void)
  */
 char *getSwap(void)
 {
-    char *swap = malloc(64);
+    const int swapSize = 64;
+    char *swap = malloc(swapSize);
     if (!swap) return strdup("");
     swap[0] = '\0';
 
     FILE *stream = fopen("/proc/meminfo", "r");
     if (stream)
     {
-        char buffer[128];
+        char buffer[swapSize * 2];
         long total = 0, freeSwap = 0;
         while (fgets(buffer, sizeof(buffer), stream))
         {
@@ -1164,11 +1318,16 @@ char *getSwap(void)
         if (total == 0) return strdup("");
 
         long used = total - freeSwap;
-        int pct = total ? (int)((used * 100) / total) : 0;
-
         char *usedStr = bytesToReadable("KiB", used);
         char *totalStr = bytesToReadable("KiB", total);
-        snprintf(swap, 64, "%s / %s (%d%%)", usedStr, totalStr, pct);
+
+        if (!COMPACT)
+        {
+            int pct = total ? (int)((used * 100) / total) : 0;
+            snprintf(swap, swapSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
+        }
+        else snprintf(swap, swapSize, "%s / %s", usedStr, totalStr);
+
         free(usedStr);
         free(totalStr);
     }
@@ -1181,7 +1340,8 @@ char *getSwap(void)
  */
 char *getRoot(void)
 {
-    char *root = malloc(64);
+    const int rootSize = 64;
+    char *root = malloc(rootSize);
     if (!root) return strdup("");
     root[0] = '\0';
 
@@ -1193,11 +1353,16 @@ char *getRoot(void)
     long long total = (long long)fs.f_blocks * fs.f_frsize;
     long long freeRoot  = (long long)fs.f_bfree * fs.f_frsize;
     long long used  = total - freeRoot;
-    int pct = total ? (int)((used * 100) / total) : 0;
-
     char *usedStr = bytesToReadable("B", used);
     char *totalStr = bytesToReadable("B", total);
-    snprintf(root, 64, "%s / %s (%d%%)", usedStr, totalStr, pct);
+
+    if (!COMPACT)
+    {
+        int pct = total ? (int)((used * 100) / total) : 0;
+        snprintf(root, rootSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
+    }
+    else snprintf(root, rootSize, "%s / %s", usedStr, totalStr);
+
     free(usedStr);
     free(totalStr);
 
@@ -1265,6 +1430,8 @@ int main(int argc, char *argv[])
                 bullet = bulletCand[0];
             }
         }
+        else if ((strcmp(argv[i], "-c") == 0) || (strcmp(argv[i], "--compact") == 0))
+            COMPACT = 1;
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
         else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
@@ -1298,35 +1465,65 @@ int main(int argc, char *argv[])
     if (os[0] != '\0')          
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smOS:\033[%sm     %s\n", colAccent, COL_RESET, os);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smOS:\033[%sm     %s\n", colAccent, COL_RESET, os);
+            else
+                printf("\033[%smOS:\033[%sm  %s\n", colAccent, COL_RESET, os);
+        }
         else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
     }
 
     if (kernel[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smKernel:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smKernel:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+            else
+                printf("\033[%smKrn:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+        }
         else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
     }
 
     if (uptime[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smUptime:\033[%sm %s\n", colAccent, COL_RESET, uptime);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smUptime:\033[%sm %s\n", colAccent, COL_RESET, uptime);
+            else
+                printf("\033[%smUp:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
+        }
         else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
     }
 
     if (shell[0] != '\0')       
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smShell:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smShell:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+            else
+                printf("\033[%smSh:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+        }
         else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
     }
 
     if (cpu[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smCPU:\033[%sm    %s\n", colAccent, COL_RESET, cpu);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smCPU:\033[%sm    %s\n", colAccent, COL_RESET, cpu);
+            else
+                printf("\033[%smCPU:\033[%sm %s\n", colAccent, COL_RESET, cpu);
+        }
         else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, cpu);
     }
 
@@ -1338,7 +1535,13 @@ int main(int argc, char *argv[])
             if (gpu[0] != '\0')     
             {
                 if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-                if (!useBullets) printf("\033[%smGPU:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                if (!useBullets) 
+                {
+                    if (!COMPACT)
+                        printf("\033[%smGPU:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                    else
+                        printf("\033[%smGPU:\033[%sm %s\n", colAccent, COL_RESET, gpu);
+                }
                 else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, gpu);
             }
             free(gpu);
@@ -1348,21 +1551,39 @@ int main(int argc, char *argv[])
     if (ram[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smRAM:\033[%sm    %s\n", colAccent, COL_RESET, ram);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smRAM:\033[%sm    %s\n", colAccent, COL_RESET, ram);
+            else
+                printf("\033[%smRAM:\033[%sm %s\n", colAccent, COL_RESET, ram);
+        }
         else printf("\033[%sm %c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
     }
 
     if (swap[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smSwap:\033[%sm   %s\n", colAccent, COL_RESET, swap);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smSwap:\033[%sm   %s\n", colAccent, COL_RESET, swap);
+            else
+                printf("\033[%smSwp:\033[%sm %s\n", colAccent, COL_RESET, swap);
+        }
         else printf("\033[%sm %c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
     }
 
     if (root[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) printf("\033[%smRoot:\033[%sm   %s\n", colAccent, COL_RESET, root);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smRoot:\033[%sm   %s\n", colAccent, COL_RESET, root);
+            else
+                printf("\033[%sm/:\033[%sm   %s\n", colAccent, COL_RESET, root);
+        }
         else printf("\033[%sm %c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
     }
     

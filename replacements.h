@@ -37,6 +37,32 @@ static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0
 
 
 
+static const struct Replacement COMPACT_CPU_GPU_REPLACES[] = {
+    { "Express ",               "",     0 },
+    { "Extreme Graphics",       "ET",   0 },
+    { " for ",                  " ",    0 },
+    { "GeForce ",               "",     0 },
+    { "Graphics Technology",    "GT",   0 },
+    { " Graphics",              "",     0 },
+    { " Integrated",            "",     0 },
+    { "Quadro ",                "",     0 },
+    { "Mobile ",                "",     0 },
+    { "Radeon ",                "",     0 },
+    { "Radeon/",                "",      0 }
+};
+static const int COMPACT_CPU_GPU_REPLACES_LEN = sizeof(COMPACT_CPU_GPU_REPLACES) / sizeof(COMPACT_CPU_GPU_REPLACES[0]);
+
+
+
+static const struct Replacement COMPACT_OS_REPLACES[] = {
+    { " GNU/Linux", "",     0 },
+    { " INDEV",     "",     0 },
+    { " Linux",     "",     0 }
+};
+static const int COMPACT_OS_REPLACES_LEN = sizeof(COMPACT_OS_REPLACES) / sizeof(COMPACT_OS_REPLACES[0]);
+
+
+
 const char *DELETIONS[] =
 {
     "AMD-",                             // For AMD K6
