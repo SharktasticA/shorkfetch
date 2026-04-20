@@ -38,25 +38,26 @@ static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0
 
 
 static const struct Replacement COMPACT_CPU_GPU_REPLACES[] = {
-    { " Adapter",               "",     0 },
-    { "Core Solo",              "CS",   0 },
-    { "Core Duo",               "CD",   0 },
-    { "Core 2 Duo",             "C2D",  0 },
-    { "Core 2 Extreme",         "C2E",  0 },
-    { "Core 2 Quad",            "C2Q",  0 },
-    { "Core i",                 "i",    0 },
-    { "Express ",               "",     0 },
-    { "Extreme Graphics",       "ET",   0 },
-    { " for ",                  " ",    0 },
-    { "GeForce ",               "",     0 },
-    { "Graphics Technology",    "GT",   0 },
-    { " Graphics",              "",     0 },
-    { " Integrated",            "",     0 },
-    { "Quadro ",                "",     0 },
-    { "Max-Q",                  "M-Q",  0 },
-    { "Mobile ",                "",     0 },
-    { "Radeon ",                "",     0 },
-    { "Radeon/",                "",     0 }
+    { " Adapter",               "",             0 },
+    { "Core Solo",              "CS",           0 },
+    { "Core Duo",               "CD",           0 },
+    { "Core 2 Duo",             "C2D",          0 },
+    { "Core 2 Extreme",         "C2E",          0 },
+    { "Core 2 Quad",            "C2Q",          0 },
+    { "Core i",                 "i",            0 },
+    { "Express ",               "",             0 },
+    { "Extreme Graphics",       "ET",           0 },
+    { " for ",                  " ",            0 },
+    { "GeForce ",               "",             0 },
+    { "Graphics Technology",    "GT",           0 },
+    { " Graphics",              "",             0 },
+    { " Integrated",            "",             0 },
+    { "Quadro ",                "",             0 },
+    { "Max-Q",                  "M-Q",          0 },
+    { "Mobile ",                "",             0 },
+    { "Radeon ",                "",             0 },
+    { "Radeon/",                "",             0 },
+    { " with Radeon",           " w/ Radeon",   0 }
 };
 static const int COMPACT_CPU_GPU_REPLACES_LEN = sizeof(COMPACT_CPU_GPU_REPLACES) / sizeof(COMPACT_CPU_GPU_REPLACES[0]);
 
