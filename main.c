@@ -670,11 +670,11 @@ void showHelp(void)
 
     char help[70] = "-h, --help       Displays help information and exits\n";
     formatNewLines(help, TERM_SIZE.ws_col, "                 ", 0);
-    printf("%s", help, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", help);
 
     char noArt[100] = "-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n";
     formatNewLines(noArt, TERM_SIZE.ws_col, "                 ", 0);
-    printf("%s", noArt, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", noArt);
 
     char noCol[100] = "-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
     formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
