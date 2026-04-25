@@ -82,24 +82,28 @@ static struct winsize TERM_SIZE;
 
 /**
  * Finds and erases a desired substring from an input string.
- * @param buffer Input string
- * @param bufferSize Size to use when allocating the result string
+ * @param input Input string
+ * @param inputSize Size to use when allocating the result string
  * @param needle Substring to find and erase
  * @return String containing what's left after erasing
  */
-char *findErase(const char *buffer, const size_t bufferSize, const char *needle)
+char *findErase(const char *input, const size_t inputSize, const char *needle)
 {
-    if (!buffer || !needle || bufferSize < 2) return strdup("");
+    if (!input || !needle || inputSize < 2) return strdup("");
 
     size_t needleLen = strlen(needle);
     if (needleLen == 0) return strdup("");
 
-    char *result = malloc(bufferSize);
+    // Prepare result string
+    char *result = malloc(inputSize);
     if (!result) return strdup("");
 
-    strncpy(result, buffer, bufferSize);
-    result[bufferSize - 1] = '\0';
+    // Copy input string to result
+    strncpy(result, input, inputSize);
+    result[inputSize - 1] = '\0';
 
+    // Go through the string looking for our needle(s)... When found, we move the rest
+    // of the string over and on top of said needles
     char *pos = result;
     while ((pos = strstr(pos, needle)) != NULL)
     {
@@ -113,31 +117,34 @@ char *findErase(const char *buffer, const size_t bufferSize, const char *needle)
 /**
  * Finds and replaces a given search term with a desired replacement term from an
  * input string.
- * @param buffer Input string
- * @param bufferSize Size to use when allocating the result string
+ * @param input Input string
+ * @param inputSize Size to use when allocating the result string
  * @param needle Substring to find and replace
  * @param replacement New string to insert
  * @return String after term replacement
  */
-char *findReplace(const char *buffer, const size_t bufferSize, const char *needle, const char *replacement)
+char *findReplace(const char *input, const size_t inputSize, const char *needle, const char *replacement)
 {
-    if (!buffer || !needle || !replacement || bufferSize < 2) return strdup("");
+    if (!input || !needle || !replacement || inputSize < 2) return strdup("");
 
     size_t needleLen = strlen(needle);
     size_t replacementLen = strlen(replacement);
     if (needleLen == 0) return strdup("");
 
-    char *result = malloc(bufferSize);
+    // Prepare result string
+    char *result = malloc(inputSize);
     if (!result) return strdup("");
 
-    strncpy(result, buffer, bufferSize);
-    result[bufferSize - 1] = '\0';
+    // Copy input string to result
+    strncpy(result, input, inputSize);
+    result[inputSize - 1] = '\0';
 
     char *pos = result;
     while ((pos = strstr(pos, needle)) != NULL)
     {
         size_t tailLen = strlen(pos + needleLen);
 
+        // If replacement is larger than our needle, realloc memory to avoid overflowing
         if (replacementLen > needleLen)
         {
             size_t currentLen = strlen(result);
@@ -148,6 +155,8 @@ char *findReplace(const char *buffer, const size_t bufferSize, const char *needl
             result = tmp;
         }
 
+        // Move the trailing text to accomodate the new size and paste our replacement into
+        // the 'gap'
         memmove(pos + replacementLen, pos + needleLen, tailLen + 1);
         memcpy(pos, replacement, replacementLen);
         pos += replacementLen;
@@ -262,39 +271,43 @@ char *bytesToReadable(const char *from, const long long val)
 
 /**
  * Extracts a substring from an input string after a given separation character
- * and offset. Also removes any surrounding quotes or trailing newline
- * characters present. 
- * @param buffer Input string
+ * and offset. Also removes any surrounding quotes or trailing newline characters
+ * present. 
+ * @param input Input string
  * @param point Character to find to separate from (e.g., '=' or ':')
  * @param offset How many characters after the point to separate at
- * @param bufferSize Size to use when allocating the result string
+ * @param inputSize Size to use when allocating the result string
  * @return String containing what's left after separation and cleaning
  */
-char *extractFromPoint(char *buffer, size_t bufferSize, char point, int offset)
+char *extractFromPoint(char *input, size_t inputSize, char point, int offset)
 {
-    if (!buffer || bufferSize < 2) return strdup("");
+    if (!input || inputSize < 2) return strdup("");
 
-    char *result = malloc(bufferSize);
+    // Prepare result string
+    char *result = malloc(inputSize);
     if (!result) return strdup("");
     result[0] = '\0';
 
-    char *sep = strchr(buffer, point);
+    // Find our separation point in the input string
+    char *sep = strchr(input, point);
     if (!sep) return result;
 
+    // Our start position taking into account possible offset
     char *start = sep + offset;
 
-    // Trim potential leading quote
+    // Trim potential leading double quote
     if (*start == '"') start++;
 
-    strncpy(result, start, bufferSize - 1);
-    result[bufferSize - 1] = '\0';
+    // Copy everything after the start position into our result
+    strncpy(result, start, inputSize - 1);
+    result[inputSize - 1] = '\0';
     size_t len = strlen(result);
 
     // Trim potential trailing newline 
     if (len > 0 && result[len - 1] == '\n')
         result[--len] = '\0';
 
-    // Trim potential trailing quote
+    // Trim potential trailing double quote
     if (len > 0 && result[len - 1] == '"')
         result[len - 1] = '\0';
 
@@ -313,12 +326,17 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
 {
     if (!buffer || bufferSize < 2) return strdup("");
 
+    // Prepare result string
     char *result = malloc(bufferSize);
     if (!result) return strdup("");
     
+    // Copy input string to result
     strncpy(result, buffer, bufferSize - 1);
     result[bufferSize - 1] = '\0';
     size_t strLen  = strlen(result);
+
+    // If applicable, extract a GPU name from square brackets - e.g.
+    // "GM204 [GeForce GTX 980]" -> "GeForce GTX 980"
     if (strstr(result, "[") && result[strLen - 1] == ']')
     {
         result[strLen - 1] = '\0';
@@ -480,6 +498,7 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
         free(tmp);
     }
 
+    // Compact mode specific cleaning
     if (COMPACT)
     {
         // Remove clock speed from CPU name
@@ -498,6 +517,7 @@ char *cleanProcessorName(const char *buffer, size_t bufferSize)
             }
         }
 
+        // Apply compact-specific CPU and GPU name shortenings
         int replaces = 0;
         for (int i = 0; i < COMPACT_CPU_GPU_REPLACES_LEN; i++)
         {
@@ -564,51 +584,56 @@ char *getAccentColour(void)
 
 /**
  * Adds new lines to a given string based on the requested line width.
- * @param buffer Input string
+ * @param input Input string
  * @param width Characters per line
  * @param indent Indent to include after newly inserted new line
  * @param trim Flags that any trailing newlines should be removed
  * @return Number of lines in the string
  */
-int formatNewLines(char *buffer, int width, char *indent, int trim)
+int formatNewLines(char *input, int width, char *indent, int trim)
 {
-    if (!buffer || width < 1) return 0;
+    if (!input || width < 1) return 0;
 
-    size_t bufferStrLen = strlen(buffer);
+    // Initialse variables that help us track progress
+    size_t inputStrLen = strlen(input);
     size_t indentLen = indent ? strlen(indent) : 0;
     int lines = 1;
     int lastSpace = -1;
     int widthCount = 1;
 
-    for (int i = 0; i < bufferStrLen; i++)
+    // Iterate through the input string to find line breaks or places to add new ones
+    for (int i = 0; i < inputStrLen; i++)
     {
-        if (buffer[i] == '\033')
+        if (input[i] == '\033')
         {
-            while (i < bufferStrLen && buffer[i] != 'm') i++;
-            if (i >= bufferStrLen) break;
+            while (i < inputStrLen && input[i] != 'm') i++;
+            if (i >= inputStrLen) break;
             continue; 
         }
         
-        if (buffer[i] == ' ') lastSpace = i;
-        else if (buffer[i] == '\n')
+        // Track where the last space was in case so we can go back for a future word wrap
+        if (input[i] == ' ') lastSpace = i;
+        // Reset tracking and take into account if we find an existing new line
+        else if (input[i] == '\n')
         {
             lines++;
             widthCount = 0;
             continue;
         }
 
+        // Begin word wrapping once the line width is saturated
         if (widthCount == width)
         {
             if (lastSpace != -1)
             {
-                buffer[lastSpace] = '\n';
+                input[lastSpace] = '\n';
                 lines++;
 
                 if (indent && indentLen > 0)
                 {
-                    memmove(buffer + lastSpace + 1 + indentLen, buffer + lastSpace + 1, bufferStrLen - lastSpace);
-                    memcpy(buffer + lastSpace + 1, indent, indentLen);
-                    bufferStrLen += indentLen;
+                    memmove(input + lastSpace + 1 + indentLen, input + lastSpace + 1, inputStrLen - lastSpace);
+                    memcpy(input + lastSpace + 1, indent, indentLen);
+                    inputStrLen += indentLen;
                     if (lastSpace <= i) i += indentLen;
                 }
             }
@@ -618,12 +643,13 @@ int formatNewLines(char *buffer, int width, char *indent, int trim)
         widthCount++;
     }
 
+    // If desired, strip possible trailing new line
     if (trim)
     {
-        int end = strlen(buffer) - 1;
-        while (end >= 0 && buffer[end] == '\n')
+        int end = strlen(input) - 1;
+        while (end >= 0 && input[end] == '\n')
         {
-            buffer[end] = '\0';
+            input[end] = '\0';
             end--;
             lines--;
         }
