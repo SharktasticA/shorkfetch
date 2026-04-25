@@ -4,6 +4,10 @@ A Linux tool for displaying basic system and environment information in a summar
 
 shorkfetch also has a focus on providing clean CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus shorkfetch is designed to help address this.
 
+<p align="center"><img alt="A screenshot of shorkfetch running on SHORK 486" src="screenshots/86box_shork-486.png"></p>
+
+
+
 ## Building
 
 ### Requirements
@@ -52,41 +56,14 @@ Simply run `shorkfetch` to use.
 
 ## Screenshots
 
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_art_col.png" style="width: 100%;" /></td>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_art.png" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td style="width: 50%;">Custom PC running Debian 13 (+ ASCII art & accent colour)</td>
-    <td style="width: 50%;">Custom PC running Debian 13 (+ ASCII art)</td>
-  </tr>
-  <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_col.png" style="width: 100%;" /></td>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13.png" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td style="width: 50%;">Custom PC running Debian 13 (+ accent colour)</td>
-    <td style="width: 50%;">Custom PC running Debian 13 (no customisation)</td>
-  </tr>
-</table>
+### shorkfetch on real hardware + Debian 13
 
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_art_col_bul.png" style="width: 100%;" /></td>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/sharktastica_desktop_debian-13_col_bul.png" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td style="width: 50%;">Custom PC running Debian 13 (+ ASCII art, accent colour & bullets)</td>
-    <td style="width: 50%;">Custom PC running Debian 13 (+ accent colour & custom bullets)</td>
-  </tr>
-</table>
+<p align="center"><img alt="A screenshot of shorkfetch running on SHORK 486" src="screenshots/sharktastica-desktop_debian-13_tmux.png"></p>
 
-<table style="table-layout: fixed; width: 100%;">
-  <tr>
-    <td style="width: 50%; text-align: center;"><img src="screenshots/86box_shork-486.png" style="width: 100%;" /></td>
-  </tr>
-  <tr>
-    <td style="width: 50%;">86Box VM running SHORK 486</td>
-  </tr>
-</table>
+### shorkfetch on 86Box + SHORK 486
+
+<p align="center"><img alt="A screenshot of shorkfetch running on SHORK 486" src="screenshots/86box_shork-486_tmux.png"></p>
+
+### shorkfetch on VMware Workstation + SHORK 486
+
+<p align="center"><img alt="A screenshot of shorkfetch running on SHORK 486" src="screenshots/vmware_shork-486_tmux.png"></p>
