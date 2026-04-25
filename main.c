@@ -359,6 +359,22 @@ char *cleanProcessorName(const char *input, size_t inputSize)
         free(tmp);
     }
 
+    // Remove clock speed from CPU name
+    if (strstr(result, "@") && strstr(result, "Hz"))
+    {
+        char *at = strstr(result, " @");
+        if (at)
+        {
+            char *leftBrac = strchr(at, '(');
+            // If brackets for core/thread count present, selective removal
+            if (leftBrac && leftBrac > at)
+                memmove(at, leftBrac - 1, strlen(leftBrac - 1) + 1);
+            // If no brackets for core/thread count, just nuke @ and after
+            else
+                *at = '\0';
+        }
+    }
+
     // Shorten "Advanced Micro Devices" to "AMD"
     if (strstr(result, "Advanced Micro Devices"))
     {
@@ -505,22 +521,6 @@ char *cleanProcessorName(const char *input, size_t inputSize)
     // Compact mode specific cleaning
     if (COMPACT)
     {
-        // Remove clock speed from CPU name
-        if (strstr(result, "@") && strstr(result, "Hz"))
-        {
-            char *at = strstr(result, " @");
-            if (at)
-            {
-                char *leftBrac = strchr(at, '(');
-                // If brackets for core/thread count present, selective removal
-                if (leftBrac && leftBrac > at)
-                    memmove(at, leftBrac - 1, strlen(leftBrac - 1) + 1);
-                // If no brackets for core/thread count, just nuke @ and after
-                else
-                    *at = '\0';
-            }
-        }
-
         // Apply compact-specific CPU and GPU name shortenings
         int replaces = 0;
         for (int i = 0; i < COMPACT_CPU_GPU_REPLACES_LEN; i++)
