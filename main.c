@@ -18,6 +18,10 @@
 #include "replacements.h"
 
 #include <dirent.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -705,9 +709,26 @@ void showHelp(void)
     char noCol[100] = "-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
     formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
     printf("%s", noCol);
+
+    char noIP[100] = "-ni, --no-ip     Disables fields related to IP addresses\n";
+    formatNewLines(noIP, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", noIP);
 }
 
 
+
+/**
+ * @return String containing the current username;"unknown" if undetermined/error
+ */
+char *getUsername(void)
+{
+    char *username = getenv("USER");
+    if (!username || username[0] == '\0')
+        username = getenv("LOGNAME");
+    if (!username || username[0] == '\0') 
+        username = strdup("unknown");
+    return username;
+}
 
 /**
  * @return String containing the hostname; "unknown" if undetermined/error
@@ -1416,16 +1437,39 @@ char *getRoot(void)
 }
 
 /**
- * @return String containing the current username;"unknown" if undetermined/error
+ * @return String containing this computer's local IP address
  */
-char *getUsername(void)
+char *getLocalIP(void)
 {
-    char *username = getenv("USER");
-    if (!username || username[0] == '\0')
-        username = getenv("LOGNAME");
-    if (!username || username[0] == '\0') 
-        username = strdup("unknown");
-    return username;
+    struct ifaddrs *ifs;
+    struct ifaddrs *currIF;
+    char *result = NULL;
+
+    // Attempt retrieivng network interfaces
+    if (getifaddrs(&ifs) == -1) return NULL;
+
+    // Iterate through found interfaces to find any IPv4s to use
+    for (currIF = ifs; currIF != NULL; currIF = currIF->ifa_next) 
+    {
+        // Skip if null or not IPv4
+        if (!currIF->ifa_addr || currIF->ifa_addr->sa_family != AF_INET) continue;
+
+        // Skip if down, not running, or loopback device
+        if (!(currIF->ifa_flags & IFF_UP) || !(currIF->ifa_flags & IFF_RUNNING) || (currIF->ifa_flags & IFF_LOOPBACK))
+            continue;
+
+        // Make IP human readible and in our result string
+        char host[INET_ADDRSTRLEN];
+        void *ifPtr = &((struct sockaddr_in *)currIF->ifa_addr)->sin_addr;
+        if (inet_ntop(AF_INET, ifPtr, host, INET_ADDRSTRLEN)) 
+        {
+            result = strdup(host);
+            break;
+        }
+    }
+
+    freeifaddrs(ifs);
+    return result;
 }
 
 
@@ -1436,6 +1480,7 @@ int main(int argc, char *argv[])
     char bullet = '*';
     char *colAccent = getAccentColour();
     int useBullets = 0;
+    int noIP = 0;
 
 #ifdef NO_ART
     int showShork = 0;
@@ -1482,6 +1527,8 @@ int main(int argc, char *argv[])
             showShork = 0;
         else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
             colAccent = COL_RESET;
+        else if ((strcmp(argv[i], "-ni") == 0) || (strcmp(argv[i], "--no-ip") == 0))
+            noIP = 1;
     }
 
     char *ram = getRAM();
@@ -1496,6 +1543,8 @@ int main(int argc, char *argv[])
     GPU *gpus = getGPUs(&noGPUs);
     char *cpu = getCPU();
     char *root = getRoot();
+    char *localIP = NULL;
+    if (!noIP) localIP = getLocalIP();
 
     if (username[0] != '\0' && hostname[0] != '\0') 
     {
@@ -1604,7 +1653,13 @@ int main(int argc, char *argv[])
             else
                 printf("\033[%smRAM:\033[%sm %s\n", colAccent, COL_RESET, ram);
         }
-        else printf("\033[%sm %c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
+        else 
+        {
+            if (!COMPACT)
+                printf("\033[%sm %c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
+            else
+                printf("\033[%sm %c\033[%sm %s (R)\n", colAccent, bullet, COL_RESET, ram);
+        }
     }
 
     if (swap[0] != '\0')        
@@ -1617,7 +1672,13 @@ int main(int argc, char *argv[])
             else
                 printf("\033[%smSwp:\033[%sm %s\n", colAccent, COL_RESET, swap);
         }
-        else printf("\033[%sm %c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
+        else 
+        {
+            if (!COMPACT)
+                printf("\033[%sm %c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
+            else
+                printf("\033[%sm %c\033[%sm %s (S)\n", colAccent, bullet, COL_RESET, swap);
+        }
     }
 
     if (root[0] != '\0')        
@@ -1630,7 +1691,32 @@ int main(int argc, char *argv[])
             else
                 printf("\033[%sm/:\033[%sm   %s\n", colAccent, COL_RESET, root);
         }
-        else printf("\033[%sm %c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
+        else 
+        {
+            if (!COMPACT)
+                printf("\033[%sm %c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
+            else
+                printf("\033[%sm %c\033[%sm %s (/)\n", colAccent, bullet, COL_RESET, root);
+        }
+    }
+
+    if (localIP)
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets) 
+        {
+            if (!COMPACT)
+                printf("\033[%smLocal:\033[%sm  %s\n", colAccent, COL_RESET, localIP);
+            else
+                printf("\033[%smLoc:\033[%sm %s\n", colAccent, COL_RESET, localIP);
+        }
+        else 
+        {
+            if (!COMPACT)
+                printf("\033[%sm %c\033[%sm %s local\n", colAccent, bullet, COL_RESET, localIP);
+            else
+                printf("\033[%sm %c\033[%sm %s (L)\n", colAccent, bullet, COL_RESET, localIP);
+        }
     }
     
     printf("\n");
@@ -1643,6 +1729,7 @@ int main(int argc, char *argv[])
     free(cpu);
     free(gpus);
     free(root);
+    if (!noIP) free(localIP);
 
     return 0;
 }
