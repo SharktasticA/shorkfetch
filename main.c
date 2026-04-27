@@ -23,6 +23,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <libgen.h>
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,16 @@
 #include <unistd.h>
 
 
+
+typedef struct {
+    char *name;
+    int isPrimary;
+    float physSize;
+    int resX;
+    int resY;
+    int resTotal;
+    int refresh;
+} Display;
 
 typedef struct {
     int vendor;
@@ -83,91 +94,6 @@ const char SHORK[15][20] = {
 static struct winsize TERM_SIZE;
 
 
-
-/**
- * Finds and erases a desired substring from an input string.
- * @param input Input string
- * @param inputSize Size to use when allocating the result string
- * @param needle Substring to find and erase
- * @return String containing what's left after erasing
- */
-char *findErase(const char *input, const size_t inputSize, const char *needle)
-{
-    if (!input || !needle || inputSize < 2) return strdup("");
-
-    size_t needleLen = strlen(needle);
-    if (needleLen == 0) return strdup("");
-
-    // Prepare result string
-    char *result = malloc(inputSize);
-    if (!result) return strdup("");
-
-    // Copy input string to result
-    strncpy(result, input, inputSize);
-    result[inputSize - 1] = '\0';
-
-    // Go through the string looking for our needle(s)... When found, we move the rest
-    // of the string over and on top of said needles
-    char *pos = result;
-    while ((pos = strstr(pos, needle)) != NULL)
-    {
-        size_t tailLen = strlen(pos + needleLen);
-        memmove(pos, pos + needleLen, tailLen + 1);
-    }
-
-    return result;
-}
-
-/**
- * Finds and replaces a given search term with a desired replacement term from an
- * input string.
- * @param input Input string
- * @param inputSize Size to use when allocating the result string
- * @param needle Substring to find and replace
- * @param replacement New string to insert
- * @return String after term replacement
- */
-char *findReplace(const char *input, const size_t inputSize, const char *needle, const char *replacement)
-{
-    if (!input || !needle || !replacement || inputSize < 2) return strdup("");
-
-    size_t needleLen = strlen(needle);
-    size_t replacementLen = strlen(replacement);
-    if (needleLen == 0) return strdup("");
-
-    // Prepare result string
-    char *result = malloc(inputSize);
-    if (!result) return strdup("");
-
-    // Copy input string to result
-    strncpy(result, input, inputSize);
-    result[inputSize - 1] = '\0';
-
-    char *pos = result;
-    while ((pos = strstr(pos, needle)) != NULL)
-    {
-        size_t tailLen = strlen(pos + needleLen);
-
-        // If replacement is larger than our needle, realloc memory to avoid overflowing
-        if (replacementLen > needleLen)
-        {
-            size_t currentLen = strlen(result);
-            size_t newLen = currentLen + (replacementLen - needleLen) + 1;
-            char *tmp = realloc(result, newLen);
-            if (!tmp) break;
-            pos = tmp + (pos - result);
-            result = tmp;
-        }
-
-        // Move the trailing text to accomodate the new size and paste our replacement into
-        // the 'gap'
-        memmove(pos + replacementLen, pos + needleLen, tailLen + 1);
-        memcpy(pos, replacement, replacementLen);
-        pos += replacementLen;
-    }
-
-    return result;
-}
 
 /**
  * Converts a data value into a string formatted into a unit that makes sense for
@@ -317,6 +243,240 @@ char *extractFromPoint(char *input, size_t inputSize, char point, int offset)
 
     return result;
 }
+
+/**
+ * Finds and erases a desired substring from an input string.
+ * @param input Input string
+ * @param inputSize Size to use when allocating the result string
+ * @param needle Substring to find and erase
+ * @return String containing what's left after erasing
+ */
+char *findErase(const char *input, const size_t inputSize, const char *needle)
+{
+    if (!input || !needle || inputSize < 2) return strdup("");
+
+    size_t needleLen = strlen(needle);
+    if (needleLen == 0) return strdup("");
+
+    // Prepare result string
+    char *result = malloc(inputSize);
+    if (!result) return strdup("");
+
+    // Copy input string to result
+    strncpy(result, input, inputSize);
+    result[inputSize - 1] = '\0';
+
+    // Go through the string looking for our needle(s)... When found, we move the rest
+    // of the string over and on top of said needles
+    char *pos = result;
+    while ((pos = strstr(pos, needle)) != NULL)
+    {
+        size_t tailLen = strlen(pos + needleLen);
+        memmove(pos, pos + needleLen, tailLen + 1);
+    }
+
+    return result;
+}
+
+/**
+ * Finds and replaces a given search term with a desired replacement term from an
+ * input string.
+ * @param input Input string
+ * @param inputSize Size to use when allocating the result string
+ * @param needle Substring to find and replace
+ * @param replacement New string to insert
+ * @return String after term replacement
+ */
+char *findReplace(const char *input, const size_t inputSize, const char *needle, const char *replacement)
+{
+    if (!input || !needle || !replacement || inputSize < 2) return strdup("");
+
+    size_t needleLen = strlen(needle);
+    size_t replacementLen = strlen(replacement);
+    if (needleLen == 0) return strdup("");
+
+    // Prepare result string
+    char *result = malloc(inputSize);
+    if (!result) return strdup("");
+
+    // Copy input string to result
+    strncpy(result, input, inputSize);
+    result[inputSize - 1] = '\0';
+
+    char *pos = result;
+    while ((pos = strstr(pos, needle)) != NULL)
+    {
+        size_t tailLen = strlen(pos + needleLen);
+
+        // If replacement is larger than our needle, realloc memory to avoid overflowing
+        if (replacementLen > needleLen)
+        {
+            size_t currentLen = strlen(result);
+            size_t newLen = currentLen + (replacementLen - needleLen) + 1;
+            char *tmp = realloc(result, newLen);
+            if (!tmp) break;
+            pos = tmp + (pos - result);
+            result = tmp;
+        }
+
+        // Move the trailing text to accomodate the new size and paste our replacement into
+        // the 'gap'
+        memmove(pos + replacementLen, pos + needleLen, tailLen + 1);
+        memcpy(pos, replacement, replacementLen);
+        pos += replacementLen;
+    }
+
+    return result;
+}
+
+/**
+ * Calculates the square root of a given number (and helps us avoid including
+ * math.h) - float variant.
+ * @param x Input value
+ * @returns Square root of the input value; -1 if imaginary/invalid
+ */
+float fsqrt(float x)
+{
+    // Return -1 to flag imaginary result
+    if (x < 0.0) return -1;
+    // sqrt(0 or 1) = number itself anyway
+    if (x == 0.0 || x == 1.0) return x;
+
+    float result = x;
+    float last = 0.0;
+
+    // Newton–Raphson...
+    for (int i = 0; i < 20; i++)
+    {
+        last = result;
+        result = 0.5 * (result + x / result);
+
+        // Get out once we're stable
+        if (result == last) break;
+    }
+
+    return result;
+}
+
+/**
+ * Validates if the WITH_COL value supplied matches a known colour. If not, bright cyan is used as a fallback.
+ * @return ASCII escape code for colour
+ */
+char *getAccentColour(void)
+{
+#ifdef COL
+    char *colour = STR(COL);
+    if (strcmp(colour, "BLACK") == 0) return COL_BLACK;
+    if (strcmp(colour, "BLUE") == 0) return COL_BLUE;
+    if (strcmp(colour, "BOLD_BLUE") == 0) return COL_BOLD_BLUE;
+    if (strcmp(colour, "BOLD_CYAN") == 0) return COL_BOLD_CYAN;
+    if (strcmp(colour, "BOLD_GREEN") == 0) return COL_BOLD_GREEN;
+    if (strcmp(colour, "BOLD_MAGENTA") == 0) return COL_BOLD_MAGENTA;
+    if (strcmp(colour, "BOLD_RED") == 0) return COL_BOLD_RED;
+    if (strcmp(colour, "BOLD_WHITE") == 0) return COL_BOLD_WHITE;
+    if (strcmp(colour, "BOLD_YELLOW") == 0) return COL_BOLD_YELLOW;
+    if (strcmp(colour, "CYAN") == 0) return COL_CYAN;
+    if (strcmp(colour, "GREEN") == 0) return COL_GREEN;
+    if (strcmp(colour, "GREY") == 0) return COL_GREY;
+    if (strcmp(colour, "MAGENTA") == 0) return COL_MAGENTA;
+    if (strcmp(colour, "OFF") == 0) return COL_RESET;
+    if (strcmp(colour, "RED") == 0) return COL_RED;
+    if (strcmp(colour, "WHITE") == 0) return COL_WHITE;
+    if (strcmp(colour, "YELLOW") == 0) return COL_YELLOW;
+#endif
+    return COL_BOLD_CYAN;
+}
+
+/**
+ * @param prog Program's executable name
+ * @returns 1 if program is installed; 0 if not
+ */
+int isProgramInstalled(char *prog)
+{
+    char *path = getenv("PATH");
+    if (!path)
+    {
+        char cmd[64];
+        snprintf(cmd, 64, "%s --version > /dev/null 2>&1", prog);
+        return (system(cmd) == 0);
+    }
+
+    char *paths = strdup(path);
+    char *dir = strtok(paths, ":");
+    while (dir)
+    {
+        char fullpath[512];
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, prog);
+        if (access(fullpath, X_OK) == 0)
+        {
+            free(paths);
+            return 1;
+        }
+        dir = strtok(NULL, ":");
+    }
+    free(paths);
+
+    // Also try /usr/libexec
+    char libexecPath[PATH_MAX];
+    snprintf(libexecPath, PATH_MAX, "/usr/libexec/%s", prog);
+    if (access(libexecPath, X_OK) == 0) return 1;
+
+    return 0;
+}
+
+/**
+ * Calculates the square root of a given number (and helps us avoid including
+ * math.h) - integer variant.
+ * @param x Input value
+ * @returns Square root of the input value; -1 if imaginary/invalid
+ */
+int isqrt(int x)
+{
+    // Return -1 to flag imaginary result
+    if (x < 0) return -1;
+    // sqrt(0 or 1) = number itself anyway
+    if (x < 2) return x;
+
+    long low = 1;
+    long high = x / 2;
+    int result = 0;
+
+    // Let's do a binary search
+    while (low <= high)
+    {
+        long mid = low + (high - low) / 2;
+        long square = mid * mid;
+
+        // If perfect square found, get out now
+        if (square == x) return (int)mid;
+        else if (square < x)
+        {
+            result = (int)mid;
+            low = mid + 1;
+        }
+        // If square is too large, go lower
+        else high = mid - 1;
+    }
+
+    return result;
+}
+
+/**
+ * Reads a single hexadecimal number for a given text file.
+ * @param path Path to file to open
+ * @return The read number as an integer (0 as fallback)
+ */
+int readHexFile(const char *path)
+{
+    FILE *stream = fopen(path, "r");
+    if (!stream) return 0;
+    int val;
+    if (fscanf(stream, "%x", &val) != 1) val = 0;
+    fclose(stream);
+    return val;
+}
+
+
 
 /**
  * Removes predefined substrings from an input string. It's intended to
@@ -541,52 +701,6 @@ char *cleanProcessorName(const char *input, size_t inputSize)
 }
 
 /**
- * Reads a single hexadecimal number for a given text file.
- * @param path Path to file to open
- * @return The read number as an integer (0 as fallback)
- */
-int readHexFile(const char *path)
-{
-    FILE *stream = fopen(path, "r");
-    if (!stream) return 0;
-    int val;
-    if (fscanf(stream, "%x", &val) != 1) val = 0;
-    fclose(stream);
-    return val;
-}
-
-/**
- * Validates if the WITH_COL value supplied matches a known colour. If not, bright cyan is used as a fallback.
- * @return ASCII escape code for colour
- */
-char *getAccentColour(void)
-{
-#ifdef COL
-    char *colour = STR(COL);
-    if (strcmp(colour, "BLACK") == 0) return COL_BLACK;
-    if (strcmp(colour, "BLUE") == 0) return COL_BLUE;
-    if (strcmp(colour, "BOLD_BLUE") == 0) return COL_BOLD_BLUE;
-    if (strcmp(colour, "BOLD_CYAN") == 0) return COL_BOLD_CYAN;
-    if (strcmp(colour, "BOLD_GREEN") == 0) return COL_BOLD_GREEN;
-    if (strcmp(colour, "BOLD_MAGENTA") == 0) return COL_BOLD_MAGENTA;
-    if (strcmp(colour, "BOLD_RED") == 0) return COL_BOLD_RED;
-    if (strcmp(colour, "BOLD_WHITE") == 0) return COL_BOLD_WHITE;
-    if (strcmp(colour, "BOLD_YELLOW") == 0) return COL_BOLD_YELLOW;
-    if (strcmp(colour, "CYAN") == 0) return COL_CYAN;
-    if (strcmp(colour, "GREEN") == 0) return COL_GREEN;
-    if (strcmp(colour, "GREY") == 0) return COL_GREY;
-    if (strcmp(colour, "MAGENTA") == 0) return COL_MAGENTA;
-    if (strcmp(colour, "OFF") == 0) return COL_RESET;
-    if (strcmp(colour, "RED") == 0) return COL_RED;
-    if (strcmp(colour, "WHITE") == 0) return COL_WHITE;
-    if (strcmp(colour, "YELLOW") == 0) return COL_YELLOW;
-#endif
-    return COL_BOLD_CYAN;
-}
-
-
-
-/**
  * Adds new lines to a given string based on the requested line width.
  * @param input Input string
  * @param width Characters per line
@@ -674,6 +788,105 @@ struct winsize getTerminalSize(void)
         ws.ws_row = 24;
     }
     return ws;
+}
+
+/**
+ * @param gpuIDs GPU struct containing detected vendor and device IDs
+ * @return String containing the GPU's vendor and device name or "unknown" along with vendor and device IDs as hex if interpreting failed
+ */
+char *interpretGPU(GPU *gpuIDs)
+{
+    const int gpuSize = 256;
+    char *gpu = malloc(gpuSize);
+    if (!gpu) return strdup("unknown");
+    gpu[0] = '\0';
+
+    // If Intel GPU, query pre-defined iGPU list
+    if (gpuIDs->vendor == 0x8086)
+    {
+        if (intelIGPUs[gpuIDs->device])
+        {
+            snprintf(gpu, gpuSize, "Intel %s", intelIGPUs[gpuIDs->device]);
+            char *clean = cleanProcessorName(gpu, gpuSize);
+            strncpy(gpu, clean, gpuSize);
+            free(clean);
+            return gpu;
+        }
+    }
+    
+    char *pciids;
+    if (access("/usr/share/misc/pci.ids", F_OK) == 0)
+        pciids = "/usr/share/misc/pci.ids";
+    else if (access("/usr/share/hwdata/pci.ids", F_OK) == 0)
+        pciids = "/usr/share/hwdata/pci.ids";
+    else
+    {
+        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        return gpu;
+    }
+
+    FILE *stream = fopen(pciids, "r");
+    if (!stream)
+    {
+        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        return gpu;
+    }
+
+    char *vendor = NULL;
+    char vendorHex[5];
+    sprintf(vendorHex, "%04x", gpuIDs->vendor);
+    char *device = NULL;
+    char deviceHex[5];
+    sprintf(deviceHex, "%04x", gpuIDs->device);
+
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), stream))
+    {
+        if (buffer[0] == '#' || buffer[0] == 'C' || buffer[0] == '\0') continue;
+        
+        if (strncmp(buffer, vendorHex, 4) == 0)
+        {
+            char *start = buffer + 6;
+            size_t len = strlen(start);
+            if (len > 0 && start[len - 1] == '\n') start[len - 1] = '\0';
+            vendor = strdup(start);
+        }
+
+        if (vendor)
+        {
+            int tabs = 0;
+            while (buffer[tabs] == '\t') tabs++;
+
+            if (tabs > 0)
+            {
+                if (strncmp(buffer + tabs, deviceHex, 4) == 0)
+                {
+                    char *start = buffer + tabs + 6;
+                    size_t len = strlen(start);
+                    if (len > 0 && start[len - 1] == '\n') start[len - 1] = '\0';
+                    device = strdup(start);
+                    break;
+                }
+            }
+        }
+    }
+    fclose(stream);
+
+    if (!vendor || !device)
+        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+    else
+    {
+        char *cleanVendor = cleanProcessorName(vendor, gpuSize / 2);
+        char *cleanDevice = cleanProcessorName(device, gpuSize / 2);
+        snprintf(gpu, gpuSize, "%s %s", cleanVendor, cleanDevice);
+        free(cleanVendor);
+        free(cleanDevice);
+    }
+
+    if (vendor) free(vendor);
+    if (device) free(device);
+
+    return gpu;
 }
 
 void showHelp(void)
@@ -981,6 +1194,127 @@ char *getShell(void)
 }
 
 /**
+ * @param count Number of displays detected (intended to be used by reference)
+ * @return Pointer to Display structs containing detected GPUs
+ */
+Display* getDisplays(int *count)
+{
+    if (!count) return NULL;
+
+    const char *x11Test = getenv("DISPLAY");
+    const char *wayTest = getenv("WAYLAND_DISPLAY");
+
+    // If we don't think we're in a graphical environment, time to leave...
+    if (!((x11Test && *x11Test) || (wayTest && *wayTest)))
+        return NULL;
+
+    Display *displays = NULL;
+
+    // Try getting displays with xrandr (X11)
+    if (isProgramInstalled("xrandr"))
+    {
+        FILE *stream = popen("xrandr", "r");
+        if (stream)
+        {
+            // What we use to read lines of xrandr output in to
+            char buffer[512];
+            // Flag when we're reading a connected display
+            int in = 0;
+
+            while (fgets(buffer, 512, stream))
+            {
+                // Only process lines for things "connected" or inside a "connected"'s block
+                if (strstr(buffer, " connected")) 
+                {
+                    // Reallocate displays array to take into account new display
+                    displays = realloc(displays, ((*count) + 1) * sizeof(Display));
+                    memset(&displays[(*count)], 0, sizeof(Display));
+
+                    // Parse connector name
+                    char name[64] = {0};
+                    sscanf(buffer, "%63s", name);
+                    displays[*count].name = strdup(name);
+
+                    // Flag if connector is for primary display
+                    displays[*count].isPrimary = strstr(buffer, " primary ") != NULL;
+
+                    // Parse and calculate physical size (DISABLED FOR NOW - DEPENDING ROUNDING TWEAKS)
+                    displays[*count].physSize = 0.0;
+                    /*char *needle = strstr(buffer, "mm x");
+                    if (needle)
+                    {
+                        char *start = needle;
+                        while (start > buffer && *(start - 1) != ' ')
+                            start--;
+
+                        int pPhysX = 0, pPhysY = 0;
+                        if (sscanf(start, "%dmm x %dmm", &pPhysX, &pPhysY) == 2)
+                        {
+                            float diagMm = fsqrt(pPhysX * pPhysX + pPhysY * pPhysY);
+                            float diagIn = (float)diagMm / 25.4f;
+
+                            // "Prettify" the size
+                            int whole = (int)diagIn;
+                            float dec = diagIn - (float)whole;
+                            int first = (int)(dec * 10.0f);
+
+                            // If the first decimal is a 0, we can likely assume the marketing size was a whole
+                            // number. Eg. 34.058189" -> 34"
+                            if (first == 0)
+                                displays[*count].physSize = (float)whole;
+                            // If first decimal is not 0, then we preserve it and around to just 1dp
+                            else
+                                displays[*count].physSize = (float)((int)(diagIn * 10.0f + 0.5f)) / 10.0f;
+                        }
+                    }*/
+
+                    // Parse resolution
+                    int pResX = 0, pResY = 0;
+                    sscanf(buffer, "%*s %*s %*s %dx%d", &pResX, &pResY);
+                    displays[*count].resX = pResX;
+                    displays[*count].resY = pResY;
+                    displays[*count].resTotal = pResX * pResY;
+
+                    // Flag that we are in a block and thus should search for more info on other lines
+                    in = 1;
+                }
+                else if (strstr(buffer, "disconnected") || !in)
+                {
+                    in = 0;
+                    continue;
+                }
+
+                // Look for current refresh rate
+                if (strchr(buffer, '*'))
+                {
+                    char *start = strchr(buffer, '*');
+                    while (start > buffer)
+                    {
+                        char c = *(start - 1);
+                        if ((c >= '0' && c <= '9') || c == '.') start--;
+                        else break;
+                    }
+                    displays[*count].refresh = (int)(atof(start) + 0.5);
+
+                    // At this point, we got everything we can for this display, so let's go
+                    (*count)++;
+                    in = 0;
+                    continue;
+                }
+            }
+
+            if (in) (*count)++;
+
+            pclose(stream);
+        }
+    }
+
+    // TODO: Wayland-specific tests
+
+    return displays;
+}
+
+/**
  * @return String containing the CPU's name and core/thread specs or "unknown" if undetermined/error
  */
 char *getCPU(void)
@@ -1175,6 +1509,8 @@ char *getCPU(void)
  */
 GPU* getGPUs(int *count)
 {
+    if (!count) return NULL;
+
     DIR *dir = opendir("/sys/bus/pci/devices");
     if (!dir)
     {
@@ -1189,11 +1525,12 @@ GPU* getGPUs(int *count)
         *count = 0;
         return NULL;
     }
+
     while ((entry = readdir(dir)) != NULL)
     {
         if (entry->d_name[0] == '.') continue;
 
-        char classPath[512], vendorPath[512], devicePath[512];
+        char classPath[PATH_MAX / 3], vendorPath[PATH_MAX / 3], devicePath[PATH_MAX / 3];
         snprintf(classPath, sizeof(classPath), "%s/%s/class", "/sys/bus/pci/devices", entry->d_name);
         snprintf(vendorPath, sizeof(vendorPath), "%s/%s/vendor", "/sys/bus/pci/devices", entry->d_name);
         snprintf(devicePath, sizeof(devicePath), "%s/%s/device", "/sys/bus/pci/devices", entry->d_name);
@@ -1214,105 +1551,6 @@ GPU* getGPUs(int *count)
     closedir(dir);
 
     return gpus;
-}
-
-/**
- * @param gpuIDs GPU struct containing detected vendor and device IDs
- * @return String containing the GPU's vendor and device name or "unknown" along with vendor and device IDs as hex if interpreting failed
- */
-char *interpretGPU(GPU *gpuIDs)
-{
-    const int gpuSize = 256;
-    char *gpu = malloc(gpuSize);
-    if (!gpu) return strdup("unknown");
-    gpu[0] = '\0';
-
-    // If Intel GPU, query pre-defined iGPU list
-    if (gpuIDs->vendor == 0x8086)
-    {
-        if (intelIGPUs[gpuIDs->device])
-        {
-            snprintf(gpu, gpuSize, "Intel %s", intelIGPUs[gpuIDs->device]);
-            char *clean = cleanProcessorName(gpu, gpuSize);
-            strncpy(gpu, clean, gpuSize);
-            free(clean);
-            return gpu;
-        }
-    }
-    
-    char *pciids;
-    if (access("/usr/share/misc/pci.ids", F_OK) == 0)
-        pciids = "/usr/share/misc/pci.ids";
-    else if (access("/usr/share/hwdata/pci.ids", F_OK) == 0)
-        pciids = "/usr/share/hwdata/pci.ids";
-    else
-    {
-        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
-        return gpu;
-    }
-
-    FILE *stream = fopen(pciids, "r");
-    if (!stream)
-    {
-        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
-        return gpu;
-    }
-
-    char *vendor = NULL;
-    char vendorHex[5];
-    sprintf(vendorHex, "%04x", gpuIDs->vendor);
-    char *device = NULL;
-    char deviceHex[5];
-    sprintf(deviceHex, "%04x", gpuIDs->device);
-
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), stream))
-    {
-        if (buffer[0] == '#' || buffer[0] == 'C' || buffer[0] == '\0') continue;
-        
-        if (strncmp(buffer, vendorHex, 4) == 0)
-        {
-            char *start = buffer + 6;
-            size_t len = strlen(start);
-            if (len > 0 && start[len - 1] == '\n') start[len - 1] = '\0';
-            vendor = strdup(start);
-        }
-
-        if (vendor)
-        {
-            int tabs = 0;
-            while (buffer[tabs] == '\t') tabs++;
-
-            if (tabs > 0)
-            {
-                if (strncmp(buffer + tabs, deviceHex, 4) == 0)
-                {
-                    char *start = buffer + tabs + 6;
-                    size_t len = strlen(start);
-                    if (len > 0 && start[len - 1] == '\n') start[len - 1] = '\0';
-                    device = strdup(start);
-                    break;
-                }
-            }
-        }
-    }
-    fclose(stream);
-
-    if (!vendor || !device)
-        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
-    else
-    {
-        char *cleanVendor = cleanProcessorName(vendor, gpuSize / 2);
-        char *cleanDevice = cleanProcessorName(device, gpuSize / 2);
-        snprintf(gpu, gpuSize, "%s %s", cleanVendor, cleanDevice);
-        free(cleanVendor);
-        free(cleanDevice);
-    }
-
-    if (vendor) free(vendor);
-    if (device) free(device);
-
-    return gpu;
 }
 
 /**
@@ -1539,9 +1777,11 @@ int main(int argc, char *argv[])
     char *kernel = getKernel();
     char *uptime = getUptime();
     char *shell = getShell();
+    int noDisplays = 0;
+    Display *displays = getDisplays(&noDisplays);
+    char *cpu = getCPU();
     int noGPUs = 0;
     GPU *gpus = getGPUs(&noGPUs);
-    char *cpu = getCPU();
     char *root = getRoot();
     char *localIP = NULL;
     if (!noIP) localIP = getLocalIP();
@@ -1560,66 +1800,118 @@ int main(int argc, char *argv[])
     if (os[0] != '\0')          
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smOS:\033[%sm     %s\n", colAccent, COL_RESET, os);
+                printf("\033[%smOS:\033[%sm      %s\n", colAccent, COL_RESET, os);
             else
                 printf("\033[%smOS:\033[%sm  %s\n", colAccent, COL_RESET, os);
         }
-        else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
     }
 
     if (kernel[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smKernel:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+                printf("\033[%smKernel:\033[%sm  %s\n", colAccent, COL_RESET, kernel);
             else
                 printf("\033[%smKrn:\033[%sm %s\n", colAccent, COL_RESET, kernel);
         }
-        else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
     }
 
     if (uptime[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smUptime:\033[%sm %s\n", colAccent, COL_RESET, uptime);
+                printf("\033[%smUptime:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
             else
                 printf("\033[%smUp:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
         }
-        else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
     }
 
     if (shell[0] != '\0')       
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smShell:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+                printf("\033[%smShell:\033[%sm   %s\n", colAccent, COL_RESET, shell);
             else
                 printf("\033[%smSh:\033[%sm  %s\n", colAccent, COL_RESET, shell);
         }
-        else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
+    }
+
+    if (displays)
+    {
+        for (int i = 0; i < noDisplays; i++)
+        {
+            Display *dis = &displays[i];
+
+            char res[21];
+            snprintf(res, 21, "%dx%d", dis->resX, dis->resY);
+
+            char size[10] = "";
+            if (dis->physSize > 0.0)
+                snprintf(size, 10, "%g\" ", dis->physSize);
+
+            if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+            if (!useBullets)
+            {
+                if (!COMPACT)
+                    printf("\033[%smScreen:\033[%sm  %s%dx%d @ %dHz\n", colAccent, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
+                else
+                    printf("\033[%smScn:\033[%sm %s%dx%d@%d\n", colAccent, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
+            }
+            else
+            {
+                if (!COMPACT)
+                    printf(" \033[%sm%c\033[%sm %s%dx%d @ %dHz\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
+                else
+                    printf(" \033[%sm%c\033[%sm %s%dx%d@%d\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
+            }
+
+            free(dis->name);
+        }
+    }
+
+    // Console
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smConsole:\033[%sm %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+            else
+                printf("\033[%smCon:\033[%sm %dx%dch\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+        }
+        else
+        {
+            if (!COMPACT)
+                printf(" \033[%sm%c\033[%sm %dx%d console\n", colAccent, bullet, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+            else
+                printf(" \033[%sm%c\033[%sm %dx%dch\n", colAccent, bullet, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+        }
     }
 
     if (cpu[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smCPU:\033[%sm    %s\n", colAccent, COL_RESET, cpu);
+                printf("\033[%smCPU:\033[%sm     %s\n", colAccent, COL_RESET, cpu);
             else
                 printf("\033[%smCPU:\033[%sm %s\n", colAccent, COL_RESET, cpu);
         }
-        else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, cpu);
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, cpu);
     }
 
     if (gpus)
@@ -1630,14 +1922,14 @@ int main(int argc, char *argv[])
             if (gpu[0] != '\0')     
             {
                 if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-                if (!useBullets) 
+                if (!useBullets)
                 {
                     if (!COMPACT)
-                        printf("\033[%smGPU:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                        printf("\033[%smGPU:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
                     else
                         printf("\033[%smGPU:\033[%sm %s\n", colAccent, COL_RESET, gpu);
                 }
-                else printf("\033[%sm %c\033[%sm %s\n", colAccent, bullet, COL_RESET, gpu);
+                else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, gpu);
             }
             free(gpu);
         }
@@ -1649,73 +1941,73 @@ int main(int argc, char *argv[])
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smRAM:\033[%sm    %s\n", colAccent, COL_RESET, ram);
+                printf("\033[%smRAM:\033[%sm     %s\n", colAccent, COL_RESET, ram);
             else
                 printf("\033[%smRAM:\033[%sm %s\n", colAccent, COL_RESET, ram);
         }
         else 
         {
             if (!COMPACT)
-                printf("\033[%sm %c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
+                printf(" \033[%sm%c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
             else
-                printf("\033[%sm %c\033[%sm %s (R)\n", colAccent, bullet, COL_RESET, ram);
+                printf(" \033[%sm%c\033[%sm %s (R)\n", colAccent, bullet, COL_RESET, ram);
         }
     }
 
     if (swap[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smSwap:\033[%sm   %s\n", colAccent, COL_RESET, swap);
+                printf("\033[%smSwap:\033[%sm    %s\n", colAccent, COL_RESET, swap);
             else
                 printf("\033[%smSwp:\033[%sm %s\n", colAccent, COL_RESET, swap);
         }
         else 
         {
             if (!COMPACT)
-                printf("\033[%sm %c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
+                printf(" \033[%sm%c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
             else
-                printf("\033[%sm %c\033[%sm %s (S)\n", colAccent, bullet, COL_RESET, swap);
+                printf(" \033[%sm%c\033[%sm %s (S)\n", colAccent, bullet, COL_RESET, swap);
         }
     }
 
     if (root[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smRoot:\033[%sm   %s\n", colAccent, COL_RESET, root);
+                printf("\033[%smRoot:\033[%sm    %s\n", colAccent, COL_RESET, root);
             else
                 printf("\033[%sm/:\033[%sm   %s\n", colAccent, COL_RESET, root);
         }
         else 
         {
             if (!COMPACT)
-                printf("\033[%sm %c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
+                printf(" \033[%sm%c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
             else
-                printf("\033[%sm %c\033[%sm %s (/)\n", colAccent, bullet, COL_RESET, root);
+                printf(" \033[%sm%c\033[%sm %s (/)\n", colAccent, bullet, COL_RESET, root);
         }
     }
 
     if (localIP)
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets) 
+        if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smLocal:\033[%sm  %s\n", colAccent, COL_RESET, localIP);
+                printf("\033[%smLocal:\033[%sm   %s\n", colAccent, COL_RESET, localIP);
             else
                 printf("\033[%smLoc:\033[%sm %s\n", colAccent, COL_RESET, localIP);
         }
         else 
         {
             if (!COMPACT)
-                printf("\033[%sm %c\033[%sm %s local\n", colAccent, bullet, COL_RESET, localIP);
+                printf(" \033[%sm%c\033[%sm %s local\n", colAccent, bullet, COL_RESET, localIP);
             else
-                printf("\033[%sm %c\033[%sm %s (L)\n", colAccent, bullet, COL_RESET, localIP);
+                printf(" \033[%sm%c\033[%sm %s (L)\n", colAccent, bullet, COL_RESET, localIP);
         }
     }
     
@@ -1726,8 +2018,10 @@ int main(int argc, char *argv[])
     free(os);
     free(kernel);
     free(uptime);
+    free(shell);
+    if (displays) free(displays);
     free(cpu);
-    free(gpus);
+    if (gpus) free(gpus);
     free(root);
     if (!noIP) free(localIP);
 
