@@ -1952,7 +1952,7 @@ int main(int argc, char *argv[])
             if (!COMPACT)
                 printf("\033[%smConsole:\033[%sm %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
             else
-                printf("\033[%smCon:\033[%sm %dx%dch\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf("\033[%smCon:\033[%sm %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
         }
         else
         {
