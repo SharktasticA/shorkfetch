@@ -1309,7 +1309,69 @@ Display* getDisplays(int *count)
         }
     }
 
-    // TODO: Wayland-specific tests
+    // If we still have nothing, we can try DRM as an X11/Wayland agnostic fallback
+    if (!displays)
+    {
+        DIR *dirStream = opendir("/sys/class/drm");
+
+        if (dirStream)
+        {
+            struct dirent *entry;
+            while ((entry = readdir(dirStream)))
+            {
+                // Skip non-connector entries
+                if (strstr(entry->d_name, "-") == NULL)
+                    continue;
+
+                // Prepare to test connector status
+                char path[PATH_MAX];
+                snprintf(path, PATH_MAX, "/sys/class/drm/%s/status", entry->d_name);
+
+                FILE *fileStream = fopen(path, "r");
+                if (!fileStream) continue;
+
+                // Check status
+                char status[64] = {0};
+                fgets(status, 64, fileStream);
+                fclose(fileStream);
+
+                // Move on if anything but "connected"
+                if (strncmp(status, "connected", 9) != 0)
+                    continue;
+
+                // Prepare to parse mode for resolution
+                snprintf(path, PATH_MAX, "/sys/class/drm/%s/modes", entry->d_name);
+                fileStream = fopen(path, "r");
+                if (!fileStream) continue;
+
+                char mode[64] = {0};
+                fgets(mode, 64, fileStream);
+                fclose(fileStream);
+
+                // Parse mode for resolution
+                int resX = 0, resY = 0;
+                sscanf(mode, "%dx%d", &resX, &resY);
+
+                // If we got nothing, no point of continuing...
+                if (resX < 0 || resY < 0) continue;
+
+                // Reallocate displays array to take into account new display
+                displays = realloc(displays, ((*count) + 1) * sizeof(Display));
+                memset(&displays[(*count)], 0, sizeof(Display));
+
+                // Populate display data
+                displays[(*count)].name = strdup(entry->d_name);
+                displays[(*count)].physSize = 0.0;
+                displays[(*count)].resX = resX;
+                displays[(*count)].resY = resY;
+                displays[(*count)].refresh = 0;
+
+                (*count)++;
+            }
+
+            closedir(dirStream);
+        }
+    }
 
     return displays;
 }
@@ -1855,28 +1917,28 @@ int main(int argc, char *argv[])
         {
             Display *dis = &displays[i];
 
-            char res[21];
-            snprintf(res, 21, "%dx%d", dis->resX, dis->resY);
-
             char size[10] = "";
             if (dis->physSize > 0.0)
                 snprintf(size, 10, "%g\" ", dis->physSize);
+
+            char refresh[20] = "";
+            if (dis->refresh > 0)
+            {
+                if (COMPACT)
+                    snprintf(refresh, 20, "@%d", dis->refresh);
+                else
+                    snprintf(refresh, 20, " @ %dHz", dis->refresh);
+            }
 
             if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
             if (!useBullets)
             {
                 if (!COMPACT)
-                    printf("\033[%smScreen:\033[%sm  %s%dx%d @ %dHz\n", colAccent, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
+                    printf("\033[%smScreen:\033[%sm  %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
                 else
-                    printf("\033[%smScn:\033[%sm %s%dx%d@%d\n", colAccent, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
+                    printf("\033[%smScn:\033[%sm %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
             }
-            else
-            {
-                if (!COMPACT)
-                    printf(" \033[%sm%c\033[%sm %s%dx%d @ %dHz\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
-                else
-                    printf(" \033[%sm%c\033[%sm %s%dx%d@%d\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, dis->refresh);
-            }
+            else printf(" \033[%sm%c\033[%sm %s%dx%d%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh);
 
             free(dis->name);
         }
