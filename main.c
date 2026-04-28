@@ -14,6 +14,7 @@
 
 
 
+#include "exclusions.h"
 #include "igpus.h"
 #include "replacements.h"
 
@@ -804,9 +805,9 @@ char *interpretGPU(GPU *gpuIDs)
     // If Intel GPU, query pre-defined iGPU list
     if (gpuIDs->vendor == 0x8086)
     {
-        if (intelIGPUs[gpuIDs->device])
+        if (INTEL_IGPUS[gpuIDs->device])
         {
-            snprintf(gpu, gpuSize, "Intel %s", intelIGPUs[gpuIDs->device]);
+            snprintf(gpu, gpuSize, "Intel %s", INTEL_IGPUS[gpuIDs->device]);
             char *clean = cleanProcessorName(gpu, gpuSize);
             strncpy(gpu, clean, gpuSize);
             free(clean);
@@ -1224,7 +1225,8 @@ Display* getDisplays(int *count)
             while (fgets(buffer, 512, stream))
             {
                 // Only process lines for things "connected" or inside a "connected"'s block
-                if (strstr(buffer, " connected")) 
+                char *isConnected = strstr(buffer, " connected");
+                if (isConnected) 
                 {
                     // Reallocate displays array to take into account new display
                     displays = realloc(displays, ((*count) + 1) * sizeof(Display));
@@ -1269,8 +1271,11 @@ Display* getDisplays(int *count)
                     }*/
 
                     // Parse resolution
+                    char *needle = isConnected;
                     int pResX = 0, pResY = 0;
-                    sscanf(buffer, "%*s %*s %*s %dx%d", &pResX, &pResY);
+                    while (*needle && (*needle < '0' || *needle > '9')) needle++;
+                    sscanf(needle, "%dx%d", &pResX, &pResY);
+
                     displays[*count].resX = pResX;
                     displays[*count].resY = pResY;
                     displays[*count].resTotal = pResX * pResY;
@@ -1603,6 +1608,17 @@ GPU* getGPUs(int *count)
 
         if ((class >> 16) == 0x03)
         {
+            int excluded = 0;
+            for (int i = 0; i < EXCLUDED_PCI_DIDS_LEN; i++)
+            {
+                if (EXCLUDED_PCI_DIDS[i] == device)
+                {
+                    excluded = 1;
+                    break;
+                }
+            }
+            if (excluded) continue;
+
             gpus[*count].vendor = vendor;
             gpus[*count].device = device;
             (*count)++;

@@ -16,7 +16,7 @@
 #ifndef IGPUS
 #define IGPUS
 
-static const char* intelIGPUs[] = {
+static const char* INTEL_IGPUS[] = {
 //  DID:     Name:                                      Example host CPUs:  
     [0x0042] = "HD Graphics (Clarkdale)",               // Core i5-650
     [0x0046] = "HD Graphics (Arrandale)",               // Core i3-380M
@@ -106,6 +106,7 @@ static const char* intelIGPUs[] = {
     [0x193d] = "Iris Pro Graphics P580",                // Xeon E3-1545M v5
     [0x22b0] = "HD Graphics (Cherry Trail)",            // Atom x5-Z8300
     [0x22b1] = "HD Graphics 400/405",                   // Celeron N3060, Pentium N3700/N3710
+    [0x2a02] = "GMA X3100 (GM965/GL960)",               // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
     [0x3184] = "UHD Graphics 605",                      // Pentium Silver J5005
     [0x3185] = "UHD Graphics 600",                      // Celeron N4020
     [0x3e90] = "UHD Graphics 610",                      // Pentium Gold G5400
