@@ -109,34 +109,50 @@ static const char* INTEL_IGPUS[] = {
 
     [0x2562] = "Extreme Graphics (845)",                // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://www.intel.com/content/www/us/en/support/products/81530/graphics/legacy-graphics/graphics-drivers-for-intel-82845g-graphics-controller.html
     [0x2572] = "Extreme Graphics 2 (865G)",             // https://theretroweb.com/chips/2808
+
     [0x2582] = "GMA 900 (910GL/915G/GV)",               // https://theretroweb.com/chips/3001
     [0x2592] = "GMA 900 (910GML/915GM/GME/GMS)",        // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://www.intel.com/content/dam/doc/datasheet/mobile-915-910-express-chipset-datasheet.pdf
     [0x258a] = "GMA 900 (E7221)",                       // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://www.intel.de/content/dam/doc/datasheet/e7221-chipset-datasheet.pdf
     [0x2772] = "GMA 950 (945G/GC/GZ)",                  // https://www.intel.com/Assets/PDF/datasheet/307502.pdf
-    //[2776] = "945G/GC/GZ",                            // EXCLUDED - 380 for 2772
-    //[2782] = "915G",                                  // EXCLUDED - 380 for 2582
-    //[2792] = "910GML/915GM/GME/GMS",                  // EXCLUDED - 380 for 2592
+    //[2776] = "",                                      // EXCLUDED - 380 for 2772
+    //[2782] = "",                                      // EXCLUDED - 380 for 2582
+    //[2792] = "",                                      // EXCLUDED - 380 for 2592
     [0x27a2] = "GMA 950 (940GML/943GML/945GM/GMS)",     // https://www.thinkwiki.org/wiki/Intel_Graphics_Media_Accelerator_950
-    //[27a6] = "945GME/GSE",                            // EXCLUDED - 380 for 27ae
+    //[27a6] = "",                                      // EXCLUDED - 380 for 27ae
     [0x27ae] = "GMA 950 (945GME/GSE)",                  // https://groups.google.com/g/fa.linux.kernel/c/L82W9WHaeVk, https://www.notebookcheck.net/Review-Asus-Eee-PC-901-Netbook.11994.0.html
     [0x2972] = "GMA X3000 (946GZ)",                     // https://www.intel.com/Assets/PDF/datasheet/313083.pdf, https://theretroweb.com/motherboards/s/asus-p5b-mx
-    //[2973] = "946GZ",                                 // EXCLUDED - 380 for 2972
+    //[2973] = "",                                      // EXCLUDED - 380 for 2972
     [0x2982] = "GMA X3500 (G35)",                       // https://www.intel.com/Assets/PDF/datasheet/317607.pdf, https://www.intel.com/Assets/PDF/prodbrief/317363.pdf
-    //[2983] = "G35",                                   // EXCLUDED - 380 for 2982
+    //[2983] = "",                                      // EXCLUDED - 380 for 2982
     [0x2992] = "GMA 3000 (Q963/Q965)",                  // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://www.intel.com/Assets/PDF/datasheet/313053.pdf
-    //[2993] = "Q963/Q965",                             // EXCLUDED - 380 for 2992
+    //[2993] = "",                                      // EXCLUDED - 380 for 2992
     [0x29a2] = "GMA X3000 (G965)",                      // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://theretroweb.com/motherboard/manual/d4681803-en-66cf8783c1307002457174.pdf
-    //[29a3] = "G965",                                  // EXCLUDED - 380 for 29a2
+    //[29a3] = "",                                      // EXCLUDED - 380 for 29a2
     [0x29b2] = "GMA 3100 (Q35)",                        // https://ubuntu-mate.community/t/intel-graphic-card-optiplex-killed-with-an-update/28920/7, https://dl.dell.com/manuals/all-products/esuprt_desktop/esuprt_optiplex_desktop/optiplex-755_user%27s%20guide_en-us.pdf
-    //[29b3] = "Q35",                                   // EXCLUDED - 380 for 29b2
+    //[29b3] = "",                                      // EXCLUDED - 380 for 29b2
     [0x29c2] = "GMA 3100 (G31/G33)",                    // https://www.intel.com/Assets/PDF/datasheet/316966.pdf, https://forums.linuxmint.com/viewtopic.php?t=349169, https://theretroweb.com/motherboards/s/gigabyte-ga-g31m-es2l-rev-1-x
-    //[29c3] = "G31/G33",                               // EXCLUDED - 380 for 29c2
+    //[29c3] = "",                                      // EXCLUDED - 380 for 29c2
     [0x29d2] = "GMA 3100 (Q33)",                        // https://forums.linuxmint.com/viewtopic.php?t=357510, https://www.bargainhardware.co.uk/content/specifications/DC5800_datasheet.pdf
-    //[29d3] = "Q33",                                   // EXCLUDED - 380 for 29d2
+    //[29d3] = "",                                      // EXCLUDED - 380 for 29d2
     [0x2a02] = "GMA X3100 (GL960/GM965)",               // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
-    //[2a03] = "GL960/GM965",                           // EXCLUDED - 380 for 2a02
+    //[2a03] = "",                                      // EXCLUDED - 380 for 2a02
     [0x2a12] = "GMA X3100 (GLE960/GME965)",             // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
-    //[2a13] = "GLE960/GME965",                         // EXCLUDED - 380 for 2a13
+    //[2a13] = "",                                      // EXCLUDED - 380 for 2a13
+
+    [0x2a42] = "GMA 4500MHD (GL40/GM4x/GS4x)",          // https://www.thinkwiki.org/wiki/Intel_GMA_4500MHD, https://www.intel.com/content/dam/doc/product-brief/mobile-gm45-intel-gs45-gl40-express-chipsets-brief.pdf
+    //[2a43] = "",                                      // EXCLUDED - 380 for 2a42
+    [0x2e02] = "GMA X4500 (G41/G43)",                   // https://en.wikipedia.org/w/index.php?title=Intel_GMA&oldid=282579198
+    //[2e03] = "",                                      // EXCLUDED - 380 for 2e02
+    [0x2e12] = "GMA 4500 (Q43/Q45)",                    // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units
+    //[2e13] = "",                                      // EXCLUDED - 380 for 2e12
+    [0x2e22] = "GMA X4500/X4500HD (G43/G45)",           // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units
+    //[2e23] = "",                                      // EXCLUDED - 380 for 2e22
+    [0x2e32] = "GMA X4500 (G41)",                       // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://forums.linuxmint.com/viewtopic.php?t=420549, https://i.dell.com/sites/csdocuments/Business_solutions_engineering-Docs_Documents/en/optiplex-380-tech-guide.pdf
+    //[2e33] = "",                                      // EXCLUDED - 380 for 2e32
+    [0x2e42] = "GMA 4500 (B43)",                        // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://forums.linuxmint.com/viewtopic.php?t=328843, https://images10.newegg.com/UploadFilesForNewegg/itemintelligence/HP/40001520003538489.pdf
+    //[2e43] = "",                                      // EXCLUDED - 380 for 2e42
+    [0x2e92] = "GMA 4500 (B43)",                        // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://lists.ubuntu.com/archives/kernel-bugs/2010-September/141165.html
+    //[2e93] = "",                                      // EXCLUDED - 380 for 2e92
 
     [0x3184] = "UHD Graphics 605",                      // Pentium Silver J5005
     [0x3185] = "UHD Graphics 600",                      // Celeron N4020
