@@ -135,6 +135,7 @@ static const char* INTEL_IGPUS[] = {
     //[2a03] = "GL960/GM965",                           // EXCLUDED - 380 for 2a02
     [0x2a12] = "GMA X3100 (GLE960/GME965)",             // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
     //[2a13] = "GLE960/GME965",                         // EXCLUDED - 380 for 2a13
+
     [0x3184] = "UHD Graphics 605",                      // Pentium Silver J5005
     [0x3185] = "UHD Graphics 600",                      // Celeron N4020
     [0x3e90] = "UHD Graphics 610",                      // Pentium Gold G5400
