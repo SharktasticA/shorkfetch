@@ -106,7 +106,35 @@ static const char* INTEL_IGPUS[] = {
     [0x193d] = "Iris Pro Graphics P580",                // Xeon E3-1545M v5
     [0x22b0] = "HD Graphics (Cherry Trail)",            // Atom x5-Z8300
     [0x22b1] = "HD Graphics 400/405",                   // Celeron N3060, Pentium N3700/N3710
-    [0x2a02] = "GMA X3100 (GM965/GL960)",               // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
+
+    [0x2562] = "Graphics Controller (845G/GL)",         // https://www.intel.com/content/www/us/en/support/products/81530/graphics/legacy-graphics/graphics-drivers-for-intel-82845g-graphics-controller.html
+    [0x2572] = "Extreme Graphics 2 (865G)",             // https://theretroweb.com/chips/2808
+    [0x2582] = "GMA 900 (910GL/915G/GV)",               // https://theretroweb.com/chips/3001
+    [0x258a] = "Graphics Controller (E7221)",           // https://www.intel.de/content/dam/doc/datasheet/e7221-chipset-datasheet.pdf
+    [0x2772] = "GMA (945G/GC/GZ)",                      // https://www.intel.com/Assets/PDF/specupdate/307503.pdf
+    [0x2776] = "GMA (945G/GC/GZ)",                      // https://www.intel.com/Assets/PDF/specupdate/307503.pdf
+    [0x2782] = "GMA 900 (915G)",                        // https://theretroweb.com/chips/3001
+    [0x27a2] = "GMA 950 (940GML/943GML/945GM/GMS)",     // https://www.thinkwiki.org/wiki/Intel_Graphics_Media_Accelerator_950
+    [0x27a6] = "GMA 950 (940GML/943GML/945GM/GMS)",     // https://wiki.debian.org/DebianEeePC/Model/1000HE
+    [0x27ae] = "GMA 950 (945GME/GSE)",                  // https://groups.google.com/g/fa.linux.kernel/c/L82W9WHaeVk, https://www.notebookcheck.net/Review-Asus-Eee-PC-901-Netbook.11994.0.html
+    [0x2972] = "GMA X3000 (946GZ)",                     // https://www.intel.com/Assets/PDF/datasheet/313083.pdf, https://theretroweb.com/motherboards/s/asus-p5b-mx
+    //[2973] = "946GZ",                                 // EXCLUDED - 380 for 2972
+    [0x2982] = "GMA X3500 (G35)",                       // https://www.intel.com/Assets/PDF/datasheet/317607.pdf, https://www.intel.com/Assets/PDF/prodbrief/317363.pdf
+    //[2983] = "G35",                                   // EXCLUDED - 380 for 2982
+    [0x2992] = "GMA 3000 (Q963/Q965)",                  // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://www.intel.com/Assets/PDF/datasheet/313053.pdf
+    //[2993] = "Q963/Q965",                             // EXCLUDED - 380 for 2992
+    [0x29a2] = "GMA X3000 (G965)",                      // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://theretroweb.com/motherboard/manual/d4681803-en-66cf8783c1307002457174.pdf
+    //[29a3] = "G965",                                  // EXCLUDED - 380 for 29a2
+    [0x29b2] = "GMA 3100 (Q35)",                        // https://ubuntu-mate.community/t/intel-graphic-card-optiplex-killed-with-an-update/28920/7, https://dl.dell.com/manuals/all-products/esuprt_desktop/esuprt_optiplex_desktop/optiplex-755_user%27s%20guide_en-us.pdf
+    //[29b3] = "Q35",                                   // EXCLUDED - 380 for 29b2
+    [0x29c2] = "GMA 3100 (G31/G33)",                    // https://www.intel.com/Assets/PDF/datasheet/316966.pdf, https://forums.linuxmint.com/viewtopic.php?t=349169, https://theretroweb.com/motherboards/s/gigabyte-ga-g31m-es2l-rev-1-x
+    //[29c3] = "G31/G33",                               // EXCLUDED - 380 for 29c2
+    [0x29d2] = "GMA 3100 (Q33)",                        // https://forums.linuxmint.com/viewtopic.php?t=357510, https://www.bargainhardware.co.uk/content/specifications/DC5800_datasheet.pdf
+    //[29d3] = "Q33",                                   // EXCLUDED - 380 for 29d2
+    [0x2a02] = "GMA X3100 (GL960/GM965)",               // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
+    //[2a03] = "GL960/GM965",                           // EXCLUDED - 380 for 2a02
+    [0x2a12] = "GMA X3100 (GLE960/GME965)",             // https://www.intel.com/Assets/PDF/datasheet/316273.pdf
+    //[2a13] = "GLE960/GME965",                         // EXCLUDED - 380 for 2a13
     [0x3184] = "UHD Graphics 605",                      // Pentium Silver J5005
     [0x3185] = "UHD Graphics 600",                      // Celeron N4020
     [0x3e90] = "UHD Graphics 610",                      // Pentium Gold G5400
