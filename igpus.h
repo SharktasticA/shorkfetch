@@ -107,7 +107,7 @@ static const char* INTEL_IGPUS[] = {
     [0x22b0] = "HD Graphics (Cherry Trail)",            // Atom x5-Z8300
     [0x22b1] = "HD Graphics 400/405",                   // Celeron N3060, Pentium N3700/N3710
 
-    [0x2562] = "Graphics Controller (845G/GL)",         // https://www.intel.com/content/www/us/en/support/products/81530/graphics/legacy-graphics/graphics-drivers-for-intel-82845g-graphics-controller.html
+    [0x2562] = "Extreme Graphics (845)",                // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://www.intel.com/content/www/us/en/support/products/81530/graphics/legacy-graphics/graphics-drivers-for-intel-82845g-graphics-controller.html
     [0x2572] = "Extreme Graphics 2 (865G)",             // https://theretroweb.com/chips/2808
     [0x2582] = "GMA 900 (910GL/915G/GV)",               // https://theretroweb.com/chips/3001
     [0x258a] = "Graphics Controller (E7221)",           // https://www.intel.de/content/dam/doc/datasheet/e7221-chipset-datasheet.pdf
@@ -138,6 +138,11 @@ static const char* INTEL_IGPUS[] = {
 
     [0x3184] = "UHD Graphics 605",                      // Pentium Silver J5005
     [0x3185] = "UHD Graphics 600",                      // Celeron N4020
+
+    [0x3577] = "Extreme Graphics (830M/MG)",            // https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units, https://megatokyo.moe/dl/msn_tv_2/datasheets/Intel_82830mg_NOT_82830M_GMCH-M.pdf
+    [0x3582] = "Extreme Graphics 2 (852/855GM)",        // https://www.intel.com/content/dam/doc/datasheet/852gm-852gmv-chipset-graphics-memory-controller-hub-datasheet.pdf, https://theretroweb.com/chip/documentation/30326901-65c7fd89bd07c733983117.pdf, https://www.thinkwiki.org/wiki/Intel_Extreme_Graphics_2
+    [0x358e] = "Extreme Graphics 2 (854)",              // https://theretroweb.com/chips/2821, https://theretroweb.com/chip/documentation/d1534303-65be5ae55062e765790772.pdf, https://theretroweb.com/chip/documentation/30682502-65be5ae54d457579437108.pdf
+
     [0x3e90] = "UHD Graphics 610",                      // Pentium Gold G5400
     [0x3e91] = "UHD Graphics 630",                      // Core i3-8100
     [0x3e92] = "UHD Graphics 630",                      // Core i5-8400T/i5-8500/i5-9500T/i7-8700K
