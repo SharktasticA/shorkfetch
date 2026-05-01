@@ -75,7 +75,7 @@ typedef struct {
 
 
 static int COMPACT = 0;
-const char SHORK[15][20] = {
+const char SHORK[20][20] = {
     "                   ",
     "^`.                ",
     "\\  \\               ",
@@ -85,6 +85,11 @@ const char SHORK[15][20] = {
     "  ,    ,    __,,,) ",
     "~;   ,-~~--`       ",
     "'._.'              ",
+    "                   ",
+    "                   ",
+    "                   ",
+    "                   ",
+    "                   ",
     "                   ",
     "                   ",
     "                   ",
