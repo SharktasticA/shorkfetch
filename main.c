@@ -1219,7 +1219,7 @@ Display* getDisplays(int *count)
     // Try getting displays with xrandr (X11)
     if (isProgramInstalled("xrandr"))
     {
-        FILE *stream = popen("xrandr", "r");
+        FILE *stream = popen("xrandr 2>/dev/null", "r");
         if (stream)
         {
             // What we use to read lines of xrandr output in to
