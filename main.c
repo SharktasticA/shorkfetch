@@ -2012,6 +2012,15 @@ int main(int argc, char *argv[])
             COMPACT = 1;
         else if (strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fields", 8) == 0)
         {
+            // Find "=" as our needle
+            char *equalsNeedle = strchr(argv[i], '=');
+            if (!equalsNeedle) 
+            {
+                printf("ERROR: invalid fields argument syntax\n");
+                return 1;
+            }
+            equalsNeedle++;
+
             // Set all fields to "off" to begin with
             showOS = 0;
             showKrn = 0;
@@ -2026,11 +2035,6 @@ int main(int argc, char *argv[])
             showRoot = 0;
             showLocIP = 0;
             int noFields = 0;
-
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) continue;
-            equalsNeedle++;
 
             // Copy values so we don't mess up argv
             char *csv = strdup(equalsNeedle);
