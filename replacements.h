@@ -90,6 +90,7 @@ const char *DELETIONS[] =
     " Eight-Core",                      // For AMD FX
     " Electronics Systems",             // For Matrox
     " Family",
+    "Genuine ",
     " Interactive",                     // For 3dfx
     " Ltd.",
     " Microsystems",                    // For Trident

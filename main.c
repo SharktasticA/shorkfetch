@@ -490,9 +490,10 @@ int readHexFile(const char *path)
  * "Corporation", etc.
  * @param input Input string
  * @param inputSize Size to use when allocating the result string
+ * @param coreCount Number of cores the processor has (presently only used for CPU name manipulation)
  * @return String containing what's left after cleaning
  */
-char *cleanProcessorName(const char *input, size_t inputSize)
+char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
 {
     if (!input || inputSize < 2) return strdup("");
 
@@ -504,6 +505,24 @@ char *cleanProcessorName(const char *input, size_t inputSize)
     strncpy(result, input, inputSize - 1);
     result[inputSize - 1] = '\0';
     size_t strLen  = strlen(result);
+
+    // Remove double-spaces
+    while (strstr(result, "  "))
+    {
+        char *tmp = findReplace(result, inputSize, "  ", " ");
+        strncpy(result, tmp, inputSize - 1);
+        result[inputSize - 1] = '\0';
+        free(tmp);
+    }
+
+    // Shorten " / " to "/"
+    while (strstr(result, " / "))
+    {
+        char *tmp = findReplace(result, inputSize, " / ", "/");
+        strncpy(result, tmp, inputSize - 1);
+        result[inputSize - 1] = '\0';
+        free(tmp);
+    }
 
     // If applicable, extract a GPU name from square brackets - e.g.
     // "GM204 [GeForce GTX 980]" -> "GeForce GTX 980"
@@ -620,6 +639,23 @@ char *cleanProcessorName(const char *input, size_t inputSize)
     // Apply Intel-specific replacements
     else if (strstr(result, "Intel"))
     {
+        // Catch Yonah Core CPUs that don't have "Core" in their name
+        if (strstr(result, "Intel T") && coreCount > 0)
+        {
+            char *tmp = NULL;
+            if (coreCount == 1)
+                tmp = findReplace(result, inputSize, "Intel T", "Intel Core Solo T");
+            else if (coreCount == 2)
+                tmp = findReplace(result, inputSize, "Intel T", "Intel Core Duo T");
+
+            if (tmp)
+            {
+                strncpy(result, tmp, inputSize - 1);
+                result[inputSize - 1] = '\0';
+                free(tmp);
+            }
+        }
+
         int replaces = 0;
         for (int i = 0; i < INTEL_REPLACES_LEN; i++)
         {
@@ -664,24 +700,6 @@ char *cleanProcessorName(const char *input, size_t inputSize)
                 free(tmp);
             }
         }
-    }
-
-    // Shorten " / " to "/"
-    while (strstr(result, " / "))
-    {
-        char *tmp = findReplace(result, inputSize, " / ", "/");
-        strncpy(result, tmp, inputSize - 1);
-        result[inputSize - 1] = '\0';
-        free(tmp);
-    }
-
-    // Remove double-spaces
-    while (strstr(result, "  "))
-    {
-        char *tmp = findReplace(result, inputSize, "  ", " ");
-        strncpy(result, tmp, inputSize - 1);
-        result[inputSize - 1] = '\0';
-        free(tmp);
     }
 
     // Compact mode specific cleaning
@@ -813,7 +831,7 @@ char *interpretGPU(GPU *gpuIDs)
         if (INTEL_IGPUS[gpuIDs->device])
         {
             snprintf(gpu, gpuSize, "Intel %s", INTEL_IGPUS[gpuIDs->device]);
-            char *clean = cleanProcessorName(gpu, gpuSize);
+            char *clean = cleanProcessorName(gpu, gpuSize, -1);
             strncpy(gpu, clean, gpuSize);
             free(clean);
             return gpu;
@@ -882,8 +900,8 @@ char *interpretGPU(GPU *gpuIDs)
         snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
     else
     {
-        char *cleanVendor = cleanProcessorName(vendor, gpuSize / 2);
-        char *cleanDevice = cleanProcessorName(device, gpuSize / 2);
+        char *cleanVendor = cleanProcessorName(vendor, gpuSize / 2, -1);
+        char *cleanDevice = cleanProcessorName(device, gpuSize / 2, -1);
         snprintf(gpu, gpuSize, "%s %s", cleanVendor, cleanDevice);
         free(cleanVendor);
         free(cleanDevice);
@@ -1476,8 +1494,11 @@ char *getCPU(void)
         }
         fclose(stream);
 
+        // If no model is given, use "unknown"
+        if (model[0] == '\0') strncpy(model, "unknown", 127);
+
         // Check if model name lacks the vendor name and if we need to try adding it in manually
-        if ((vendor[0] != '\0' && vendor[0] != 'u') && model[0] != '\0')
+        if ((vendor[0] != '\0' && vendor[0] != 'u') && (model[0] != '\0' && model[0] != 'u'))
         {
             if (!strstr(model, "Intel") && !strstr(model, "AMD") && !strstr(model, "Cyrix") && !strstr(model, "IDT") && !strstr(model, "VIA") && !strstr(model, "Transmeta"))
             {
@@ -1572,6 +1593,10 @@ char *getCPU(void)
     }
     else strcpy(cpu, "unknown");
 
+    int coreCount = 0;
+    if (cores && cores[0] != '\0')
+        coreCount = (int)strtol(cores, NULL, 10);
+
     free(vendor);
     free(model);
     free(processor);
@@ -1579,7 +1604,7 @@ char *getCPU(void)
     free(threads);
     free(fpu);
 
-    char *cleanedCPU = cleanProcessorName(cpu, 134);
+    char *cleanedCPU = cleanProcessorName(cpu, 134, coreCount);
     strncpy(cpu, cleanedCPU, 133);
     free(cleanedCPU);
 
