@@ -1974,17 +1974,17 @@ int main(int argc, char *argv[])
         {
             Display *dis = &displays[i];
 
-            char size[10] = "";
+            char size[32] = "";
             if (dis->physSize > 0.0)
-                snprintf(size, 10, "%g\" ", dis->physSize);
+                snprintf(size, 32, "%g\" ", dis->physSize);
 
-            char refresh[20] = "";
+            char refresh[32] = "";
             if (dis->refresh > 0)
             {
                 if (COMPACT)
-                    snprintf(refresh, 20, "@%d", dis->refresh);
+                    snprintf(refresh, 32, "@%d", dis->refresh);
                 else
-                    snprintf(refresh, 20, " @ %dHz", dis->refresh);
+                    snprintf(refresh, 32, " @ %dHz", dis->refresh);
             }
 
             if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
