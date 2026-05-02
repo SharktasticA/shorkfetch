@@ -16,6 +16,7 @@
 
 #include "exclusions.h"
 #include "igpus.h"
+#include "implementers.h"
 #include "replacements.h"
 
 #include <dirent.h>
@@ -1422,23 +1423,29 @@ char *getCPU(void)
 {
     char *cpu = malloc(134);
     char *vendor = malloc(16);
+    char *implementer = malloc(16);
     char *model = malloc(128);
+    char *architecture = malloc(4);
     char *processor = malloc(4);
     char *cores = malloc(4);
     char *threads = malloc(4);
     char *fpu = malloc(4);
-    if (!cpu || !vendor || !model || !processor || !cores || !threads || !fpu) 
+    if (!cpu || !vendor || !implementer || !model || !architecture || !processor || !cores || !threads || !fpu) 
     {
         free(cpu);
         free(vendor);
+        free(implementer);
         free(model);
+        free(architecture);
         free(processor);
         free(cores);
         free(threads);
         free(fpu);
         return strdup("unknown");
     }
-    cpu[0] = vendor[0] = model[0] = processor[0] = cores[0] = threads[0] = fpu[0] = '\0';
+    cpu[0] = vendor[0] = implementer[0] = model[0] = architecture[0] = processor[0] = cores[0] = threads[0] = fpu[0] = '\0';
+
+
 
     FILE *stream = fopen("/proc/cpuinfo", "r");
     if (stream)
@@ -1458,10 +1465,22 @@ char *getCPU(void)
                 strncpy(vendor, extract, 15);
                 free(extract);
             }
+            else if (strncmp(buffer, "CPU implementer", 15) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                strncpy(implementer, extract, 15);
+                free(extract);
+            }
             else if (strncmp(buffer, "model name", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, 128, ':', 2);
                 strncpy(model, extract, 127);
+                free(extract);
+            }
+            else if (strncmp(buffer, "CPU architecture", 16) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                strncpy(architecture, extract, 3);
                 free(extract);
             }
             else if (strncmp(buffer, "cpu cores", 9) == 0)
@@ -1488,117 +1507,166 @@ char *getCPU(void)
                     free(extract);
                 }
             }
-            
-            if (model[0] != '\0' && cores[0] != '\0' && threads[0] != '\0' && fpu[0] != '\0')
-                break;
         }
         fclose(stream);
 
-        // If no model is given, use "unknown"
-        if (model[0] == '\0') strncpy(model, "unknown", 127);
 
-        // Check if model name lacks the vendor name and if we need to try adding it in manually
-        if ((vendor[0] != '\0' && vendor[0] != 'u') && (model[0] != '\0' && model[0] != 'u'))
+
+        // Typical CPU path
+        if (vendor[0] != '\0' || model[0] != '\0')
         {
-            if (!strstr(model, "Intel") && !strstr(model, "AMD") && !strstr(model, "Cyrix") && !strstr(model, "IDT") && !strstr(model, "VIA") && !strstr(model, "Transmeta"))
+            // Check if model name lacks the vendor name and if we need to try adding it in manually
+            if ((vendor[0] != '\0' && vendor[0] != 'u') && (model[0] != '\0' && model[0] != 'u'))
             {
-                char *tmp = malloc(128);
-                if (tmp)
+                if (!strstr(model, "Intel") && !strstr(model, "AMD") && !strstr(model, "Cyrix") && !strstr(model, "IDT") && !strstr(model, "VIA") && !strstr(model, "Transmeta"))
                 {
-                    if (strstr(vendor, "Intel") || strstr(vendor, "Iotel"))
-                        snprintf(tmp, 128, "%s %s", "Intel", model);
-                    else if (strstr(vendor, "AMD"))
-                        snprintf(tmp, 128, "%s %s", "AMD", model);
-                    else if (strstr(vendor, "Cyrix"))
-                        snprintf(tmp, 128, "%s %s", "Cyrix", model);
-                    else if (strstr(vendor, "Centaur"))
-                        snprintf(tmp, 128, "%s %s", "IDT/Centaur", model);
-                    else if (strstr(vendor, "VIA"))
-                        snprintf(tmp, 128, "%s %s", "VIA", model);
-                    else if (strstr(vendor, "Transmeta") || strstr(vendor, "TM"))
-                        snprintf(tmp, 128, "%s %s", "Transmeta", model);
-                    else
-                        snprintf(tmp, 128, "%s %s", vendor, model);
-                    
-                    strncpy(model, tmp, 128);
-                    free(tmp);
-                    model[127] = '\0';
+                    char *tmp = malloc(128);
+                    if (tmp)
+                    {
+                        if (strstr(vendor, "Intel") || strstr(vendor, "Iotel"))
+                            snprintf(tmp, 128, "%s %s", "Intel", model);
+                        else if (strstr(vendor, "AMD"))
+                            snprintf(tmp, 128, "%s %s", "AMD", model);
+                        else if (strstr(vendor, "Cyrix"))
+                            snprintf(tmp, 128, "%s %s", "Cyrix", model);
+                        else if (strstr(vendor, "Centaur"))
+                            snprintf(tmp, 128, "%s %s", "IDT/Centaur", model);
+                        else if (strstr(vendor, "VIA"))
+                            snprintf(tmp, 128, "%s %s", "VIA", model);
+                        else if (strstr(vendor, "Transmeta") || strstr(vendor, "TM"))
+                            snprintf(tmp, 128, "%s %s", "Transmeta", model);
+                        else
+                            snprintf(tmp, 128, "%s %s", vendor, model);
+                        
+                        strncpy(model, tmp, 128);
+                        free(tmp);
+                        model[127] = '\0';
+                    }
                 }
             }
-        }
 
-        // If we have a Cx486Dxxx with FPU, make sure 387 is included in the model name
-        if ((strstr(model, "Cx486DLC") || strstr(model, "Cx486DRx2")) && fpu[0] == '1')
+            // If we have a Cx486Dxxx with FPU, make sure 387 is included in the model name
+            if ((strstr(model, "Cx486DLC") || strstr(model, "Cx486DRx2")) && fpu[0] == '1')
+            {
+                char tmp[128];
+                snprintf(tmp, 128, "%s + 387", model);
+                strncpy(model, tmp, 127);
+                model[127] = '\0';
+            }
+
+            // If we have a Cx486S with FPU, make sure 487 is included in the model name
+            if (strstr(model, "Cx486S") && fpu[0] == '1')
+            {
+                char tmp[128];
+                snprintf(tmp, 128, "%s + 487", model);
+                strncpy(model, tmp, 127);
+                model[127] = '\0';
+            }
+
+            // If we have for certain an Intel 486SX with FPU, make sure 487 is included in the model name
+            if (strstr(model, "486") && strstr(model, "SX") && fpu[0] == '1')
+            {
+                char tmp[128];
+                snprintf(tmp, 128, "%s + 487", model);
+                strncpy(model, tmp, 127);
+                model[127] = '\0';
+            }
+
+            // If we have a vendorless and revisionless 486, we can at least infer if its purely 486SX, or
+            // a 486DX, 487SX (true 486SX + 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx  + 387), from the
+            // presence of an FPU
+            if ((vendor[0] == '\0' || vendor[0] == 'u') && model[0] != '\0' && strcmp(model, "486") == 0)
+            {
+                if (fpu[0] == '0')
+                    snprintf(model, 127, "486SX");
+                else if (fpu[0] == '1')
+                    snprintf(model, 127, "486DX/487SX/486SX + 387");
+            }
+        }
+        // Possible ARM CPU path
+        if (architecture[0] != '\0')
         {
-            char tmp[128];
-            snprintf(tmp, 128, "%s + 387", model);
-            strncpy(model, tmp, 127);
-            model[127] = '\0';
-        }
+            const char *implementerName = NULL;
+            // Try to resolve implementer name 
+            if (implementer[0] != '\0')
+            {
+                char *end = NULL;
+                long val = strtol(implementer, &end, 0);
+                if (end != implementer && val >= 0 && val < 128 && ARM_IMPLEMENTERS[val])
+                    implementerName = ARM_IMPLEMENTERS[val];
+            }
 
-        // If we have a Cx486S with FPU, make sure 487 is included in the model name
-        if (strstr(model, "Cx486S") && fpu[0] == '1')
+            if (implementerName)
+                snprintf(model, 128, "%s Armv%d", implementerName, atoi(architecture));
+            else
+                snprintf(model, 128, "Armv%d", atoi(architecture));
+        }
+        // Absolute fallback - we have nothing to show
+        else if (cores[0] == '\0' && threads[0] == '\0' && processor[0] == '\0')
         {
-            char tmp[128];
-            snprintf(tmp, 128, "%s + 487", model);
-            strncpy(model, tmp, 127);
-            model[127] = '\0';
+            free(vendor);
+            free(implementer);
+            free(model);
+            free(architecture);
+            free(processor);
+            free(cores);
+            free(threads);
+            free(fpu);
+            return cpu;
         }
 
-        // If we have for certain an Intel 486SX with FPU, make sure 487 is included in the model name
-        if (strstr(model, "486") && strstr(model, "SX") && fpu[0] == '1')
-        {
-            char tmp[128];
-            snprintf(tmp, 128, "%s + 487", model);
-            strncpy(model, tmp, 127);
-            model[127] = '\0';
-        }
 
-        // If we have a vendorless and revisionless 486, we can at least infer if its purely 486SX, or
-        // a 486DX, 487SX (true 486SX + 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx  + 387), from the
-        // presence of an FPU
-        if ((vendor[0] == '\0' || vendor[0] == 'u') && model[0] != '\0' && strcmp(model, "486") == 0)
-        {
-            if (fpu[0] == '0')
-                snprintf(model, 127, "486SX");
-            else if (fpu[0] == '1')
-                snprintf(model, 127, "486DX/487SX/486SX + 387");
-        }
-
-        // Catch if literally no model name is availble
-        if (model[0] == '\0')
-            strcpy(cpu, "unknown");
 
         // If we don't have a cores value, set it to the same as threads
         // so we don't try to show them separately later
         if (cores[0] == '\0' && threads[0] != '\0')
             strncpy(cores, threads, 3);
 
+        char coresAndThreads[16];
+
         // If we don't have cores or threads, we use the processor field in its place
-        if (!COMPACT && cores[0] == '\0' && threads[0] == '\0')
+        if (cores[0] == '\0' && threads[0] == '\0')
         {
             int processorInt = atoi(processor);
             processorInt++;
-            snprintf(cpu, 134, "%s (%dC)", model, processorInt);
+            snprintf(coresAndThreads, 16, "%dC", processorInt);
         }
         // If cores and threads are the same value, just show cores
-        else if (!COMPACT && strcmp(cores, threads) == 0)
-            snprintf(cpu, 134, "%s (%sC)", model, cores);
+        else if (strcmp(cores, threads) == 0)
+            snprintf(coresAndThreads, 16, "%sC", cores);
         // If cores and threads are different values, show both
-        else if (!COMPACT)
-            snprintf(cpu, 134, "%s (%sC/%sT)", model, cores, threads);
-        // Fallback for compact mode
         else
-            snprintf(cpu, 134, "%s", model);
+            snprintf(coresAndThreads, 16, "%sC/%sT", cores, threads);
+
+
+
+        // If we have no model name but we have core/thread count, just show the latter
+        if (model[0] == '\0' && coresAndThreads[0] != '\0')
+            strncpy(cpu, coresAndThreads, 133);
+        // If we're in compact mode, we just show the model name
+        else if (COMPACT)
+            strncpy(cpu, model, 133);
+        // Normal view
+        else
+        {
+            if (coresAndThreads[0] != '\0')
+                snprintf(cpu, 134, "%s (%s)", model, coresAndThreads);
+            else
+                strncpy(cpu, model, 133);
+        }
     }
     else strcpy(cpu, "unknown");
+
+
 
     int coreCount = 0;
     if (cores && cores[0] != '\0')
         coreCount = (int)strtol(cores, NULL, 10);
 
     free(vendor);
+    free(implementer);
     free(model);
+    free(architecture);
     free(processor);
     free(cores);
     free(threads);
