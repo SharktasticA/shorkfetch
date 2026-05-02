@@ -966,17 +966,21 @@ void showHelp(void)
     formatNewLines(help, TERM_SIZE.ws_col, "                 ", 0);
     printf("%s", help);
 
+    char fields[140] = "-f, --fields     Allows you to specify which fields to show via a comma-separated list (os,krn,...)\n";
+    formatNewLines(fields, TERM_SIZE.ws_col, "                 ", 0);
+    printf("%s", fields);
+
     char noArt[100] = "-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n";
     formatNewLines(noArt, TERM_SIZE.ws_col, "                 ", 0);
     printf("%s", noArt);
 
-    char noCol[100] = "-nc, --no-col    Disables all coloured output (if compiled with colour support)\n";
+    char noCol[100] = "-nc, --no-col    Disables all coloured output (if compiled with colour support)\n\n";
     formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
     printf("%s", noCol);
 
-    char noIP[100] = "-ni, --no-ip     Disables fields related to IP addresses\n";
-    formatNewLines(noIP, TERM_SIZE.ws_col, "                 ", 0);
-    printf("%s", noIP);
+    char fieldNames[90] = "Field names:\nos, krn, upt, sh, scn, con, cpu, gpu, ram, swap, root and lip\n";
+    formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
+    printf("%s", fieldNames);
 }
 
 
@@ -1948,11 +1952,23 @@ char *getLocalIP(void)
 int main(int argc, char *argv[])
 {
     TERM_SIZE = getTerminalSize();
+
     char bullet = '*';
     char *colAccent = getAccentColour();
     int useBullets = 0;
     int noIP = 0;
-
+    int showOS = 1;
+    int showKrn = 1;
+    int showUpt = 1;
+    int showSh = 1;
+    int showScn = 1;
+    int showCon = 1;
+    int showCPU = 1;
+    int showGPU = 1;
+    int showRAM = 1;
+    int showSwap = 1;
+    int showRoot = 1;
+    int showLocIP = 1;
 #ifdef NO_ART
     int showShork = 0;
 #else
@@ -1971,29 +1987,136 @@ int main(int argc, char *argv[])
         {
             useBullets = 1;
 
-            char *bulletCand = NULL;
+            char *bulletChar = NULL;
             if (strncmp(argv[i], "-b=", 3) == 0)
-                bulletCand = &argv[i][3];
+                bulletChar = &argv[i][3];
             else if (strncmp(argv[i], "--bullets=", 10) == 0)
-                bulletCand = &argv[i][10];
+                bulletChar = &argv[i][10];
 
-            if (bulletCand)
+            if (bulletChar)
             {
-                if (bulletCand[0] == '\0')
+                if (bulletChar[0] == '\0')
                 {
                     printf("ERROR: custom bullet point character not given\n");
                     return 1;
                 }
-                else if (bulletCand[1] != '\0')
+                else if (bulletChar[1] != '\0')
                 {
                     printf("ERROR: custom bullet point character can only be a single character\n");
                     return 1;
                 }
-                bullet = bulletCand[0];
+                bullet = bulletChar[0];
             }
         }
         else if ((strcmp(argv[i], "-c") == 0) || (strcmp(argv[i], "--compact") == 0))
             COMPACT = 1;
+        else if (strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fields", 8) == 0)
+        {
+            // Set all fields to "off" to begin with
+            showOS = 0;
+            showKrn = 0;
+            showUpt = 0;
+            showSh = 0;
+            showScn = 0;
+            showCon = 0;
+            showCPU = 0;
+            showGPU = 0;
+            showRAM = 0;
+            showSwap = 0;
+            showRoot = 0;
+            showLocIP = 0;
+            int noFields = 0;
+
+            // Find "=" as our needle
+            char *equalsNeedle = strchr(argv[i], '=');
+            if (!equalsNeedle) continue;
+            equalsNeedle++;
+
+            // Copy values so we don't mess up argv
+            char *csv = strdup(equalsNeedle);
+            if (!csv) continue;
+
+            // Parse the CSV for field names
+            char *currTok = strtok(csv, ",");
+            while (currTok)
+            {
+                if (strcmp(currTok, "os") == 0)
+                {
+                    showOS = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "krn") == 0)
+                {
+                    showKrn = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "upt") == 0)
+                {
+                    showUpt = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "sh") == 0)
+                {
+                    showSh = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "scn") == 0)
+                {
+                    showScn = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "con") == 0)
+                {
+                    showCon = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "cpu") == 0)
+                {
+                    showCPU = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "gpu") == 0)
+                {
+                    showGPU = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "ram") == 0)
+                {
+                    showRAM = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "swap") == 0)
+                {
+                    showSwap = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "root") == 0)
+                {
+                    showRoot = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "lip") == 0)
+                {
+                    showLocIP = 1;
+                    noFields++;
+                }
+                else
+                {
+                    printf("ERROR: unrecognised field name \"%s\"\n", currTok);
+                    return 1;
+                }
+
+                currTok = strtok(NULL, ",");
+            }
+
+            if (noFields == 0)
+            {
+                printf("ERROR: no invalid field names were given\n");
+                return 1;
+            }
+            else if (noFields < 6) showShork = 0;
+            else if (noFields == 6) shorkLine = 1;
+        }
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
         else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
@@ -2002,22 +2125,25 @@ int main(int argc, char *argv[])
             noIP = 1;
     }
 
-    char *ram = getRAM();
-    char *swap = getSwap();
+
+
     char *username = getUsername();
     char *hostname = getHostname();
-    char *os = getOS();
-    char *kernel = getKernel();
-    char *uptime = getUptime();
-    char *shell = getShell();
+    char *os = showOS ? getOS() : NULL;
+    char *kernel = showKrn ? getKernel() : NULL;
+    char *uptime = showUpt ? getUptime() : NULL;
+    char *shell = showSh ? getShell() : NULL;
     int noDisplays = 0;
-    Display *displays = getDisplays(&noDisplays);
-    char *cpu = getCPU();
+    Display *displays = showScn ? getDisplays(&noDisplays) : NULL;
+    char *cpu = showCPU ? getCPU() : NULL;
     int noGPUs = 0;
-    GPU *gpus = getGPUs(&noGPUs);
-    char *root = getRoot();
-    char *localIP = NULL;
-    if (!noIP) localIP = getLocalIP();
+    GPU *gpus = showGPU ? getGPUs(&noGPUs) : NULL;
+    char *ram = showRAM ? getRAM() : NULL;
+    char *swap = showSwap ? getSwap() : NULL;
+    char *root = showRoot ? getRoot() : NULL;
+    char *localIP = (!noIP && showLocIP) ? getLocalIP() : NULL;
+
+
 
     if (username[0] != '\0' && hostname[0] != '\0') 
     {
@@ -2030,7 +2156,7 @@ int main(int argc, char *argv[])
         printf("\n");
     }
 
-    if (os[0] != '\0')          
+    if (os && os[0] != '\0')          
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2043,7 +2169,7 @@ int main(int argc, char *argv[])
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
     }
 
-    if (kernel[0] != '\0')      
+    if (kernel && kernel[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2056,7 +2182,7 @@ int main(int argc, char *argv[])
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
     }
 
-    if (uptime[0] != '\0')      
+    if (uptime && uptime[0] != '\0')      
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2069,7 +2195,7 @@ int main(int argc, char *argv[])
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
     }
 
-    if (shell[0] != '\0')       
+    if (shell && shell[0] != '\0')       
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2157,6 +2283,7 @@ int main(int argc, char *argv[])
     }
 
     // Console
+    if (showCon)
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2175,7 +2302,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (cpu[0] != '\0')         
+    if (cpu && cpu[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2225,7 +2352,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (ram[0] != '\0')         
+    if (ram && ram[0] != '\0')         
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2244,7 +2371,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (swap[0] != '\0')        
+    if (swap && swap[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2263,7 +2390,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (root[0] != '\0')        
+    if (root && root[0] != '\0')        
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2302,6 +2429,8 @@ int main(int argc, char *argv[])
     }
     
     printf("\n");
+
+
 
     free(ram);
     free(swap);

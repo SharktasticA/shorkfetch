@@ -10,9 +10,17 @@ shorkfetch also has a focus on providing clean CPU and GPU name reporting, espec
 
 ## Building
 
+### Quick instructions
+
+_This assumes you already have the prerequisites for compilation already installed._
+
+    git clone https://github.com/SharktasticA/shorkfetch.git
+    cd shorkfetch
+    sudo make install
+
 ### Requirements
 
-You just need a C compiler (tested with GCC with either glibc or musl).
+You just need a C compiler (tested with GCC with either glibc or musl) and make installed.
 
 ### Compilation
 
@@ -37,20 +45,43 @@ shorkfetch has pre-programmed ASCII art normally intended for use with SHORK Ope
 
 Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`. You may include the `COL` and/or `NO_ART` flags as well.
 
+### Possible errors
+
+#### Errors with static building
+
+If you experience errors with building shorkfetch statically, you can modify the `Makefile` to comment out or delete the line `LDFLAGS += -static` to build dynamically instead.
+
 
 
 ## Running
 
-Simply run `shorkfetch` to use.
+Usage: shorkfetch [OPTIONS]
 
-### Arguments
+### Options
 
-* `-b`, `--bullets`: Uses bullet points instead of field headings; can also be used to set a custom character
+* `-b`, `--bullets`: Uses bullet points instead of field headings; can also be used to specific a custom character
 * `-c`, `--compact`: Compacts field names (if not using bullets) and field values
+* `-f`, `--fields`: Allows you to specify which fields to show via a comma-separated list (os,krn,...)
 * `-h`, `--help`: Shows help information and exits
 * `-na`, `--no-art`: Disables the SHORK ASCII art (if compiled with art support)
 * `-nc`, `--no-col`: Disables all coloured output (if compiled with colour support)
-* `-ni`, `--no-ip`: Disables fields related to IP addresses
+
+### Field names
+
+These are possible field names you can use with the `--fields` argument. The feature __does not__ support using them to specify field order (yet).
+
+* `os`: OS
+* `krn`: Kernel
+* `upt`: Uptime
+* `sh`: Shell
+* `scn`: Screen(s)
+* `con`: Console
+* `cpu`: CPU
+* `gpu`: GPU(s)
+* `ram`: RAM
+* `swap`: Swap size
+* `root`: Root partition size
+* `lip`: Local IP
 
 
 
