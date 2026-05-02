@@ -37,7 +37,7 @@
 
 
 typedef struct {
-    char *name;
+    char *connector;
     int isPrimary;
     float physSize;
     int resX;
@@ -1294,9 +1294,9 @@ Display* getDisplays(int *count)
                     memset(&displays[(*count)], 0, sizeof(Display));
 
                     // Parse connector name
-                    char name[64] = {0};
-                    sscanf(buffer, "%63s", name);
-                    displays[*count].name = strdup(name);
+                    char pConnector[64] = {0};
+                    sscanf(buffer, "%63s", pConnector);
+                    displays[*count].connector = strdup(pConnector);
 
                     // Flag if connector is for primary display
                     displays[*count].isPrimary = strstr(buffer, " primary ") != NULL;
@@ -1415,21 +1415,21 @@ Display* getDisplays(int *count)
                 fclose(fileStream);
 
                 // Parse mode for resolution
-                int resX = 0, resY = 0;
-                sscanf(mode, "%dx%d", &resX, &resY);
+                int pResX = 0, pResY = 0;
+                sscanf(mode, "%dx%d", &pResX, &pResY);
 
                 // If we got nothing, no point of continuing...
-                if (resX < 0 || resY < 0) continue;
+                if (pResX <= 0 || pResY <= 0) continue;
 
                 // Reallocate displays array to take into account new display
                 displays = realloc(displays, ((*count) + 1) * sizeof(Display));
                 memset(&displays[(*count)], 0, sizeof(Display));
 
                 // Populate display data
-                displays[(*count)].name = strdup(entry->d_name);
+                displays[(*count)].connector = strdup(entry->d_name);
                 displays[(*count)].physSize = 0.0;
-                displays[(*count)].resX = resX;
-                displays[(*count)].resY = resY;
+                displays[(*count)].resX = pResX;
+                displays[(*count)].resY = pResY;
                 displays[(*count)].refresh = 0;
 
                 (*count)++;
@@ -2064,6 +2064,7 @@ int main(int argc, char *argv[])
 
     if (displays)
     {
+        int pastFirstDisplay = 0;
         for (int i = 0; i < noDisplays; i++)
         {
             Display *dis = &displays[i];
@@ -2081,17 +2082,51 @@ int main(int argc, char *argv[])
                     snprintf(refresh, 32, " @ %dHz", dis->refresh);
             }
 
+            char connector[32] = "";
+            if (dis->connector[0] != '\0')
+                snprintf(connector, 32, " (%s)", dis->connector);
+            free(dis->connector);
+
             if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+
             if (!useBullets)
             {
                 if (!COMPACT)
-                    printf("\033[%smScreen:\033[%sm  %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
+                {
+                    // No compact - no bullet - single display
+                    if (noDisplays == 1)
+                        printf("\033[%smScreen:\033[%sm  %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                    // No compact - no bullet - multiple displays - first display
+                    else if (!pastFirstDisplay)
+                        printf("\033[%smScreens:\033[%sm %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                    // No compact - no bullet - multiple displays - subsequent displays
+                    else 
+                        printf("         %s%dx%d%s%s\n", size, dis->resX, dis->resY, refresh, connector);
+                }
                 else
-                    printf("\033[%smScn:\033[%sm %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
+                {
+                    // Compact - no bullet - single display
+                    if (noDisplays == 1)
+                        printf("\033[%smScn:\033[%sm %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
+                    // Compact - no bullet - multiple displays - first display
+                    else if (!pastFirstDisplay)
+                        printf("\033[%smScn:\033[%sm %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
+                    // Compact - no bullet - multiple displays - subsequent displays
+                    else 
+                        printf("     %s%dx%d%s\n", size, dis->resX, dis->resY, refresh);
+                }
             }
-            else printf(" \033[%sm%c\033[%sm %s%dx%d%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh);
+            else 
+            {
+                // Compact/no compact - bullet - single display
+                if (noDisplays == 1 || COMPACT)
+                    printf(" \033[%sm%c\033[%sm %s%dx%d%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh);
+                // No compact - bullet - multiple displays
+                else if (!COMPACT)
+                    printf(" \033[%sm%c\033[%sm %s%dx%d%s%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+            }
 
-            free(dis->name);
+            pastFirstDisplay = 1;
         }
     }
 
@@ -2129,22 +2164,38 @@ int main(int argc, char *argv[])
 
     if (gpus)
     {
+        int pastFirstGPU = 0;
         for (int i = 0; i < noGPUs; i++)
         {
             char *gpu = interpretGPU(&gpus[i]);
+
             if (gpu[0] != '\0')     
             {
                 if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
                 if (!useBullets)
                 {
                     if (!COMPACT)
-                        printf("\033[%smGPU:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
+                    {
+                        if (noGPUs == 1)
+                            printf("\033[%smGPU:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
+                        else if (!pastFirstGPU)
+                            printf("\033[%smGPUs:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                        else
+                            printf("         %s\n", gpu);
+                    }
                     else
-                        printf("\033[%smGPU:\033[%sm %s\n", colAccent, COL_RESET, gpu);
+                    {
+                        if (noGPUs == 1 || !pastFirstGPU)
+                            printf("\033[%smGPU:\033[%sm %s\n", colAccent, COL_RESET, gpu);
+                        else
+                            printf("     %s\n", gpu);
+                    }
                 }
                 else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, gpu);
             }
+
             free(gpu);
+            pastFirstGPU = 1;
         }
     }
 
