@@ -16,9 +16,8 @@
 #ifndef IMPLEMENTERS
 #define IMPLEMENTERS
 
-static const char* ARM_IMPLEMENTERS[256] = {
+static const char* ARM_IMPLEMENTERS[193] = {
     [0x00] = "Reserved",
-    [0xC0] = "Ampere",
     [0x41] = "Arm",
     [0x42] = "Broadcom",
     [0x43] = "Cavium",
@@ -31,6 +30,7 @@ static const char* ARM_IMPLEMENTERS[256] = {
     [0x51] = "Qualcomm",
     [0x56] = "Marvell",
     [0x69] = "Intel",
+    [0xC0] = "Ampere"
 };
 
 #endif

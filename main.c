@@ -657,6 +657,32 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
             }
         }
 
+        // Catch redundant "x Gen" in the name of late Intel Core CPUs
+        if (strstr(result, " Core ") && strstr(result, " Gen "))
+        {
+            char *needle = strstr(result, " Gen ");
+            if (needle)
+            {
+                if (needle - result >= 2)
+                {
+                    char *suffix = needle - 2;
+                    // Proceed if we find a "st", "nd", "rd" or "th" suffix
+                    if ((suffix[0] == 's' && suffix[1] == 't') || (suffix[0] == 'n' && suffix[1] == 'd') || (suffix[0] == 'r' && suffix[1] == 'd') || (suffix[0] == 't' && suffix[1] == 'h'))
+                    {
+                        // Walk back to find the ordinal
+                        char *digits = suffix - 1;
+                        while (digits >= result && *digits >= '0' && *digits <= '9')
+                            digits--;
+                        char *ordinal = digits + 1;
+
+                        // Make the deletion
+                        size_t removeLen = (needle + 5) - ordinal;
+                        memmove(ordinal, needle + 5, strlen(needle + 5) + 1);
+                    }
+                }
+            }
+        }
+
         int replaces = 0;
         for (int i = 0; i < INTEL_REPLACES_LEN; i++)
         {
@@ -1417,7 +1443,7 @@ Display* getDisplays(int *count)
 }
 
 /**
- * @return String containing the CPU's name and core/thread specs or "unknown" if undetermined/error
+ * @return String containing the CPU's name and core/thread specs; empty string if unknown
  */
 char *getCPU(void)
 {
@@ -1592,7 +1618,7 @@ char *getCPU(void)
             {
                 char *end = NULL;
                 long val = strtol(implementer, &end, 0);
-                if (end != implementer && val >= 0 && val < 128 && ARM_IMPLEMENTERS[val])
+                if (end != implementer && val >= 0 && val <= 193 && ARM_IMPLEMENTERS[val])
                     implementerName = ARM_IMPLEMENTERS[val];
             }
 
