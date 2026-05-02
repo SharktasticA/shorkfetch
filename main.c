@@ -1298,6 +1298,14 @@ Display* getDisplays(int *count)
                     sscanf(buffer, "%63s", pConnector);
                     displays[*count].connector = strdup(pConnector);
 
+                    // Replace "Virtual-" with "Virt-" if present
+                    char *virtNeedle = strstr(displays[*count].connector, "Virtual-");
+                    if (virtNeedle)
+                    {
+                        memcpy(virtNeedle, "Virt-", 5);
+                        memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
+                    }
+
                     // Flag if connector is for primary display
                     displays[*count].isPrimary = strstr(buffer, " primary ") != NULL;
 
@@ -1431,6 +1439,18 @@ Display* getDisplays(int *count)
                 displays[(*count)].resX = pResX;
                 displays[(*count)].resY = pResY;
                 displays[(*count)].refresh = 0;
+
+                // Remove "cardX-" prefix if present
+                if (strncmp(displays[(*count)].connector, "card", 4) == 0)
+                    memmove(displays[(*count)].connector, displays[(*count)].connector + 6, strlen(displays[(*count)].connector + 6) + 1);
+
+                // Replace "Virtual-" with "Virt-" if present
+                char *virtNeedle = strstr(displays[*count].connector, "Virtual-");
+                if (virtNeedle)
+                {
+                    memcpy(virtNeedle, "Virt-", 5);
+                    memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
+                }
 
                 (*count)++;
             }
@@ -2118,12 +2138,18 @@ int main(int argc, char *argv[])
             }
             else 
             {
-                // Compact/no compact - bullet - single display
-                if (noDisplays == 1 || COMPACT)
+                // Compact - bullet - single or multiple displays
+                if (COMPACT)
                     printf(" \033[%sm%c\033[%sm %s%dx%d%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh);
-                // No compact - bullet - multiple displays
-                else if (!COMPACT)
-                    printf(" \033[%sm%c\033[%sm %s%dx%d%s%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                else
+                {
+                    // No compact - bullet - single display
+                    if (noDisplays == 1)
+                        printf(" \033[%sm%c\033[%sm %s%dx%d%s%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                    // No compact - bullet - multiple displays
+                    else if (!COMPACT)
+                        printf(" \033[%sm%c\033[%sm %s%dx%d%s%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                }
             }
 
             pastFirstDisplay = 1;
