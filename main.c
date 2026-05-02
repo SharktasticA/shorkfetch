@@ -1070,6 +1070,17 @@ char *getOS(void)
     // Fallback
     if (os[0] == '\0')
         strcpy(os, "unknown");
+
+    // If the name is wrapped in apostrophes, remove them
+    if (os[0] == '\'')
+    {
+        size_t osLen = strlen(os);
+        if (osLen >= 2 && os[osLen - 1] == '\'')
+        {
+            memmove(os, os + 1, osLen - 2);
+            os[osLen - 2] = '\0';
+        }
+    }
     
     if (COMPACT)
     {
