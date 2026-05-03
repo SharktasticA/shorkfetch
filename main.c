@@ -525,14 +525,25 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
         free(tmp);
     }
 
-    // If applicable, extract a GPU name from square brackets - e.g.
-    // "GM204 [GeForce GTX 980]" -> "GeForce GTX 980"
+    // If applicable, handle GPU names in/around square brackets
     if (strstr(result, "[") && result[strLen - 1] == ']')
     {
-        result[strLen - 1] = '\0';
-        char *extract = extractFromPoint(result, inputSize, '[', 1);
-        strncpy(result, extract, inputSize - 1);
-        free(extract);
+        // If Cirrus Logic GPU, we actually want to discard the square brackets and their
+        // contents
+        if (result[0] == 'G' && result[1] == 'D')
+        {
+            char *openBrac = strchr(result, '[');
+            if (openBrac) *openBrac = '\0';
+        }
+        // Extract a GPU name from square brackets - e.g. "GM204 [GeForce GTX 980]" ->
+        // "GeForce GTX 980" 
+        else
+        {
+            result[strLen - 1] = '\0';
+            char *extract = extractFromPoint(result, inputSize, '[', 1);
+            strncpy(result, extract, inputSize - 1);
+            free(extract);
+        }
     }
 
     // Apply generic deletions
@@ -565,6 +576,15 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
     if (strstr(result, "Advanced Micro Devices"))
     {
         char *tmp = findReplace(result, inputSize, "Advanced Micro Devices", "AMD");
+        strncpy(result, tmp, inputSize - 1);
+        result[inputSize - 1] = '\0';
+        free(tmp);
+    }
+
+    // Remove space between "GD" and model number for Cirrus Logic GPUs
+    if (result[0] == 'G' && result[1] == 'D' && result[2] == ' ')
+    {
+        char *tmp = findReplace(result, inputSize, "GD ", "GD");
         strncpy(result, tmp, inputSize - 1);
         result[inputSize - 1] = '\0';
         free(tmp);
