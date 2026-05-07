@@ -1059,52 +1059,9 @@ char *getUsername(void)
  */
 char *getHostname(void)
 {
-    char *hostname = NULL;
-    
-    FILE *stream = popen("hostname 2>/dev/null", "r");
-    if (stream)
-    {
-        char buffer[255];
-        if (fgets(buffer, sizeof(buffer), stream) != NULL)
-        {
-            buffer[strcspn(buffer, "\n")] = '\0';
-            hostname = strdup(buffer);
-        }
-        pclose(stream);
-    }
-
-    if (!hostname)
-    {
-        stream = popen("uname -n 2>/dev/null", "r");
-        if (stream)
-        {
-            char buffer[255];
-            if (fgets(buffer, sizeof(buffer), stream) != NULL)
-            {
-                buffer[strcspn(buffer, "\n")] = '\0';
-                hostname = strdup(buffer);
-            }
-            pclose(stream);
-        }
-    }
-
-    if (!hostname)
-    {
-        FILE *stream = fopen("/etc/hostname", "r");
-        if (stream)
-        {
-            char buffer[255];
-            if (fgets(buffer, sizeof(buffer), stream))
-            {
-                buffer[strcspn(buffer, "\n")] = '\0';
-                hostname = strdup(buffer);
-            }
-            fclose(stream);
-        }
-    }
-
-    if (!hostname) return strdup("unknown");
-    return hostname;
+    char buffer[256];
+    if (gethostname(buffer, 256) == 0) return strdup(buffer);
+    return strdup("unknown");
 }
 
 /**
