@@ -517,16 +517,19 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
     size_t strLen  = strlen(result);
 
     // Remove double-spaces
-    while (strstr(result, "  "))
+    char *src = result, *dst = result;
+    while (*src)
     {
-        char *tmp = findReplace(result, inputSize, "  ", " ");
-        strncpy(result, tmp, inputSize - 1);
-        result[inputSize - 1] = '\0';
-        free(tmp);
+        *dst++ = *src;
+        // If we hit a space, let's begin skipping them...
+        if (*src++ == ' ')
+            while (*src == ' ')
+                src++;
     }
+    *dst = '\0';
 
     // Shorten " / " to "/"
-    while (strstr(result, " / "))
+    if (strstr(result, " / "))
     {
         char *tmp = findReplace(result, inputSize, " / ", "/");
         strncpy(result, tmp, inputSize - 1);
@@ -705,7 +708,6 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
                         char *ordinal = digits + 1;
 
                         // Make the deletion
-                        size_t removeLen = (needle + 5) - ordinal;
                         memmove(ordinal, needle + 5, strlen(needle + 5) + 1);
                     }
                 }
@@ -868,14 +870,15 @@ MemInfo getMemInfo(void)
     if (stream)
     {
         char buffer[128];
-        while (fgets(buffer, sizeof(buffer), stream))
+        int parsed = 0;
+        while (fgets(buffer, sizeof(buffer), stream) && parsed < 6)
         {
-            sscanf(buffer, "MemTotal: %ld", &mi.memTotal);
-            sscanf(buffer, "MemFree: %ld", &mi.memFree);
-            sscanf(buffer, "Buffers: %ld", &mi.buffers);
-            sscanf(buffer, "Cached: %ld", &mi.cached);
-            sscanf(buffer, "SwapTotal: %ld", &mi.swapTotal);
-            sscanf(buffer, "SwapFree: %ld", &mi.swapFree);
+            if (sscanf(buffer, "MemTotal: %ld", &mi.memTotal) == 1) { parsed++; continue; }
+            else if (sscanf(buffer, "MemFree: %ld", &mi.memFree) == 1) { parsed++; continue; }
+            else if (sscanf(buffer, "Buffers: %ld", &mi.buffers) == 1) { parsed++; continue; }
+            else if (sscanf(buffer, "Cached: %ld", &mi.cached) == 1) { parsed++; continue; }
+            else if (sscanf(buffer, "SwapTotal: %ld", &mi.swapTotal) == 1) { parsed++; continue; }
+            else if (sscanf(buffer, "SwapFree: %ld", &mi.swapFree) == 1) { parsed++; continue; }
         }
         fclose(stream);
     }
@@ -1055,19 +1058,22 @@ char *getUsername(void)
 }
 
 /**
+ * @param u Parsed uname data
+ * @param uStatus The status returned from uname attempt
  * @return String containing the hostname; "unknown" if undetermined/error
  */
-char *getHostname(void)
+char *getHostname(struct utsname u, int uStatus)
 {
-    char buffer[256];
-    if (gethostname(buffer, 256) == 0) return strdup(buffer);
+    if (uStatus == 0) return strdup(u.nodename);
     return strdup("unknown");
 }
 
 /**
+ * @param u Parsed uname data
+ * @param uStatus The status returned from uname attempt
  * @return String containing the OS/Linux distro's name or "unknown" if undetermined/error
  */
-char *getOS(void)
+char *getOS(struct utsname u, int uStatus)
 {
     const int osSize = 128;
     char *os = malloc(osSize);
@@ -1114,20 +1120,8 @@ char *getOS(void)
 
     // Try uname -o
     if (os[0] == '\0')
-    {
-        FILE *stream = popen("uname -o 2>/dev/null", "r");
-        if (stream)
-        {
-            char buffer[128];
-            if (fgets(buffer, sizeof(buffer), stream) != NULL)
-            {
-                // Remove trailing newline
-                buffer[strcspn(buffer, "\n")] = '\0';
-                strcpy(os, buffer);
-            }
-            pclose(stream);
-        }
-    }
+        if (uStatus == 0)
+            strncpy(os, u.sysname, osSize - 1);
 
     // Fallback
     if (os[0] == '\0')
@@ -1179,12 +1173,13 @@ char *getOS(void)
 }
 
 /**
+ * @param u Parsed uname data
+ * @param uStatus The status returned from uname attempt
  * @return String containing the kernel version or "unknown" if undetermined/error
  */
-char *getKernel(void)
+char *getKernel(struct utsname u, int uStatus)
 {
-    struct utsname u;
-    if (uname(&u) == -1) return strdup("unknown");
+    if (uStatus != 0) return strdup("unknown");
     const char *src = u.release;
 
     if (!COMPACT)
@@ -1513,8 +1508,14 @@ char *getCPU(void)
     FILE *stream = fopen("/proc/cpuinfo", "r");
     if (stream)
     {
+        // Use these to stop parsing once we have everything we need!
+        // lookingFor's default value is x86 orientated - the ARM-based path
+        // can change this to 2, hence not a const.
+        int lookingFor = 5;
+        int parsed = 0;
+
         char buffer[128];
-        while (fgets(buffer, sizeof(buffer), stream))
+        while (fgets(buffer, sizeof(buffer), stream) && parsed < lookingFor)
         {
             if (strncmp(buffer, "processor", 9) == 0)
             {
@@ -1527,36 +1528,42 @@ char *getCPU(void)
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 strncpy(vendor, extract, 15);
                 free(extract);
+                parsed++;
             }
             else if (strncmp(buffer, "CPU implementer", 15) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 strncpy(implementer, extract, 15);
                 free(extract);
+                lookingFor = 2;
             }
             else if (strncmp(buffer, "model name", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, 128, ':', 2);
                 strncpy(model, extract, 127);
                 free(extract);
+                parsed++;
             }
             else if (strncmp(buffer, "CPU architecture", 16) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':', 2);
                 strncpy(architecture, extract, 3);
                 free(extract);
+                lookingFor = 2;
             }
             else if (strncmp(buffer, "cpu cores", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':', 2);
                 strncpy(cores, extract, 3);
                 free(extract);
+                parsed++;
             }
             else if (strncmp(buffer, "siblings", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':', 2);
                 strncpy(threads, extract, 3);
                 free(extract);
+                parsed++;
             }
             else if (strncmp(buffer, "fpu", 3) == 0)
             {
@@ -1569,6 +1576,7 @@ char *getCPU(void)
                         strncpy(fpu, "0", 2);
                     free(extract);
                 }
+                parsed++;
             }
         }
         fclose(stream);
@@ -2105,6 +2113,7 @@ int main(int argc, char *argv[])
             }
             else if (noFields < 6) showShork = 0;
             else if (noFields == 6) shorkLine = 1;
+            free(csv);
         }
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
@@ -2116,7 +2125,7 @@ int main(int argc, char *argv[])
 
 
 
-    MemInfo mi;
+    MemInfo mi = {0};
     if (showRAM || showSwap)
     {
         mi = getMemInfo();
@@ -2127,12 +2136,15 @@ int main(int argc, char *argv[])
         }
     }
 
+    struct utsname u;
+    int uStatus = uname(&u);
+
 
 
     char *username = getUsername();
-    char *hostname = getHostname();
-    char *os = showOS ? getOS() : NULL;
-    char *kernel = showKrn ? getKernel() : NULL;
+    char *hostname = getHostname(u, uStatus);
+    char *os = showOS ? getOS(u, uStatus) : NULL;
+    char *kernel = showKrn ? getKernel(u, uStatus) : NULL;
     char *uptime = showUpt ? getUptime() : NULL;
     char *shell = showSh ? getShell() : NULL;
     int noDisplays = 0;
