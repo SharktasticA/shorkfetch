@@ -51,6 +51,15 @@ typedef struct {
     int device;
 } GPU;
 
+typedef struct {
+    long memTotal;
+    long memFree;
+    long buffers;
+    long cached;
+    long swapTotal;
+    long swapFree;
+} MemInfo;
+
 
 
 #define COL_BLACK           "0;30"
@@ -845,6 +854,33 @@ int formatNewLines(char *input, int width, char *indent, int trim)
     }
 
     return lines;
+}
+
+/**
+ * Reads memory and swap data from /proc/meminfo into a MemInfo struct.
+ * @return populated MemInfo struct
+ */
+MemInfo getMemInfo(void)
+{
+    MemInfo mi = {0};
+
+    FILE *stream = fopen("/proc/meminfo", "r");
+    if (stream)
+    {
+        char buffer[128];
+        while (fgets(buffer, sizeof(buffer), stream))
+        {
+            sscanf(buffer, "MemTotal: %ld", &mi.memTotal);
+            sscanf(buffer, "MemFree: %ld", &mi.memFree);
+            sscanf(buffer, "Buffers: %ld", &mi.buffers);
+            sscanf(buffer, "Cached: %ld", &mi.cached);
+            sscanf(buffer, "SwapTotal: %ld", &mi.swapTotal);
+            sscanf(buffer, "SwapFree: %ld", &mi.swapFree);
+        }
+        fclose(stream);
+    }
+
+    return mi;
 }
 
 /**
@@ -1811,88 +1847,60 @@ GPU* getGPUs(int *count)
 }
 
 /**
+ * @param mi /proc/meminfo data
  * @return String containing the system memory used and total amounts both numerically and as a percentage
  */
-char *getRAM(void)
+char *getRAM(MemInfo mi)
 {
     const int ramSize = 64;
     char *ram = malloc(ramSize);
     if (!ram) return strdup("");
     ram[0] = '\0';
 
-    FILE *stream = fopen("/proc/meminfo", "r");
-    if (stream)
+    long freeMem = mi.memFree + mi.buffers + mi.cached;
+    long used = mi.memTotal - freeMem;
+    char *usedStr = bytesToReadable("KiB", used);
+    char *totalStr = bytesToReadable("KiB", mi.memTotal);
+
+    if (!COMPACT)
     {
-        char buffer[ramSize * 2];
-        long total = 0, freeMem = 0, buffers = 0, cached = 0;
-        while (fgets(buffer, sizeof(buffer), stream))
-        {
-            if (sscanf(buffer, "MemTotal: %ld kB", &total) == 1) continue;
-            if (sscanf(buffer, "MemFree: %ld kB", &freeMem) == 1) continue;
-            if (sscanf(buffer, "Buffers: %ld kB", &buffers) == 1) continue;
-            if (sscanf(buffer, "Cached: %ld kB", &cached) == 1) continue;
-            if (total != 0 && freeMem != 0 && buffers != 0 && cached != 0) break;
-        }
-        fclose(stream);
-
-        freeMem = freeMem + buffers + cached;
-        long used = total - freeMem;
-        char *usedStr = bytesToReadable("KiB", used);
-        char *totalStr = bytesToReadable("KiB", total);
-
-        if (!COMPACT)
-        {
-            int pct = total ? (int)((used * 100) / total) : 0;
-            snprintf(ram, ramSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
-        }
-        else snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
-        
-        free(usedStr);
-        free(totalStr);
+        int pct = mi.memTotal ? (int)((used * 100) / mi.memTotal) : 0;
+        snprintf(ram, ramSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
     }
+    else snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
+    
+    free(usedStr);
+    free(totalStr);
 
     return ram;
 }
 
 /**
+ * @param mi /proc/meminfo data
  * @return String containing the system swap used and total amounts both numerically and as a percentage
  */
-char *getSwap(void)
+char *getSwap(MemInfo mi)
 {
+    if (mi.swapTotal == 0) return strdup("");
+
     const int swapSize = 64;
     char *swap = malloc(swapSize);
     if (!swap) return strdup("");
     swap[0] = '\0';
 
-    FILE *stream = fopen("/proc/meminfo", "r");
-    if (stream)
+    long used = mi.swapTotal - mi.swapFree;
+    char *usedStr = bytesToReadable("KiB", used);
+    char *totalStr = bytesToReadable("KiB", mi.swapTotal);
+
+    if (!COMPACT)
     {
-        char buffer[swapSize * 2];
-        long total = 0, freeSwap = 0;
-        while (fgets(buffer, sizeof(buffer), stream))
-        {
-            if (sscanf(buffer, "SwapTotal: %ld kB", &total) == 1) continue;
-            if (sscanf(buffer, "SwapFree: %ld kB", &freeSwap) == 1) continue;
-            if (total != 0 && freeSwap != 0) break;
-        }
-        fclose(stream);
-
-        if (total == 0) return strdup("");
-
-        long used = total - freeSwap;
-        char *usedStr = bytesToReadable("KiB", used);
-        char *totalStr = bytesToReadable("KiB", total);
-
-        if (!COMPACT)
-        {
-            int pct = total ? (int)((used * 100) / total) : 0;
-            snprintf(swap, swapSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
-        }
-        else snprintf(swap, swapSize, "%s / %s", usedStr, totalStr);
-
-        free(usedStr);
-        free(totalStr);
+        int pct = mi.swapTotal ? (int)((used * 100) / mi.swapTotal) : 0;
+        snprintf(swap, swapSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
     }
+    else snprintf(swap, swapSize, "%s / %s", usedStr, totalStr);
+
+    free(usedStr);
+    free(totalStr);
 
     return swap;
 }
@@ -2151,6 +2159,19 @@ int main(int argc, char *argv[])
 
 
 
+    MemInfo mi;
+    if (showRAM || showSwap)
+    {
+        mi = getMemInfo();
+        if (mi.memTotal <= 0)
+        {
+            printf("ERROR: could not load data from /proc/meminfo\n");
+            return 1;
+        }
+    }
+
+
+
     char *username = getUsername();
     char *hostname = getHostname();
     char *os = showOS ? getOS() : NULL;
@@ -2162,8 +2183,8 @@ int main(int argc, char *argv[])
     char *cpu = showCPU ? getCPU() : NULL;
     int noGPUs = 0;
     GPU *gpus = showGPU ? getGPUs(&noGPUs) : NULL;
-    char *ram = showRAM ? getRAM() : NULL;
-    char *swap = showSwap ? getSwap() : NULL;
+    char *ram = showRAM ? getRAM(mi) : NULL;
+    char *swap = showSwap ? getSwap(mi) : NULL;
     char *root = showRoot ? getRoot() : NULL;
     char *localIP = (!noIP && showLocIP) ? getLocalIP() : NULL;
 
@@ -2177,7 +2198,7 @@ int main(int argc, char *argv[])
 
         size_t len = strlen(username) + 1 + strlen(hostname);
         for (size_t i = 0; i < len; i++) printf("-");
-        printf("\n");
+        putchar('\n');
     }
 
     if (os && os[0] != '\0')          
@@ -2452,7 +2473,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    printf("\n");
+    putchar('\n');
 
 
 
