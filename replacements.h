@@ -26,12 +26,13 @@ struct Replacement {
 
 
 static const struct Replacement AMD_REPLACES[] = {
-    { " 486 DX",        " Am486DX",         0 },
-    { "Am486DX/2",      "Am486DX2",         0 },
-    { "Am486DX/4",      "Am486DX4/Am5x86",  0 },
-    { "K6 3D+",         "K6-III",           0 },
-    { "K6 3D",          "K6-2",             0 },
-    { "K6-III",         "K6-2+/K6-III+",    1 }
+    { " 486 DX",                " Am486DX",         0 },
+    { "Am486DX/2",              "Am486DX2",         0 },
+    { "Am486DX/4",              "Am486DX4/Am5x86",  0 },
+    { "K6 3D+",                 "K6-III",           0 },
+    { "K6 3D",                  "K6-2",             0 },
+    { "K6-III",                 "K6-2+/K6-III+",    1 },
+    { " with Radeon Graphics",   "",                0 }
 };
 static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0]);
 
@@ -45,8 +46,7 @@ static const struct Replacement COMPACT_CPU_REPLACES[] = {
     { "Core 2 Quad",            "C2Q",          0 },
     { "Core i",                 "i",            0 },
     { " for ",                  " ",            0 },
-    { "Mobile ",                "",             0 },
-    { " with Radeon",           " w/ Radeon",   0 }
+    { "Mobile ",                "",             0 }
 };
 static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) / sizeof(COMPACT_CPU_REPLACES[0]);
 
