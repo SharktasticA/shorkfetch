@@ -57,9 +57,9 @@ static const struct Replacement COMPACT_GPU_REPLACES[] = {
     { "Express ",               "",             0 },
     { "Extreme Graphics",       "ET",           0 },
     { " for ",                  " ",            0 },
-    { " GeForce2",              " 2",            0 },
-    { " GeForce3",              " 3",            0 },
-    { " GeForce4",              " 4",            0 },
+    { " GeForce2",              " 2",           0 },
+    { " GeForce3",              " 3",           0 },
+    { " GeForce4",              " 4",           0 },
     { " GeForce",               "",             0 },
     { "Graphics Technology",    "GT",           0 },
     { " Graphics",              "",             0 },
@@ -67,7 +67,8 @@ static const struct Replacement COMPACT_GPU_REPLACES[] = {
     { "Quadro ",                "",             0 },
     { "Max-Q",                  "M-Q",          0 },
     { "Mobile ",                "",             0 },
-    { " Radeon",                "",             0 }
+    { " Radeon",                "",             0 },
+    { "Vega/Vega",              "Vega",         0 }
 };
 static const int COMPACT_GPU_REPLACES_LEN = sizeof(COMPACT_GPU_REPLACES) / sizeof(COMPACT_GPU_REPLACES[0]);
 

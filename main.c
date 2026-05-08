@@ -819,9 +819,10 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // containing the codename)
         if (cleanedDeviceBrac)
         {
-            // If the info contains the "Graphics" (e.g., "Radeon R6 Graphics"),
-            // we will permit the norm to help with distinguishing it
-            if (strstr(cleanedDeviceBrac, " Graphics"))
+            // If the info contains the "Graphics" (e.g., "Radeon R6 Graphics")
+            // or "Vega Series", we will permit the norm to help with
+            // distinguishing it
+            if (strstr(cleanedDeviceBrac, " Graphics") || strstr(cleanedDeviceBrac, " Vega Series"))
                 snprintf(cleanedDevice, inputSize, "%s (%s)", cleanedDeviceBrac, cleanedDeviceNorm);
             // Otherwise, we just use the bracketed info
             else
@@ -842,6 +843,15 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
             next = first + 6;
             while ((next = strstr(next, "Radeon ")))
                 memmove(next, next + 7, strlen(next + 7) + 1);
+        }
+
+        // Especially for Vega iGPU strings like "Radeon Vega Series /
+        // Radeon Vega Mobile Series"
+        if (strstr(cleanedDevice, " Series/Vega Mobile Series"))
+        {
+            char *tmp = findReplace(cleanedDevice, inputSize, " Series/Vega Mobile Series", "/Vega Mobile");
+            free(cleanedDevice);
+            cleanedDevice = tmp;
         }
     }
     // Intel Corporation
