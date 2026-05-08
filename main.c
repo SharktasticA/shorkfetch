@@ -846,7 +846,14 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     }
     // Intel Corporation
     else if (vendor[0] == 'I' && strncmp(vendor, "Intel", 5) == 0)
+    {
         cleanedVendor = strdup("Intel");
+
+        // If we have bracketed info, we discard the norm (usually just
+        // containing the core name)
+        if (cleanedDeviceBrac)
+            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+    }
     // NVIDIA Corporation
     else if (vendor[0] == 'N' && strncmp(vendor, "NVIDIA", 6) == 0)
     {
