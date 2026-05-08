@@ -495,15 +495,13 @@ int readHexFile(const char *path)
 
 
 /**
- * Removes predefined substrings from an input string. It's intended to
- * simplify CPU and GPU names by removing things like "(R)", "(TM)",
- * "Corporation", etc.
+ * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
  * @param input Input string
  * @param inputSize Size to use when allocating the result string
  * @param coreCount Number of cores the processor has (presently only used for CPU name manipulation)
- * @return String containing what's left after cleaning
+ * @return String containing the result after cleaning
  */
-char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
+char *cleanCPUName(const char *input, size_t inputSize, int coreCount)
 {
     if (!input || inputSize < 2) return strdup("");
 
@@ -537,27 +535,6 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
         free(tmp);
     }
 
-    // If applicable, handle GPU names in/around square brackets
-    if (strstr(result, "[") && result[strLen - 1] == ']')
-    {
-        // If Cirrus Logic GPU, we actually want to discard the square brackets and their
-        // contents
-        if (result[0] == 'G' && result[1] == 'D')
-        {
-            char *openBrac = strchr(result, '[');
-            if (openBrac) *openBrac = '\0';
-        }
-        // Extract a GPU name from square brackets - e.g. "GM204 [GeForce GTX 980]" ->
-        // "GeForce GTX 980" 
-        else
-        {
-            result[strLen - 1] = '\0';
-            char *extract = extractFromPoint(result, inputSize, '[', 1);
-            strncpy(result, extract, inputSize - 1);
-            free(extract);
-        }
-    }
-
     // Apply generic deletions
     for (size_t i = 0; i < DELETIONS_LEN; i++)
     {
@@ -588,15 +565,6 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
     if (strstr(result, "Advanced Micro Devices"))
     {
         char *tmp = findReplace(result, inputSize, "Advanced Micro Devices", "AMD");
-        strncpy(result, tmp, inputSize - 1);
-        result[inputSize - 1] = '\0';
-        free(tmp);
-    }
-
-    // Remove space between "GD" and model number for Cirrus Logic GPUs
-    if (result[0] == 'G' && result[1] == 'D' && result[2] == ' ')
-    {
-        char *tmp = findReplace(result, inputSize, "GD ", "GD");
         strncpy(result, tmp, inputSize - 1);
         result[inputSize - 1] = '\0';
         free(tmp);
@@ -763,14 +731,14 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
     // Compact mode specific cleaning
     if (COMPACT)
     {
-        // Apply compact-specific CPU and GPU name shortenings
+        // Apply compact-specific CPU name shortenings
         int replaces = 0;
-        for (int i = 0; i < COMPACT_CPU_GPU_REPLACES_LEN; i++)
+        for (int i = 0; i < COMPACT_CPU_REPLACES_LEN; i++)
         {
-            if (COMPACT_CPU_GPU_REPLACES[i].standalone && replaces > 0) continue;
-            else if (strstr(result, COMPACT_CPU_GPU_REPLACES[i].match))
+            if (COMPACT_CPU_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, COMPACT_CPU_REPLACES[i].match))
             {
-                char *tmp = findReplace(result, inputSize, COMPACT_CPU_GPU_REPLACES[i].match, COMPACT_CPU_GPU_REPLACES[i].replacement);
+                char *tmp = findReplace(result, inputSize, COMPACT_CPU_REPLACES[i].match, COMPACT_CPU_REPLACES[i].replacement);
                 strncpy(result, tmp, inputSize - 1);
                 result[inputSize - 1] = '\0';
                 free(tmp);
@@ -778,6 +746,211 @@ char *cleanProcessorName(const char *input, size_t inputSize, int coreCount)
             }
         }
     }
+
+    return result;
+}
+
+/**
+ * Cleans a GPU's name so it is less needlessly verbose and 'to the point'.
+ * @param input Input string
+ * @param inputSize Size to use when allocating the result string
+ * @return String containing the result after cleaning
+ */
+char *cleanGPUName(const char *vendor, const char *device, const size_t inputSize)
+{
+    if (!vendor || !device || inputSize < 2) return strdup("");
+
+    // Prepare result strings
+    const size_t RESULT_SIZE = (inputSize * 2) + 1;
+    char *result = malloc(RESULT_SIZE);
+    if (!result) return strdup("");
+    char *cleanedVendor = NULL;
+    char *cleanedDevice = strdup(device);
+    char *cleanedDeviceNorm = NULL;
+    char *cleanedDeviceBrac = NULL;
+
+
+
+    // Shorten " / " to "/"
+    if (strstr(cleanedDevice, " / "))
+    {
+        char *tmp = findReplace(cleanedDevice, inputSize, " / ", "/");
+        free(cleanedDevice);
+        cleanedDevice = tmp;
+    }
+
+    // If we find an opening square bracket, break up device name into "normal"
+    // and "bracket" strings
+    const char *brac = strchr(cleanedDevice, '[');
+    if (brac)
+    {
+        size_t normLen = (size_t)(brac - cleanedDevice);
+        cleanedDeviceNorm = strndup(cleanedDevice, normLen);
+
+        // Remove trailing space
+        if (normLen > 0 && cleanedDeviceNorm[normLen - 1] == ' ')
+            cleanedDeviceNorm[normLen - 1] = '\0';
+
+        // Find closing bracket
+        const char *end = strchr(brac + 1, ']');
+        if (end)
+        {
+            size_t bracLen = (size_t)(end - (brac + 1));
+            cleanedDeviceBrac = strndup(brac + 1, bracLen);
+        }
+        // If no closing bracket, we treat this as invalid...
+        else cleanedDeviceBrac = NULL;
+    }
+    else
+    {
+        cleanedDeviceNorm = strdup(device);
+        cleanedDeviceBrac = NULL;
+    }
+
+
+
+    // Vendor-specific actions...
+    // Advanced Micro Devices, Inc. [AMD/ATI]
+    if (vendor[0] == 'A' && strncmp(vendor, "Advanced Micro", 14) == 0)
+    {
+        cleanedVendor = strdup("AMD/ATI");
+
+        // If we have bracketed info, we *may* discard the norm (usually just
+        // containing the codename)
+        if (cleanedDeviceBrac)
+        {
+            // If the info contains the "Graphics" (e.g., "Radeon R6 Graphics"),
+            // we will permit the norm to help with distinguishing it
+            if (strstr(cleanedDeviceBrac, " Graphics"))
+                snprintf(cleanedDevice, inputSize, "%s (%s)", cleanedDeviceBrac, cleanedDeviceNorm);
+            // Otherwise, we just use the bracketed info
+            else
+                snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+        }
+
+        // Begin testing for if there are multiple "Radeon"... Look for the
+        // first instance of "Radeon"
+        char *first = strstr(cleanedDevice, "Radeon");
+        if (first)
+        {
+            // Handle " Radeon"; +6 so we don't trip on the first instance
+            char *next = first + 6;
+            while ((next = strstr(next, " Radeon")))
+                memmove(next, next + 7, strlen(next + 7) + 1);
+
+            // Handle "Radeon "
+            next = first + 6;
+            while ((next = strstr(next, "Radeon ")))
+                memmove(next, next + 7, strlen(next + 7) + 1);
+        }
+    }
+    // Intel Corporation
+    else if (vendor[0] == 'I' && strncmp(vendor, "Intel", 5) == 0)
+        cleanedVendor = strdup("Intel");
+    // NVIDIA Corporation
+    else if (vendor[0] == 'N' && strncmp(vendor, "NVIDIA", 6) == 0)
+    {
+        cleanedVendor = strdup("NVIDIA");
+
+        // If we have bracketed info, we discard the norm (usually just
+        // containing the core name)
+        if (cleanedDeviceBrac)
+            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+    }
+    // 3Dfx Interactive, Inc.
+    else if (vendor[0] == '3' && strncmp(vendor, "3Dfx", 4) == 0)
+    {
+        cleanedVendor = strdup("3Dfx");
+
+        // If this Voodoo is probably a Velocity (entry-level)
+        if (cleanedDeviceBrac && cleanedDeviceBrac[0] == 'V')
+            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+
+        // E.g., Voodoo 4/Voodoo 5 -> Voodoo 4/5
+        if (strstr(cleanedDevice, "/Voodoo "))
+        {
+            char *tmp = findReplace(cleanedDevice, inputSize, "/Voodoo ", "/");
+            free(cleanedDevice);
+            cleanedDevice = tmp;
+        }
+    }
+    else if (vendor[0] == 'C')
+    {
+        // Chips and Technologies
+        if (strncmp(vendor, "Chips and", 9) == 0)
+            cleanedVendor = strdup("Chips & Technologies");
+        // Cirrus Logic
+        else if (strncmp(vendor, "Cirrus Logic", 12) == 0)
+        {
+            cleanedVendor = strdup("Cirrus Logic");
+
+            // Discard any bracketed info like "Alpine" 
+            if (cleanedDeviceBrac)
+                snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceNorm);
+
+            // Remove space between "GD" and model number
+            if (cleanedDevice[0] == 'G' && cleanedDevice[1] == 'D' && cleanedDevice[2] == ' ')
+            {
+                char *tmp = findReplace(cleanedDevice, inputSize, "GD ", "GD");
+                free(cleanedDevice);
+                cleanedDevice = tmp;
+            }
+        }
+    }
+    // Matrox Electronics Systems Ltd.
+    else if (vendor[0] == 'M' && strncmp(vendor, "Matrox", 6) == 0)
+        cleanedVendor = strdup("Matrox");
+    // S3 Graphics Ltd.
+    else if (vendor[0] == 'S' && strncmp(vendor, "S3 ", 3) == 0)
+        cleanedVendor = strdup("S3 Graphics");
+    // Trident Microsystems
+    else if (vendor[0] == 'T' && strncmp(vendor, "Trident", 7) == 0)
+        cleanedVendor = strdup("Trident");
+    // VMware
+    else if (vendor[0] == 'V' && strncmp(vendor, "VMware", 6) == 0)
+        cleanedVendor = strdup("VMware");
+    // Anything else...
+    else
+    {
+        // Apply generic deletions
+        cleanedVendor = strdup(vendor);
+        for (size_t i = 0; i < DELETIONS_LEN; i++)
+        {
+            const char *pattern = DELETIONS[i];
+            char *tmp = findErase(cleanedVendor, inputSize, pattern);
+            free(cleanedVendor);
+            cleanedVendor = tmp;
+        }
+    }
+
+
+
+    // Combine and return final result
+    snprintf(result, RESULT_SIZE, "%s %s", cleanedVendor, cleanedDevice);
+
+    // Compact mode specific cleaning
+    if (COMPACT)
+    {
+        // Apply compact-specific GPU name shortenings
+        int replaces = 0;
+        for (int i = 0; i < COMPACT_GPU_REPLACES_LEN; i++)
+        {
+            if (COMPACT_GPU_REPLACES[i].standalone && replaces > 0) continue;
+            else if (strstr(result, COMPACT_GPU_REPLACES[i].match))
+            {
+                char *tmp = findReplace(result, RESULT_SIZE, COMPACT_GPU_REPLACES[i].match, COMPACT_GPU_REPLACES[i].replacement);
+                strncpy(result, tmp, RESULT_SIZE - 1);
+                result[RESULT_SIZE - 1] = '\0';
+                free(tmp);
+                replaces++;
+            }
+        }
+    }
+
+    free(cleanedVendor);
+    free(cleanedDevice);
+    free(cleanedDeviceNorm);
+    free(cleanedDeviceBrac);
 
     return result;
 }
@@ -917,9 +1090,6 @@ char *interpretGPU(GPU *gpuIDs)
         if (INTEL_IGPUS[gpuIDs->device])
         {
             snprintf(gpu, gpuSize, "Intel %s", INTEL_IGPUS[gpuIDs->device]);
-            char *clean = cleanProcessorName(gpu, gpuSize, -1);
-            strncpy(gpu, clean, gpuSize);
-            free(clean);
             return gpu;
         }
     }
@@ -986,11 +1156,7 @@ char *interpretGPU(GPU *gpuIDs)
         snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
     else
     {
-        char *cleanVendor = cleanProcessorName(vendor, gpuSize / 2, -1);
-        char *cleanDevice = cleanProcessorName(device, gpuSize / 2, -1);
-        snprintf(gpu, gpuSize, "%s %s", cleanVendor, cleanDevice);
-        free(cleanVendor);
-        free(cleanDevice);
+        snprintf(gpu, gpuSize, "%s", cleanGPUName(vendor, device, gpuSize));
     }
 
     if (vendor) free(vendor);
@@ -1743,7 +1909,7 @@ char *getCPU(void)
     free(threads);
     free(fpu);
 
-    char *cleanedCPU = cleanProcessorName(cpu, 134, coreCount);
+    char *cleanedCPU = cleanCPUName(cpu, 134, coreCount);
     strncpy(cpu, cleanedCPU, 133);
     free(cleanedCPU);
 
@@ -1779,32 +1945,37 @@ GPU* getGPUs(int *count)
 
         char classPath[PATH_MAX / 3], vendorPath[PATH_MAX / 3], devicePath[PATH_MAX / 3];
         snprintf(classPath, sizeof(classPath), "%s/%s/class", "/sys/bus/pci/devices", entry->d_name);
-        snprintf(vendorPath, sizeof(vendorPath), "%s/%s/vendor", "/sys/bus/pci/devices", entry->d_name);
-        snprintf(devicePath, sizeof(devicePath), "%s/%s/device", "/sys/bus/pci/devices", entry->d_name);
-
         int class = readHexFile(classPath);
-        int vendor = readHexFile(vendorPath);
-        int device = readHexFile(devicePath);
+        class = (class >> 8) & 0xFFFF;
 
-        if ((class >> 16) == 0x03)
+        // We only want class 0x30x...
+        if ((class >> 8) == 0x03 && class != 0x0380)
         {
-            int excluded = 0;
-            for (int i = 0; i < EXCLUDED_PCI_DIDS_LEN; i++)
+            snprintf(vendorPath, sizeof(vendorPath), "%s/%s/vendor", "/sys/bus/pci/devices", entry->d_name);
+            snprintf(devicePath, sizeof(devicePath), "%s/%s/device", "/sys/bus/pci/devices", entry->d_name);
+            int vendor = readHexFile(vendorPath);
+            int device = readHexFile(devicePath);
+
+            if (EXCLUDED_PCI_DIDS_LEN > 0)
             {
-                if (EXCLUDED_PCI_DIDS[i] == device)
+                int excluded = 0;
+                for (int i = 0; i < EXCLUDED_PCI_DIDS_LEN; i++)
                 {
-                    excluded = 1;
-                    break;
+                    if (EXCLUDED_PCI_DIDS[i] == device)
+                    {
+                        excluded = 1;
+                        break;
+                    }
                 }
+                if (excluded) continue;
             }
-            if (excluded) continue;
 
             gpus[*count].vendor = vendor;
             gpus[*count].device = device;
             (*count)++;
-        }
 
-        if (*count == 4) break;
+            if (*count == 4) break;
+        }
     }
     closedir(dir);
 
