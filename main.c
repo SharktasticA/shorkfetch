@@ -1087,13 +1087,17 @@ char *interpretGPU(GPU *gpuIDs)
     // If Intel GPU, query pre-defined iGPU list
     if (gpuIDs->vendor == 0x8086)
     {
-        if (INTEL_IGPUS[gpuIDs->device])
+        const char *name = INTEL_IGPUS[gpuIDs->device];
+        if (name)
         {
-            snprintf(gpu, gpuSize, "Intel %s", INTEL_IGPUS[gpuIDs->device]);
+            char *tmp = cleanGPUName("Intel", name, gpuSize);
+            strncpy(gpu, tmp, gpuSize - 1);
+            gpu[gpuSize - 1] = '\0';
+            free(tmp);
             return gpu;
         }
     }
-    
+
     char *pciids;
     if (access("/usr/share/misc/pci.ids", F_OK) == 0)
         pciids = "/usr/share/misc/pci.ids";
