@@ -28,7 +28,8 @@ struct Replacement {
 static const struct Replacement AMD_REPLACES[] = {
     { " 486 DX",                " Am486DX",         0 },
     { "Am486DX/2",              "Am486DX2",         0 },
-    { "Am486DX/4",              "Am486DX4/Am5x86",  0 },
+    { "Am486DX/4",              "Am486DX4",         0 },
+    { "Am5x86-WT",              "Am5x86",           0 },
     { "K6 3D+",                 "K6-III",           0 },
     { "K6 3D",                  "K6-2",             0 },
     { "K6-III",                 "K6-2+/K6-III+",    1 },
@@ -88,6 +89,7 @@ const char *DELETIONS[] =
     "AMD-",                             // For AMD K6
     ", Inc.",
     ", Inc",
+    " Inc",
     "(R)",
     "(tm)",
     "(tm )",                            // For AMD Duron
