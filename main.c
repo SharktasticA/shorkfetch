@@ -863,6 +863,10 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // containing the core name)
         if (cleanedDeviceBrac)
             snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+
+        // Some Arc GPUs have "Intel" in the device name...
+        if (strncmp(cleanedDevice, "Intel ", 6) == 0)
+            memmove(cleanedDevice, cleanedDevice + 6, strlen(cleanedDevice) - 5);
     }
     // NVIDIA Corporation
     else if (vendor[0] == 'N' && strncmp(vendor, "NVIDIA", 6) == 0)
