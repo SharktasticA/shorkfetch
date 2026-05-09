@@ -894,8 +894,13 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     else if (vendor[0] == 'C')
     {
         // Chips and Technologies
-        if (strncmp(vendor, "Chips and", 9) == 0)
-            cleanedVendor = strdup("Chips & Technologies");
+        if (vendor[1] == '&' || strncmp(vendor, "Chips and", 9) == 0)
+        {
+            if (COMPACT)
+                cleanedVendor = strdup("C&T");
+            else
+                cleanedVendor = strdup("Chips & Technologies");
+        }
         // Cirrus Logic
         else if (strncmp(vendor, "Cirrus Logic", 12) == 0)
         {
@@ -919,10 +924,23 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         cleanedVendor = strdup("Matrox");
     // S3 Graphics Ltd.
     else if (vendor[0] == 'S' && strncmp(vendor, "S3 ", 3) == 0)
+    {
         cleanedVendor = strdup("S3 Graphics");
-    // Trident Microsystems
-    else if (vendor[0] == 'T' && strncmp(vendor, "Trident", 7) == 0)
-        cleanedVendor = strdup("Trident");
+
+        // If we have bracketed info, we discard the norm (usually just
+        // containing the core name)
+        if (cleanedDeviceBrac)
+            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+    }
+    else if (vendor[0] == 'T')
+    {
+        // Trident Microsystems
+        if (strncmp(vendor, "Trident", 7) == 0)
+            cleanedVendor = strdup("Trident");
+        // Tseng Labs Inc
+        else if (strncmp(vendor, "Tseng", 5) == 0)
+            cleanedVendor = strdup("Tseng Labs");
+    }
     // VMware
     else if (vendor[0] == 'V' && strncmp(vendor, "VMware", 6) == 0)
         cleanedVendor = strdup("VMware");
