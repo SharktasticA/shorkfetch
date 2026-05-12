@@ -1813,9 +1813,30 @@ char *getWM(char *de)
     {
         if (procExists(WINDOW_MANAGERS[i].cmd, 0))
         {
-            // If DE == WM, we treat this as just a WM
-            if (de && strstr(de, WINDOW_MANAGERS[i].name) != NULL)
-                return de;
+            // If DE == WM, we may treat this as just a WM
+            if (de)
+            {
+                // Convert both subjects to all caps for a case-insensitive 
+                // comparison
+                char *deCaps = strdup(de);
+                    for (size_t j = 0; deCaps[j]; j++)
+                        if (deCaps[j] >= 'a' && deCaps[j] <= 'z')
+                            deCaps[j] -= 32;
+                char *wmCaps = strdup(WINDOW_MANAGERS[i].name);
+                for (size_t j = 0; wmCaps[j]; j++)
+                    if (wmCaps[j] >= 'a' && wmCaps[j] <= 'z')
+                        wmCaps[j] -= 32;
+
+                if (strstr(deCaps, wmCaps) != NULL)
+                {
+                    free(deCaps);
+                    free(wmCaps);
+                    return de;
+                }
+
+                free(deCaps);
+                free(wmCaps);
+            }
 
             return strdup(WINDOW_MANAGERS[i].name);
         }
