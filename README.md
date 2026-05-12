@@ -8,6 +8,12 @@ shorkfetch also has a focus on providing clean CPU and GPU name reporting, espec
 
 
 
+## Help wanted!
+
+shorkfetch is young, and I would love to hear from you if you have tried shorkfetch and found that (in particular) the **DE, WM and/or GPU fields** were incorrect or imprecise, or in your opinion, were overly verbose, containing marks like "(R)", "TM", etc. and could likely be shortened without compromising understanding. Feel free to create an issue here or contact me via [email](https://sharktastica.co.uk/contact), Discord (@sharktastica) or Reddit (u/sharktastica), and I will take your feedback on board! Please include a screenshot of your shorkfetch's output, some context about your system's real specifications, and especially the result of `echo $XDG_CURRENT_DESKTOP` for DE/WM related reports.
+
+
+
 ## Building
 
 ### Quick instructions
@@ -75,6 +81,8 @@ These are possible field names you can use with the `--fields` argument. The fea
 * `upt`: Uptime
 * `sh`: Shell
 * `scn`: Screen(s)
+* `de`: Desktop environment
+* `wm`: Window manager and/or Wayland compositor
 * `con`: Console
 * `cpu`: CPU
 * `gpu`: GPU(s)

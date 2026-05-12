@@ -18,6 +18,7 @@
 #include "igpus.h"
 #include "implementers.h"
 #include "replacements.h"
+#include "wms.h"
 
 #include <dirent.h>
 #include <net/if.h>
@@ -79,8 +80,11 @@ typedef struct {
 #define COL_RESET           "0"
 #define COL_WHITE           "0;37"
 #define COL_YELLOW          "0;33"
+
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
+
+#define TASK_COMM_LEN       24
 
 
 
@@ -108,6 +112,9 @@ const char SHORK[20][20] = {
     "                   "
 };
 static struct winsize TERM_SIZE;
+static int WAYLAND_PRESENT;
+static int X11_PRESENT;
+static char *XDG_CURRENT_DESKTOP;
 
 
 
@@ -475,6 +482,61 @@ int isqrt(int x)
     }
 
     return result;
+}
+
+/**
+ * Checks if a given process name is presently running and via the /proc 
+ * filesystem.
+ * @param name The process name to find
+ * @param strict Flags if we are looking for an exact match (1) or not (0)
+ * @return 1 if found; 0 if not found or error
+ */
+int procExists(const char *name, const int strict)
+{
+    DIR *proc = opendir("/proc");
+    if (!proc) return 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(proc)) != NULL)
+    {
+        // Skip non-numeric (not PID) entries
+        if (entry->d_name[0] < '0' || entry->d_name[0] > '9')
+            continue;
+
+        // Build path to process' comm (command) file
+        char path[267];
+        snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
+
+        FILE *commFile = fopen(path, "r");
+        if (!commFile) continue;
+
+        char commVal[TASK_COMM_LEN];
+        int found = 0;
+
+        if (fgets(commVal, TASK_COMM_LEN, commFile))
+        {
+            // Strip trailing newline
+            commVal[strcspn(commVal, "\n")] = '\0';
+
+            // If strict, we look for an exact match
+            if (strict)
+                found = strcmp(commVal, name) == 0;
+            // If not, we look for a substring
+            else
+                found = strstr(commVal, name) != NULL;
+        }
+
+        fclose(commFile);
+
+        if (found)
+        {
+            closedir(proc);
+            return 1;
+        }
+    }
+
+    closedir(proc);
+    return 0;
 }
 
 /**
@@ -1246,7 +1308,7 @@ void showHelp(void)
     formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
     printf("%s", noCol);
 
-    char fieldNames[90] = "Field names:\nos, krn, upt, sh, scn, con, cpu, gpu, ram, swap, root and lip\n";
+    char fieldNames[100] = "Field names:\nos, krn, upt, sh, scn, de, wm, con, cpu, gpu, ram, swap, root and lip\n";
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", fieldNames);
 }
@@ -1480,15 +1542,12 @@ char *getShell(void)
  * @param count Number of displays detected (intended to be used by reference)
  * @return Pointer to Display structs containing detected GPUs
  */
-Display* getDisplays(int *count)
+Display *getDisplays(int *count)
 {
     if (!count) return NULL;
 
-    const char *x11Test = getenv("DISPLAY");
-    const char *wayTest = getenv("WAYLAND_DISPLAY");
-
     // If we don't think we're in a graphical environment, time to leave...
-    if (!((x11Test && *x11Test) || (wayTest && *wayTest)))
+    if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
 
     Display *displays = NULL;
@@ -1681,6 +1740,93 @@ Display* getDisplays(int *count)
     }
 
     return displays;
+}
+
+/**
+ * @return String containing the active display environment's name; NULL if not found/applicable
+ */
+char *getDE(void)
+{
+    // If we don't think we're in a graphical environment, time to leave...
+    if (!WAYLAND_PRESENT && !X11_PRESENT)
+        return NULL;
+
+    char *de = NULL;
+
+    // Test standardised DE environment var
+    if (XDG_CURRENT_DESKTOP && XDG_CURRENT_DESKTOP[0] != '\0')
+        de = strdup(XDG_CURRENT_DESKTOP);
+
+    // Do some cleaning if needed
+    if (de)
+    {
+        // Remove "ubuntu" in "ubuntu:GNOME"
+        if (strncmp(de, "ubuntu:", 7) == 0)
+            memmove(de, de + 7, strlen(de + 7) + 1);
+
+        // Remove "X-" in "X-Cinnamon"
+        if (strncmp(de, "X-", 2) == 0)
+            memmove(de, de + 2, strlen(de + 2) + 1);
+
+        // "Prettify" XFCE to Xfce
+        if (strncmp(de, "XFCE", 4) == 0)
+        {
+            free(de);
+            de = strdup("Xfce");
+        }
+
+        // Discard ":Unity7:ubuntu" from "Unity:Unity7:ubuntu" (etc.)
+        if (strncmp(de, "Unity", 5) == 0)
+        {
+            char *needle = strchr(de, ':');
+            if (needle) *needle = '\0';
+        }
+        
+        // Discard ":wlroots" from "sway:wlroots"
+        if (strncmp(de, "sway", 4) == 0)
+        {
+            char *needle = strchr(de, ':');
+            if (needle) *needle = '\0';
+        }
+    }
+
+    return de;
+}
+
+/**
+ * @param de Desktop enivornment's name
+ * @return String containing the active window manager's name; NULL if not found/applicable
+ */
+char *getWM(char *de)
+{
+    // If we don't think we're in a graphical environment, time to leave...
+    if (!WAYLAND_PRESENT && !X11_PRESENT)
+        return NULL;
+
+    // Cinnamon's WM (Muffin) is internal, we have to assume instead of look for
+    // the process
+    if (de && strstr(de, "Cinnamon") != NULL)
+        return strdup("Muffin");
+
+    // Run through our WM database
+    for (size_t i = 0; i < WINDOW_MANAGERS_LEN; i++)
+    {
+        if (procExists(WINDOW_MANAGERS[i].cmd, 0))
+        {
+            // If DE == WM, we treat this as just a WM
+            if (de && strstr(de, WINDOW_MANAGERS[i].name) != NULL)
+                return de;
+
+            return strdup(WINDOW_MANAGERS[i].name);
+        }
+    }
+
+    // If we haven't found a WM but we have a DE, there's a good chance DE/WM
+    // are one and the same
+    if (de)
+        return de;
+
+    return NULL;
 }
 
 /**
@@ -2169,6 +2315,8 @@ int main(int argc, char *argv[])
     int showUpt = 1;
     int showSh = 1;
     int showScn = 1;
+    int showDE = 1;
+    int showWM = 1;
     int showCon = 1;
     int showCPU = 1;
     int showGPU = 1;
@@ -2234,6 +2382,8 @@ int main(int argc, char *argv[])
             showUpt = 0;
             showSh = 0;
             showScn = 0;
+            showDE = 0;
+            showWM = 0;
             showCon = 0;
             showCPU = 0;
             showGPU = 0;
@@ -2274,6 +2424,16 @@ int main(int argc, char *argv[])
                 else if (strcmp(currTok, "scn") == 0)
                 {
                     showScn = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "de") == 0)
+                {
+                    showDE = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "wm") == 0)
+                {
+                    showWM = 1;
                     noFields++;
                 }
                 else if (strcmp(currTok, "con") == 0)
@@ -2353,6 +2513,13 @@ int main(int argc, char *argv[])
     struct utsname u;
     int uStatus = uname(&u);
 
+    char *envWay = getenv("WAYLAND_DISPLAY");
+    WAYLAND_PRESENT = (envWay != NULL && envWay[0] != '\0');
+    char *envX11 = getenv("DISPLAY");
+    X11_PRESENT = (envX11 != NULL && envX11[0] != '\0');
+    if (WAYLAND_PRESENT || X11_PRESENT)
+        XDG_CURRENT_DESKTOP = getenv("XDG_CURRENT_DESKTOP");
+
 
 
     char *username = getUsername();
@@ -2363,6 +2530,8 @@ int main(int argc, char *argv[])
     char *shell = showSh ? getShell() : NULL;
     int noDisplays = 0;
     Display *displays = showScn ? getDisplays(&noDisplays) : NULL;
+    char *de = showDE ? getDE() : NULL;
+    char *wm = showWM ? getWM(de) : NULL;
     char *cpu = showCPU ? getCPU() : NULL;
     int noGPUs = 0;
     GPU *gpus = showGPU ? getGPUs(&noGPUs) : NULL;
@@ -2507,6 +2676,47 @@ int main(int argc, char *argv[])
             }
 
             pastFirstDisplay = 1;
+        }
+    }
+
+    if (de && de != wm)
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smDE:\033[%sm      %s\n", colAccent, COL_RESET, de);
+            else
+                printf("\033[%smDE:\033[%sm  %s\n", colAccent, COL_RESET, de);
+        }
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, de);
+    }
+
+    if (wm)
+    {
+        char server[32] = "";
+        if (!COMPACT)
+        {
+            if (WAYLAND_PRESENT)
+                snprintf(server, 32, " (Wayland)");
+            else if (X11_PRESENT)
+                snprintf(server, 32, " (X11)");
+        }
+
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smWM:\033[%sm      %s%s\n", colAccent, COL_RESET, wm, server);
+            else
+                printf("\033[%smWM:\033[%sm  %s\n", colAccent, COL_RESET, wm);
+        }
+        else 
+        {
+            if (!COMPACT)
+                printf(" \033[%sm%c\033[%sm %s%s\n", colAccent, bullet, COL_RESET, wm, server);
+            else
+                printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, wm);
         }
     }
 
@@ -2667,6 +2877,8 @@ int main(int argc, char *argv[])
     free(uptime);
     free(shell);
     if (displays) free(displays);
+    if (de != wm) free(de);
+    free(wm);
     free(cpu);
     if (gpus) free(gpus);
     free(root);
