@@ -1797,7 +1797,7 @@ char *getDE(void)
  * @param de Desktop enivornment's name
  * @return String containing the active window manager's name; NULL if not found/applicable
  */
-char *getWM(char *de)
+char *getWM(char **de)
 {
     // If we don't think we're in a graphical environment, time to leave...
     if (!WAYLAND_PRESENT && !X11_PRESENT)
@@ -1805,7 +1805,7 @@ char *getWM(char *de)
 
     // Cinnamon's WM (Muffin) is internal, we have to assume instead of look for
     // the process
-    if (de && strstr(de, "Cinnamon") != NULL)
+    if (de && *de && strstr(*de, "Cinnamon") != NULL)
         return strdup("Muffin");
 
     // Run through our WM database
@@ -1814,11 +1814,11 @@ char *getWM(char *de)
         if (procExists(WINDOW_MANAGERS[i].cmd, 0))
         {
             // If DE == WM, we may treat this as just a WM
-            if (de)
+            if (de && *de)
             {
                 // Convert both subjects to all caps for a case-insensitive 
                 // comparison
-                char *deCaps = strdup(de);
+                char *deCaps = strdup(*de);
                     for (size_t j = 0; deCaps[j]; j++)
                         if (deCaps[j] >= 'a' && deCaps[j] <= 'z')
                             deCaps[j] -= 32;
@@ -1831,7 +1831,9 @@ char *getWM(char *de)
                 {
                     free(deCaps);
                     free(wmCaps);
-                    return de;
+                    char *wm = strdup(WINDOW_MANAGERS[i].name);
+                    *de = wm;
+                    return wm;
                 }
 
                 free(deCaps);
@@ -1844,8 +1846,8 @@ char *getWM(char *de)
 
     // If we haven't found a WM but we have a DE, there's a good chance DE/WM
     // are one and the same
-    if (de)
-        return de;
+    if (de && *de)
+        return *de;
 
     return NULL;
 }
@@ -2552,7 +2554,7 @@ int main(int argc, char *argv[])
     int noDisplays = 0;
     Display *displays = showScn ? getDisplays(&noDisplays) : NULL;
     char *de = showDE ? getDE() : NULL;
-    char *wm = showWM ? getWM(de) : NULL;
+    char *wm = showWM ? getWM(&de) : NULL;
     char *cpu = showCPU ? getCPU() : NULL;
     int noGPUs = 0;
     GPU *gpus = showGPU ? getGPUs(&noGPUs) : NULL;
