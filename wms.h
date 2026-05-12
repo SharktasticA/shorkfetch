@@ -56,7 +56,7 @@ static const struct WM WINDOW_MANAGERS[] = {
     { "metacity",       "Metacity",         0 },
     { "river",          "River",            1 },
     { "sawfish",        "Sawfish",          1 },
-    { "twm",            "twm",              1 },
+    { "twm",            "TWM",              1 },
     { "wayfire",        "Wayfire",          1 },
     { "weston",         "Weston",           1 },
 };
