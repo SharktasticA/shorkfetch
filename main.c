@@ -94,7 +94,7 @@ typedef struct {
 
 
 static int COMPACT = 0;
-const char SHORK[20][20] = {
+const char SHORK[24][20] = {
     "                   ",
     "^`.                ",
     "\\  \\               ",
@@ -104,6 +104,10 @@ const char SHORK[20][20] = {
     "  ,    ,    __,,,) ",
     "~;   ,-~~--`       ",
     "'._.'              ",
+    "                   ",
+    "                   ",
+    "                   ",
+    "                   ",
     "                   ",
     "                   ",
     "                   ",
@@ -1337,28 +1341,32 @@ void showHelp(void)
     formatNewLines(options, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", options);
 
-    char bullets[130] = "-b, --bullets    Uses bullet points instead of field headings; can also be used to set a custom character\n";
-    formatNewLines(bullets, TERM_SIZE.ws_col, "                 ", 0);
+    char bullets[130] = "-b, --bullets      Uses bullet points instead of field headings; can also be used to set a custom character\n";
+    formatNewLines(bullets, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", bullets);
 
-    char compact[130] = "-c, --compact    Compacts field names (if not using bullets) and field values\n";
-    formatNewLines(compact, TERM_SIZE.ws_col, "                 ", 0);
+    char categories[90] = "-ca, --categories  Groups and divides similar fields with dashed lines\n";
+    formatNewLines(categories, TERM_SIZE.ws_col, "                   ", 0);
+    printf("%s", categories);
+
+    char compact[100] = "-c, --compact      Compacts field names (if not using bullets) and field values\n";
+    formatNewLines(compact, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", compact);
 
-    char help[70] = "-h, --help       Displays help information and exits\n";
-    formatNewLines(help, TERM_SIZE.ws_col, "                 ", 0);
+    char help[70] = "-h, --help         Displays help information and exits\n";
+    formatNewLines(help, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", help);
 
-    char fields[140] = "-f, --fields     Allows you to specify which fields to show via a comma-separated list (os,krn,...)\n";
-    formatNewLines(fields, TERM_SIZE.ws_col, "                 ", 0);
+    char fields[140] = "-f, --fields       Allows you to specify which fields to show via a comma-separated list (os,krn,...)\n";
+    formatNewLines(fields, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", fields);
 
-    char noArt[100] = "-na, --no-art    Disables the SHORK ASCII art (if compiled with art support)\n";
-    formatNewLines(noArt, TERM_SIZE.ws_col, "                 ", 0);
+    char noArt[100] = "-na, --no-art      Disables the SHORK ASCII art (if compiled with art support)\n";
+    formatNewLines(noArt, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", noArt);
 
-    char noCol[100] = "-nc, --no-col    Disables all coloured output (if compiled with colour support)\n\n";
-    formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
+    char noCol[100] = "-nc, --no-col      Disables all coloured output (if compiled with colour support)\n\n";
+    formatNewLines(noCol, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", noCol);
 
     char fieldNames[100] = "Field names:\nos, krn, upt, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip\n";
@@ -2447,8 +2455,16 @@ int main(int argc, char *argv[])
 
     char bullet = '*';
     char *colAccent = getAccentColour();
-    int useBullets = 0;
     int noIP = 0;
+    int shorkLine = 0;
+    int showCategories = 0;
+#ifdef NO_ART
+    int showShork = 0;
+#else
+    int showShork = 1;
+#endif
+    int useBullets = 0;
+
     int showOS = 1;
     int showKrn = 1;
     int showUpt = 1;
@@ -2463,12 +2479,6 @@ int main(int argc, char *argv[])
     int showSwap = 1;
     int showRoot = 1;
     int showLocIP = 1;
-#ifdef NO_ART
-    int showShork = 0;
-#else
-    int showShork = 1;
-#endif
-    int shorkLine = 0;
 
     for (int i = 1; i < argc; i++)
     {
@@ -2502,6 +2512,8 @@ int main(int argc, char *argv[])
                 bullet = bulletChar[0];
             }
         }
+        else if ((strcmp(argv[i], "-ca") == 0) || (strcmp(argv[i], "--categories") == 0))
+            showCategories = 1;
         else if ((strcmp(argv[i], "-c") == 0) || (strcmp(argv[i], "--compact") == 0))
             COMPACT = 1;
         else if (strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fields", 8) == 0)
@@ -2682,14 +2694,15 @@ int main(int argc, char *argv[])
 
 
 
+    size_t headerWidth = 12;
     if (username[0] != '\0' && hostname[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         printf("\033[%sm%s\033[%sm@\033[%sm%s\033[%sm\n", colAccent, username, COL_RESET, colAccent, hostname, COL_RESET);
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
 
-        size_t len = strlen(username) + 1 + strlen(hostname);
-        for (size_t i = 0; i < len; i++) printf("-");
+        headerWidth = strlen(username) + 1 + strlen(hostname);
+        for (size_t i = 0; i < headerWidth; i++) printf("-");
         putchar('\n');
     }
 
@@ -2731,7 +2744,14 @@ int main(int argc, char *argv[])
         }
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
     }
-    
+
+    if (showCategories)
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        for (size_t i = 0; i < headerWidth; i++) printf("-");
+        putchar('\n');
+    }
+
     if (displays)
     {
         int pastFirstDisplay = 0;
@@ -2899,7 +2919,12 @@ int main(int argc, char *argv[])
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
     }
 
-
+    if (showCategories)
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        for (size_t i = 0; i < headerWidth; i++) printf("-");
+        putchar('\n');
+    }
 
     if (cpu && cpu[0] != '\0')
     {
@@ -3006,6 +3031,13 @@ int main(int argc, char *argv[])
             else
                 printf(" \033[%sm%c\033[%sm %s (/)\n", colAccent, bullet, COL_RESET, root);
         }
+    }
+
+    if (showCategories)
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        for (size_t i = 0; i < headerWidth; i++) printf("-");
+        putchar('\n');
     }
 
     if (localIP)

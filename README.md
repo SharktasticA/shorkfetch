@@ -66,6 +66,7 @@ Usage: shorkfetch [OPTIONS]
 ### Options
 
 * `-b`, `--bullets`: Uses bullet points instead of field headings; can also be used to specific a custom character
+* `-ca`, `--categories`: Groups and divides similar fields with dashed lines
 * `-c`, `--compact`: Compacts field names (if not using bullets) and field values
 * `-f`, `--fields`: Allows you to specify which fields to show via a comma-separated list (os,krn,...)
 * `-h`, `--help`: Shows help information and exits
