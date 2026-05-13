@@ -3033,15 +3033,17 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (showCategories)
-    {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        for (size_t i = 0; i < headerWidth; i++) printf("-");
-        putchar('\n');
-    }
-
     if (localIP)
     {
+        // Since local IP is the only current field for the final category, we
+        // nest this part in here
+        if (showCategories)
+        {
+            if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+            for (size_t i = 0; i < headerWidth; i++) printf("-");
+            putchar('\n');
+        }
+
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
