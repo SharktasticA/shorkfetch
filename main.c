@@ -1034,7 +1034,14 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     }
     // Matrox Electronics Systems Ltd.
     else if (vendor[0] == 'M' && strncmp(vendor, "Matrox", 6) == 0)
+    {
         cleanedVendor = strdup("Matrox");
+
+        // If we have bracketed info, we discard the norm (usually just
+        // containing the chip model name like 2064)
+        if (cleanedDeviceBrac)
+            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+    }
     // S3 Graphics Ltd.
     else if (vendor[0] == 'S' && strncmp(vendor, "S3 ", 3) == 0)
     {
