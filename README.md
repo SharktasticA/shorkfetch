@@ -79,11 +79,11 @@ These are possible field names you can use with the `--fields` argument. The fea
 * `os`: OS
 * `krn`: Kernel
 * `upt`: Uptime
-* `sh`: Shell
 * `scn`: Screen(s)
 * `de`: Desktop environment
 * `wm`: Window manager and/or Wayland compositor
-* `con`: Console
+* `trm`: Terminal emulator/console size
+* `sh`: Shell
 * `cpu`: CPU
 * `gpu`: GPU(s)
 * `ram`: RAM

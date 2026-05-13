@@ -18,6 +18,7 @@
 #include "igpus.h"
 #include "implementers.h"
 #include "replacements.h"
+#include "shells.h"
 #include "wms.h"
 
 #include <dirent.h>
@@ -60,6 +61,11 @@ typedef struct {
     long swapTotal;
     long swapFree;
 } MemInfo;
+
+typedef struct {
+    int pid;
+    char name[256];
+} Process;
 
 
 
@@ -408,6 +414,47 @@ char *getAccentColour(void)
     if (strcmp(colour, "YELLOW") == 0) return COL_YELLOW;
 #endif
     return COL_BOLD_CYAN;
+}
+
+/**
+ * Gets the parent process ID (PPID) and name of a given process ID (PID).
+ * @param pid The input PID
+ * @return Process struct with the found PPID and name; pid is -1 if something went wrong
+ */
+Process getParentProcess(int pid)
+{
+    Process result = { -1, "" };
+
+    // Open the process's status file
+    char pidPath[64];
+    snprintf(pidPath, sizeof(pidPath), "/proc/%d/status", pid);
+    FILE *pidStatus = fopen(pidPath, "r");
+    if (!pidStatus) return result;
+
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), pidStatus))
+    {
+        // Look for the PPid field in the status file
+        if (sscanf(buffer, "PPid: %d", &result.pid) == 1)
+        {
+            fclose(pidStatus);
+
+            // Get parent process' name
+            char commPath[64];
+            snprintf(commPath, sizeof(commPath), "/proc/%d/comm", result.pid);
+            FILE *comm = fopen(commPath, "r");
+            if (!comm) { result.pid = -1; return result; }
+
+            fgets(result.name, sizeof(result.name), comm);
+            result.name[strcspn(result.name, "\n")] = '\0';
+            fclose(comm);
+
+            return result;
+        }
+    }
+
+    fclose(pidStatus);
+    return result;
 }
 
 /**
@@ -1308,7 +1355,7 @@ void showHelp(void)
     formatNewLines(noCol, TERM_SIZE.ws_col, "                 ", 0);
     printf("%s", noCol);
 
-    char fieldNames[100] = "Field names:\nos, krn, upt, sh, scn, de, wm, con, cpu, gpu, ram, swap, root and lip\n";
+    char fieldNames[100] = "Field names:\nos, krn, upt, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip\n";
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", fieldNames);
 }
@@ -1523,19 +1570,6 @@ char *getUptime(void)
     else strcpy(uptime, "unknown");
 
     return uptime;
-}
-
-/**
- * @return String containing the shell's name or "unknown" if undetermined/error
- */
-char *getShell(void)
-{
-    char *shell = getenv("SHELL");
-    if (!shell || shell[0] == '\0') 
-        shell = strdup("unknown");
-    else
-        shell = strdup(basename(shell));
-    return shell;
 }
 
 /**
@@ -1850,6 +1884,86 @@ char *getWM(char **de)
         return *de;
 
     return NULL;
+}
+
+/**
+ * @return String containing the host terminal emulator's name; NULL if not found/applicable
+ */
+char *getTerminal(void)
+{
+    // If we don't think we're in a graphical environment, time to leave...
+    if (!WAYLAND_PRESENT && !X11_PRESENT)
+        return NULL;
+
+    // Try the sane way ($TERM_PROGRAM) first
+    char *termProgram = getenv("TERM_PROGRAM");
+    if (termProgram && termProgram[0] != '\0')
+        return strdup(termProgram);
+
+    // Try looking through our parent processes to get the name
+    Process process = getParentProcess(getpid());
+    while (process.pid > 1)
+    {
+        // Flags if we must not use this process as our terminal
+        int notTerminal = 0;
+
+        // We must skip wrappers like doas, su or sudo
+        if (strcmp(process.name, "sudo") == 0 || strcmp(process.name, "doas") == 0 || strcmp(process.name, "su") == 0 || strcmp(process.name, "pkexec") == 0 || strcmp(process.name, "runuser") == 0 || strcmp(process.name, "firejail") == 0 || strcmp(process.name, "bubblewrap") == 0 || strcmp(process.name, "flatpak") == 0)
+            notTerminal = 1;
+
+        // The immediate parent is likely a shell, so we must skip that
+        for (int i = 0; i < SHELL_NAMES_LEN; i++)
+        {
+            if (strcmp(process.name, SHELL_NAMES[i]) == 0)
+            {
+                notTerminal = 1;
+                break;
+            }
+        }
+
+        if (!notTerminal)
+        {
+            // Remove trailing hyphen from "gnome-terminal-" (etc.)
+            size_t len = strlen(process.name);
+            if (len > 0 && process.name[len - 1] == '-')
+                process.name[len - 1] = '\0';
+
+            return strdup(process.name);
+        }
+
+        process = getParentProcess(process.pid);
+    }
+
+    // As a fallback, we can also try $TERM to get the terminal's basic 
+    // capabilities like "xterm-256color"
+    char *term = getenv("TERM");
+    if (term && term[0] != '\0')
+    {
+        if (COMPACT) return strdup(term);
+        else
+        {
+            size_t resultLen = strlen(term) + 11 + 1;
+            char *result = malloc(resultLen);
+            if (!result) return NULL;
+            snprintf(result, resultLen, "%s compatible", term);
+            return result;
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * @return String containing the shell's name or "unknown" if undetermined/error
+ */
+char *getShell(void)
+{
+    char *shell = getenv("SHELL");
+    if (!shell || shell[0] == '\0') 
+        shell = strdup("unknown");
+    else
+        shell = strdup(basename(shell));
+    return shell;
 }
 
 /**
@@ -2336,11 +2450,11 @@ int main(int argc, char *argv[])
     int showOS = 1;
     int showKrn = 1;
     int showUpt = 1;
-    int showSh = 1;
     int showScn = 1;
     int showDE = 1;
     int showWM = 1;
-    int showCon = 1;
+    int showTrm = 1;
+    int showSh = 1;
     int showCPU = 1;
     int showGPU = 1;
     int showRAM = 1;
@@ -2403,11 +2517,11 @@ int main(int argc, char *argv[])
             showOS = 0;
             showKrn = 0;
             showUpt = 0;
-            showSh = 0;
             showScn = 0;
             showDE = 0;
             showWM = 0;
-            showCon = 0;
+            showTrm = 0;
+            showSh = 0;
             showCPU = 0;
             showGPU = 0;
             showRAM = 0;
@@ -2439,11 +2553,6 @@ int main(int argc, char *argv[])
                     showUpt = 1;
                     noFields++;
                 }
-                else if (strcmp(currTok, "sh") == 0)
-                {
-                    showSh = 1;
-                    noFields++;
-                }
                 else if (strcmp(currTok, "scn") == 0)
                 {
                     showScn = 1;
@@ -2459,9 +2568,14 @@ int main(int argc, char *argv[])
                     showWM = 1;
                     noFields++;
                 }
-                else if (strcmp(currTok, "con") == 0)
+                else if (strcmp(currTok, "trm") == 0)
                 {
-                    showCon = 1;
+                    showTrm = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "sh") == 0)
+                {
+                    showSh = 1;
                     noFields++;
                 }
                 else if (strcmp(currTok, "cpu") == 0)
@@ -2550,11 +2664,12 @@ int main(int argc, char *argv[])
     char *os = showOS ? getOS(u, uStatus) : NULL;
     char *kernel = showKrn ? getKernel(u, uStatus) : NULL;
     char *uptime = showUpt ? getUptime() : NULL;
-    char *shell = showSh ? getShell() : NULL;
     int noDisplays = 0;
     Display *displays = showScn ? getDisplays(&noDisplays) : NULL;
     char *de = showDE ? getDE() : NULL;
     char *wm = showWM ? getWM(&de) : NULL;
+    char *trm = showTrm ? getTerminal() : NULL;
+    char *shell = showSh ? getShell() : NULL;
     char *cpu = showCPU ? getCPU() : NULL;
     int noGPUs = 0;
     GPU *gpus = showGPU ? getGPUs(&noGPUs) : NULL;
@@ -2565,7 +2680,7 @@ int main(int argc, char *argv[])
 
 
 
-    if (username[0] != '\0' && hostname[0] != '\0') 
+    if (username[0] != '\0' && hostname[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         printf("\033[%sm%s\033[%sm@\033[%sm%s\033[%sm\n", colAccent, username, COL_RESET, colAccent, hostname, COL_RESET);
@@ -2576,58 +2691,45 @@ int main(int argc, char *argv[])
         putchar('\n');
     }
 
-    if (os && os[0] != '\0')          
+    if (os && os[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smOS:\033[%sm      %s\n", colAccent, COL_RESET, os);
+                printf("\033[%smOS:\033[%sm       %s\n", colAccent, COL_RESET, os);
             else
                 printf("\033[%smOS:\033[%sm  %s\n", colAccent, COL_RESET, os);
         }
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
     }
 
-    if (kernel && kernel[0] != '\0')      
+    if (kernel && kernel[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smKernel:\033[%sm  %s\n", colAccent, COL_RESET, kernel);
+                printf("\033[%smKernel:\033[%sm   %s\n", colAccent, COL_RESET, kernel);
             else
                 printf("\033[%smKrn:\033[%sm %s\n", colAccent, COL_RESET, kernel);
         }
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
     }
 
-    if (uptime && uptime[0] != '\0')      
+    if (uptime && uptime[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smUptime:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
+                printf("\033[%smUptime:\033[%sm   %s\n", colAccent, COL_RESET, uptime);
             else
                 printf("\033[%smUp:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
         }
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
     }
-
-    if (shell && shell[0] != '\0')       
-    {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        if (!useBullets)
-        {
-            if (!COMPACT)
-                printf("\033[%smShell:\033[%sm   %s\n", colAccent, COL_RESET, shell);
-            else
-                printf("\033[%smSh:\033[%sm  %s\n", colAccent, COL_RESET, shell);
-        }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
-    }
-
+    
     if (displays)
     {
         int pastFirstDisplay = 0;
@@ -2661,7 +2763,7 @@ int main(int argc, char *argv[])
                 {
                     // No compact - no bullet - single display
                     if (noDisplays == 1)
-                        printf("\033[%smScreen:\033[%sm  %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                        printf("\033[%smScreen:\033[%sm   %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
                     // No compact - no bullet - multiple displays - first display
                     else if (!pastFirstDisplay)
                         printf("\033[%smScreens:\033[%sm %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
@@ -2708,7 +2810,7 @@ int main(int argc, char *argv[])
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smDE:\033[%sm      %s\n", colAccent, COL_RESET, de);
+                printf("\033[%smDE:\033[%sm       %s\n", colAccent, COL_RESET, de);
             else
                 printf("\033[%smDE:\033[%sm  %s\n", colAccent, COL_RESET, de);
         }
@@ -2730,7 +2832,7 @@ int main(int argc, char *argv[])
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smWM:\033[%sm      %s%s\n", colAccent, COL_RESET, wm, server);
+                printf("\033[%smWM:\033[%sm       %s%s\n", colAccent, COL_RESET, wm, server);
             else
                 printf("\033[%smWM:\033[%sm  %s\n", colAccent, COL_RESET, wm);
         }
@@ -2743,14 +2845,33 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Console
-    if (showCon)
+    if (trm)
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smConsole:\033[%sm %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf("\033[%smTerminal:\033[%sm %s (%dx%d)\n", colAccent, COL_RESET, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+            else
+                printf("\033[%smTrm:\033[%sm %s\n", colAccent, COL_RESET, trm);
+        }
+        else
+        {
+            if (!COMPACT)
+                printf(" \033[%sm%c\033[%sm %s (%dx%d)\n", colAccent, bullet, COL_RESET, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+            else
+                printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, trm);
+        }
+    }
+    // If we don't have a terminal name, we can at least still show the console 
+    // size
+    else if (showTrm)
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smConsole:\033[%sm  %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
             else
                 printf("\033[%smCon:\033[%sm %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
         }
@@ -2763,13 +2884,28 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (cpu && cpu[0] != '\0')         
+    if (shell && shell[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smCPU:\033[%sm     %s\n", colAccent, COL_RESET, cpu);
+                printf("\033[%smShell:\033[%sm    %s\n", colAccent, COL_RESET, shell);
+            else
+                printf("\033[%smSh:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+        }
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
+    }
+
+
+
+    if (cpu && cpu[0] != '\0')
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smCPU:\033[%sm      %s\n", colAccent, COL_RESET, cpu);
             else
                 printf("\033[%smCPU:\033[%sm %s\n", colAccent, COL_RESET, cpu);
         }
@@ -2791,9 +2927,9 @@ int main(int argc, char *argv[])
                     if (!COMPACT)
                     {
                         if (noGPUs == 1)
-                            printf("\033[%smGPU:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
+                            printf("\033[%smGPU:\033[%sm      %s\n", colAccent, COL_RESET, gpu);
                         else if (!pastFirstGPU)
-                            printf("\033[%smGPUs:\033[%sm    %s\n", colAccent, COL_RESET, gpu);
+                            printf("\033[%smGPUs:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
                         else
                             printf("         %s\n", gpu);
                     }
@@ -2813,13 +2949,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (ram && ram[0] != '\0')         
+    if (ram && ram[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smRAM:\033[%sm     %s\n", colAccent, COL_RESET, ram);
+                printf("\033[%smRAM:\033[%sm      %s\n", colAccent, COL_RESET, ram);
             else
                 printf("\033[%smRAM:\033[%sm %s\n", colAccent, COL_RESET, ram);
         }
@@ -2832,13 +2968,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (swap && swap[0] != '\0')        
+    if (swap && swap[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smSwap:\033[%sm    %s\n", colAccent, COL_RESET, swap);
+                printf("\033[%smSwap:\033[%sm     %s\n", colAccent, COL_RESET, swap);
             else
                 printf("\033[%smSwp:\033[%sm %s\n", colAccent, COL_RESET, swap);
         }
@@ -2851,13 +2987,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (root && root[0] != '\0')        
+    if (root && root[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smRoot:\033[%sm    %s\n", colAccent, COL_RESET, root);
+                printf("\033[%smRoot:\033[%sm     %s\n", colAccent, COL_RESET, root);
             else
                 printf("\033[%sm/:\033[%sm   %s\n", colAccent, COL_RESET, root);
         }
@@ -2876,7 +3012,7 @@ int main(int argc, char *argv[])
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smLocal:\033[%sm   %s\n", colAccent, COL_RESET, localIP);
+                printf("\033[%smLocal IP:\033[%sm %s\n", colAccent, COL_RESET, localIP);
             else
                 printf("\033[%smLoc:\033[%sm %s\n", colAccent, COL_RESET, localIP);
         }
@@ -2898,10 +3034,11 @@ int main(int argc, char *argv[])
     free(os);
     free(kernel);
     free(uptime);
-    free(shell);
     if (displays) free(displays);
     if (de != wm) free(de);
     free(wm);
+    free(trm);
+    free(shell);
     free(cpu);
     if (gpus) free(gpus);
     free(root);
