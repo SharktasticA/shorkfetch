@@ -18,7 +18,6 @@
 #include "igpus.h"
 #include "implementers.h"
 #include "replacements.h"
-#include "shells.h"
 #include "wms.h"
 
 #include <dirent.h>
@@ -1914,14 +1913,10 @@ char *getTerminal(void)
         // Flags if we must not use this process as our terminal
         int notTerminal = 0;
 
-        // We must skip wrappers like doas, su or sudo
-        if (strcmp(process.name, "sudo") == 0 || strcmp(process.name, "doas") == 0 || strcmp(process.name, "su") == 0 || strcmp(process.name, "pkexec") == 0 || strcmp(process.name, "runuser") == 0 || strcmp(process.name, "firejail") == 0 || strcmp(process.name, "bubblewrap") == 0 || strcmp(process.name, "flatpak") == 0)
-            notTerminal = 1;
-
-        // The immediate parent is likely a shell, so we must skip that
-        for (int i = 0; i < SHELL_NAMES_LEN; i++)
+        // We must skip wrappers like doas, su or sudo, and possible shells
+        for (int i = 0; i < EXCLUDED_TERMINAL_PROCS_LEN; i++)
         {
-            if (strcmp(process.name, SHELL_NAMES[i]) == 0)
+            if (strcmp(process.name, EXCLUDED_TERMINAL_PROCS[i]) == 0)
             {
                 notTerminal = 1;
                 break;
