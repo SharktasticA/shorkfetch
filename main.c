@@ -2766,10 +2766,10 @@ int main(int argc, char *argv[])
                         printf("\033[%smScreen:\033[%sm   %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
                     // No compact - no bullet - multiple displays - first display
                     else if (!pastFirstDisplay)
-                        printf("\033[%smScreens:\033[%sm %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                        printf("\033[%smScreens:\033[%sm  %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
                     // No compact - no bullet - multiple displays - subsequent displays
                     else 
-                        printf("         %s%dx%d%s%s\n", size, dis->resX, dis->resY, refresh, connector);
+                        printf("          %s%dx%d%s%s\n", size, dis->resX, dis->resY, refresh, connector);
                 }
                 else
                 {
@@ -2931,7 +2931,7 @@ int main(int argc, char *argv[])
                         else if (!pastFirstGPU)
                             printf("\033[%smGPUs:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
                         else
-                            printf("         %s\n", gpu);
+                            printf("          %s\n", gpu);
                     }
                     else
                     {
