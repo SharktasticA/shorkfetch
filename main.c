@@ -1635,6 +1635,31 @@ char *getPackages(const char *os)
         }
     }
 
+    // Get Arch-style packages by counting /var/lib/pacman/local
+    if (access("/var/lib/pacman/local", F_OK) == 0)
+    {
+        DIR *pacmanLocal = opendir("/var/lib/pacman/local");
+        if (pacmanLocal)
+        {
+            struct dirent *dirEntry;
+            while ((dirEntry = readdir(pacmanLocal)) != NULL)
+                if (dirEntry->d_name[0] != '.')
+                    pCount++;
+            closedir(pacmanLocal);
+        }
+
+        // As a fallback, try pacman (much slower)
+        if (!pCount)
+        {
+            FILE *stream = popen("pacman -Qq 2>/dev/null | wc -l", "r");
+            if (stream)
+            {
+                fscanf(stream, "%d", &pCount);
+                pclose(stream);
+            }
+        }
+    }
+
     // Get Flatpak packages
     if (isProgramInstalled("flatpak"))
     {
