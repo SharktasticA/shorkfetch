@@ -1369,7 +1369,7 @@ void showHelp(void)
     formatNewLines(noCol, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", noCol);
 
-    char fieldNames[100] = "Field names:\nos, krn, upt, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip\n";
+    char fieldNames[100] = "Field names:\nos, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip\n";
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", fieldNames);
 }
@@ -1584,6 +1584,179 @@ char *getUptime(void)
     else strcpy(uptime, "unknown");
 
     return uptime;
+}
+
+/**
+ * @return String containing counts of various packages including dpkg, pacman,
+ * rpm, flatpak and snap.
+ */
+char *getPackages(const char *os)
+{
+    // We know for sure SHORK doesn't have a package manager...
+    if (os && strncmp(os, "SHORK", 5) == 0)
+        return NULL;
+
+    const int PKGS_SIZE = 256;
+    char *pkgs = malloc(PKGS_SIZE);
+    if (!pkgs) return NULL;
+    pkgs[0] = '\0';
+
+    int dCount = 0;
+    int pCount = 0;
+    int rCount = 0;
+    int fCount = 0;
+    int sCount = 0;
+
+    // Get Debian-style packages
+    if (isProgramInstalled("dpkg"))
+    {
+        // Try quickly counting inside /var/lib/dpkg/status
+        FILE *dpkgStatus = fopen("/var/lib/dpkg/status", "r");
+        if (dpkgStatus)
+        {
+            const char *needle = "Status: install ok installed";
+            size_t needleLen = strlen(needle);
+            char buffer[512];
+            while (fgets(buffer, 512, dpkgStatus))
+                if (strncmp(buffer, needle, needleLen) == 0)
+                    dCount++;
+            fclose(dpkgStatus);
+        }
+
+        // Try dpkg-query as a slower fallback...
+        if (!dCount)
+        {
+            FILE *stream = popen("dpkg-query -f '.\n' -W 2>/dev/null | wc -l", "r");
+            if (stream)
+            {
+                fscanf(stream, "%d", &dCount);
+                pclose(stream);
+            }
+        }
+    }
+
+    // Get Flatpak packages
+    if (isProgramInstalled("flatpak"))
+    {
+        // Try quickly figuring the number out using the filesystem
+        const char* HOME = getenv("HOME");
+        char userApp[256], userRuntime[256];
+        snprintf(userApp, 256, "%s/.local/share/flatpak/app", HOME);
+        snprintf(userRuntime, 256, "%s/.local/share/flatpak/runtime", HOME);
+
+        // The directories we need to check - system and user apps and runtimes
+        const char *flatpakDirs[] = {
+            "/var/lib/flatpak/app",
+            "/var/lib/flatpak/runtime",
+            userApp,
+            userRuntime
+        };
+
+        // We will cache found flatpaks for duplication checking
+        int foundFpacksCap = 256;
+        const int KEY_SIZE = 257;
+        char (*foundFpacks)[KEY_SIZE] = malloc(sizeof(*foundFpacks) * foundFpacksCap);
+
+        for (int i = 0; i < 4; i++)
+        {
+            DIR *flatpakDir = opendir(flatpakDirs[i]);
+            if (flatpakDir)
+            {
+                struct dirent *dirEntry;
+                while ((dirEntry = readdir(flatpakDir)) != NULL)
+                {
+                    if (dirEntry->d_name[0] == '.')
+                        continue;
+
+                    // A unique key for this flatpak that can distinguish system
+                    // and user
+                    char key[KEY_SIZE];
+                    snprintf(key, KEY_SIZE, "%s%c", dirEntry->d_name, (i < 2) ? 'S' : 'U');
+
+                    // Check for duplicates
+                    int duplicate = 0;
+                    for (int j = 0; j < fCount; j++)
+                    {
+                        if (strcmp(foundFpacks[j], key) == 0)
+                        {
+                            duplicate = 1;
+                            break;
+                        }
+                    }
+
+                    if (!duplicate)
+                    {
+                        // Reallocate to expand the cache if needed
+                        if (fCount == foundFpacksCap)
+                        {
+                            foundFpacksCap += 256;
+                            foundFpacks = realloc(foundFpacks, sizeof(*foundFpacks) * foundFpacksCap);
+                            if (!foundFpacks)
+                                return NULL;
+                        }
+
+                        strncpy(foundFpacks[fCount], key, sizeof(foundFpacks[0]) - 1);
+                        foundFpacks[fCount][sizeof(foundFpacks[0]) - 1] = '\0';
+                        fCount++;
+                    }
+                }
+                closedir(flatpakDir);
+            }
+        }
+
+        // Try flatpak list as a slower fallback...
+        if (!fCount)
+        {
+            FILE *stream = popen("flatpak list 2>/dev/null | wc -l", "r");
+            if (stream)
+            {
+                fscanf(stream, "%d", &fCount);
+                pclose(stream);
+            }
+        }
+    }
+
+    // Get Snap packages
+    if (isProgramInstalled("snap"))
+    {
+        // Try quickly figuring the number out using the filesystem
+        DIR *snapDir = opendir("/snap");
+        if (snapDir)
+        {
+            struct dirent *dirEntry;
+            while ((dirEntry = readdir(snapDir)) != NULL)
+                if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
+                    sCount++;
+            closedir(snapDir);
+        }
+
+        // Try snap list as a slower fallback...
+        if (!sCount)
+        {
+            FILE *stream = popen("snap list 2>/dev/null | wc -l", "r");
+            if (stream)
+            {
+                int lines = 0;
+                fscanf(stream, "%d", &lines);
+                sCount = lines > 1 ? lines - 1 : 0;
+                pclose(stream);
+            }
+        }
+    }
+
+    // Build the result string
+    if (dCount > 0)
+        snprintf(pkgs, PKGS_SIZE, COMPACT ? "%d(D)" : "%d (dpkg)", dCount);
+    if (pCount > 0)
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(P)" : ", %d (pacman)", pCount);
+    if (rCount > 0)
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(R)" : ", %d (rpm)", rCount);
+    if (fCount > 0)
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(F)" : ", %d (flat)", fCount);
+    if (sCount > 0)
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
+
+    return pkgs;
 }
 
 /**
@@ -2468,6 +2641,7 @@ int main(int argc, char *argv[])
     int showOS = 1;
     int showKrn = 1;
     int showUpt = 1;
+    int showPkgs = 1;
     int showScn = 1;
     int showDE = 1;
     int showWM = 1;
@@ -2531,6 +2705,7 @@ int main(int argc, char *argv[])
             showOS = 0;
             showKrn = 0;
             showUpt = 0;
+            showPkgs = 0;
             showScn = 0;
             showDE = 0;
             showWM = 0;
@@ -2565,6 +2740,11 @@ int main(int argc, char *argv[])
                 else if (strcmp(currTok, "upt") == 0)
                 {
                     showUpt = 1;
+                    noFields++;
+                }
+                else if (strcmp(currTok, "pkgs") == 0)
+                {
+                    showPkgs = 1;
                     noFields++;
                 }
                 else if (strcmp(currTok, "scn") == 0)
@@ -2675,21 +2855,26 @@ int main(int argc, char *argv[])
 
     char *username = getUsername();
     char *hostname = getHostname(u, uStatus);
+
     char *os = showOS ? getOS(u, uStatus) : NULL;
     char *kernel = showKrn ? getKernel(u, uStatus) : NULL;
     char *uptime = showUpt ? getUptime() : NULL;
+    char *pkgs = showPkgs ? getPackages(os): NULL;
+
     int noDisplays = 0;
     Display *displays = showScn ? getDisplays(&noDisplays) : NULL;
     char *de = showDE ? getDE() : NULL;
     char *wm = showWM ? getWM(&de) : NULL;
     char *trm = showTrm ? getTerminal() : NULL;
     char *shell = showSh ? getShell() : NULL;
+
     char *cpu = showCPU ? getCPU() : NULL;
     int noGPUs = 0;
     GPU *gpus = showGPU ? getGPUs(&noGPUs) : NULL;
     char *ram = showRAM ? getRAM(mi) : NULL;
     char *swap = showSwap ? getSwap(mi) : NULL;
     char *root = showRoot ? getRoot() : NULL;
+
     char *localIP = (!noIP && showLocIP) ? getLocalIP() : NULL;
 
 
@@ -2743,6 +2928,19 @@ int main(int argc, char *argv[])
                 printf("\033[%smUp:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
         }
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
+    }
+
+    if (pkgs && pkgs[0] != '\0')
+    {
+        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (!useBullets)
+        {
+            if (!COMPACT)
+                printf("\033[%smPackages:\033[%sm %s\n", colAccent, COL_RESET, pkgs);
+            else
+                printf("\033[%smPkg:\033[%sm %s\n", colAccent, COL_RESET, pkgs);
+        }
+        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, pkgs);
     }
 
     if (showCategories)
@@ -2826,7 +3024,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (de && de != wm)
+    if (de && de != wm && de[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -2839,7 +3037,7 @@ int main(int argc, char *argv[])
         else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, de);
     }
 
-    if (wm)
+    if (wm && wm[0] != '\0')
     {
         char server[32] = "";
         if (!COMPACT)
@@ -2867,7 +3065,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (trm)
+    if (trm && trm[0] != '\0')
     {
         if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
         if (!useBullets)
@@ -3070,14 +3268,18 @@ int main(int argc, char *argv[])
     free(os);
     free(kernel);
     free(uptime);
+    free(pkgs);
+
     if (displays) free(displays);
     if (de != wm) free(de);
     free(wm);
     free(trm);
     free(shell);
+
     free(cpu);
     if (gpus) free(gpus);
     free(root);
+
     if (!noIP) free(localIP);
 
     return 0;

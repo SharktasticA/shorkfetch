@@ -80,6 +80,7 @@ These are possible field names you can use with the `--fields` argument. The fea
 * `os`: OS
 * `krn`: Kernel
 * `upt`: Uptime
+* `pkgs`: packages
 * `scn`: Screen(s)
 * `de`: Desktop environment
 * `wm`: Window manager and/or Wayland compositor
