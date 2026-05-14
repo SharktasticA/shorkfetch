@@ -1756,6 +1756,11 @@ char *getPackages(const char *os)
     if (sCount > 0)
         snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
 
+    // Make sure we don't start with ", "...
+    size_t pkgsLen = strlen(pkgs);
+    if (pkgsLen > 2 && pkgs[0] == ',' && pkgs[1] == ' ')
+        memmove(pkgs, pkgs + 2, pkgsLen - 1);
+
     return pkgs;
 }
 
