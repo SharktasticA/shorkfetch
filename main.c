@@ -462,10 +462,14 @@ Process getParentProcess(int pid)
 
 /**
  * @param prog Program's executable name
+ * @param isExec Flags if the function should also check if a found program has
+ *               execute permissions
  * @returns 1 if program is installed; 0 if not
  */
-int isProgramInstalled(char *prog)
+int isProgramInstalled(char *prog, int isExec)
 {
+    int mode = isExec ? X_OK : F_OK;
+
     char *path = getenv("PATH");
     if (!path)
     {
@@ -480,7 +484,7 @@ int isProgramInstalled(char *prog)
     {
         char fullpath[512];
         snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, prog);
-        if (access(fullpath, X_OK) == 0)
+        if (access(fullpath, mode) == 0)
         {
             free(paths);
             return 1;
@@ -492,7 +496,7 @@ int isProgramInstalled(char *prog)
     // Also try /usr/libexec
     char libexecPath[PATH_MAX];
     snprintf(libexecPath, PATH_MAX, "/usr/libexec/%s", prog);
-    if (access(libexecPath, X_OK) == 0) return 1;
+    if (access(libexecPath, mode) == 0) return 1;
 
     return 0;
 }
@@ -1608,7 +1612,7 @@ char *getPackages(const char *os)
     int sCount = 0;
 
     // Get Debian-style packages
-    if (isProgramInstalled("dpkg"))
+    if (isProgramInstalled("dpkg", 0))
     {
         // Try quickly counting inside /var/lib/dpkg/status
         FILE *dpkgStatus = fopen("/var/lib/dpkg/status", "r");
@@ -1635,20 +1639,20 @@ char *getPackages(const char *os)
         }
     }
 
-    // Get Arch-style packages by counting /var/lib/pacman/local
-    if (access("/var/lib/pacman/local", F_OK) == 0)
+    if (isProgramInstalled("pacman", 0))
     {
+        // Try quickly counting inside /var/lib/pacman/local
         DIR *pacmanLocal = opendir("/var/lib/pacman/local");
         if (pacmanLocal)
         {
             struct dirent *dirEntry;
             while ((dirEntry = readdir(pacmanLocal)) != NULL)
-                if (dirEntry->d_name[0] != '.')
+                if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "ALPM_DB_VERSION") != 0)
                     pCount++;
             closedir(pacmanLocal);
         }
 
-        // As a fallback, try pacman (much slower)
+        // Try pacman as a slower fallback...
         if (!pCount)
         {
             FILE *stream = popen("pacman -Qq 2>/dev/null | wc -l", "r");
@@ -1660,8 +1664,19 @@ char *getPackages(const char *os)
         }
     }
 
+    if (isProgramInstalled("rpm", 0))
+    {
+        // Try rpm for now (it's slow, we should find a better way...)
+        FILE *stream = popen("rpm -qa 2>/dev/null | wc -l", "r");
+        if (stream)
+        {
+            fscanf(stream, "%d", &rCount);
+            pclose(stream);
+        }
+    }
+
     // Get Flatpak packages
-    if (isProgramInstalled("flatpak"))
+    if (isProgramInstalled("flatpak", 0))
     {
         // Try quickly figuring the number out using the filesystem
         const char* HOME = getenv("HOME");
@@ -1742,7 +1757,7 @@ char *getPackages(const char *os)
     }
 
     // Get Snap packages
-    if (isProgramInstalled("snap"))
+    if (isProgramInstalled("snap", 0))
     {
         // Try quickly figuring the number out using the filesystem
         DIR *snapDir = opendir("/snap");
@@ -1804,7 +1819,7 @@ Display *getDisplays(int *count)
     Display *displays = NULL;
 
     // Try getting displays with xrandr (X11)
-    if (isProgramInstalled("xrandr"))
+    if (isProgramInstalled("xrandr", 0))
     {
         FILE *stream = popen("xrandr 2>/dev/null", "r");
         if (stream)
