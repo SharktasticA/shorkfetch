@@ -2082,58 +2082,75 @@ char *getTerminal(void)
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
 
-    // Try the sane way ($TERM_PROGRAM) first
+    char *terminal = NULL;
+
+    // Try the easy way ($TERM_PROGRAM) first
     char *termProgram = getenv("TERM_PROGRAM");
     if (termProgram && termProgram[0] != '\0')
-        return strdup(termProgram);
+        terminal = strdup(termProgram);
 
     // Try looking through our parent processes to get the name
-    Process process = getParentProcess(getpid());
-    while (process.pid > 1)
+    if (!terminal)
     {
-        // Flags if we must not use this process as our terminal
-        int notTerminal = 0;
-
-        // We must skip wrappers like doas, su or sudo, and possible shells
-        for (int i = 0; i < EXCLUDED_TERMINAL_PROCS_LEN; i++)
+        Process process = getParentProcess(getpid());
+        while (process.pid > 1)
         {
-            if (strcmp(process.name, EXCLUDED_TERMINAL_PROCS[i]) == 0)
+            // Flags if we must not use this process as our terminal
+            int notTerminal = 0;
+
+            // We must skip wrappers like doas, su or sudo, and possible shells
+            for (int i = 0; i < EXCLUDED_TERMINAL_PROCS_LEN; i++)
             {
-                notTerminal = 1;
+                if (strcmp(process.name, EXCLUDED_TERMINAL_PROCS[i]) == 0)
+                {
+                    notTerminal = 1;
+                    break;
+                }
+            }
+
+            if (!notTerminal)
+            {
+                terminal = strdup(process.name);
                 break;
             }
+
+            process = getParentProcess(process.pid);
         }
-
-        if (!notTerminal)
-        {
-            // Remove trailing hyphen from "gnome-terminal-" (etc.)
-            size_t len = strlen(process.name);
-            if (len > 0 && process.name[len - 1] == '-')
-                process.name[len - 1] = '\0';
-
-            return strdup(process.name);
-        }
-
-        process = getParentProcess(process.pid);
     }
 
     // As a fallback, we can also try $TERM to get the terminal's basic 
     // capabilities like "xterm-256color"
-    char *term = getenv("TERM");
-    if (term && term[0] != '\0')
+    if (!terminal)
     {
-        if (COMPACT) return strdup(term);
-        else
+        const char *TERM = getenv("TERM");
+        if (TERM && TERM[0] != '\0')
         {
-            size_t resultLen = strlen(term) + 11 + 1;
-            char *result = malloc(resultLen);
-            if (!result) return NULL;
-            snprintf(result, resultLen, "%s compatible", term);
-            return result;
+            if (COMPACT) terminal = strdup(TERM);
+            else
+            {
+                size_t termLen = strlen(TERM) + 11 + 1;
+                terminal = malloc(termLen);
+                if (terminal)
+                    snprintf(terminal, termLen, "%s compatible", TERM);
+            }
         }
     }
 
-    return NULL;
+    // Do some cleaning if needed
+    if (terminal)
+    {
+        size_t terminalLen = strlen(terminal);
+
+        // Remove trailing hyphen from "gnome-terminal-" (etc.)
+        if (terminalLen > 0 && terminal[terminalLen - 1] == '-')
+            terminal[terminalLen - 1] = '\0';
+
+        // Remove "agent" from "ptyxis-agent"
+        if (terminalLen > 6 && terminal[6] == '-' && strncmp(terminal, "ptyxis", 6) == 0)
+            terminal[6] = '\0';
+    }
+
+    return terminal;
 }
 
 /**
