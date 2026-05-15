@@ -50,6 +50,7 @@ typedef struct {
 typedef struct {
     int vendor;
     int device;
+    int revision;
 } GPU;
 
 typedef struct {
@@ -94,7 +95,8 @@ typedef struct {
 
 
 static int COMPACT = 0;
-const char SHORK[24][20] = {
+static char* HOME;
+static const char SHORK[24][20] = {
     "                   ",
     "^`.                ",
     "\\  \\               ",
@@ -429,7 +431,7 @@ Process getParentProcess(int pid)
     Process result = { -1, "" };
 
     // Open the process's status file
-    char pidPath[64];
+    char pidPath[PATH_MAX];
     snprintf(pidPath, sizeof(pidPath), "/proc/%d/status", pid);
     FILE *pidStatus = fopen(pidPath, "r");
     if (!pidStatus) return result;
@@ -443,7 +445,7 @@ Process getParentProcess(int pid)
             fclose(pidStatus);
 
             // Get parent process' name
-            char commPath[64];
+            char commPath[PATH_MAX];
             snprintf(commPath, sizeof(commPath), "/proc/%d/comm", result.pid);
             FILE *comm = fopen(commPath, "r");
             if (!comm) { result.pid = -1; return result; }
@@ -482,9 +484,9 @@ int isProgramInstalled(char *prog, int isExec)
     char *dir = strtok(paths, ":");
     while (dir)
     {
-        char fullpath[512];
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, prog);
-        if (access(fullpath, mode) == 0)
+        char fullPath[PATH_MAX];
+        snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, prog);
+        if (access(fullPath, mode) == 0)
         {
             free(paths);
             return 1;
@@ -558,7 +560,7 @@ int procExists(const char *name, const int strict)
             continue;
 
         // Build path to process' comm (command) file
-        char path[267];
+        char path[PATH_MAX];
         snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
 
         FILE *commFile = fopen(path, "r");
@@ -600,11 +602,11 @@ int procExists(const char *name, const int strict)
  */
 int readHexFile(const char *path)
 {
-    FILE *stream = fopen(path, "r");
-    if (!stream) return 0;
+    FILE *fStream = fopen(path, "r");
+    if (!fStream) return 0;
     int val;
-    if (fscanf(stream, "%x", &val) != 1) val = 0;
-    fclose(stream);
+    if (fscanf(fStream, "%x", &val) != 1) val = 0;
+    fclose(fStream);
     return val;
 }
 
@@ -929,7 +931,20 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     // Advanced Micro Devices, Inc. [AMD/ATI]
     if (vendor[0] == 'A' && strncmp(vendor, "Advanced Micro", 14) == 0)
     {
-        cleanedVendor = strdup("AMD/ATI");
+        // If we used amdgpu.ids, A deterimed "AMD" or "ATI" may be in the
+        // device name and we should use that
+        if (strncmp(cleanedDevice, "AMD ", 4) == 0)
+        {
+            cleanedVendor = strdup("AMD");
+            memmove(cleanedDevice, cleanedDevice + 4, strlen(cleanedDevice) - 3);
+        }
+        else if (strncmp(cleanedDevice, "ATI ", 4) == 0)
+        {
+            cleanedVendor = strdup("ATI");
+            memmove(cleanedDevice, cleanedDevice + 4, strlen(cleanedDevice) - 3);
+        }
+        else
+            cleanedVendor = strdup("AMD/ATI");
 
         // If we have bracketed info, we *may* discard the norm (usually just
         // containing the codename)
@@ -968,6 +983,21 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
             char *tmp = findReplace(cleanedDevice, inputSize, " Series/Vega Mobile Series", "/Vega Mobile");
             free(cleanedDevice);
             cleanedDevice = tmp;
+        }
+
+        // Prettify (e.g.) "FirePro V (FireGL V)" to "FirePro V/FireGL V"
+        char *fireGLBrac = strstr(cleanedDevice, " (Fire");
+        if (fireGLBrac)
+        {
+            char *closeBrac = strchr(fireGLBrac, ')');
+            if (closeBrac)
+            {
+                memmove(fireGLBrac, fireGLBrac + 1, strlen(fireGLBrac));
+                cleanedDevice[fireGLBrac - cleanedDevice] = '/';
+                char *newClose = strchr(cleanedDevice, ')');
+                if (newClose)
+                    memmove(newClose, newClose + 1, strlen(newClose));
+            }
         }
     }
     // Intel Corporation
@@ -1083,6 +1113,14 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
             free(cleanedVendor);
             cleanedVendor = tmp;
         }
+    }
+
+    // Universal deletions
+    if (strstr(cleanedDevice, " Graphics Adapter"))
+    {
+        char *tmp = findReplace(cleanedDevice, inputSize, " Graphics Adapter", "");
+        free(cleanedDevice);
+        cleanedDevice = tmp;
     }
 
 
@@ -1201,12 +1239,12 @@ MemInfo getMemInfo(void)
 {
     MemInfo mi = {0};
 
-    FILE *stream = fopen("/proc/meminfo", "r");
-    if (stream)
+    FILE *fStream = fopen("/proc/meminfo", "r");
+    if (fStream)
     {
         char buffer[128];
         int parsed = 0;
-        while (fgets(buffer, sizeof(buffer), stream) && parsed < 6)
+        while (fgets(buffer, sizeof(buffer), fStream) && parsed < 6)
         {
             if (sscanf(buffer, "MemTotal: %ld", &mi.memTotal) == 1) { parsed++; continue; }
             else if (sscanf(buffer, "MemFree: %ld", &mi.memFree) == 1) { parsed++; continue; }
@@ -1215,7 +1253,7 @@ MemInfo getMemInfo(void)
             else if (sscanf(buffer, "SwapTotal: %ld", &mi.swapTotal) == 1) { parsed++; continue; }
             else if (sscanf(buffer, "SwapFree: %ld", &mi.swapFree) == 1) { parsed++; continue; }
         }
-        fclose(stream);
+        fclose(fStream);
     }
 
     return mi;
@@ -1246,7 +1284,9 @@ char *interpretGPU(GPU *gpuIDs)
     if (!gpu) return strdup("unknown");
     gpu[0] = '\0';
 
-    // If Intel GPU, query pre-defined iGPU list
+
+
+    // If Intel GPU, query our pre-defined iGPU list
     if (gpuIDs->vendor == 0x8086)
     {
         const char *name = INTEL_IGPUS[gpuIDs->device];
@@ -1259,7 +1299,50 @@ char *interpretGPU(GPU *gpuIDs)
             return gpu;
         }
     }
+    // If AMD GPU, query the AMD GPU IDs database
+    else if (gpuIDs->vendor == 0x1002)
+    {
+        // Possible paths to amdgpu.ids 
+        char userAMDGPUIDs[PATH_MAX];
+        snprintf(userAMDGPUIDs, PATH_MAX, "%s/.local/share/libdrm/amdgpu.ids", HOME);
+        const char *amdGPUIDs[] = {
+            "/usr/share/libdrm/amdgpu.ids",
+            userAMDGPUIDs
+        };
 
+        for (int i = 0; i < 2; i++)
+        {
+            FILE *fStream = fopen(amdGPUIDs[i], "r");
+            if (!fStream) continue;
+
+            char line[256];
+            while (fgets(line, sizeof(line), fStream))
+            {
+                if (line[0] == '#' || line[0] == '\n') continue;
+
+                int fileDID, fileRev;
+                char name[256];
+                // A line looks lile: 7480,	C1,	AMD Radeon RX 7700S
+                if (sscanf(line, "%x,\t%x,\t%255[^\n]", &fileDID, &fileRev, name) == 3)
+                {
+                    if (fileDID == gpuIDs->device && fileRev == gpuIDs->revision)
+                    {
+                        char *tmp = cleanGPUName("Advanced Micro", name, gpuSize);
+                        strncpy(gpu, tmp, gpuSize - 1);
+                        gpu[gpuSize - 1] = '\0';
+                        free(tmp);
+                        fclose(fStream);
+                        return gpu;
+                    }
+                }
+            }
+            fclose(fStream);
+        }
+    }
+
+
+
+    // Check the PCI IDs database
     char *pciids;
     if (access("/usr/share/misc/pci.ids", F_OK) == 0)
         pciids = "/usr/share/misc/pci.ids";
@@ -1267,14 +1350,14 @@ char *interpretGPU(GPU *gpuIDs)
         pciids = "/usr/share/hwdata/pci.ids";
     else
     {
-        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpu, gpuSize, "%04x:%04x", gpuIDs->vendor, gpuIDs->device);
         return gpu;
     }
 
-    FILE *stream = fopen(pciids, "r");
-    if (!stream)
+    FILE *fStream = fopen(pciids, "r");
+    if (!fStream)
     {
-        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpu, gpuSize, "%04x:%04x", gpuIDs->vendor, gpuIDs->device);
         return gpu;
     }
 
@@ -1286,7 +1369,7 @@ char *interpretGPU(GPU *gpuIDs)
     sprintf(deviceHex, "%04x", gpuIDs->device);
 
     char buffer[128];
-    while (fgets(buffer, sizeof(buffer), stream))
+    while (fgets(buffer, sizeof(buffer), fStream))
     {
         if (buffer[0] == '#' || buffer[0] == 'C' || buffer[0] == '\0') continue;
         
@@ -1316,14 +1399,12 @@ char *interpretGPU(GPU *gpuIDs)
             }
         }
     }
-    fclose(stream);
+    fclose(fStream);
 
     if (!vendor || !device)
-        snprintf(gpu, gpuSize, "unknown (%04x:%04x)", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpu, gpuSize, "%04x:%04x", gpuIDs->vendor, gpuIDs->device);
     else
-    {
         snprintf(gpu, gpuSize, "%s", cleanGPUName(vendor, device, gpuSize));
-    }
 
     if (vendor) free(vendor);
     if (device) free(device);
@@ -1417,11 +1498,11 @@ char *getOS(struct utsname u, int uStatus)
     os[0] = '\0';
 
     // Try os-release
-    FILE *stream = fopen("/etc/os-release", "r");
-    if (stream)
+    FILE *fStream = fopen("/etc/os-release", "r");
+    if (fStream)
     {
         char buffer[128];
-        while (fgets(buffer, sizeof(buffer), stream))
+        while (fgets(buffer, sizeof(buffer), fStream))
         {
             if (strncmp(buffer, "PRETTY_NAME=", 12) == 0)
             {
@@ -1431,17 +1512,17 @@ char *getOS(struct utsname u, int uStatus)
                 break;
             }
         }
-        fclose(stream);
+        fclose(fStream);
     }
 
     // Try issue
     if (os[0] == '\0')
     {
-        FILE *stream = fopen("/etc/issue", "r");
-        if (stream)
+        fStream = fopen("/etc/issue", "r");
+        if (fStream)
         {
             char buffer[osSize];
-            if (fgets(buffer, sizeof(buffer), stream))
+            if (fgets(buffer, sizeof(buffer), fStream))
             {
                 size_t len = strlen(buffer);
                 if (len > 0 && buffer[len - 1] == '\n') buffer[len - 1] = '\0';
@@ -1450,7 +1531,7 @@ char *getOS(struct utsname u, int uStatus)
                 strncpy(os, buffer, osSize - 1);
                 os[osSize - 1] = '\0';
             }
-            fclose(stream);
+            fclose(fStream);
         }
     }
 
@@ -1553,11 +1634,11 @@ char *getUptime(void)
     if (!uptime) return strdup("unknown");
     uptime[0] = '\0'; 
 
-    FILE *stream = fopen("/proc/uptime", "r");
-    if (stream)
+    FILE *fStream = fopen("/proc/uptime", "r");
+    if (fStream)
     {
         double seconds;
-        if (fscanf(stream, "%lf", &seconds) == 1)
+        if (fscanf(fStream, "%lf", &seconds) == 1)
         {
             int sec = (int)seconds;
             int days = sec / 86400;
@@ -1583,7 +1664,7 @@ char *getUptime(void)
                     snprintf(uptime, 128, "%d:%d", hours, minutes);
             }
         }
-        fclose(stream);
+        fclose(fStream);
     }
     else strcpy(uptime, "unknown");
 
@@ -1630,11 +1711,11 @@ char *getPackages(const char *os)
         // Try dpkg-query as a slower fallback...
         if (!dCount)
         {
-            FILE *stream = popen("dpkg-query -f '.\n' -W 2>/dev/null | wc -l", "r");
-            if (stream)
+            FILE *fStream = popen("dpkg-query -f '.\n' -W 2>/dev/null | wc -l", "r");
+            if (fStream)
             {
-                fscanf(stream, "%d", &dCount);
-                pclose(stream);
+                fscanf(fStream, "%d", &dCount);
+                pclose(fStream);
             }
         }
     }
@@ -1655,11 +1736,11 @@ char *getPackages(const char *os)
         // Try pacman as a slower fallback...
         if (!pCount)
         {
-            FILE *stream = popen("pacman -Qq 2>/dev/null | wc -l", "r");
-            if (stream)
+            FILE *fStream = popen("pacman -Qq 2>/dev/null | wc -l", "r");
+            if (fStream)
             {
-                fscanf(stream, "%d", &pCount);
-                pclose(stream);
+                fscanf(fStream, "%d", &pCount);
+                pclose(fStream);
             }
         }
     }
@@ -1667,11 +1748,11 @@ char *getPackages(const char *os)
     if (isProgramInstalled("rpm", 0))
     {
         // Try rpm for now (it's slow, we should find a better way...)
-        FILE *stream = popen("rpm -qa 2>/dev/null | wc -l", "r");
-        if (stream)
+        FILE *fStream = popen("rpm -qa 2>/dev/null | wc -l", "r");
+        if (fStream)
         {
-            fscanf(stream, "%d", &rCount);
-            pclose(stream);
+            fscanf(fStream, "%d", &rCount);
+            pclose(fStream);
         }
     }
 
@@ -1679,10 +1760,9 @@ char *getPackages(const char *os)
     if (isProgramInstalled("flatpak", 0))
     {
         // Try quickly figuring the number out using the filesystem
-        const char* HOME = getenv("HOME");
-        char userApp[256], userRuntime[256];
-        snprintf(userApp, 256, "%s/.local/share/flatpak/app", HOME);
-        snprintf(userRuntime, 256, "%s/.local/share/flatpak/runtime", HOME);
+        char userApp[PATH_MAX], userRuntime[PATH_MAX];
+        snprintf(userApp, PATH_MAX, "%s/.local/share/flatpak/app", HOME);
+        snprintf(userRuntime, PATH_MAX, "%s/.local/share/flatpak/runtime", HOME);
 
         // The directories we need to check - system and user apps and runtimes
         const char *flatpakDirs[] = {
@@ -1747,11 +1827,11 @@ char *getPackages(const char *os)
         // Try flatpak list as a slower fallback...
         if (!fCount)
         {
-            FILE *stream = popen("flatpak list 2>/dev/null | wc -l", "r");
-            if (stream)
+            FILE *fStream = popen("flatpak list 2>/dev/null | wc -l", "r");
+            if (fStream)
             {
-                fscanf(stream, "%d", &fCount);
-                pclose(stream);
+                fscanf(fStream, "%d", &fCount);
+                pclose(fStream);
             }
         }
     }
@@ -1773,13 +1853,13 @@ char *getPackages(const char *os)
         // Try snap list as a slower fallback...
         if (!sCount)
         {
-            FILE *stream = popen("snap list 2>/dev/null | wc -l", "r");
-            if (stream)
+            FILE *fStream = popen("snap list 2>/dev/null | wc -l", "r");
+            if (fStream)
             {
                 int lines = 0;
-                fscanf(stream, "%d", &lines);
+                fscanf(fStream, "%d", &lines);
                 sCount = lines > 1 ? lines - 1 : 0;
-                pclose(stream);
+                pclose(fStream);
             }
         }
     }
@@ -1821,15 +1901,15 @@ Display *getDisplays(int *count)
     // Try getting displays with xrandr (X11)
     if (isProgramInstalled("xrandr", 0))
     {
-        FILE *stream = popen("xrandr 2>/dev/null", "r");
-        if (stream)
+        FILE *fStream = popen("xrandr 2>/dev/null", "r");
+        if (fStream)
         {
             // What we use to read lines of xrandr output in to
             char buffer[512];
             // Flag when we're reading a connected display
             int in = 0;
 
-            while (fgets(buffer, 512, stream))
+            while (fgets(buffer, 512, fStream))
             {
                 // Only process lines for things "connected" or inside a "connected"'s block
                 char *isConnected = strstr(buffer, " connected");
@@ -1925,7 +2005,7 @@ Display *getDisplays(int *count)
 
             if (in) (*count)++;
 
-            pclose(stream);
+            pclose(fStream);
         }
     }
 
@@ -2242,8 +2322,8 @@ char *getCPU(void)
 
 
 
-    FILE *stream = fopen("/proc/cpuinfo", "r");
-    if (stream)
+    FILE *fStream = fopen("/proc/cpuinfo", "r");
+    if (fStream)
     {
         // Use these to stop parsing once we have everything we need!
         // lookingFor's default value is x86 orientated - the ARM-based path
@@ -2252,7 +2332,7 @@ char *getCPU(void)
         int parsed = 0;
 
         char buffer[128];
-        while (fgets(buffer, sizeof(buffer), stream) && parsed < lookingFor)
+        while (fgets(buffer, sizeof(buffer), fStream) && parsed < lookingFor)
         {
             if (strncmp(buffer, "processor", 9) == 0)
             {
@@ -2316,7 +2396,7 @@ char *getCPU(void)
                 parsed++;
             }
         }
-        fclose(stream);
+        fclose(fStream);
 
 
 
@@ -2514,7 +2594,7 @@ GPU* getGPUs(int *count)
     {
         if (entry->d_name[0] == '.') continue;
 
-        char classPath[PATH_MAX / 3], vendorPath[PATH_MAX / 3], devicePath[PATH_MAX / 3];
+        char classPath[PATH_MAX];
         snprintf(classPath, sizeof(classPath), "%s/%s/class", "/sys/bus/pci/devices", entry->d_name);
         int class = readHexFile(classPath);
         class = (class >> 8) & 0xFFFF;
@@ -2522,10 +2602,14 @@ GPU* getGPUs(int *count)
         // We only want class 0x30x...
         if ((class >> 8) == 0x03 && class != 0x0380)
         {
+            char vendorPath[PATH_MAX], devicePath[PATH_MAX], revisionPath[PATH_MAX];
             snprintf(vendorPath, sizeof(vendorPath), "%s/%s/vendor", "/sys/bus/pci/devices", entry->d_name);
             snprintf(devicePath, sizeof(devicePath), "%s/%s/device", "/sys/bus/pci/devices", entry->d_name);
+            snprintf(revisionPath, sizeof(revisionPath), "%s/%s/revision", "/sys/bus/pci/devices", entry->d_name);
+
             int vendor = readHexFile(vendorPath);
             int device = readHexFile(devicePath);
+            int revision = readHexFile(revisionPath);
 
             if (EXCLUDED_PCI_DIDS_LEN > 0)
             {
@@ -2543,6 +2627,7 @@ GPU* getGPUs(int *count)
 
             gpus[*count].vendor = vendor;
             gpus[*count].device = device;
+            gpus[*count].revision = revision;
             (*count)++;
 
             if (*count == 4) break;
@@ -2891,6 +2976,8 @@ int main(int argc, char *argv[])
     }
 
 
+
+    HOME =  getenv("HOME");
 
     MemInfo mi = {0};
     if (showRAM || showSwap)
