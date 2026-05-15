@@ -48,6 +48,7 @@ typedef struct {
 } Display;
 
 typedef struct {
+    char *name;
     int vendor;
     int device;
     int revision;
@@ -2585,7 +2586,7 @@ GPU* getGPUs(int *count)
     struct dirent *entry;
     GPU *gpus = malloc(4 * sizeof(GPU));
     if (!gpus) 
-    {   
+    {
         *count = 0;
         return NULL;
     }
@@ -2766,6 +2767,146 @@ char *getLocalIP(void)
     freeifaddrs(ifs);
     return result;
 }
+
+
+
+#ifdef TESTS
+/**
+ * Tests the interpretGPU function to ensure it finds and cleans GPU names as
+ * we expect it to.
+ */
+void testInterpretGPU(void)
+{
+    printf("########################\n");
+    printf("## INTERPRET GPU TEST ##\n");
+    printf("########################\n");
+    
+    GPU gpus[] = {
+        {
+            "ATI FirePro V (FireGL V) Graphics Adapter",
+            0x1002,
+            0x6784,
+            0x00
+        },
+        {
+            "Caicos [Radeon HD 6450/7450/8450 / R5 230 OEM]",
+            0x1002,
+            0x6779,
+            -1
+        },
+        {
+            "Tahiti XT GL [FirePro W9000]",
+            0x1002,
+            0x6780,
+            -1
+        },
+        {
+            "AMD FirePro W9000",
+            0x1002,
+            0x6780,
+            0x00
+        },
+        {
+            "Navi 33 [Radeon RX 7600/7600 XT/7600M XT/7600S/7700S / PRO W7600]",
+            0x1002,
+            0x7480,
+            -1
+        },
+        {
+            "AMD Radeon RX 7700S",
+            0x1002,
+            0x7480, 
+            0xC1 
+        },
+        {
+            "NV11 [GeForce2 MX/MX 400]",
+            0x10de,
+            0x0110,
+            -1
+        },
+        {
+            "NV43M [GeForce Go6200 TE / 6600 TE]",
+            0x10de,
+            0x0146,
+            -1
+        },
+        {
+            "G92GLM [Quadro FX 3700M]",
+            0x10de,
+            0x061e,
+            -1
+        },
+        {
+            "G94 [GeForce 9600 GT Green Edition]",
+            0x10de,
+            0x0624,
+            -1
+        },
+        {
+            "G96 [GeForce 9500 GA / 9600 GT / GTS 250]",
+            0x10de,
+            0x065d,
+            -1
+        },
+        {
+            "GF110 [GeForce GTX 560 Ti OEM]",
+            0x10de,
+            0x1082,
+            -1
+        },
+        {
+            "GF110 [GeForce GTX 560 Ti 448 Cores]",
+            0x10de,
+            0x1087,
+            -1
+        },
+        {
+            "GM204M [GeForce GTX 960 OEM / 970M]",
+            0x10de,
+            0x13d8,
+            -1
+        },
+        {
+            "GM204 [GeForce GTX 980]",
+            0x10de,
+            0x13c0,
+            0xa1
+        },
+        {
+            "TU104GLM [Quadro RTX 5000 Mobile / Max-Q]",
+            0x10de,
+            0x1eb5,
+            -1
+        },
+        {
+            "TU106 [GeForce RTX 2070 Rev. A]",
+            0x10de,
+            0x1f07,
+            -1
+        },
+        {
+            "AD103 [GeForce RTX 4080 SUPER]",
+            0x10de,
+            0x2702,
+            -1
+        }
+    };
+    const int noGPUs = sizeof(gpus) / sizeof(gpus[0]);
+
+    for (int i = 0; i < noGPUs; i++)
+    {
+        char *gpu = interpretGPU(&gpus[i]);
+        if (gpu[0] != '\0')
+        {
+            if (gpus[i].revision == -1)
+                printf("%04x:%04x:--: \033[31m%s\033[0m -> \033[32m%s\033[0m\n", gpus[i].vendor, gpus[i].device, gpus[i].name, gpu);
+            else
+                printf("%04x:%04x:%02X: \033[31m%s\033[0m -> \033[32m%s\033[0m\n", gpus[i].vendor, gpus[i].device, gpus[i].revision, gpus[i].name, gpu);
+        }
+        free(gpu);
+    }
+}
+#endif
 
 
 
@@ -2999,6 +3140,13 @@ int main(int argc, char *argv[])
     X11_PRESENT = (envX11 != NULL && envX11[0] != '\0');
     if (WAYLAND_PRESENT || X11_PRESENT)
         XDG_CURRENT_DESKTOP = getenv("XDG_CURRENT_DESKTOP");
+
+
+
+#ifdef TESTS
+    testInterpretGPU();
+    return 0;
+#endif
 
 
 

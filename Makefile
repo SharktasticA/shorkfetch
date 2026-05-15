@@ -14,6 +14,10 @@ ifdef NO_ART
 	CFLAGS += -DNO_ART
 endif
 
+ifdef TESTS
+	CFLAGS += -DTESTS
+endif
+
 SRC = main.c
 
 shorkfetch: $(SRC)
