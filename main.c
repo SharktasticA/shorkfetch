@@ -395,31 +395,31 @@ float fsqrt(float x)
 
 /**
  * Validates if the WITH_COL value supplied matches a known colour. If not, bright cyan is used as a fallback.
- * @return ASCII escape code for colour
+ * @return ANSI escape code for colour; empty string if COL=OFF
  */
 char *getAccentColour(void)
 {
 #ifdef COL
     char *colour = STR(COL);
-    if (strcmp(colour, "BLACK") == 0) return COL_BLACK;
-    if (strcmp(colour, "BLUE") == 0) return COL_BLUE;
-    if (strcmp(colour, "BOLD_BLUE") == 0) return COL_BOLD_BLUE;
-    if (strcmp(colour, "BOLD_CYAN") == 0) return COL_BOLD_CYAN;
-    if (strcmp(colour, "BOLD_GREEN") == 0) return COL_BOLD_GREEN;
-    if (strcmp(colour, "BOLD_MAGENTA") == 0) return COL_BOLD_MAGENTA;
-    if (strcmp(colour, "BOLD_RED") == 0) return COL_BOLD_RED;
-    if (strcmp(colour, "BOLD_WHITE") == 0) return COL_BOLD_WHITE;
-    if (strcmp(colour, "BOLD_YELLOW") == 0) return COL_BOLD_YELLOW;
-    if (strcmp(colour, "CYAN") == 0) return COL_CYAN;
-    if (strcmp(colour, "GREEN") == 0) return COL_GREEN;
-    if (strcmp(colour, "GREY") == 0) return COL_GREY;
-    if (strcmp(colour, "MAGENTA") == 0) return COL_MAGENTA;
-    if (strcmp(colour, "OFF") == 0) return COL_RESET;
-    if (strcmp(colour, "RED") == 0) return COL_RED;
-    if (strcmp(colour, "WHITE") == 0) return COL_WHITE;
-    if (strcmp(colour, "YELLOW") == 0) return COL_YELLOW;
+    if (strcmp(colour, "BLACK") == 0) return "\033[" COL_BLACK "m";
+    if (strcmp(colour, "BLUE") == 0) return "\033[" COL_BLUE "m";
+    if (strcmp(colour, "BOLD_BLUE") == 0) return "\033[" COL_BOLD_BLUE "m";
+    if (strcmp(colour, "BOLD_CYAN") == 0) return "\033[" COL_BOLD_CYAN "m";
+    if (strcmp(colour, "BOLD_GREEN") == 0) return "\033[" COL_BOLD_GREEN "m";
+    if (strcmp(colour, "BOLD_MAGENTA") == 0) return "\033[" COL_BOLD_MAGENTA "m";
+    if (strcmp(colour, "BOLD_RED") == 0) return "\033[" COL_BOLD_RED "m";
+    if (strcmp(colour, "BOLD_WHITE") == 0) return "\033[" COL_BOLD_WHITE "m";
+    if (strcmp(colour, "BOLD_YELLOW") == 0) return "\033[" COL_BOLD_YELLOW "m";
+    if (strcmp(colour, "CYAN") == 0) return "\033[" COL_CYAN "m";
+    if (strcmp(colour, "GREEN") == 0) return "\033[" COL_GREEN "m";
+    if (strcmp(colour, "GREY") == 0) return "\033[" COL_GREY "m";
+    if (strcmp(colour, "MAGENTA") == 0) return "\033[" COL_MAGENTA "m";
+    if (strcmp(colour, "OFF") == 0) return "";
+    if (strcmp(colour, "RED") == 0) return "\033[" COL_RED "m";
+    if (strcmp(colour, "WHITE") == 0) return "\033[" COL_WHITE "m";
+    if (strcmp(colour, "YELLOW") == 0) return "\033[" COL_YELLOW "m";
 #endif
-    return COL_BOLD_CYAN;
+    return "\033[" COL_BOLD_CYAN "m";
 }
 
 /**
@@ -2863,6 +2863,7 @@ int main(int argc, char *argv[])
 
     char bullet = '*';
     char *colAccent = getAccentColour();
+    char *colReset = (colAccent[0] == '\0') ? "" : "\033[" COL_RESET "m";
     int noIP = 0;
     int shorkLine = 0;
     int showCategories = 0;
@@ -3058,7 +3059,7 @@ int main(int argc, char *argv[])
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
         else if ((strcmp(argv[i], "-nc") == 0) || (strcmp(argv[i], "--no-col") == 0))
-            colAccent = COL_RESET;
+            colAccent = colReset = "";
         else if ((strcmp(argv[i], "-ni") == 0) || (strcmp(argv[i], "--no-ip") == 0))
             noIP = 1;
     }
@@ -3126,9 +3127,9 @@ int main(int argc, char *argv[])
     size_t headerWidth = 12;
     if (username[0] != '\0' && hostname[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
-        printf("\033[%sm%s\033[%sm@\033[%sm%s\033[%sm\n", colAccent, username, COL_RESET, colAccent, hostname, COL_RESET);
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
+        printf("%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent, hostname, colReset);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
 
         headerWidth = strlen(username) + 1 + strlen(hostname);
         for (size_t i = 0; i < headerWidth; i++) printf("-");
@@ -3137,59 +3138,59 @@ int main(int argc, char *argv[])
 
     if (os && os[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smOS:\033[%sm       %s\n", colAccent, COL_RESET, os);
+                printf("%sOS:%s       %s\n", colAccent, colReset, os);
             else
-                printf("\033[%smOS:\033[%sm  %s\n", colAccent, COL_RESET, os);
+                printf("%sOS:%s  %s\n", colAccent, colReset, os);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, os);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, os);
     }
 
     if (kernel && kernel[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smKernel:\033[%sm   %s\n", colAccent, COL_RESET, kernel);
+                printf("%sKernel:%s   %s\n", colAccent, colReset, kernel);
             else
-                printf("\033[%smKrn:\033[%sm %s\n", colAccent, COL_RESET, kernel);
+                printf("%sKrn:%s %s\n", colAccent, colReset, kernel);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, kernel);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, kernel);
     }
 
     if (uptime && uptime[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smUptime:\033[%sm   %s\n", colAccent, COL_RESET, uptime);
+                printf("%sUptime:%s   %s\n", colAccent, colReset, uptime);
             else
-                printf("\033[%smUp:\033[%sm  %s\n", colAccent, COL_RESET, uptime);
+                printf("%sUp:%s  %s\n", colAccent, colReset, uptime);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, uptime);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, uptime);
     }
 
     if (pkgs && pkgs[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smPackages:\033[%sm %s\n", colAccent, COL_RESET, pkgs);
+                printf("%sPackages:%s %s\n", colAccent, colReset, pkgs);
             else
-                printf("\033[%smPkg:\033[%sm %s\n", colAccent, COL_RESET, pkgs);
+                printf("%sPkg:%s %s\n", colAccent, colReset, pkgs);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, pkgs);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, pkgs);
     }
 
     if (showCategories)
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         for (size_t i = 0; i < headerWidth; i++) printf("-");
         putchar('\n');
     }
@@ -3219,7 +3220,7 @@ int main(int argc, char *argv[])
                 snprintf(connector, 32, " (%s)", dis->connector);
             free(dis->connector);
 
-            if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
 
             if (!useBullets)
             {
@@ -3227,10 +3228,10 @@ int main(int argc, char *argv[])
                 {
                     // No compact - no bullet - single display
                     if (noDisplays == 1)
-                        printf("\033[%smScreen:\033[%sm   %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                        printf("%sScreen:%s   %s%dx%d%s%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh, connector);
                     // No compact - no bullet - multiple displays - first display
                     else if (!pastFirstDisplay)
-                        printf("\033[%smScreens:\033[%sm  %s%dx%d%s%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                        printf("%sScreens:%s  %s%dx%d%s%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh, connector);
                     // No compact - no bullet - multiple displays - subsequent displays
                     else 
                         printf("          %s%dx%d%s%s\n", size, dis->resX, dis->resY, refresh, connector);
@@ -3239,10 +3240,10 @@ int main(int argc, char *argv[])
                 {
                     // Compact - no bullet - single display
                     if (noDisplays == 1)
-                        printf("\033[%smScn:\033[%sm %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
+                        printf("%sScn:%s %s%dx%d%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh);
                     // Compact - no bullet - multiple displays - first display
                     else if (!pastFirstDisplay)
-                        printf("\033[%smScn:\033[%sm %s%dx%d%s\n", colAccent, COL_RESET, size, dis->resX, dis->resY, refresh);
+                        printf("%sScn:%s %s%dx%d%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh);
                     // Compact - no bullet - multiple displays - subsequent displays
                     else 
                         printf("     %s%dx%d%s\n", size, dis->resX, dis->resY, refresh);
@@ -3252,15 +3253,15 @@ int main(int argc, char *argv[])
             {
                 // Compact - bullet - single or multiple displays
                 if (COMPACT)
-                    printf(" \033[%sm%c\033[%sm %s%dx%d%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh);
+                    printf(" %s%c%s %s%dx%d%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh);
                 else
                 {
                     // No compact - bullet - single display
                     if (noDisplays == 1)
-                        printf(" \033[%sm%c\033[%sm %s%dx%d%s%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                        printf(" %s%c%s %s%dx%d%s%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh, connector);
                     // No compact - bullet - multiple displays
                     else if (!COMPACT)
-                        printf(" \033[%sm%c\033[%sm %s%dx%d%s%s\n", colAccent, bullet, COL_RESET, size, dis->resX, dis->resY, refresh, connector);
+                        printf(" %s%c%s %s%dx%d%s%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh, connector);
                 }
             }
 
@@ -3270,15 +3271,15 @@ int main(int argc, char *argv[])
 
     if (de && de != wm && de[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smDE:\033[%sm       %s\n", colAccent, COL_RESET, de);
+                printf("%sDE:%s       %s\n", colAccent, colReset, de);
             else
-                printf("\033[%smDE:\033[%sm  %s\n", colAccent, COL_RESET, de);
+                printf("%sDE:%s  %s\n", colAccent, colReset, de);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, de);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, de);
     }
 
     if (wm && wm[0] != '\0')
@@ -3292,93 +3293,93 @@ int main(int argc, char *argv[])
                 snprintf(server, 32, " (X11)");
         }
 
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smWM:\033[%sm       %s%s\n", colAccent, COL_RESET, wm, server);
+                printf("%sWM:%s       %s%s\n", colAccent, colReset, wm, server);
             else
-                printf("\033[%smWM:\033[%sm  %s\n", colAccent, COL_RESET, wm);
+                printf("%sWM:%s  %s\n", colAccent, colReset, wm);
         }
         else 
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %s%s\n", colAccent, bullet, COL_RESET, wm, server);
+                printf(" %s%c%s %s%s\n", colAccent, bullet, colReset, wm, server);
             else
-                printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, wm);
+                printf(" %s%c%s %s\n", colAccent, bullet, colReset, wm);
         }
     }
 
     if (trm && trm[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smTerminal:\033[%sm %s (%dx%d)\n", colAccent, COL_RESET, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf("%sTerminal:%s %s (%dx%d)\n", colAccent, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
             else
-                printf("\033[%smTrm:\033[%sm %s\n", colAccent, COL_RESET, trm);
+                printf("%sTrm:%s %s\n", colAccent, colReset, trm);
         }
         else
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %s (%dx%d)\n", colAccent, bullet, COL_RESET, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf(" %s%c%s %s (%dx%d)\n", colAccent, bullet, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
             else
-                printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, trm);
+                printf(" %s%c%s %s\n", colAccent, bullet, colReset, trm);
         }
     }
     // If we don't have a terminal name, we can at least still show the console 
     // size
     else if (showTrm)
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smConsole:\033[%sm  %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf("%sConsole:%s  %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
             else
-                printf("\033[%smCon:\033[%sm %dx%d\n", colAccent, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf("%sCon:%s %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
         }
         else
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %dx%d console\n", colAccent, bullet, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf(" %s%c%s %dx%d console\n", colAccent, bullet, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
             else
-                printf(" \033[%sm%c\033[%sm %dx%dch\n", colAccent, bullet, COL_RESET, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                printf(" %s%c%s %dx%dch\n", colAccent, bullet, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
         }
     }
 
     if (shell && shell[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smShell:\033[%sm    %s\n", colAccent, COL_RESET, shell);
+                printf("%sShell:%s    %s\n", colAccent, colReset, shell);
             else
-                printf("\033[%smSh:\033[%sm  %s\n", colAccent, COL_RESET, shell);
+                printf("%sSh:%s  %s\n", colAccent, colReset, shell);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, shell);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, shell);
     }
 
     if (showCategories)
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         for (size_t i = 0; i < headerWidth; i++) printf("-");
         putchar('\n');
     }
 
     if (cpu && cpu[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smCPU:\033[%sm      %s\n", colAccent, COL_RESET, cpu);
+                printf("%sCPU:%s      %s\n", colAccent, colReset, cpu);
             else
-                printf("\033[%smCPU:\033[%sm %s\n", colAccent, COL_RESET, cpu);
+                printf("%sCPU:%s %s\n", colAccent, colReset, cpu);
         }
-        else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, cpu);
+        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, cpu);
     }
 
     if (gpus)
@@ -3390,27 +3391,27 @@ int main(int argc, char *argv[])
 
             if (gpu[0] != '\0')     
             {
-                if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (!useBullets)
                 {
                     if (!COMPACT)
                     {
                         if (noGPUs == 1)
-                            printf("\033[%smGPU:\033[%sm      %s\n", colAccent, COL_RESET, gpu);
+                            printf("%sGPU:%s      %s\n", colAccent, colReset, gpu);
                         else if (!pastFirstGPU)
-                            printf("\033[%smGPUs:\033[%sm     %s\n", colAccent, COL_RESET, gpu);
+                            printf("%sGPUs:%s     %s\n", colAccent, colReset, gpu);
                         else
                             printf("          %s\n", gpu);
                     }
                     else
                     {
                         if (noGPUs == 1 || !pastFirstGPU)
-                            printf("\033[%smGPU:\033[%sm %s\n", colAccent, COL_RESET, gpu);
+                            printf("%sGPU:%s %s\n", colAccent, colReset, gpu);
                         else
                             printf("     %s\n", gpu);
                     }
                 }
-                else printf(" \033[%sm%c\033[%sm %s\n", colAccent, bullet, COL_RESET, gpu);
+                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, gpu);
             }
 
             free(gpu);
@@ -3420,58 +3421,58 @@ int main(int argc, char *argv[])
 
     if (ram && ram[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smRAM:\033[%sm      %s\n", colAccent, COL_RESET, ram);
+                printf("%sRAM:%s      %s\n", colAccent, colReset, ram);
             else
-                printf("\033[%smRAM:\033[%sm %s\n", colAccent, COL_RESET, ram);
+                printf("%sRAM:%s %s\n", colAccent, colReset, ram);
         }
         else 
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %s RAM\n", colAccent, bullet, COL_RESET, ram);
+                printf(" %s%c%s %s RAM\n", colAccent, bullet, colReset, ram);
             else
-                printf(" \033[%sm%c\033[%sm %s (R)\n", colAccent, bullet, COL_RESET, ram);
+                printf(" %s%c%s %s (R)\n", colAccent, bullet, colReset, ram);
         }
     }
 
     if (swap && swap[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smSwap:\033[%sm     %s\n", colAccent, COL_RESET, swap);
+                printf("%sSwap:%s     %s\n", colAccent, colReset, swap);
             else
-                printf("\033[%smSwp:\033[%sm %s\n", colAccent, COL_RESET, swap);
+                printf("%sSwp:%s %s\n", colAccent, colReset, swap);
         }
         else 
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %s swap\n", colAccent, bullet, COL_RESET, swap);
+                printf(" %s%c%s %s swap\n", colAccent, bullet, colReset, swap);
             else
-                printf(" \033[%sm%c\033[%sm %s (S)\n", colAccent, bullet, COL_RESET, swap);
+                printf(" %s%c%s %s (S)\n", colAccent, bullet, colReset, swap);
         }
     }
 
     if (root && root[0] != '\0')
     {
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smRoot:\033[%sm     %s\n", colAccent, COL_RESET, root);
+                printf("%sRoot:%s     %s\n", colAccent, colReset, root);
             else
-                printf("\033[%sm/:\033[%sm   %s\n", colAccent, COL_RESET, root);
+                printf("%s/:%s   %s\n", colAccent, colReset, root);
         }
         else 
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %s root\n", colAccent, bullet, COL_RESET, root);
+                printf(" %s%c%s %s root\n", colAccent, bullet, colReset, root);
             else
-                printf(" \033[%sm%c\033[%sm %s (/)\n", colAccent, bullet, COL_RESET, root);
+                printf(" %s%c%s %s (/)\n", colAccent, bullet, colReset, root);
         }
     }
 
@@ -3481,25 +3482,25 @@ int main(int argc, char *argv[])
         // nest this part in here
         if (showCategories)
         {
-            if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
             for (size_t i = 0; i < headerWidth; i++) printf("-");
             putchar('\n');
         }
 
-        if (showShork) printf("\033[%sm%s\033[%sm", colAccent, SHORK[shorkLine++], COL_RESET);
+        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
         if (!useBullets)
         {
             if (!COMPACT)
-                printf("\033[%smLocal IP:\033[%sm %s\n", colAccent, COL_RESET, localIP);
+                printf("%sLocal IP:%s %s\n", colAccent, colReset, localIP);
             else
-                printf("\033[%smLoc:\033[%sm %s\n", colAccent, COL_RESET, localIP);
+                printf("%sLoc:%s %s\n", colAccent, colReset, localIP);
         }
         else 
         {
             if (!COMPACT)
-                printf(" \033[%sm%c\033[%sm %s local\n", colAccent, bullet, COL_RESET, localIP);
+                printf(" %s%c%s %s local\n", colAccent, bullet, colReset, localIP);
             else
-                printf(" \033[%sm%c\033[%sm %s (L)\n", colAccent, bullet, COL_RESET, localIP);
+                printf(" %s%c%s %s (L)\n", colAccent, bullet, colReset, localIP);
         }
     }
     
