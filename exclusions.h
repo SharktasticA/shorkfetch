@@ -43,6 +43,7 @@ const char *EXCLUDED_TERMINAL_PROCS[] = {
     "ion",
     "xonsh",
     "rc",
+    "zensh"
 
     // Wrappers
     "sudo",
