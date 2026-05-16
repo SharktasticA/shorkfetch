@@ -1745,67 +1745,59 @@ char *getPackages(const char *os)
             userRuntime
         };
 
-        // We will cache found flatpaks for duplication checking
-        int foundFpacksCap = 256;
-        const int KEY_SIZE = 257;
-        char (*foundFpacks)[KEY_SIZE] = malloc(sizeof(*foundFpacks) * foundFpacksCap);
-
+        // We are looking for "active" symbolic link files. The tree looks like:
+        // flatpakDir[i]/org.kde.Platform/x86_64/6.9   /active
+        //              /name            /arch  /branch/BINGO
         for (int i = 0; i < 4; i++)
         {
             DIR *flatpakDir = opendir(flatpakDirs[i]);
-            if (flatpakDir)
+            if (!flatpakDir) continue;
+
+            // Enter arch
+            struct dirent *nameEntry;
+            while ((nameEntry = readdir(flatpakDir)) != NULL)
             {
-                struct dirent *dirEntry;
-                while ((dirEntry = readdir(flatpakDir)) != NULL)
+                if (nameEntry->d_name[0] == '.') continue;
+
+                char archPath[PATH_MAX];
+                snprintf(archPath, PATH_MAX, "%s/%s", flatpakDirs[i], nameEntry->d_name);
+                DIR *archDir = opendir(archPath);
+                if (!archDir) continue;
+
+                // Enter branch
+                struct dirent *archEntry;
+                while ((archEntry = readdir(archDir)) != NULL)
                 {
-                    if (dirEntry->d_name[0] == '.')
-                        continue;
+                    if (archEntry->d_name[0] == '.') continue;
 
-                    // A unique key for this flatpak that can distinguish system
-                    // and user
-                    char key[KEY_SIZE];
-                    snprintf(key, KEY_SIZE, "%s%c", dirEntry->d_name, (i < 2) ? 'S' : 'U');
+                    char branchPath[PATH_MAX];
+                    snprintf(branchPath, PATH_MAX, "%s/%s", archPath, archEntry->d_name);
+                    DIR *branchDir = opendir(branchPath);
+                    if (!branchDir) continue;
 
-                    // Check for duplicates
-                    int duplicate = 0;
-                    for (int j = 0; j < fCount; j++)
+                    // Look for out crucial "active" file
+                    struct dirent *branchEntry;
+                    while ((branchEntry = readdir(branchDir)) != NULL)
                     {
-                        if (strcmp(foundFpacks[j], key) == 0)
-                        {
-                            duplicate = 1;
-                            break;
-                        }
-                    }
+                        if (branchEntry->d_name[0] == '.') continue;
 
-                    if (!duplicate)
-                    {
-                        // Reallocate to expand the cache if needed
-                        if (fCount == foundFpacksCap)
-                        {
-                            foundFpacksCap += 256;
-                            foundFpacks = realloc(foundFpacks, sizeof(*foundFpacks) * foundFpacksCap);
-                            if (!foundFpacks)
-                                return NULL;
-                        }
+                        char activePath[PATH_MAX];
+                        snprintf(activePath, PATH_MAX, "%s/%s/active", branchPath, branchEntry->d_name);
+                        if (access(activePath, F_OK) != 0) continue;
 
-                        strncpy(foundFpacks[fCount], key, sizeof(foundFpacks[0]) - 1);
-                        foundFpacks[fCount][sizeof(foundFpacks[0]) - 1] = '\0';
+                        // flatpak list seems to skip .Locale, so we do so to
+                        // match its output
+                        size_t nameLen = strlen(nameEntry->d_name);
+                        if (nameLen > 7 && strcmp(nameEntry->d_name + nameLen - 7, ".Locale") == 0)
+                            continue;
+
                         fCount++;
                     }
+                    closedir(branchDir);
                 }
-                closedir(flatpakDir);
+                closedir(archDir);
             }
-        }
-
-        // Try flatpak list as a slower fallback...
-        if (!fCount)
-        {
-            FILE *fStream = popen("flatpak list 2>/dev/null | wc -l", "r");
-            if (fStream)
-            {
-                fscanf(fStream, "%d", &fCount);
-                pclose(fStream);
-            }
+            closedir(flatpakDir);
         }
     }
 
