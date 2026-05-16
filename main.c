@@ -2893,7 +2893,7 @@ void testInterpretGPU(void)
     for (int i = 0; i < noGPUs; i++)
     {
         char *gpu = interpretGPU(&gpus[i]);
-        if (gpu[0] != '\0')
+        if (gpu && gpu[0] != '\0')
         {
             if (gpus[i].revision == -1)
                 printf("%04x:%04x:--: \033[31m%s\033[0m -> \033[32m%s\033[0m\n", gpus[i].vendor, gpus[i].device, gpus[i].name, gpu);
@@ -2901,6 +2901,47 @@ void testInterpretGPU(void)
                 printf("%04x:%04x:%02X: \033[31m%s\033[0m -> \033[32m%s\033[0m\n", gpus[i].vendor, gpus[i].device, gpus[i].revision, gpus[i].name, gpu);
         }
         free(gpu);
+    }
+}
+
+/**
+ * Tests the interpretScreen function to ensure it assembles screen specs
+ * strings as we expect it to.
+ */
+void testInterpretScreen(void)
+{
+    printf("###########################\n");
+    printf("## INTERPRET SCREEN TEST ##\n");
+    printf("###########################\n");
+
+    Screen screens[] = {
+        {
+            strdup("DP-4"),
+            1,
+            798.000000,
+            334.000000,
+            3440,
+            1440,
+            100
+        },
+        {
+            strdup("eDP-1"),
+            0,
+            309.000000,
+            173.000000,
+            1920,
+            1080,
+            60
+        }
+    };
+    const int noScreens = sizeof(screens) / sizeof(screens[0]);
+
+    for (int i = 0; i < noScreens; i++)
+    {
+        char *screen = interpretScreen(&screens[i]);
+        if (screen && screen[0] != '\0')
+            printf("%s\n", screen);
+        free(screen);
     }
 }
 #endif
@@ -3143,6 +3184,7 @@ int main(int argc, char *argv[])
 
 #ifdef TESTS
     testInterpretGPU();
+    testInterpretScreen();
     return 0;
 #endif
 
