@@ -1815,7 +1815,7 @@ char *getPackages(const char *os)
     {
         struct dirent *dirEntry;
         while ((dirEntry = readdir(snapDir)) != NULL)
-            if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
+            if (dirEntry->d_type == DT_DIR && dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
                 sCount++;
         closedir(snapDir);
     }
