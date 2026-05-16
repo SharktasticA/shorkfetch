@@ -1863,15 +1863,20 @@ char *getPackages(const char *os)
         }
     }
 
-    // Get Snap packages by counting inside /snap
-    DIR *snapDir = opendir("/snap");
-    if (snapDir)
+    // Get Snap packages by counting inside /snap or /var/lib/snapd/snap
+    const char *snapDirs[] = {"/snap", "/var/lib/snapd/snap"};
+    for (int i = 0; i < 2; i++)
     {
+        DIR *snapDir = opendir(snapDirs[i]);
+        if (!snapDir) continue;
+
         struct dirent *dirEntry;
         while ((dirEntry = readdir(snapDir)) != NULL)
             if (dirEntry->d_type == DT_DIR && dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
                 sCount++;
         closedir(snapDir);
+
+        if (sCount > 0) break;
     }
 
     // Build the result string
