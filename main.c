@@ -45,7 +45,7 @@ typedef struct {
     int resY;
     int resTotal;
     int refresh;
-} Display;
+} Screen;
 
 typedef struct {
     char *name;
@@ -1833,10 +1833,10 @@ char *getPackages(const char *os)
 }
 
 /**
- * @param count Number of displays detected (intended to be used by reference)
- * @return Pointer to Display structs containing detected GPUs
+ * @param count Number of screens detected (intended to be used by reference)
+ * @return Pointer to Screen structs containing detected GPUs
  */
-Display *getDisplays(int *count)
+Screen *getScreens(int *count)
 {
     if (!count) return NULL;
 
@@ -1844,9 +1844,9 @@ Display *getDisplays(int *count)
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
 
-    Display *displays = NULL;
+    Screen *screens = NULL;
 
-    // Try getting displays with xrandr (X11)
+    // Try getting screens with xrandr (X11)
     if (isProgramInstalled("xrandr", 0))
     {
         FILE *fStream = popen("xrandr 2>/dev/null", "r");
@@ -1854,7 +1854,7 @@ Display *getDisplays(int *count)
         {
             // What we use to read lines of xrandr output in to
             char buffer[512];
-            // Flag when we're reading a connected display
+            // Flag when we're reading a connected screen
             int in = 0;
 
             while (fgets(buffer, 512, fStream))
@@ -1863,28 +1863,28 @@ Display *getDisplays(int *count)
                 char *isConnected = strstr(buffer, " connected");
                 if (isConnected) 
                 {
-                    // Reallocate displays array to take into account new display
-                    displays = realloc(displays, ((*count) + 1) * sizeof(Display));
-                    memset(&displays[(*count)], 0, sizeof(Display));
+                    // Reallocate screens array to take into account new screen
+                    screens = realloc(screens, ((*count) + 1) * sizeof(Screen));
+                    memset(&screens[(*count)], 0, sizeof(Screen));
 
                     // Parse connector name
                     char pConnector[64] = {0};
                     sscanf(buffer, "%63s", pConnector);
-                    displays[*count].connector = strdup(pConnector);
+                    screens[*count].connector = strdup(pConnector);
 
                     // Replace "Virtual-" with "Virt-" if present
-                    char *virtNeedle = strstr(displays[*count].connector, "Virtual-");
+                    char *virtNeedle = strstr(screens[*count].connector, "Virtual-");
                     if (virtNeedle)
                     {
                         memcpy(virtNeedle, "Virt-", 5);
                         memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
                     }
 
-                    // Flag if connector is for primary display
-                    displays[*count].isPrimary = strstr(buffer, " primary ") != NULL;
+                    // Flag if connector is for primary screen
+                    screens[*count].isPrimary = strstr(buffer, " primary ") != NULL;
 
                     // Parse and calculate physical size (DISABLED FOR NOW - DEPENDING ROUNDING TWEAKS)
-                    displays[*count].physSize = 0.0;
+                    screens[*count].physSize = 0.0;
                     /*char *needle = strstr(buffer, "mm x");
                     if (needle)
                     {
@@ -1906,10 +1906,10 @@ Display *getDisplays(int *count)
                             // If the first decimal is a 0, we can likely assume the marketing size was a whole
                             // number. Eg. 34.058189" -> 34"
                             if (first == 0)
-                                displays[*count].physSize = (float)whole;
+                                screens[*count].physSize = (float)whole;
                             // If first decimal is not 0, then we preserve it and around to just 1dp
                             else
-                                displays[*count].physSize = (float)((int)(diagIn * 10.0f + 0.5f)) / 10.0f;
+                                screens[*count].physSize = (float)((int)(diagIn * 10.0f + 0.5f)) / 10.0f;
                         }
                     }*/
 
@@ -1919,9 +1919,9 @@ Display *getDisplays(int *count)
                     while (*needle && (*needle < '0' || *needle > '9')) needle++;
                     sscanf(needle, "%dx%d", &pResX, &pResY);
 
-                    displays[*count].resX = pResX;
-                    displays[*count].resY = pResY;
-                    displays[*count].resTotal = pResX * pResY;
+                    screens[*count].resX = pResX;
+                    screens[*count].resY = pResY;
+                    screens[*count].resTotal = pResX * pResY;
 
                     // Flag that we are in a block and thus should search for more info on other lines
                     in = 1;
@@ -1942,9 +1942,9 @@ Display *getDisplays(int *count)
                         if ((c >= '0' && c <= '9') || c == '.') start--;
                         else break;
                     }
-                    displays[*count].refresh = (int)(atof(start) + 0.5);
+                    screens[*count].refresh = (int)(atof(start) + 0.5);
 
-                    // At this point, we got everything we can for this display, so let's go
+                    // At this point, we got everything we can for this screen, so let's go
                     (*count)++;
                     in = 0;
                     continue;
@@ -1958,7 +1958,7 @@ Display *getDisplays(int *count)
     }
 
     // If we still have nothing, we can try DRM as an X11/Wayland agnostic fallback
-    if (!displays)
+    if (!screens)
     {
         DIR *dirStream = opendir("/sys/class/drm");
 
@@ -2003,23 +2003,23 @@ Display *getDisplays(int *count)
                 // If we got nothing, no point of continuing...
                 if (pResX <= 0 || pResY <= 0) continue;
 
-                // Reallocate displays array to take into account new display
-                displays = realloc(displays, ((*count) + 1) * sizeof(Display));
-                memset(&displays[(*count)], 0, sizeof(Display));
+                // Reallocate screens array to take into account new screen
+                screens = realloc(screens, ((*count) + 1) * sizeof(Screen));
+                memset(&screens[(*count)], 0, sizeof(Screen));
 
-                // Populate display data
-                displays[(*count)].connector = strdup(entry->d_name);
-                displays[(*count)].physSize = 0.0;
-                displays[(*count)].resX = pResX;
-                displays[(*count)].resY = pResY;
-                displays[(*count)].refresh = 0;
+                // Populate screen data
+                screens[(*count)].connector = strdup(entry->d_name);
+                screens[(*count)].physSize = 0.0;
+                screens[(*count)].resX = pResX;
+                screens[(*count)].resY = pResY;
+                screens[(*count)].refresh = 0;
 
                 // Remove "cardX-" prefix if present
-                if (strncmp(displays[(*count)].connector, "card", 4) == 0)
-                    memmove(displays[(*count)].connector, displays[(*count)].connector + 6, strlen(displays[(*count)].connector + 6) + 1);
+                if (strncmp(screens[(*count)].connector, "card", 4) == 0)
+                    memmove(screens[(*count)].connector, screens[(*count)].connector + 6, strlen(screens[(*count)].connector + 6) + 1);
 
                 // Replace "Virtual-" with "Virt-" if present
-                char *virtNeedle = strstr(displays[*count].connector, "Virtual-");
+                char *virtNeedle = strstr(screens[*count].connector, "Virtual-");
                 if (virtNeedle)
                 {
                     memcpy(virtNeedle, "Virt-", 5);
@@ -2033,7 +2033,7 @@ Display *getDisplays(int *count)
         }
     }
 
-    return displays;
+    return screens;
 }
 
 /**
@@ -3106,8 +3106,8 @@ int main(int argc, char *argv[])
     char *uptime = showUpt ? getUptime() : NULL;
     char *pkgs = showPkgs ? getPackages(os): NULL;
 
-    int noDisplays = 0;
-    Display *displays = showScn ? getDisplays(&noDisplays) : NULL;
+    int noScreens = 0;
+    Screen *screens = showScn ? getScreens(&noScreens) : NULL;
     char *de = showDE ? getDE() : NULL;
     char *wm = showWM ? getWM(&de) : NULL;
     char *trm = showTrm ? getTerminal() : NULL;
@@ -3195,12 +3195,12 @@ int main(int argc, char *argv[])
         putchar('\n');
     }
 
-    if (displays)
+    if (screens)
     {
-        int pastFirstDisplay = 0;
-        for (int i = 0; i < noDisplays; i++)
+        int pastFirstScreen = 0;
+        for (int i = 0; i < noScreens; i++)
         {
-            Display *dis = &displays[i];
+            Screen *dis = &screens[i];
 
             char size[32] = "";
             if (dis->physSize > 0.0)
@@ -3226,46 +3226,46 @@ int main(int argc, char *argv[])
             {
                 if (!COMPACT)
                 {
-                    // No compact - no bullet - single display
-                    if (noDisplays == 1)
+                    // No compact - no bullet - single screen
+                    if (noScreens == 1)
                         printf("%sScreen:%s   %s%dx%d%s%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh, connector);
-                    // No compact - no bullet - multiple displays - first display
-                    else if (!pastFirstDisplay)
+                    // No compact - no bullet - multiple screens - first screen
+                    else if (!pastFirstScreen)
                         printf("%sScreens:%s  %s%dx%d%s%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh, connector);
-                    // No compact - no bullet - multiple displays - subsequent displays
+                    // No compact - no bullet - multiple screens - subsequent screens
                     else 
                         printf("          %s%dx%d%s%s\n", size, dis->resX, dis->resY, refresh, connector);
                 }
                 else
                 {
-                    // Compact - no bullet - single display
-                    if (noDisplays == 1)
+                    // Compact - no bullet - single screen
+                    if (noScreens == 1)
                         printf("%sScn:%s %s%dx%d%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh);
-                    // Compact - no bullet - multiple displays - first display
-                    else if (!pastFirstDisplay)
+                    // Compact - no bullet - multiple screens - first screen
+                    else if (!pastFirstScreen)
                         printf("%sScn:%s %s%dx%d%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh);
-                    // Compact - no bullet - multiple displays - subsequent displays
+                    // Compact - no bullet - multiple screens - subsequent screens
                     else 
                         printf("     %s%dx%d%s\n", size, dis->resX, dis->resY, refresh);
                 }
             }
             else 
             {
-                // Compact - bullet - single or multiple displays
+                // Compact - bullet - single or multiple screens
                 if (COMPACT)
                     printf(" %s%c%s %s%dx%d%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh);
                 else
                 {
-                    // No compact - bullet - single display
-                    if (noDisplays == 1)
+                    // No compact - bullet - single screen
+                    if (noScreens == 1)
                         printf(" %s%c%s %s%dx%d%s%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh, connector);
-                    // No compact - bullet - multiple displays
+                    // No compact - bullet - multiple screens
                     else if (!COMPACT)
                         printf(" %s%c%s %s%dx%d%s%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh, connector);
                 }
             }
 
-            pastFirstDisplay = 1;
+            pastFirstScreen = 1;
         }
     }
 
@@ -3515,7 +3515,7 @@ int main(int argc, char *argv[])
     free(uptime);
     free(pkgs);
 
-    if (displays) free(displays);
+    if (screens) free(screens);
     if (de != wm) free(de);
     free(wm);
     free(trm);
