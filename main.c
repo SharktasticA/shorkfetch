@@ -38,12 +38,19 @@
 
 
 typedef struct {
+    // Connector name (e.g., DP-1)
     char *connector;
+    // Flags if this is the primary screen
     int isPrimary;
-    float physSize;
+    // Physical width (mm)
+    float physX;
+    // Physical height (mm)
+    float physY;
+    // Resolution width (px)
     int resX;
+    // Resolution height (px)
     int resY;
-    int resTotal;
+    // Refresh rate (Hz)
     int refresh;
 } Screen;
 
@@ -1275,33 +1282,35 @@ struct winsize getTerminalSize(void)
 }
 
 /**
- * @param gpuIDs GPU struct containing detected vendor and device IDs
- * @return String containing the GPU's vendor and device name or "unknown" along with vendor and device IDs as hex if interpreting failed
+ * @param gpu GPU struct containing detected vendor and device IDs and revision
+ *            number
+ * @return String containing the GPU's assembled and cleaned full name; vendor
+ *         and device IDs as hex if interpreting failed
  */
-char *interpretGPU(GPU *gpuIDs)
+char *interpretGPU(GPU *gpu)
 {
-    const int gpuSize = 256;
-    char *gpu = malloc(gpuSize);
-    if (!gpu) return strdup("unknown");
-    gpu[0] = '\0';
+    const int GPU_SIZE = 256;
+    char *gpuStr = malloc(GPU_SIZE);
+    if (!gpuStr) return strdup("unknown");
+    gpuStr[0] = '\0';
 
 
 
     // If Intel GPU, query our pre-defined iGPU list
-    if (gpuIDs->vendor == 0x8086)
+    if (gpu->vendor == 0x8086)
     {
-        const char *name = INTEL_IGPUS[gpuIDs->device];
+        const char *name = INTEL_IGPUS[gpu->device];
         if (name)
         {
-            char *tmp = cleanGPUName("Intel", name, gpuSize);
-            strncpy(gpu, tmp, gpuSize - 1);
-            gpu[gpuSize - 1] = '\0';
+            char *tmp = cleanGPUName("Intel", name, GPU_SIZE);
+            strncpy(gpuStr, tmp, GPU_SIZE - 1);
+            gpuStr[GPU_SIZE - 1] = '\0';
             free(tmp);
-            return gpu;
+            return gpuStr;
         }
     }
     // If AMD GPU, query the AMD GPU IDs database
-    else if (gpuIDs->vendor == 0x1002)
+    else if (gpu->vendor == 0x1002)
     {
         // Possible paths to amdgpu.ids 
         char userAMDGPUIDs[PATH_MAX];
@@ -1326,14 +1335,14 @@ char *interpretGPU(GPU *gpuIDs)
                 // A line looks lile: 7480,	C1,	AMD Radeon RX 7700S
                 if (sscanf(line, "%x,\t%x,\t%255[^\n]", &fileDID, &fileRev, name) == 3)
                 {
-                    if (fileDID == gpuIDs->device && fileRev == gpuIDs->revision)
+                    if (fileDID == gpu->device && fileRev == gpu->revision)
                     {
-                        char *tmp = cleanGPUName("Advanced Micro", name, gpuSize);
-                        strncpy(gpu, tmp, gpuSize - 1);
-                        gpu[gpuSize - 1] = '\0';
+                        char *tmp = cleanGPUName("Advanced Micro", name, GPU_SIZE);
+                        strncpy(gpuStr, tmp, GPU_SIZE - 1);
+                        gpuStr[GPU_SIZE - 1] = '\0';
                         free(tmp);
                         fclose(fStream);
-                        return gpu;
+                        return gpuStr;
                     }
                 }
             }
@@ -1351,23 +1360,23 @@ char *interpretGPU(GPU *gpuIDs)
         pciids = "/usr/share/hwdata/pci.ids";
     else
     {
-        snprintf(gpu, gpuSize, "%04x:%04x", gpuIDs->vendor, gpuIDs->device);
-        return gpu;
+        snprintf(gpuStr, GPU_SIZE, "%04x:%04x", gpu->vendor, gpu->device);
+        return gpuStr;
     }
 
     FILE *fStream = fopen(pciids, "r");
     if (!fStream)
     {
-        snprintf(gpu, gpuSize, "%04x:%04x", gpuIDs->vendor, gpuIDs->device);
-        return gpu;
+        snprintf(gpuStr, GPU_SIZE, "%04x:%04x", gpu->vendor, gpu->device);
+        return gpuStr;
     }
 
     char *vendor = NULL;
     char vendorHex[5];
-    sprintf(vendorHex, "%04x", gpuIDs->vendor);
+    sprintf(vendorHex, "%04x", gpu->vendor);
     char *device = NULL;
     char deviceHex[5];
-    sprintf(deviceHex, "%04x", gpuIDs->device);
+    sprintf(deviceHex, "%04x", gpu->device);
 
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), fStream))
@@ -1403,14 +1412,67 @@ char *interpretGPU(GPU *gpuIDs)
     fclose(fStream);
 
     if (!vendor || !device)
-        snprintf(gpu, gpuSize, "%04x:%04x", gpuIDs->vendor, gpuIDs->device);
+        snprintf(gpuStr, GPU_SIZE, "%04x:%04x", gpu->vendor, gpu->device);
     else
-        snprintf(gpu, gpuSize, "%s", cleanGPUName(vendor, device, gpuSize));
+        snprintf(gpuStr, GPU_SIZE, "%s", cleanGPUName(vendor, device, GPU_SIZE));
 
     if (vendor) free(vendor);
     if (device) free(device);
 
-    return gpu;
+    return gpuStr;
+}
+
+/**
+ * @param screen Screen struct containing raw specifications for the given
+ *               screen
+ * @return String containing the screen's assembled specifications
+ */
+char *interpretScreen(Screen *screen)
+{
+    // Quick check to make sure we have something to work with...
+    if (screen->resX <= 0 || screen->resY <= 0)
+        return NULL;
+
+    const int SCREEN_SIZE = 128;
+    char *screenStr = malloc(SCREEN_SIZE);
+
+    // Prepare physical screen size
+    char physSize[32] = "";
+    if (screen->physX > 0.0 && screen->physY > 0.0)
+    {
+        float diagMm = fsqrt(screen->physX * screen->physX + screen->physY * screen->physY);
+        float diagIn = (float)diagMm / 25.4f;
+        float diagInRounded = (float)(int)(diagIn * 2.0f + 0.5f) / 2.0f;
+
+        if (diagInRounded == (int)diagInRounded)
+            snprintf(physSize, 32, "%d\" ", (int)diagInRounded);
+        else
+            snprintf(physSize, 32, "%.1f\" ", diagInRounded);
+    }
+
+    // Prepare refresh rate
+    char refresh[32] = "";
+    if (screen->refresh > 0)
+    {
+        if (COMPACT)
+            snprintf(refresh, 32, "@%d", screen->refresh);
+        else
+            snprintf(refresh, 32, " @ %dHz", screen->refresh);
+    }
+
+    // Prepare connector name
+    char connector[32] = "";
+    if (screen->connector[0] != '\0')
+        snprintf(connector, 32, " (%s)", screen->connector);
+    free(screen->connector);
+
+    // Assemble the string
+    if (!COMPACT)
+        snprintf(screenStr, SCREEN_SIZE, "%s%dx%d%s%s", physSize, screen->resX, screen->resY, refresh, connector);
+    else
+        snprintf(screenStr, SCREEN_SIZE, "%s%dx%d%s", physSize, screen->resX, screen->resY, refresh);
+
+    return screenStr;
 }
 
 void showHelp(void)
@@ -1883,9 +1945,10 @@ Screen *getScreens(int *count)
                     // Flag if connector is for primary screen
                     screens[*count].isPrimary = strstr(buffer, " primary ") != NULL;
 
-                    // Parse and calculate physical size (DISABLED FOR NOW - DEPENDING ROUNDING TWEAKS)
-                    screens[*count].physSize = 0.0;
-                    /*char *needle = strstr(buffer, "mm x");
+                    // Parse physical size
+                    screens[*count].physX = 0.0;
+                    screens[*count].physY = 0.0;
+                    char *needle = strstr(buffer, "mm x");
                     if (needle)
                     {
                         char *start = needle;
@@ -1895,33 +1958,19 @@ Screen *getScreens(int *count)
                         int pPhysX = 0, pPhysY = 0;
                         if (sscanf(start, "%dmm x %dmm", &pPhysX, &pPhysY) == 2)
                         {
-                            float diagMm = fsqrt(pPhysX * pPhysX + pPhysY * pPhysY);
-                            float diagIn = (float)diagMm / 25.4f;
-
-                            // "Prettify" the size
-                            int whole = (int)diagIn;
-                            float dec = diagIn - (float)whole;
-                            int first = (int)(dec * 10.0f);
-
-                            // If the first decimal is a 0, we can likely assume the marketing size was a whole
-                            // number. Eg. 34.058189" -> 34"
-                            if (first == 0)
-                                screens[*count].physSize = (float)whole;
-                            // If first decimal is not 0, then we preserve it and around to just 1dp
-                            else
-                                screens[*count].physSize = (float)((int)(diagIn * 10.0f + 0.5f)) / 10.0f;
+                            screens[*count].physX = pPhysX;
+                            screens[*count].physY = pPhysY;
                         }
-                    }*/
+                    }
 
                     // Parse resolution
-                    char *needle = isConnected;
+                    needle = isConnected;
                     int pResX = 0, pResY = 0;
                     while (*needle && (*needle < '0' || *needle > '9')) needle++;
                     sscanf(needle, "%dx%d", &pResX, &pResY);
 
                     screens[*count].resX = pResX;
                     screens[*count].resY = pResY;
-                    screens[*count].resTotal = pResX * pResY;
 
                     // Flag that we are in a block and thus should search for more info on other lines
                     in = 1;
@@ -2009,7 +2058,8 @@ Screen *getScreens(int *count)
 
                 // Populate screen data
                 screens[(*count)].connector = strdup(entry->d_name);
-                screens[(*count)].physSize = 0.0;
+                screens[(*count)].physX = 0.0;
+                screens[(*count)].physY = 0.0;
                 screens[(*count)].resX = pResX;
                 screens[(*count)].resY = pResY;
                 screens[(*count)].refresh = 0;
@@ -3200,71 +3250,57 @@ int main(int argc, char *argv[])
         int pastFirstScreen = 0;
         for (int i = 0; i < noScreens; i++)
         {
-            Screen *dis = &screens[i];
+            char *screen = interpretScreen(&screens[i]);
 
-            char size[32] = "";
-            if (dis->physSize > 0.0)
-                snprintf(size, 32, "%g\" ", dis->physSize);
-
-            char refresh[32] = "";
-            if (dis->refresh > 0)
+            if (screen && screen[0] != '\0')
             {
-                if (COMPACT)
-                    snprintf(refresh, 32, "@%d", dis->refresh);
-                else
-                    snprintf(refresh, 32, " @ %dHz", dis->refresh);
-            }
+                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
 
-            char connector[32] = "";
-            if (dis->connector[0] != '\0')
-                snprintf(connector, 32, " (%s)", dis->connector);
-            free(dis->connector);
-
-            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-
-            if (!useBullets)
-            {
-                if (!COMPACT)
+                if (!useBullets)
                 {
-                    // No compact - no bullet - single screen
-                    if (noScreens == 1)
-                        printf("%sScreen:%s   %s%dx%d%s%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh, connector);
-                    // No compact - no bullet - multiple screens - first screen
-                    else if (!pastFirstScreen)
-                        printf("%sScreens:%s  %s%dx%d%s%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh, connector);
-                    // No compact - no bullet - multiple screens - subsequent screens
-                    else 
-                        printf("          %s%dx%d%s%s\n", size, dis->resX, dis->resY, refresh, connector);
+                    if (!COMPACT)
+                    {
+                        // No compact - no bullet - single screen
+                        if (noScreens == 1)
+                            printf("%sScreen:%s   %s\n", colAccent, colReset, screen);
+                        // No compact - no bullet - multiple screens - first screen
+                        else if (!pastFirstScreen)
+                            printf("%sScreens:%s  %s\n", colAccent, colReset, screen);
+                        // No compact - no bullet - multiple screens - subsequent screens
+                        else 
+                            printf("          %s\n", screen);
+                    }
+                    else
+                    {
+                        // Compact - no bullet - single screen
+                        if (noScreens == 1)
+                            printf("%sScn:%s %s\n", colAccent, colReset, screen);
+                        // Compact - no bullet - multiple screens - first screen
+                        else if (!pastFirstScreen)
+                            printf("%sScn:%s %s\n", colAccent, colReset, screen);
+                        // Compact - no bullet - multiple screens - subsequent screens
+                        else 
+                            printf("     %s\n", screen);
+                    }
                 }
-                else
+                else 
                 {
-                    // Compact - no bullet - single screen
-                    if (noScreens == 1)
-                        printf("%sScn:%s %s%dx%d%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh);
-                    // Compact - no bullet - multiple screens - first screen
-                    else if (!pastFirstScreen)
-                        printf("%sScn:%s %s%dx%d%s\n", colAccent, colReset, size, dis->resX, dis->resY, refresh);
-                    // Compact - no bullet - multiple screens - subsequent screens
-                    else 
-                        printf("     %s%dx%d%s\n", size, dis->resX, dis->resY, refresh);
-                }
-            }
-            else 
-            {
-                // Compact - bullet - single or multiple screens
-                if (COMPACT)
-                    printf(" %s%c%s %s%dx%d%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh);
-                else
-                {
-                    // No compact - bullet - single screen
-                    if (noScreens == 1)
-                        printf(" %s%c%s %s%dx%d%s%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh, connector);
-                    // No compact - bullet - multiple screens
-                    else if (!COMPACT)
-                        printf(" %s%c%s %s%dx%d%s%s\n", colAccent, bullet, colReset, size, dis->resX, dis->resY, refresh, connector);
+                    // Compact - bullet - single or multiple screens
+                    if (COMPACT)
+                        printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
+                    else
+                    {
+                        // No compact - bullet - single screen
+                        if (noScreens == 1)
+                            printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
+                        // No compact - bullet - multiple screens
+                        else if (!COMPACT)
+                            printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
+                    }
                 }
             }
 
+            free(screen);
             pastFirstScreen = 1;
         }
     }
@@ -3389,7 +3425,7 @@ int main(int argc, char *argv[])
         {
             char *gpu = interpretGPU(&gpus[i]);
 
-            if (gpu[0] != '\0')     
+            if (gpu && gpu[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (!useBullets)
