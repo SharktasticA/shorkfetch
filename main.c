@@ -1693,59 +1693,31 @@ char *getPackages(const char *os)
     int fCount = 0;
     int sCount = 0;
 
-    // Get Debian-style packages
-    if (isProgramInstalled("dpkg", 0))
+    // Get Debian-style packages by counting inside /var/lib/dpkg/status
+    FILE *dpkgStatus = fopen("/var/lib/dpkg/status", "r");
+    if (dpkgStatus)
     {
-        // Try quickly counting inside /var/lib/dpkg/status
-        FILE *dpkgStatus = fopen("/var/lib/dpkg/status", "r");
-        if (dpkgStatus)
-        {
-            const char *needle = "Status: install ok installed";
-            size_t needleLen = strlen(needle);
-            char buffer[512];
-            while (fgets(buffer, 512, dpkgStatus))
-                if (strncmp(buffer, needle, needleLen) == 0)
-                    dCount++;
-            fclose(dpkgStatus);
-        }
-
-        // Try dpkg-query as a slower fallback...
-        if (!dCount)
-        {
-            FILE *fStream = popen("dpkg-query -f '.\n' -W 2>/dev/null | wc -l", "r");
-            if (fStream)
-            {
-                fscanf(fStream, "%d", &dCount);
-                pclose(fStream);
-            }
-        }
+        const char *needle = "Status: install ok installed";
+        size_t needleLen = strlen(needle);
+        char buffer[512];
+        while (fgets(buffer, 512, dpkgStatus))
+            if (strncmp(buffer, needle, needleLen) == 0)
+                dCount++;
+        fclose(dpkgStatus);
     }
 
-    if (isProgramInstalled("pacman", 0))
+    // Get Arch-style packages by counting inside /var/lib/pacman/local
+    DIR *pacmanLocal = opendir("/var/lib/pacman/local");
+    if (pacmanLocal)
     {
-        // Try quickly counting inside /var/lib/pacman/local
-        DIR *pacmanLocal = opendir("/var/lib/pacman/local");
-        if (pacmanLocal)
-        {
-            struct dirent *dirEntry;
-            while ((dirEntry = readdir(pacmanLocal)) != NULL)
-                if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "ALPM_DB_VERSION") != 0)
-                    pCount++;
-            closedir(pacmanLocal);
-        }
-
-        // Try pacman as a slower fallback...
-        if (!pCount)
-        {
-            FILE *fStream = popen("pacman -Qq 2>/dev/null | wc -l", "r");
-            if (fStream)
-            {
-                fscanf(fStream, "%d", &pCount);
-                pclose(fStream);
-            }
-        }
+        struct dirent *dirEntry;
+        while ((dirEntry = readdir(pacmanLocal)) != NULL)
+            if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "ALPM_DB_VERSION") != 0)
+                pCount++;
+        closedir(pacmanLocal);
     }
 
+    // Get Fedora-style packages
     if (isProgramInstalled("rpm", 0))
     {
         // Try rpm for now (it's slow, we should find a better way...)
@@ -1837,32 +1809,15 @@ char *getPackages(const char *os)
         }
     }
 
-    // Get Snap packages
-    if (isProgramInstalled("snap", 0))
+    // Get Snap packages by counting inside /snap
+    DIR *snapDir = opendir("/snap");
+    if (snapDir)
     {
-        // Try quickly figuring the number out using the filesystem
-        DIR *snapDir = opendir("/snap");
-        if (snapDir)
-        {
-            struct dirent *dirEntry;
-            while ((dirEntry = readdir(snapDir)) != NULL)
-                if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
-                    sCount++;
-            closedir(snapDir);
-        }
-
-        // Try snap list as a slower fallback...
-        if (!sCount)
-        {
-            FILE *fStream = popen("snap list 2>/dev/null | wc -l", "r");
-            if (fStream)
-            {
-                int lines = 0;
-                fscanf(fStream, "%d", &lines);
-                sCount = lines > 1 ? lines - 1 : 0;
-                pclose(fStream);
-            }
-        }
+        struct dirent *dirEntry;
+        while ((dirEntry = readdir(snapDir)) != NULL)
+            if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
+                sCount++;
+        closedir(snapDir);
     }
 
     // Build the result string
