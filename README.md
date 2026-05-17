@@ -20,9 +20,7 @@ shorkfetch is young, and I would love to hear from you if you have tried shorkfe
 
 _This assumes you already have the prerequisites for compilation already installed._
 
-    git clone https://github.com/SharktasticA/shorkfetch.git
-    cd shorkfetch
-    sudo make install
+    curl -fsSL https://raw.githubusercontent.com/SharktasticA/shorkfetch/refs/heads/main/install.sh | bash
 
 ### Requirements
 
