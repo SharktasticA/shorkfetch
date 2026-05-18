@@ -14,6 +14,10 @@
 
 
 
+static const char *VERSION = "0.1.2-wip";
+
+
+
 #include "exclusions.h"
 #include "igpus.h"
 #include "implementers.h"
@@ -1513,9 +1517,13 @@ void showHelp(void)
     formatNewLines(noArt, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", noArt);
 
-    char noCol[100] = "-nc, --no-col      Disables all coloured output (if compiled with colour support)\n\n";
+    char noCol[100] = "-nc, --no-col      Disables all coloured output (if compiled with colour support)\n";
     formatNewLines(noCol, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", noCol);
+
+    char version[100] = "-v, --version      Displays version number and exits\n\n";
+    formatNewLines(version, TERM_SIZE.ws_col, "                   ", 0);
+    printf("%s", version);
 
     char fieldNames[100] = "Field names:\nos, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip\n";
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
@@ -3213,6 +3221,11 @@ int main(int argc, char *argv[])
             colAccent = colReset = "";
         else if ((strcmp(argv[i], "-ni") == 0) || (strcmp(argv[i], "--no-ip") == 0))
             noIP = 1;
+        if ((strcmp(argv[i], "-v") == 0) || (strcmp(argv[i], "--version") == 0))
+        {
+            printf("shorkfetch %s\n", VERSION);
+            return 0;
+        }
     }
 
 
