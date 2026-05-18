@@ -1445,13 +1445,18 @@ char *interpretScreen(Screen *screen)
     if (screen->physX > 0.0 && screen->physY > 0.0)
     {
         float diagMm = fsqrt(screen->physX * screen->physX + screen->physY * screen->physY);
-        float diagIn = (float)diagMm / 25.4f;
-        float diagInRounded = (float)(int)(diagIn * 2.0f + 0.5f) / 2.0f;
+        float diagIn = diagMm / 25.4f;
 
-        if (diagInRounded == (int)diagInRounded)
-            snprintf(physSize, 32, "%d\" ", (int)diagInRounded);
+        if ((int)(diagIn * 10.0f) % 10 == 0)
+            snprintf(physSize, 32, "%d\" ", (int)diagIn);
         else
-            snprintf(physSize, 32, "%.1f\" ", diagInRounded);
+        {
+            float diagInRounded = (float)(int)(diagIn * 10.0f + 0.5f) / 10.0f;
+            if (diagInRounded == (int)diagInRounded)
+                snprintf(physSize, 32, "%d\" ", (int)diagInRounded);
+            else
+                snprintf(physSize, 32, "%.1f\" ", diagInRounded);
+        }
     }
 
     // Prepare refresh rate
@@ -2974,6 +2979,17 @@ void testInterpretScreen(void)
     printf("###########################\n");
 
     Screen screens[] = {
+        // table.flip 34"
+        {
+            strdup("DP-3"),
+            1,
+            800.000000,
+            335.000000,
+            3440,
+            1440,
+            0
+        },
+        // SN-MAIN 34"
         {
             strdup("DP-4"),
             1,
@@ -2983,6 +2999,17 @@ void testInterpretScreen(void)
             1440,
             100
         },
+        // table.flip - 27"
+        {
+            strdup("DP-4"),
+            1,
+            597.000000,
+            336.000000,
+            2560,
+            1440,
+            0
+        },
+        // W530
         {
             strdup("LVDS-1-1"),
             1,
@@ -2992,6 +3019,27 @@ void testInterpretScreen(void)
             1080,
             60
         },
+        // R500
+        {
+            strdup("LVDS"),
+            1,
+            331.000000,
+            207.000000,
+            1650,
+            1050,
+            60
+        },
+        // L430
+        {
+            strdup("LVDS-1"),
+            1,
+            309.000000,
+            174.000000,
+            1366,
+            768,
+            60
+        },
+        // T480
         {
             strdup("eDP-1"),
             1,
@@ -3007,8 +3055,10 @@ void testInterpretScreen(void)
     for (int i = 0; i < noScreens; i++)
     {
         char *screen = interpretScreen(&screens[i]);
+        float diagMm = fsqrt(screens[i].physX * screens[i].physX + screens[i].physY * screens[i].physY);
+        float diagIn = (float)diagMm / 25.4f;
         if (screen && screen[0] != '\0')
-            printf("%s\n", screen);
+            printf("\033[31m%f\"\033[0m -> \033[32m%s\033[0m\n", diagIn, screen, screen);
         free(screen);
     }
 }
