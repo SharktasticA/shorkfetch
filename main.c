@@ -2319,17 +2319,19 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     char *vendor = malloc(16);
     char *implementer = malloc(16);
     char *model = malloc(128);
+    char *stepping = malloc(4);
     char *architecture = malloc(4);
     char *processor = malloc(4);
     char *cores = malloc(4);
     char *threads = malloc(4);
     char *fpu = malloc(4);
-    if (!cpu || !vendor || !implementer || !model || !architecture || !processor || !cores || !threads || !fpu) 
+    if (!cpu || !vendor || !implementer || !model || !stepping || !architecture || !processor || !cores || !threads || !fpu) 
     {
         free(cpu);
         free(vendor);
         free(implementer);
         free(model);
+        free(stepping);
         free(architecture);
         free(processor);
         free(cores);
@@ -2337,7 +2339,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(fpu);
         return NULL;
     }
-    cpu[0] = vendor[0] = implementer[0] = model[0] = architecture[0] = processor[0] = cores[0] = threads[0] = fpu[0] = '\0';
+    cpu[0] = vendor[0] = implementer[0] = model[0] = stepping[0] = architecture[0] = processor[0] = cores[0] = threads[0] = fpu[0] = '\0';
 
 
 
@@ -2347,10 +2349,10 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         // Use these to stop parsing once we have everything we need!
         // lookingFor's default value is x86 orientated - the ARM-based path
         // can change this to 2, hence not a const.
-        int lookingFor = 5;
+        int lookingFor = 6;
         int parsed = 0;
 
-        char buffer[128];
+        char buffer[256];
         while (fgets(buffer, sizeof(buffer), fStream) && parsed < lookingFor)
         {
             if (strncmp(buffer, "processor", 9) == 0)
@@ -2377,6 +2379,13 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             {
                 char *extract = extractFromPoint(buffer, 128, ':', 2);
                 strncpy(model, extract, 127);
+                free(extract);
+                parsed++;
+            }
+            else if (strncmp(buffer, "stepping", 8) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                strncpy(stepping, extract, 3);
                 free(extract);
                 parsed++;
             }
@@ -2452,6 +2461,28 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
 
+
+
+            // If we have a supposed AMD K6-III, it may actually be a K6-2+ or
+            // K6-III+, and we may be able to tell from the stepping
+            if (strstr(model, "AMD-K6(tm)-III Processor"))
+            {
+                if (stepping[0] == '0')
+                {
+                    char tmp[128];
+                    snprintf(tmp, 128, "AMD K6-III+", model);
+                    strncpy(model, tmp, 127);
+                    model[127] = '\0';
+                }
+                else if (stepping[0] == '4')
+                {
+                    char tmp[128];
+                    snprintf(tmp, 128, "AMD K6-2+", model);
+                    strncpy(model, tmp, 127);
+                    model[127] = '\0';
+                }
+            }
+
             // If we have a Cx486Dxxx with FPU, make sure 387 is included in the model name
             if ((strstr(model, "Cx486DLC") || strstr(model, "Cx486DRx2")) && fpu[0] == '1')
             {
@@ -2515,6 +2546,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             free(vendor);
             free(implementer);
             free(model);
+            free(stepping);
             free(architecture);
             free(processor);
             free(cores);
@@ -2600,6 +2632,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(vendor);
         free(implementer);
         free(model);
+        free(stepping);
         free(architecture);
         free(processor);
         free(cores);
@@ -2617,6 +2650,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     free(vendor);
     free(implementer);
     free(model);
+    free(stepping);
     free(architecture);
     free(processor);
     free(cores);

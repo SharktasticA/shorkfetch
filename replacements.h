@@ -32,7 +32,7 @@ static const struct Replacement AMD_REPLACES[] = {
     { "Am5x86-WT",              "Am5x86",           0 },
     { "K6 3D+",                 "K6-III",           0 },
     { "K6 3D",                  "K6-2",             0 },
-    { "K6-III",                 "K6-2+/K6-III+",    1 },
+    { "K6-III ",                 "K6-2+/K6-III+",   1 },
     { "AMD-",                   "AMD ",             0 },
     { "RYZEN AI MAX+",          "Ryzen AI Max+",    0 }
 };
