@@ -38,101 +38,98 @@ Screen *getScreens(int *count)
     Screen *screens = NULL;
 
     // Try getting screens with xrandr (X11)
-    if (isProgramInstalled("xrandr", 0))
+    FILE *fStream = popen("xrandr 2>/dev/null", "r");
+    if (fStream)
     {
-        FILE *fStream = popen("xrandr 2>/dev/null", "r");
-        if (fStream)
+        // What we use to read lines of xrandr output in to
+        char buffer[512];
+        // Flag when we're reading a connected screen
+        int in = 0;
+
+        while (fgets(buffer, 512, fStream))
         {
-            // What we use to read lines of xrandr output in to
-            char buffer[512];
-            // Flag when we're reading a connected screen
-            int in = 0;
-
-            while (fgets(buffer, 512, fStream))
+            // Only process lines for things "connected" or inside a "connected"'s block
+            char *isConnected = strstr(buffer, " connected");
+            if (isConnected) 
             {
-                // Only process lines for things "connected" or inside a "connected"'s block
-                char *isConnected = strstr(buffer, " connected");
-                if (isConnected) 
+                // Reallocate screens array to take into account new screen
+                screens = realloc(screens, ((*count) + 1) * sizeof(Screen));
+                memset(&screens[(*count)], 0, sizeof(Screen));
+
+                // Parse connector name
+                char pConnector[64] = {0};
+                sscanf(buffer, "%63s", pConnector);
+                screens[*count].connector = strdup(pConnector);
+
+                // Replace "Virtual-" with "Virt-" if present
+                char *virtNeedle = strstr(screens[*count].connector, "Virtual-");
+                if (virtNeedle)
                 {
-                    // Reallocate screens array to take into account new screen
-                    screens = realloc(screens, ((*count) + 1) * sizeof(Screen));
-                    memset(&screens[(*count)], 0, sizeof(Screen));
-
-                    // Parse connector name
-                    char pConnector[64] = {0};
-                    sscanf(buffer, "%63s", pConnector);
-                    screens[*count].connector = strdup(pConnector);
-
-                    // Replace "Virtual-" with "Virt-" if present
-                    char *virtNeedle = strstr(screens[*count].connector, "Virtual-");
-                    if (virtNeedle)
-                    {
-                        memcpy(virtNeedle, "Virt-", 5);
-                        memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
-                    }
-
-                    // Flag if connector is for primary screen
-                    screens[*count].isPrimary = strstr(buffer, " primary ") != NULL;
-
-                    // Parse physical size
-                    screens[*count].physX = 0.0;
-                    screens[*count].physY = 0.0;
-                    char *needle = strstr(buffer, "mm x");
-                    if (needle)
-                    {
-                        char *start = needle;
-                        while (start > buffer && *(start - 1) != ' ')
-                            start--;
-
-                        int pPhysX = 0, pPhysY = 0;
-                        if (sscanf(start, "%dmm x %dmm", &pPhysX, &pPhysY) == 2)
-                        {
-                            screens[*count].physX = pPhysX;
-                            screens[*count].physY = pPhysY;
-                        }
-                    }
-
-                    // Parse resolution
-                    needle = isConnected;
-                    int pResX = 0, pResY = 0;
-                    while (*needle && (*needle < '0' || *needle > '9')) needle++;
-                    sscanf(needle, "%dx%d", &pResX, &pResY);
-
-                    screens[*count].resX = pResX;
-                    screens[*count].resY = pResY;
-
-                    // Flag that we are in a block and thus should search for more info on other lines
-                    in = 1;
-                }
-                else if (strstr(buffer, "disconnected") || !in)
-                {
-                    in = 0;
-                    continue;
+                    memcpy(virtNeedle, "Virt-", 5);
+                    memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
                 }
 
-                // Look for current refresh rate
-                if (strchr(buffer, '*'))
-                {
-                    char *start = strchr(buffer, '*');
-                    while (start > buffer)
-                    {
-                        char c = *(start - 1);
-                        if ((c >= '0' && c <= '9') || c == '.') start--;
-                        else break;
-                    }
-                    screens[*count].refresh = (int)(atof(start) + 0.5);
+                // Flag if connector is for primary screen
+                screens[*count].isPrimary = strstr(buffer, " primary ") != NULL;
 
-                    // At this point, we got everything we can for this screen, so let's go
-                    (*count)++;
-                    in = 0;
-                    continue;
+                // Parse physical size
+                screens[*count].physX = 0.0;
+                screens[*count].physY = 0.0;
+                char *needle = strstr(buffer, "mm x");
+                if (needle)
+                {
+                    char *start = needle;
+                    while (start > buffer && *(start - 1) != ' ')
+                        start--;
+
+                    int pPhysX = 0, pPhysY = 0;
+                    if (sscanf(start, "%dmm x %dmm", &pPhysX, &pPhysY) == 2)
+                    {
+                        screens[*count].physX = pPhysX;
+                        screens[*count].physY = pPhysY;
+                    }
                 }
+
+                // Parse resolution
+                needle = isConnected;
+                int pResX = 0, pResY = 0;
+                while (*needle && (*needle < '0' || *needle > '9')) needle++;
+                sscanf(needle, "%dx%d", &pResX, &pResY);
+
+                screens[*count].resX = pResX;
+                screens[*count].resY = pResY;
+
+                // Flag that we are in a block and thus should search for more info on other lines
+                in = 1;
+            }
+            else if (strstr(buffer, "disconnected") || !in)
+            {
+                in = 0;
+                continue;
             }
 
-            if (in) (*count)++;
+            // Look for current refresh rate
+            if (strchr(buffer, '*'))
+            {
+                char *start = strchr(buffer, '*');
+                while (start > buffer)
+                {
+                    char c = *(start - 1);
+                    if ((c >= '0' && c <= '9') || c == '.') start--;
+                    else break;
+                }
+                screens[*count].refresh = (int)(atof(start) + 0.5);
 
-            pclose(fStream);
+                // At this point, we got everything we can for this screen, so let's go
+                (*count)++;
+                in = 0;
+                continue;
+            }
         }
+
+        if (in) (*count)++;
+
+        pclose(fStream);
     }
 
     // If we still have nothing, we can try DRM as an X11/Wayland agnostic fallback
