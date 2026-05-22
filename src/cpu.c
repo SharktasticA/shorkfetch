@@ -296,13 +296,14 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     char *model = malloc(4);
     char *modelName = malloc(128);
     char *stepping = malloc(4);
+    char *cacheSize = malloc(16);
     char *architecture = malloc(4);
     char *processor = malloc(5);
     char *cores = malloc(5);
     char *threads = malloc(5);
     char *hart = malloc(5);
     char *fpu = malloc(4);
-    if (!result || !cpu || !vendor || !implementer || !isa || !model || !modelName || !stepping || !architecture || !processor || !cores || !threads || !hart || !fpu) 
+    if (!result || !cpu || !vendor || !implementer || !isa || !model || !modelName || !stepping || !cacheSize || !architecture || !processor || !cores || !threads || !hart || !fpu) 
     {
         free(result);
         free(cpu);
@@ -312,6 +313,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(model);
         free(modelName);
         free(stepping);
+        free(cacheSize);
         free(architecture);
         free(processor);
         free(cores);
@@ -320,7 +322,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(fpu);
         return NULL;
     }
-    result[0] = cpu[0] = vendor[0] = implementer[0] = isa[0] = model[0] = modelName[0] = stepping[0] = architecture[0] = processor[0] = cores[0] = threads[0] = hart[0] = fpu[0] = '\0';
+    result[0] = cpu[0] = vendor[0] = implementer[0] = isa[0] = model[0] = modelName[0] = stepping[0] = cacheSize[0] = architecture[0] = processor[0] = cores[0] = threads[0] = hart[0] = fpu[0] = '\0';
 
 
 
@@ -419,6 +421,16 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
                 parsed++;
+            }
+            else if (cacheSize[0] == '\0' && strncmp(buffer, "cache size", 10) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                if (extract)
+                {
+                    strncpy(cacheSize, extract, 15);
+                    cacheSize[15] = '\0';
+                    free(extract);
+                }
             }
             else if (architecture[0] == '\0' && strncmp(buffer, "CPU architecture", 16) == 0)
             {
@@ -598,6 +610,27 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
                 modelName[127] = '\0';
             }
 
+            // Celeron (Covington) has mostly the same values as Pentium II
+            // (Deschutes), including calling itself "Pentium II (Deschutes)",
+            // so we must distinguish it via cache size (32KB vs 512KB)
+            if (strstr(modelName, "Deschutes"))
+            {
+                if (strstr(cacheSize, "32 "))
+                {
+                    char tmp[128];
+                    snprintf(tmp, 128, "Intel Celeron (Covington)", modelName);
+                    strncpy(modelName, tmp, 127);
+                    modelName[127] = '\0';
+                }
+                else if (strstr(cacheSize, "512 "))
+                {
+                    char tmp[128];
+                    snprintf(tmp, 128, "Intel Pentium II (Deschutes)", modelName);
+                    strncpy(modelName, tmp, 127);
+                    modelName[127] = '\0';
+                }
+            }
+
             // If we have a vendorless and revisionless 486, we can at least
             // infer if its purely 486SX, or a 486DX, 487SX (true 486SX +
             // 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx  + 387), from the
@@ -660,6 +693,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             free(model);
             free(modelName);
             free(stepping);
+            free(cacheSize);
             free(architecture);
             free(processor);
             free(cores);
@@ -801,6 +835,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(model);
         free(modelName);
         free(stepping);
+        free(cacheSize);
         free(architecture);
         free(processor);
         free(cores);
@@ -823,6 +858,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     free(model);
     free(modelName);
     free(stepping);
+    free(cacheSize);
     free(architecture);
     free(processor);
     free(cores);
