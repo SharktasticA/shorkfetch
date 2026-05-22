@@ -292,6 +292,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     char *cpu = malloc(128);
     char *vendor = malloc(16);
     char *implementer = malloc(16);
+    char *isa = malloc(128);
     char *model = malloc(4);
     char *modelName = malloc(128);
     char *stepping = malloc(4);
@@ -299,13 +300,15 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     char *processor = malloc(5);
     char *cores = malloc(5);
     char *threads = malloc(5);
+    char *hart = malloc(5);
     char *fpu = malloc(4);
-    if (!result || !cpu || !vendor || !implementer || !model || !modelName || !stepping || !architecture || !processor || !cores || !threads || !fpu) 
+    if (!result || !cpu || !vendor || !implementer || !isa || !model || !modelName || !stepping || !architecture || !processor || !cores || !threads || !hart || !fpu) 
     {
         free(result);
         free(cpu);
         free(vendor);
         free(implementer);
+        free(isa);
         free(model);
         free(modelName);
         free(stepping);
@@ -313,10 +316,11 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(processor);
         free(cores);
         free(threads);
+        free(hart);
         free(fpu);
         return NULL;
     }
-    result[0] = cpu[0] = vendor[0] = implementer[0] = model[0] = modelName[0] = stepping[0] = architecture[0] = processor[0] = cores[0] = threads[0] = fpu[0] = '\0';
+    result[0] = cpu[0] = vendor[0] = implementer[0] = isa[0] = model[0] = modelName[0] = stepping[0] = architecture[0] = processor[0] = cores[0] = threads[0] = hart[0] = fpu[0] = '\0';
 
 
 
@@ -332,13 +336,43 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         char buffer[256];
         while (fgets(buffer, sizeof(buffer), fStream) && parsed < lookingFor)
         {
-            if (processor[0] == '\0' && strncmp(buffer, "processor", 9) == 0)
+            if (strncmp(buffer, "processor", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
                 {
                     strncpy(processor, extract, 4);
                     processor[4] = '\0';
+                    free(extract);
+                }
+            }
+            else if (strncmp(buffer, "hart", 4) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 5, ':', 2);
+                if (extract)
+                {
+                    strncpy(hart, extract, 4);
+                    hart[4] = '\0';
+                    free(extract);
+                }
+            }
+            else if (implementer[0] == '\0' && strncmp(buffer, "CPU implementer", 15) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                if (extract)
+                {
+                    strncpy(implementer, extract, 15);
+                    implementer[15] = '\0';
+                    free(extract);
+                }
+            }
+            else if (isa[0] == '\0' && strncmp(buffer, "isa", 3) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 128, ':', 2);
+                if (extract)
+                {
+                    strncpy(isa, extract, 127);
+                    isa[127] = '\0';
                     free(extract);
                 }
             }
@@ -352,17 +386,6 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
                 parsed++;
-            }
-            else if (implementer[0] == '\0' && strncmp(buffer, "CPU implementer", 15) == 0)
-            {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
-                if (extract)
-                {
-                    strncpy(implementer, extract, 15);
-                    implementer[15] = '\0';
-                    free(extract);
-                }
-                lookingFor = 2;
             }
             else if (modelName[0] == '\0' && strncmp(buffer, "model name", 10) == 0)
             {
@@ -588,7 +611,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
         }
         // Possible ARM CPU path
-        if (architecture[0] != '\0')
+        else if (architecture[0] != '\0')
         {
             arch = ARM;
 
@@ -608,7 +631,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
                 snprintf(modelName, 128, "Armv%d", atoi(architecture));
         }
         // Possible POWER CPU path
-        if (cpu[0] == 'P' && modelName[0] == '\0')
+        else if (cpu[0] == 'P' && modelName[0] == '\0')
         {
             arch = POWER;
 
@@ -620,6 +643,12 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             char *comma = strchr(modelName, ',');
             if (comma) *comma = '\0';
         }
+        // RISC-V CPU path
+        else if (isa[0] == 'r' && isa[1] == 'v')
+        {
+            arch = RISCV;
+            snprintf(modelName, 128, "RISC-V");
+        }
         // Leave if have nothing to show...
         else if (cores[0] == '\0' && threads[0] == '\0' && processor[0] == '\0')
         {
@@ -627,6 +656,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             free(cpu);
             free(vendor);
             free(implementer);
+            free(isa);
             free(model);
             free(modelName);
             free(stepping);
@@ -634,6 +664,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
             free(processor);
             free(cores);
             free(threads);
+            free(hart);
             free(fpu);
             return NULL;
         }
@@ -645,28 +676,73 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         if (cores[0] == '\0' && threads[0] != '\0')
             strncpy(cores, threads, 3);
 
-        char coresAndThreads[16];
+        char coresAndThreads[16] = "";
 
-        // If we don't have cores or threads, we use the processor field in its
-        // place
-        if (cores[0] == '\0' && threads[0] == '\0' && processor[0] != '\0')
+        // For most arches, we work with cores, threads and fallback processor
+        // count
+        if (arch != RISCV)
         {
-            int processorInt = atoi(processor);
-            processorInt++;
+            // If we don't have cores or threads, we use the processor field in its
+            // place
+            if (cores[0] == '\0' && threads[0] == '\0' && processor[0] != '\0')
+            {
+                int processorInt = atoi(processor);
+                processorInt++;
 
-            // We don't have a good way to tell cores from threads for POWER
-            // CPUs at the moment, so let's not imply our value is for cores
-            if (arch == POWER)
-                snprintf(coresAndThreads, 16, "%dT", processorInt);
+                // We don't have a good way to tell cores from threads for POWER
+                // CPUs at the moment, so let's not imply our value is for cores
+                if (arch == POWER)
+                    snprintf(coresAndThreads, 16, "%dT", processorInt);
+                else
+                    snprintf(coresAndThreads, 16, "%dC", processorInt);
+            }
+            // If cores and threads are the same value, just show cores
+            else if (strcmp(cores, threads) == 0)
+                snprintf(coresAndThreads, 16, "%sC", cores);
+            // If cores and threads are different values, show both
             else
-                snprintf(coresAndThreads, 16, "%dC", processorInt);
+                snprintf(coresAndThreads, 16, "%sC/%sT", cores, threads);
         }
-        // If cores and threads are the same value, just show cores
-        else if (strcmp(cores, threads) == 0)
-            snprintf(coresAndThreads, 16, "%sC", cores);
-        // If cores and threads are different values, show both
+        // For RISC-V specifically, we have processor and hart (hardware
+        // thread) to work with
         else
-            snprintf(coresAndThreads, 16, "%sC/%sT", cores, threads);
+        {
+            // If we have processor...
+            if (processor[0] != '\0')
+            {
+                int processorInt = atoi(processor);
+                processorInt++;
+
+                // ...and hart
+                if (hart[0] != '\0')
+                {
+                    int hartInt = atoi(hart);
+                    // The SiFive Freedom U540 (etc.) count from 1 instead of 0...
+                    if (hartInt % 2 != 0)
+                        hartInt++;
+
+                    // If processors and hart are the same value, just show
+                    // processors
+                    if (processorInt == hartInt || hartInt == 0)
+                        snprintf(coresAndThreads, 16, "%dC", processorInt);
+                    // If processors and hart are different values, show both
+                    else
+                        snprintf(coresAndThreads, 16, "%dC%dT", processorInt, hartInt);
+                }
+                // ...only
+                else
+                    snprintf(coresAndThreads, 16, "%dC", processorInt);
+            }
+            // If we only have hart...
+            else if (hart[0] != '\0')
+            {
+                int hartInt = atoi(hart);
+                // The SiFive Freedom U540 (etc.) count from 1 instead of 0...
+                if (hartInt % 2 != 0)
+                    hartInt++;
+                snprintf(coresAndThreads, 16, "%dC", hartInt);
+            }
+        }
 
 
 
@@ -721,6 +797,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(cpu);
         free(vendor);
         free(implementer);
+        free(isa);
         free(model);
         free(modelName);
         free(stepping);
@@ -728,6 +805,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(processor);
         free(cores);
         free(threads);
+        free(hart);
         free(fpu);
         return NULL;
     }
@@ -741,6 +819,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     free(cpu);
     free(vendor);
     free(implementer);
+    free(isa);
     free(model);
     free(modelName);
     free(stepping);
@@ -748,6 +827,7 @@ char *getCPU(char *cpuInfo, char **gpuFromCPU)
     free(processor);
     free(cores);
     free(threads);
+    free(hart);
     free(fpu);
 
     char *cleanedCPU = cleanCPUName(result, 134, coreCount);

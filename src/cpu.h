@@ -24,6 +24,7 @@ typedef enum
     UNKNOWN,
     ARM,
     POWER,
+    RISCV,
     X86
 } CPUArch;
 
