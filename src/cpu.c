@@ -26,11 +26,9 @@
  * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
  * @param input Input string
  * @param inputSize Size to use when allocating the result string
- * @param coreCount Number of cores the processor has (presently only used for
- *                  CPU name manipulation)
  * @return String containing the result after cleaning
  */
-char *cleanCPUName(const char *input, size_t inputSize, int coreCount)
+char *cleanCPUName(const char *input, size_t inputSize)
 {
     if (!input || inputSize < 2) return strdup("");
 
@@ -169,23 +167,6 @@ char *cleanCPUName(const char *input, size_t inputSize, int coreCount)
     // Apply Intel-specific replacements
     else if (strstr(result, "Intel"))
     {
-        // Catch Yonah Core CPUs that don't have "Core" in their name
-        if (strstr(result, "Intel T") && coreCount > 0)
-        {
-            char *tmp = NULL;
-            if (coreCount == 1)
-                tmp = findReplace(result, inputSize, "Intel T", "Intel Core Solo T");
-            else if (coreCount == 2)
-                tmp = findReplace(result, inputSize, "Intel T", "Intel Core Duo T");
-
-            if (tmp)
-            {
-                strncpy(result, tmp, inputSize - 1);
-                result[inputSize - 1] = '\0';
-                free(tmp);
-            }
-        }
-
         // Catch redundant "x Gen" in the name of late Intel Core CPUs
         if (strstr(result, " Core ") && strstr(result, " Gen "))
         {
@@ -790,6 +771,24 @@ char *interpretCPU(CPU_DATA *cpu)
             }
         }
 
+        // Core (Yonah) may not have "Core" in their name, so we will try to
+        // add it and a "Solo" or "Duo" suffix depending on the core count 
+        if (strstr(cpu->name, "Intel(R) CPU") && (cpu->cores > 0 || cpu->index > 0))
+        {
+            char *tmp = NULL;
+            if (cpu->cores == 1 || cpu->index == 1)
+                tmp = findReplace(cpu->name, NAME_LEN, "CPU           T", "Core Solo T");
+            else if (cpu->cores == 2 || cpu->index == 2)
+                tmp = findReplace(cpu->name, NAME_LEN, "CPU           T", "Core Duo T");
+
+            if (tmp)
+            {
+                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                cpu->name[NAME_LEN-1] = '\0';
+                free(tmp);
+            }
+        }
+
         // If we have a vendorless and revisionless 486, we can at least
         // infer if its purely 486SX, or a 486DX, 487SX (true 486SX +
         // 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx  + 387), from the
@@ -878,7 +877,7 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
     // Clean up the result string
-    char *cleanedResult = cleanCPUName(result, RESULT_LEN, cpu->cores);
+    char *cleanedResult = cleanCPUName(result, RESULT_LEN);
     strncpy(result, cleanedResult, RESULT_LEN-1);
     free(cleanedResult);
 

@@ -87,7 +87,7 @@ static const char *ARM_IMPLEMENTERS[193] = {
 
 
 
-char *cleanCPUName(const char *, size_t, int);
+char *cleanCPUName(const char *, size_t);
 CPU_DATA *getCPU(char *, char **);
 char *interpretCPU(CPU_DATA*);
 
