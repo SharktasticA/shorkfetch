@@ -67,17 +67,34 @@ void testGetCPU(void)
         CPU_DATA *cpu = getCPU(cpuinfo, &gpuFromCPU);
         char *cpuStr = interpretCPU(cpu);
 
-        if (gpuFromCPU)
-            printf("\033[31m%s:\033[0m \033[32m%s\033[0m \033[36m(%s)\033[0m\n", bName, cpuStr, gpuFromCPU);
-        else
-            printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
+        int maxLeft = 41;
+        int maxRight = 52;
 
-        if (showRaw)
+        if (!showRaw)
         {
+            char rightSide[512];
+            if (gpuFromCPU)
+                snprintf(rightSide, sizeof(rightSide), "%s (%s)", cpuStr, gpuFromCPU);
+            else
+                snprintf(rightSide, sizeof(rightSide), "%s", cpuStr ? cpuStr : "");
+
+            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, bName, maxRight, rightSide);
+
+            if ((i + 1) % 2 == 0 || i + 1 == count)
+                printf("\n");
+        }
+        else
+        {
+            if (gpuFromCPU)
+                printf("\033[31m%s:\033[0m \033[32m%s\033[0m \033[36m(%s)\033[0m\n", bName, cpuStr, gpuFromCPU);
+            else
+                printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
+
             printf("    arch:      %d\n", cpu->arch);
             printf("    uarch:     %s\n", cpu->uarch ? cpu->uarch : "(null)");
             printf("    vendor:    %s\n", cpu->vendor ? cpu->vendor : "(null)");
             printf("    name:      %s\n", cpu->name   ? cpu->name   : "(null)");
+            printf("    family:    %d\n", cpu->family);
             printf("    model:     %d\n", cpu->model);
             printf("    stepping:  %d\n", cpu->stepping);
             printf("    freq:      %.0f\n", cpu->freq);

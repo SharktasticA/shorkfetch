@@ -1,19 +1,19 @@
 processor	: 0
-vendor_id	: GenuineIntel
+vendor_id	: CyrixInstead
 cpu family	: 4
-model		: 5
-model name	: 486 SX/2
-stepping	: 11
+model		: 1
+model name	: Cx486DRx2
+stepping	: unknown
 fdiv_bug	: no
 f00f_bug	: no
 coma_bug	: no
 fpu		: no
 fpu_exception	: no
-cpuid level	: 1
+cpuid level	: -1
 wp		: yes
-flags		: vme cpuid
+flags		:
 bugs		: itlb_multihit
-bogomips	: 32.97
+bogomips	: 18.86
 clflush size	: 32
 cache_alignment	: 32
 address sizes	: 32 bits physical, 32 bits virtual

@@ -1,9 +1,9 @@
 processor	: 0
 vendor_id	: GenuineIntel
 cpu family	: 4
-model		: 5
-model name	: 486 SX/2
-stepping	: 11
+model		: 2
+model name	: 486 SX
+stepping	: 10
 fdiv_bug	: no
 f00f_bug	: no
 coma_bug	: no
@@ -13,7 +13,7 @@ cpuid level	: 1
 wp		: yes
 flags		: vme cpuid
 bugs		: itlb_multihit
-bogomips	: 32.97
+bogomips	: 16.48
 clflush size	: 32
 cache_alignment	: 32
 address sizes	: 32 bits physical, 32 bits virtual

@@ -677,170 +677,178 @@ char *interpretCPU(CPU_DATA *cpu)
             }
         }
 
-        // If we have a K6, we will try to distinguish if it's a Model 6 or
-        // Model 7
-        if (strstr(cpu->name, "AMD-K6tm w"))
+        // 486 era
+        if (cpu->family == 4)
         {
-            if (cpu->model == 6)
+            if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'y')
             {
-                char tmp[NAME_LEN];
-                snprintf(tmp, NAME_LEN, "AMD K6 Model 6", cpu->name);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
+                // If we have a Cx486Dxxx with FPU, make sure 387 is included in
+                // the model name
+                if ((strstr(cpu->name, "Cx486DLC") || strstr(cpu->name, "Cx486DRx2")) && cpu->hasFPU)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "%s + 387", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+                // If we have a Cx486S with FPU, make sure 487 is included in the
+                // model name
+                else if (strstr(cpu->name, "Cx486S") && cpu->hasFPU)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "%s + 487", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
             }
-            else if (cpu->model == 7)
-            {
-                char tmp[NAME_LEN];
-                snprintf(tmp, NAME_LEN, "AMD K6 Model 7", cpu->name);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
-            }
-        }
-
-        // If we have a supposed K6-III, it may actually be a K6-2+ or
-        // K6-III+, and we may be able to tell from the stepping
-        if (strstr(cpu->name, "AMD-K6(tm)-III P"))
-        {
-            if (cpu->stepping == 0)
-            {
-                char tmp[NAME_LEN];
-                snprintf(tmp, NAME_LEN, "AMD K6-III+", cpu->name);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
-            }
-            else if (cpu->stepping == 4)
-            {
-                char tmp[NAME_LEN];
-                snprintf(tmp, NAME_LEN, "AMD K6-2+", cpu->name);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
-            }
-        }
-
-        // If we have a Cx486Dxxx with FPU, make sure 387 is included in
-        // the model name
-        if ((strstr(cpu->name, "Cx486DLC") || strstr(cpu->name, "Cx486DRx2")) && cpu->hasFPU)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "%s + 387", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-
-        // If we have a Cx486S with FPU, make sure 487 is included in the
-        // model name
-        if (strstr(cpu->name, "Cx486S") && cpu->hasFPU)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "%s + 487", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-
-        // If we have a supposed WinChip 2-3D, we may be able to tell if
-        // its a WinChip 2A from the stepping
-        if (strstr(cpu->name, "WinChip 2-3D") && cpu->stepping == 7)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "IDT WinChip 2A", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-
-        // If we have for certain an Intel 486SX with FPU, make sure 487 is
-        // included in the model name
-        if (strstr(cpu->name, "486") && strstr(cpu->name, "SX") && cpu->hasFPU)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "%s + 487", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-
-        // The Pentium OverDrive for Socket 3 is guaranteed to be P54C, so
-        // let's report that to distinguish it from P5 OverDrives for Socket 4
-        if (strstr(cpu->name, "OverDrive PODP5V") && cpu->freq < 84)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P54C)", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-
-        // Pentium OverDrives for Sockets 4 and 5 do not distinguish themselves
-        // by name from their base P5 or P54C Pentiums, but we can use
-        // OverDrive's 100+MHz clockspeeds to tell them apart
-        if (strstr(cpu->name, "60/66") && cpu->freq >= 100)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P5)", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-        else if (strstr(cpu->name, "75 - 200") && cpu->freq >= 100)
-        {
-            char tmp[NAME_LEN];
-            snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P54C)", cpu->name);
-            strncpy(cpu->name, tmp, NAME_LEN-1);
-            cpu->name[NAME_LEN-1] = '\0';
-        }
-
-        // Pentium II (Deschutes) and the Deschutes-based Pentium II Xeon
-        // and Celeron (Covington) have basically the same CPU ID, but we
-        // can tell *some* apart from the cache size. For sure: 32KB =
-        // Celeron; 512KB = Pentium II; 1024/2048KB = Pentium II Xeon. The
-        // 512KB Xeon cannot presently be distinguished, though...
-        if (strstr(cpu->name, "Deschutes"))
-        {
-            if (cpu->cacheSize == 32)
-            {
-                char tmp[NAME_LEN];
-                snprintf(tmp, NAME_LEN, "Intel Celeron (Covington)", cpu->name);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
-            }
-            else if (cpu->cacheSize == 512)
-            {
-                // Don't need to do anything, yet... At some point, we will try
-                // to distinguish standard II and II Xeon at this cache amount
-            }
-            else if (cpu->cacheSize >= 1024)
-            {
-                char tmp[NAME_LEN];
-                snprintf(tmp, NAME_LEN, "Intel Pentium II Xeon", cpu->name);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
-            }
-        }
-
-        // Core (Yonah) may not have "Core" in their name, so we will try to
-        // add it and a "Solo" or "Duo" suffix depending on the core count 
-        if (strstr(cpu->name, "Intel(R) CPU") && (cpu->cores > 0 || cpu->index > 0))
-        {
-            char *tmp = NULL;
-            if (cpu->cores == 1 || cpu->index == 1)
-                tmp = findReplace(cpu->name, NAME_LEN, "CPU           T", "Core Solo T");
-            else if (cpu->cores == 2 || cpu->index == 2)
-                tmp = findReplace(cpu->name, NAME_LEN, "CPU           T", "Core Duo T");
-
-            if (tmp)
-            {
-                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                cpu->name[NAME_LEN-1] = '\0';
-                free(tmp);
-            }
-        }
-
-        // If we have a vendorless and revisionless 486, we can at least
-        // infer if its purely 486SX, or a 486DX, 487SX (true 486SX +
-        // 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx + 387), via the
-        // presence of an FPU
-        if ((cpu->vendor[0] == '\0' || cpu->vendor[0] == 'u') && cpu->name[0] != '\0' && strcmp(cpu->name, "486") == 0)
-        {
-            if (cpu->hasFPU)
-                snprintf(cpu->name, NAME_LEN, "486DX/487SX/486SX + 387");
             else
-                snprintf(cpu->name, NAME_LEN, "486SX");
+            {
+                // If we have a vendorless and revisionless 486, we can at least
+                // infer if its purely 486SX, or a 486DX, 487SX (true 486SX +
+                // 487SX) or 486SX + 387 (eg, IBM 486BLx/486SLCx + 387), via the
+                // presence of an FPU
+                if (cpu->model == 0 && (cpu->vendor[0] == '\0' || cpu->vendor[0] == 'u') && cpu->name[0] != '\0' && strcmp(cpu->name, "486") == 0)
+                {
+                    if (cpu->hasFPU)
+                        snprintf(cpu->name, NAME_LEN, "486DX/487SX/486SX + 387");
+                    else
+                        snprintf(cpu->name, NAME_LEN, "486SX");
+                }
+            }
+        }
+        // Pentium/P5 and K6 era
+        else if (cpu->family == 5)
+        {
+            if (cpu->vendor[0] == 'A')
+            {
+                // If we have a K6, we will try to distinguish if it's a Model
+                // 6 or Model 7
+                if (cpu->model == 6)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "AMD K6 Model 6", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+                else if (cpu->model == 7)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "AMD K6 Model 7", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+                // If we have a supposed K6-III, it may actually be a K6-2+ or
+                // K6-III+, and we may be able to tell from the stepping
+                else if (cpu->model == 13)
+                {
+                    if (cpu->stepping == 0)
+                    {
+                        char tmp[NAME_LEN];
+                        snprintf(tmp, NAME_LEN, "AMD K6-III+", cpu->name);
+                        strncpy(cpu->name, tmp, NAME_LEN-1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                    }
+                    else if (cpu->stepping == 4)
+                    {
+                        char tmp[NAME_LEN];
+                        snprintf(tmp, NAME_LEN, "AMD K6-2+", cpu->name);
+                        strncpy(cpu->name, tmp, NAME_LEN-1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                    }
+                }
+            }
+            else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
+            {
+                // Pentium OverDrives for Sockets 4 and 5 do not distinguish themselves
+                // by name from their base P5 or P54C Pentiums, but we can use
+                // OverDrive's 100+MHz clockspeeds to tell them apart
+                if (cpu->model == 1 && cpu->freq >= 100)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P5)", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+                else if (cpu->model == 2 && cpu->freq >= 100)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P54C)", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+                // The Pentium OverDrive for Socket 3 is guaranteed to be P54C, so
+                // let's report that to distinguish it from P5 OverDrives for Socket 4
+                else if (cpu->model == 3 && cpu->freq < 84)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P54C)", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+            }
+            else if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'e')
+            {
+                // If we have a supposed WinChip 2-3D, we may be able to tell
+                // if its a WinChip 2A from the stepping
+                if (cpu->model == 8 && cpu->stepping == 7)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "IDT WinChip 2A", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+            }
+        }
+        // Pentium/P6 and later
+        else if (cpu->family == 6)
+        {
+            // Pentium II (Deschutes) and the Deschutes-based Pentium II Xeon
+            // and Celeron (Covington) have basically the same CPU ID, but we
+            // can tell *some* apart from the cache size. For sure: 32KB =
+            // Celeron; 512KB = Pentium II; 1024/2048KB = Pentium II Xeon. The
+            // 512KB Xeon cannot presently be distinguished, though...
+            if (cpu->model == 5)
+            {
+                if (cpu->cacheSize == 32)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "Intel Celeron (Covington)", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+                else if (cpu->cacheSize == 512)
+                {
+                    // Don't need to do anything, yet... At some point, we will try
+                    // to distinguish standard II and II Xeon at this cache amount
+                }
+                else if (cpu->cacheSize >= 1024)
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "Intel Pentium II Xeon", cpu->name);
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
+            }
+            // Core (Yonah) may not have "Core" in their name, so we will try to
+            // add it and a "Solo" or "Duo" suffix depending on the core count 
+            else if (cpu->model == 14 && (cpu->cores > 0 || cpu->index > 0))
+            {
+                if (strstr(cpu->name, "Intel(R) CPU") && (cpu->cores > 0 || cpu->index > 0))
+                {
+                    char *tmp = NULL;
+                    if (cpu->cores == 1 || cpu->index == 1)
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU           T", "Core Solo T");
+                    else if (cpu->cores == 2 || cpu->index == 2)
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU           T", "Core Duo T");
+
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
+                }
+            }
         }
     }
 
