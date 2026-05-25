@@ -893,17 +893,33 @@ char *interpretCPU(CPU_DATA *cpu)
                     free(tmp);
                 }
             }
-            // Mobile Core 2 Duo (Merom) may not have "Duo" in their name, so
-            // we will try to add it in
-            // SEE: Core 2 Duo T7400
-            else if (cpu->model == 15 && (cpu->cores == 2 || cpu->index == 2) && strstr(cpu->name, "2 CPU"))
+            else if (cpu->model == 15 && (cpu->cores == 2 || cpu->index == 2))
             {
-                char *tmp = findReplace(cpu->name, NAME_LEN, "CPU         ", "Duo ");
-                if (tmp)
+                // Some Merom-based Pentium Dual-Cores have a rogue "Dual" in
+                // their name
+                // SEE: Pentium T3200
+                if (strstr(cpu->name, "Dual  CPU"))
                 {
-                    strncpy(cpu->name, tmp, NAME_LEN - 1);
-                    cpu->name[NAME_LEN-1] = '\0';
-                    free(tmp);
+                    char *tmp = findReplace(cpu->name, NAME_LEN, "Dual  CPU", " ");
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
+                }
+                // Mobile Core 2 Duo (Merom) may not have "Duo" in their name,
+                // so we will try to add it in
+                // SEE: Core 2 Duo T7400
+                else if (strstr(cpu->name, "2 CPU"))
+                {
+                    char *tmp = findReplace(cpu->name, NAME_LEN, "CPU         ", "Duo ");
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
                 }
             }
         }
