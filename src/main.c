@@ -83,6 +83,10 @@ void showHelp(void)
     formatNewLines(noCol, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", noCol);
 
+    char noIP[100] = "-ni, --no-ip       Hides the local IP field\n";
+    formatNewLines(noIP, TERM_SIZE.ws_col, "                   ", 0);
+    printf("%s", noIP);
+
     char version[100] = "-v, --version      Displays version number and exits\n\n";
     formatNewLines(version, TERM_SIZE.ws_col, "                   ", 0);
     printf("%s", version);

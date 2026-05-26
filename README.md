@@ -80,6 +80,7 @@ Usage: shorkfetch [OPTIONS]
 * `-h`, `--help`: Shows help information and exits
 * `-na`, `--no-art`: Disables the SHORK ASCII art (if compiled with art support)
 * `-nc`, `--no-col`: Disables all coloured output (if compiled with colour support)
+* `-ni`, `--no-ip`: Hides the local IP field
 * `-v`, `--version`: Displays version number and exits
 
 ### Field names
