@@ -17,6 +17,7 @@
 #include "globals.h"
 #include "replacements.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -73,12 +74,14 @@ char *cleanCPUName(const char *input, size_t inputSize)
     }
 
     // Remove clock speed from CPU name
-    char *ghz = strstr(result, "GHz");
-    if (ghz)
+    char *hz = strstr(result, "Hz");
+    if (hz)
     {
-        // Walk back from "GHz" to find the beginning of the frequency substring
-        char *at = ghz;
-        while (at > result && ((*(at-1) >= '0' && *(at-1) <= '9') || *(at-1) == '.'))
+        // Walk back from "Hz" to find the beginning of the frequency substring
+        char *at = hz;
+        if (at > result && isalpha(*(at-1)))
+            at--;
+        while (at > result && (isdigit(*(at-1)) || *(at-1) == '.'))
             at--;
 
         // Take into account possible " @ " or " " in front
@@ -91,7 +94,7 @@ char *cleanCPUName(const char *input, size_t inputSize)
                 at--;
         }
 
-        char *leftBrac = strchr(ghz + 3, '(');
+        char *leftBrac = strchr(hz + 2, '(');
         // If brackets for core/thread count present, selective removal
         if (leftBrac)
             memmove(at, leftBrac - 1, strlen(leftBrac - 1) + 1);
