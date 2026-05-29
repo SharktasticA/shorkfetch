@@ -26,6 +26,16 @@ SHORKFETCH is available on the [AUR](https://aur.archlinux.org/packages/shorkfet
 
     yay -S shorkfetch
 
+### Nix
+
+#### Run
+
+    nix run github:SharktasticA/shorkfetch
+
+#### Install
+
+    nix profile install github:SharktasticA/shorkfetch
+
 ### Everything else (quick compilation)
 
 _This assumes you already have the prerequisites for compilation already installed._

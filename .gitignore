@@ -54,6 +54,9 @@ dkms.conf
 # debug information files
 *.dwo
 
+# Nix/NixOS
+/result
+
 # shorkfetch specific
 shorkfetch
 testing/excluded
