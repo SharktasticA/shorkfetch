@@ -754,7 +754,7 @@ char *interpretCPU(CPU_DATA *cpu)
             }
         }
 
-        // 486 era
+        // 486
         if (cpu->family == 4)
         {
             if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'y')
@@ -793,7 +793,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
             }
         }
-        // Pentium/P5 and K6 era
+        // Pentium/P5 and K6
         else if (cpu->family == 5)
         {
             if (cpu->vendor[0] == 'A')
@@ -876,7 +876,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
             }
         }
-        // Pentium/P6 era and descendants
+        // Pentium/P6 and descendants
         else if (cpu->family == 6)
         {
             // Deschutes & Covington
@@ -1071,6 +1071,58 @@ char *interpretCPU(CPU_DATA *cpu)
                 // See: Xeon E3-1230 v2
                 char *vNeedle = strstr(cpu->name, "V");
                 if (vNeedle) *vNeedle = 'v';
+            }
+        }
+        // NetBurst
+        else if (cpu->family == 15)
+        {
+            // Early Pentium 4s generally don't have a model number, and the
+            // later ones that do don't report it, so we will distinguish them
+            // via their microarchitecture name
+            if (strstr(cpu->name, "4 CPU"))
+            {
+                char *tmp = NULL;
+                // Willamette
+                if (cpu->model == 1)
+                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Willamette)");
+                // Northwood
+                else if (cpu->model == 2)
+                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Northwood)");
+                // Prescott
+                // See: B80546PE0561M, RK80546PG0881M, RK80546PG0961M
+                else if (cpu->model == 3 || cpu->model == 4)
+                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Prescott)");
+                // Cedar Mill
+                // See: Pentium 4 631 (5), Pentium 4 641 (2), Pentium 4 651 (4)
+                else if (cpu->model == 6)
+                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Cedar Mill)");
+
+                if (tmp)
+                {
+                    strncpy(cpu->name, tmp, NAME_LEN - 1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                    free(tmp);
+                }
+            }
+            // Ditto for Pentium D
+            else if (strstr(cpu->name, "D CPU"))
+            {
+                char *tmp = NULL;
+                // Smithfield
+                // See: Pentium D 805 (7), Pentium D 830 (4)
+                if (cpu->model == 4)
+                    tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Smithfield)");
+                // Presler
+                // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960 (4)
+                else if (cpu->model == 6)
+                    tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Presler)");
+
+                if (tmp)
+                {
+                    strncpy(cpu->name, tmp, NAME_LEN - 1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                    free(tmp);
+                }
             }
         }
     }
