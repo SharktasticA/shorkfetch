@@ -56,14 +56,14 @@ static const struct Replacement COMPACT_CPU_REPLACES[] = {
     { "Core 2 Extreme",         "C2E",          0 },
     { "Core 2 Quad",            "C2Q",          0 },
     { "Core i",                 "i",            0 },
+    { "Core Ultra ",            "CU ",          0 },
     { " for ",                  " ",            0 },
     { "Mobile ",                "",             0 },
     { "OverDrive",              "OD",           0 },
     { "Ryzen 3",                "R3",           0 },
     { "Ryzen 5",                "R5",           0 },
     { "Ryzen 7",                "R7",           0 },
-    { "Ryzen 9",                "R9",           0 },
-    { "Ryzen",                 "R",             0 }
+    { "Ryzen 9",                "R9",           0 }
 };
 static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) / sizeof(COMPACT_CPU_REPLACES[0]);
 
