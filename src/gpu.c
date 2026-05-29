@@ -264,7 +264,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     // Anything else...
     else
     {
-        // Apply generic deletions
+        // Apply generic deletions to vender name
         cleanedVendor = strdup(vendor);
         for (size_t i = 0; i < DELETIONS_LEN; i++)
         {
@@ -275,15 +275,14 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         }
     }
 
-    // Universal deletions
-    if (strstr(cleanedDevice, " Graphics Adapter"))
+    // Apply generic deletions to device name
+    for (size_t i = 0; i < DELETIONS_LEN; i++)
     {
-        char *tmp = findReplace(cleanedDevice, inputSize, " Graphics Adapter", "");
+        const char *pattern = DELETIONS[i];
+        char *tmp = findErase(cleanedDevice, inputSize, pattern);
         free(cleanedDevice);
         cleanedDevice = tmp;
     }
-
-
 
     // Combine and return final result
     snprintf(result, RESULT_SIZE, "%s %s", cleanedVendor, cleanedDevice);

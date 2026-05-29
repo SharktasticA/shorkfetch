@@ -151,10 +151,16 @@ void testInterpretGPU(void)
             -1
         },
         {
-            "AMD FirePro W9000",
+            "Tahiti XT GL [FirePro W9000]",
             0x1002,
             0x6780,
             0x00
+        },
+        {
+            "Tahiti [FirePro Series Graphics Adapter]",
+            0x1002,
+            0x6784,
+            -1
         },
         {
             "Navi 33 [Radeon RX 7600/7600 XT/7600M XT/7600S/7700S / PRO W7600]",
@@ -163,10 +169,10 @@ void testInterpretGPU(void)
             -1
         },
         {
-            "AMD Radeon RX 7700S",
+            "Navi 33 [Radeon RX 7600/7600 XT/7600M XT/7600S/7700S / PRO W7600]",
             0x1002,
             0x7480, 
-            0xC1 
+            0xC1
         },
         {
             "NV11 [GeForce2 MX/MX 400]",

@@ -15,6 +15,7 @@
 #include "cpu.h"
 #include "general.h"
 #include "globals.h"
+#include "gpu.h"
 #include "replacements.h"
 
 #include <ctype.h>
@@ -665,8 +666,13 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 *gpuFromCPU = malloc(NAME_LEN);
                 if (*gpuFromCPU)
                 {
-                    const char *gpuVendor = (i < 2) ? "AMD " : "NVIDIA ";
-                    snprintf(*gpuFromCPU, NAME_LEN, "%s%s", gpuVendor, found + (strchr(gpuNeedles[i], ' ') - gpuNeedles[i]) + 1);
+                    const char *gpuVendor = (i < 2) ? "AMD" : "NVIDIA";
+                    snprintf(*gpuFromCPU, NAME_LEN, "%s %s", gpuVendor, found + (strchr(gpuNeedles[i], ' ') - gpuNeedles[i]) + 1);
+
+                    char *tmp = cleanGPUName(gpuVendor, *gpuFromCPU, NAME_LEN);
+                    strncpy(*gpuFromCPU, tmp, NAME_LEN - 1);
+                    (*gpuFromCPU)[NAME_LEN - 1] = '\0';
+                    free(tmp);
                 }
 
                 // Remove it from model name
