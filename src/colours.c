@@ -14,6 +14,7 @@
 
 #include "colours.h"
 #include "general.h"
+#include "globals.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,26 +28,52 @@
 ColourPalette getColourPalette(void)
 {
     ColourPalette palette;
-    snprintf(palette.normalCols, 128, "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
-        COL_BAK_BLACK,
-        COL_BAK_RED,
-        COL_BAK_GREEN,
-        COL_BAK_YELLOW,
-        COL_BAK_BLUE,
-        COL_BAK_MAGENTA,
-        COL_BAK_CYAN,
-        COL_BAK_WHITE,
-        COL_RESET);
-    snprintf(palette.boldCols, 128, "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
-        COL_BAK_BOLD_BLACK,
-        COL_BAK_BOLD_RED,
-        COL_BAK_BOLD_GREEN,
-        COL_BAK_BOLD_YELLOW,
-        COL_BAK_BOLD_BLUE,
-        COL_BAK_BOLD_MAGENTA,
-        COL_BAK_BOLD_CYAN,
-        COL_BAK_BOLD_WHITE,
-        COL_RESET);
+    if (COMPACT)
+    {
+        snprintf(palette.normalCols, 128, "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
+            COL_BAK_BLACK,
+            COL_BAK_RED,
+            COL_BAK_GREEN,
+            COL_BAK_YELLOW,
+            COL_BAK_BLUE,
+            COL_BAK_MAGENTA,
+            COL_BAK_CYAN,
+            COL_BAK_WHITE,
+            COL_RESET);
+        snprintf(palette.boldCols, 128, "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
+            COL_BAK_BOLD_BLACK,
+            COL_BAK_BOLD_RED,
+            COL_BAK_BOLD_GREEN,
+            COL_BAK_BOLD_YELLOW,
+            COL_BAK_BOLD_BLUE,
+            COL_BAK_BOLD_MAGENTA,
+            COL_BAK_BOLD_CYAN,
+            COL_BAK_BOLD_WHITE,
+            COL_RESET);
+    }
+    else
+    {
+        snprintf(palette.normalCols, 128, "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
+            COL_BAK_BLACK,
+            COL_BAK_RED,
+            COL_BAK_GREEN,
+            COL_BAK_YELLOW,
+            COL_BAK_BLUE,
+            COL_BAK_MAGENTA,
+            COL_BAK_CYAN,
+            COL_BAK_WHITE,
+            COL_RESET);
+        snprintf(palette.boldCols, 128, "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
+            COL_BAK_BOLD_BLACK,
+            COL_BAK_BOLD_RED,
+            COL_BAK_BOLD_GREEN,
+            COL_BAK_BOLD_YELLOW,
+            COL_BAK_BOLD_BLUE,
+            COL_BAK_BOLD_MAGENTA,
+            COL_BAK_BOLD_CYAN,
+            COL_BAK_BOLD_WHITE,
+            COL_RESET);
+    }
     return palette;
 }
 
