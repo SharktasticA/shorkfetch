@@ -916,7 +916,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 // from second-gen Dothan
                 if (strstr(cpu->name, "(R) M p"))
                 {
-                char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Banias)");
+                    char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Banias)");
                     if (tmp)
                     {
                         strncpy(cpu->name, tmp, NAME_LEN - 1);
@@ -1123,6 +1123,22 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->name[NAME_LEN-1] = '\0';
                     free(tmp);
                 }
+            }
+        }
+        // Bulldozer
+        else if (cpu->family == 21)
+        {
+            // Bulldozer proper
+            if (cpu->model == 1)
+            {
+                // Some AMD FXs are reported with physical ID count that starts
+                // at 1 instead of 0, potentially flagging it as a multi-CPU
+                // config when it isn't... We can ensure that we aren't in such
+                // a config if the processor index count and per-CPU thread
+                // count are equal (impossible on a real multi-CPU config).
+                // See: AMD FX-8150
+                if (cpu->maxPhysID > 1 && cpu->index == cpu->threads)
+                    cpu->maxPhysID--;
             }
         }
     }
