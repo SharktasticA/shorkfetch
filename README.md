@@ -113,6 +113,7 @@ These are possible field names you can use with the `--fields` argument. You ent
 * `swap`: Swap memory
 * `root`: Root partition size
 * `lip`: Local IP address
+* `clrs`: ANSI escape code colour palette
 
 ### Configuration
 

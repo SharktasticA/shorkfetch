@@ -40,7 +40,8 @@ static const char *POSSIBLE_FIELDS[] =
     "ram",  // System memory
     "swap", // Swap memory
     "root", // Root partition size
-    "lip"  // Local IP address
+    "lip",  // Local IP address
+    "clrs"  // ANSI escape code colour palette
 };
 static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) / sizeof(POSSIBLE_FIELDS[0]);
 

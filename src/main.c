@@ -96,7 +96,7 @@ void showHelp(void)
     formatNewLines(colours, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", colours);
 
-    char fieldNames[200] = "Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, --- (category separator), single blank space (new line)\n";
+    char fieldNames[200] = "Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, clrs, --- (category separator), single blank space (new line)\n";
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", fieldNames);
 }
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     TERM_SIZE = getTerminalSize();
 
     char bullet = '*';
-    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,root,lip, ");
+    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,root,lip, ,clrs, ");
     int noIP = 0;
     int saveConf = 0;
     int shorkLine = 0;
@@ -763,6 +763,15 @@ int main(int argc, char *argv[])
                 }
                 free(localIP);
             }
+        }
+        else if (strcmp(fieldsProcessed[i], "clrs") == 0)
+        {
+            ColourPalette palette = getColourPalette();
+
+            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
+            printf("%s\n", palette.normalCols);
+            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
+            printf("%s\n", palette.boldCols);
         }
     }
 
