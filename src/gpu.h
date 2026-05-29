@@ -16,6 +16,12 @@
 #ifndef GPU
 #define GPU
 
+
+
+#define GPU_NAME_LEN 256
+
+
+
 typedef struct {
     char *name;
     int vendor;
@@ -282,7 +288,7 @@ static const char* INTEL_IGPUS[] = {
 
 
 
-char *cleanGPUName(const char*, const char*, const size_t);
+char *cleanGPUName(const char*, const char*, const int);
 GPU_IDS* getGPUs(int *);
 char *interpretGPU(GPU_IDS*, const char *);
 

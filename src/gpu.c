@@ -30,16 +30,18 @@
 
 /**
  * Cleans a GPU's name so it is less needlessly verbose and 'to the point'.
- * @param input Input string
- * @param inputSize Size to use when allocating the result string
+ * @param vendor Input vendor name string
+ * @param device Input device name string
+ * @param isGPUFromCPU Flags if the GPU name being cleaned is one extracted
+ *                     from a CPU name
  * @return String containing the result after cleaning
  */
-char *cleanGPUName(const char *vendor, const char *device, const size_t inputSize)
+char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCPU)
 {
-    if (!vendor || !device || inputSize < 2) return strdup("");
+    if (!vendor || !device) return strdup("");
 
     // Prepare result strings
-    const size_t RESULT_SIZE = (inputSize * 2) + 1;
+    const size_t RESULT_SIZE = (GPU_NAME_LEN * 2) + 1;
     char *result = malloc(RESULT_SIZE);
     if (!result) return strdup("");
     char *cleanedVendor = NULL;
@@ -52,7 +54,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     // Shorten " / " to "/"
     if (strstr(cleanedDevice, " / "))
     {
-        char *tmp = findReplace(cleanedDevice, inputSize, " / ", "/");
+        char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, " / ", "/");
         free(cleanedDevice);
         cleanedDevice = tmp;
     }
@@ -114,10 +116,10 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
             // or "Vega Series", we will permit the norm to help with
             // distinguishing it
             if (strstr(cleanedDeviceBrac, " Graphics") || strstr(cleanedDeviceBrac, " Vega Series"))
-                snprintf(cleanedDevice, inputSize, "%s (%s)", cleanedDeviceBrac, cleanedDeviceNorm);
+                snprintf(cleanedDevice, GPU_NAME_LEN, "%s (%s)", cleanedDeviceBrac, cleanedDeviceNorm);
             // Otherwise, we just use the bracketed info
             else
-                snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+                snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
         }
 
         // Begin testing for if there are multiple "Radeon"... Look for the
@@ -140,7 +142,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // Radeon Vega Mobile Series"
         if (strstr(cleanedDevice, " Series/Vega Mobile Series"))
         {
-            char *tmp = findReplace(cleanedDevice, inputSize, " Series/Vega Mobile Series", "/Vega Mobile");
+            char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, " Series/Vega Mobile Series", "/Vega Mobile");
             free(cleanedDevice);
             cleanedDevice = tmp;
         }
@@ -168,7 +170,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // If we have bracketed info, we discard the norm (usually just
         // containing the core name)
         if (cleanedDeviceBrac)
-            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+            snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
 
         // Some Arc GPUs have "Intel" in the device name...
         if (strncmp(cleanedDevice, "Intel ", 6) == 0)
@@ -182,7 +184,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // If we have bracketed info, we discard the norm (usually just
         // containing the core name)
         if (cleanedDeviceBrac)
-            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+            snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
     }
     // 3Dfx Interactive, Inc.
     else if (vendor[0] == '3' && strncmp(vendor, "3Dfx", 4) == 0)
@@ -191,12 +193,12 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
 
         // If this Voodoo is probably a Velocity (entry-level)
         if (cleanedDeviceBrac && cleanedDeviceBrac[0] == 'V')
-            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+            snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
 
         // E.g., Voodoo 4/Voodoo 5 -> Voodoo 4/5
         if (strstr(cleanedDevice, "/Voodoo "))
         {
-            char *tmp = findReplace(cleanedDevice, inputSize, "/Voodoo ", "/");
+            char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, "/Voodoo ", "/");
             free(cleanedDevice);
             cleanedDevice = tmp;
         }
@@ -218,12 +220,12 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
 
             // Discard any bracketed info like "Alpine" 
             if (cleanedDeviceBrac)
-                snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceNorm);
+                snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceNorm);
 
             // Remove space between "GD" and model number
             if (cleanedDevice[0] == 'G' && cleanedDevice[1] == 'D' && cleanedDevice[2] == ' ')
             {
-                char *tmp = findReplace(cleanedDevice, inputSize, "GD ", "GD");
+                char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, "GD ", "GD");
                 free(cleanedDevice);
                 cleanedDevice = tmp;
             }
@@ -237,7 +239,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // If we have bracketed info, we discard the norm (usually just
         // containing the chip model name like 2064)
         if (cleanedDeviceBrac)
-            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+            snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
     }
     // S3 Graphics Ltd.
     else if (vendor[0] == 'S' && strncmp(vendor, "S3 ", 3) == 0)
@@ -247,7 +249,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         // If we have bracketed info, we discard the norm (usually just
         // containing the core name)
         if (cleanedDeviceBrac)
-            snprintf(cleanedDevice, inputSize, "%s", cleanedDeviceBrac);
+            snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
     }
     else if (vendor[0] == 'T')
     {
@@ -269,7 +271,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
         for (size_t i = 0; i < DELETIONS_LEN; i++)
         {
             const char *pattern = DELETIONS[i];
-            char *tmp = findErase(cleanedVendor, inputSize, pattern);
+            char *tmp = findErase(cleanedVendor, GPU_NAME_LEN, pattern);
             free(cleanedVendor);
             cleanedVendor = tmp;
         }
@@ -279,7 +281,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     for (size_t i = 0; i < DELETIONS_LEN; i++)
     {
         const char *pattern = DELETIONS[i];
-        char *tmp = findErase(cleanedDevice, inputSize, pattern);
+        char *tmp = findErase(cleanedDevice, GPU_NAME_LEN, pattern);
         free(cleanedDevice);
         cleanedDevice = tmp;
     }
@@ -288,7 +290,7 @@ char *cleanGPUName(const char *vendor, const char *device, const size_t inputSiz
     snprintf(result, RESULT_SIZE, "%s %s", cleanedVendor, cleanedDevice);
 
     // Compact mode specific cleaning
-    if (COMPACT)
+    if (COMPACT && !isGPUFromCPU)
     {
         // Apply compact-specific GPU name shortenings
         int replaces = 0;
@@ -394,8 +396,7 @@ GPU_IDS* getGPUs(int *count)
  */
 char *interpretGPU(GPU_IDS *gpu, const char *os)
 {
-    const int GPU_SIZE = 256;
-    char *gpuStr = malloc(GPU_SIZE);
+    char *gpuStr = malloc(GPU_NAME_LEN);
     if (!gpuStr) return strdup("unknown");
     gpuStr[0] = '\0';
 
@@ -407,9 +408,9 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
         const char *name = INTEL_IGPUS[gpu->device];
         if (name)
         {
-            char *tmp = cleanGPUName("Intel", name, GPU_SIZE);
-            strncpy(gpuStr, tmp, GPU_SIZE - 1);
-            gpuStr[GPU_SIZE - 1] = '\0';
+            char *tmp = cleanGPUName("Intel", name, 0);
+            strncpy(gpuStr, tmp, GPU_NAME_LEN - 1);
+            gpuStr[GPU_NAME_LEN - 1] = '\0';
             free(tmp);
             return gpuStr;
         }
@@ -442,9 +443,9 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
                 {
                     if (fileDID == gpu->device && fileRev == gpu->revision)
                     {
-                        char *tmp = cleanGPUName("Advanced Micro", name, GPU_SIZE);
-                        strncpy(gpuStr, tmp, GPU_SIZE - 1);
-                        gpuStr[GPU_SIZE - 1] = '\0';
+                        char *tmp = cleanGPUName("Advanced Micro", name, 0);
+                        strncpy(gpuStr, tmp, GPU_NAME_LEN - 1);
+                        gpuStr[GPU_NAME_LEN - 1] = '\0';
                         free(tmp);
                         fclose(fStream);
                         return gpuStr;
@@ -484,14 +485,14 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
     }
     else
     {
-        snprintf(gpuStr, GPU_SIZE, "%04x:%04x", gpu->vendor, gpu->device);
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor, gpu->device);
         return gpuStr;
     }
 
     FILE *fStream = fopen(pciids, "r");
     if (!fStream)
     {
-        snprintf(gpuStr, GPU_SIZE, "%04x:%04x", gpu->vendor, gpu->device);
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor, gpu->device);
         return gpuStr;
     }
 
@@ -536,9 +537,9 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
     fclose(fStream);
 
     if (!vendor || !device)
-        snprintf(gpuStr, GPU_SIZE, "%04x:%04x", gpu->vendor, gpu->device);
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor, gpu->device);
     else
-        snprintf(gpuStr, GPU_SIZE, "%s", cleanGPUName(vendor, device, GPU_SIZE));
+        snprintf(gpuStr, GPU_NAME_LEN, "%s", cleanGPUName(vendor, device, 0));
 
     if (vendor) free(vendor);
     if (device) free(device);

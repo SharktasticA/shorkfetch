@@ -667,16 +667,22 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             if (found)
             {
                 // Save it for later
-                *gpuFromCPU = malloc(NAME_LEN);
+                *gpuFromCPU = malloc(GPU_NAME_LEN);
                 if (*gpuFromCPU)
                 {
                     const char *gpuVendor = (i < 2) ? "AMD" : "NVIDIA";
-                    snprintf(*gpuFromCPU, NAME_LEN, "%s %s", gpuVendor, found + (strchr(gpuNeedles[i], ' ') - gpuNeedles[i]) + 1);
+                    snprintf(*gpuFromCPU, GPU_NAME_LEN, "%s %s", gpuVendor, found + (strchr(gpuNeedles[i], ' ') - gpuNeedles[i]) + 1);
 
-                    char *tmp = cleanGPUName(gpuVendor, *gpuFromCPU, NAME_LEN);
-                    strncpy(*gpuFromCPU, tmp, NAME_LEN - 1);
-                    (*gpuFromCPU)[NAME_LEN - 1] = '\0';
+                    char *tmp = cleanGPUName(gpuVendor, *gpuFromCPU, 1);
+                    strncpy(*gpuFromCPU, tmp, GPU_NAME_LEN - 1);
+                    (*gpuFromCPU)[GPU_NAME_LEN - 1] = '\0';
                     free(tmp);
+
+                    // Remove trailing " Graphics" if present
+                    size_t gpuLen = strlen(*gpuFromCPU);
+                    size_t suffixLen = strlen(" Graphics");
+                    if (gpuLen > suffixLen && strcmp(*gpuFromCPU + gpuLen - suffixLen, " Graphics") == 0)
+                        (*gpuFromCPU)[gpuLen - suffixLen] = '\0';
                 }
 
                 // Remove it from model name
