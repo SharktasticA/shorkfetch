@@ -1073,6 +1073,28 @@ char *interpretCPU(CPU_DATA *cpu)
                 if (vNeedle) *vNeedle = 'v';
             }
         }
+        // Larrabee
+        else if (cpu->family == 11)
+        {
+            // Xeon Phis may have 'nonsense' in the model name like simply
+            // "0b/01" for 7110P, so we may completely discard it and create a
+            // new model name with the microarchitecture revision included
+            // instead
+            if (!strstr(cpu->name, "Xeon"))
+            {
+                free(cpu->name);
+                // Knights Ferry
+                if (cpu->model == 0)
+                    cpu->name = strdup("Intel Xeon Phi (Knights Ferry)");
+                // Knights Corner
+                // See: Xeon Phi 7110P
+                else if (cpu->model == 1)
+                    cpu->name = strdup("Intel Xeon Phi (Knights Corner)");
+                // Fallback
+                else
+                    cpu->name = strdup("Intel Xeon Phi");
+            }
+        }
         // NetBurst
         else if (cpu->family == 15)
         {
