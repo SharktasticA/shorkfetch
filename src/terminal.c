@@ -60,6 +60,14 @@ char *getTerminal(void)
                 }
             }
 
+            // We must also skip shell script parents
+            if (!notTerminal)
+            {
+                size_t len = strlen(process.name);
+                if (len > 3 && strcmp(process.name + len - 3, ".sh") == 0)
+                    notTerminal = 1;
+            }
+
             if (!notTerminal)
             {
                 terminal = strdup(process.name);
