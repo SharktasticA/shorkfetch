@@ -1045,6 +1045,45 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
             }
+            // Clarksfield
+            else if (cpu->model == 30)
+            {
+                // Clarksfield has what should be the suffix as the prefix
+                // *and* lacks the "M" to denote these are mobile chips
+                // See: Core i7-740QM, Core i7-920XM
+                if (cpu->stepping == 5)
+                {
+                    const char *suffix = NULL;
+                    if (strstr(cpu->name, "CPU       Q"))
+                        suffix = "QM";
+                    else if (strstr(cpu->name, "CPU       X"))
+                        suffix = "XM";
+
+                    if (suffix)
+                    {
+                        // Remove the incorrect prefix
+                        char search[32];
+                        snprintf(search, 32, " CPU       %c ", suffix[0]);
+                        char *tmp = findReplace(cpu->name, NAME_LEN, search, "-");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN - 1] = '\0';
+                            free(tmp);
+                        }
+
+                        // Add the correct suffix and discard the clock speed
+                        // whilst we're at it
+                        char *needle = strchr(cpu->name, '@');
+                        if (needle)
+                        {
+                            char *p = needle - 1;
+                            while (p > cpu->name && *p == ' ') p--;
+                            strcpy(p + 1, suffix);
+                        }
+                    }
+                }
+            }
             // Sandy Bridge
             else if (cpu->model == 42)
             {
