@@ -1045,6 +1045,26 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
             }
+            // Sandy Bridge
+            else if (cpu->model == 42)
+            {
+                if (cpu->stepping == 7)
+                {
+                    // Sandy Bridge-based Xeon E3s may lack a "-" separating
+                    // the "E3" prefix and the rest of the model number
+                    // See: Xeon E3-1230, Xeon E3-1275
+                    if (strstr(cpu->name, "E31"))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "E31", " E3-1");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                }
+            }
             // Sandy Bridge-EP
             else if (cpu->model == 45)
             {
