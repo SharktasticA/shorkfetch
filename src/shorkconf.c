@@ -108,11 +108,15 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, int *noI
 void writeConf(char bullet, char *colour, int compact, char *fields, int noIP, int showShork, int useBullets)
 {
     char path[PATH_MAX];
-    snprintf(path, PATH_MAX, "%s/.config/shorkutils/", HOME);
 
+    // Create directory to store the conf file - this is broken into parts in
+    // case the system does not have .config/
+    snprintf(path, PATH_MAX, "%s/.config/", HOME);
     mkdir(path, 0755);
-    strncat(path, "shorkfetch.conf", PATH_MAX - strlen(path) - 1);
+    strncat(path, "shorkutils/", PATH_MAX - strlen(path) - 1);
+    mkdir(path, 0755);
 
+    strncat(path, "shorkfetch.conf", PATH_MAX - strlen(path) - 1);
     FILE *shorkconf = fopen(path, "w");
     if (shorkconf)
     {
