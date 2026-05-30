@@ -1092,14 +1092,25 @@ char *interpretCPU(CPU_DATA *cpu)
                 char *vNeedle = strstr(cpu->name, "V");
                 if (vNeedle) *vNeedle = 'v';
             }
+            // Silvermont: Merriefield
+            else if (cpu->model == 74)
+            {
+                // The 500MHz Intel Atom variant for the Intel Edison has a
+                // non-descriptive name like "Intel 4000", thus we discard it
+                // and create a new model name
+                if (cpu->stepping == 8 && cpu->freq == 500)
+                {
+                    free(cpu->name);
+                    cpu->name = strdup("Intel Atom Z34xx (Edison)");
+                }
+            }
         }
         // Larrabee
         else if (cpu->family == 11)
         {
             // Xeon Phis may have 'nonsense' in the model name like simply
-            // "0b/01" for 7110P, so we may completely discard it and create a
-            // new model name with the microarchitecture revision included
-            // instead
+            // "0b/01" for 7110P, so we may discard it and create a new model
+            // name with the microarchitecture revision included instead
             if (!strstr(cpu->name, "Xeon"))
             {
                 free(cpu->name);
