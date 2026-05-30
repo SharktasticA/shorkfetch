@@ -12,6 +12,14 @@
 
 
 
+/*
+    OPTIMISATION TODO
+        * Intel
+            * Arrandale embedded (Core iX-XXXE/LE/UE)
+*/
+
+
+
 #include "cpu.h"
 #include "general.h"
 #include "globals.h"
@@ -1054,10 +1062,51 @@ char *interpretCPU(CPU_DATA *cpu)
                 if (cpu->stepping == 5)
                 {
                     const char *suffix = NULL;
-                    if (strstr(cpu->name, "CPU       Q"))
+                    if (strstr(cpu->name, "       Q"))
                         suffix = "QM";
-                    else if (strstr(cpu->name, "CPU       X"))
+                    else if (strstr(cpu->name, "       X"))
                         suffix = "XM";
+
+                    if (suffix)
+                    {
+                        // Remove the incorrect prefix
+                        char search[32];
+                        snprintf(search, 32, " CPU       %c ", suffix[0]);
+                        char *tmp = findReplace(cpu->name, NAME_LEN, search, "-");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN - 1] = '\0';
+                            free(tmp);
+                        }
+
+                        // Add the correct suffix and discard the clock speed
+                        // whilst we're at it
+                        char *needle = strchr(cpu->name, '@');
+                        if (needle)
+                        {
+                            char *p = needle - 1;
+                            while (p > cpu->name && *p == ' ') p--;
+                            strcpy(p + 1, suffix);
+                        }
+                    }
+                }
+            }
+            // Arrandale
+            else if (cpu->model == 37)
+            {
+                // Arrandale has what should be the suffix as the prefix and
+                // usually just a single digit when it should be two
+                // See: Core i3-380UM, Core i5-540M, Core i7-640LM
+                if (cpu->stepping == 2 || cpu->stepping == 5)
+                {
+                    const char *suffix = NULL;
+                    if (strstr(cpu->name, "       M"))
+                        suffix = "M";
+                    else if (strstr(cpu->name, "       L"))
+                        suffix = "LM";
+                    else if (strstr(cpu->name, "       U"))
+                        suffix = "UM";
 
                     if (suffix)
                     {
