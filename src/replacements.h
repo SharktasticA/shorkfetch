@@ -56,6 +56,7 @@ static const struct Replacement COMPACT_CPU_REPLACES[] = {
     { "Core 2 Extreme",         "C2E",          0 },
     { "Core 2 Quad",            "C2Q",          0 },
     { "Core i",                 "i",            0 },
+    { "Core m",                 "m",            0 },
     { "Core Ultra ",            "CU ",          0 },
     { " for ",                  " ",            0 },
     { "Mobile ",                "",             0 },
