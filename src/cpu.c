@@ -1104,6 +1104,22 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->name = strdup("Intel Atom Z34xx (Edison)");
                 }
             }
+            // Skylake
+            else if (cpu->model == 94)
+            {
+                // There are some examples of Skylake-based Intel Cores with a
+                // generic name, so we will tidy it up a bit
+                if (cpu->stepping == 3 && strstr(cpu->name, "Processor (Skylake, IBRS)"))
+                {
+                    char *tmp = findReplace(cpu->name, NAME_LEN, "Processor (Skylake, IBRS)", "(Skylake)");
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
+                }
+            }
         }
         // Larrabee
         else if (cpu->family == 11)
