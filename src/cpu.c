@@ -1251,52 +1251,55 @@ char *interpretCPU(CPU_DATA *cpu)
         // NetBurst
         else if (cpu->family == 15)
         {
-            // Early Pentium 4s generally don't have a model number, and the
-            // later ones that do don't report it, so we will distinguish them
-            // via their microarchitecture name
-            if (strstr(cpu->name, "4 CPU"))
+            if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
-                char *tmp = NULL;
-                // Willamette
-                if (cpu->model == 1)
-                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Willamette)");
-                // Northwood
-                else if (cpu->model == 2)
-                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Northwood)");
-                // Prescott
-                // See: B80546PE0561M, RK80546PG0881M, RK80546PG0961M
-                else if (cpu->model == 3 || cpu->model == 4)
-                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Prescott)");
-                // Cedar Mill
-                // See: Pentium 4 631 (5), Pentium 4 641 (2), Pentium 4 651 (4)
-                else if (cpu->model == 6)
-                    tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Cedar Mill)");
-
-                if (tmp)
+                // Early Pentium 4s generally don't have a model number, and the
+                // later ones that do don't report it, so we will distinguish them
+                // via their microarchitecture name
+                if (strstr(cpu->name, "4 CPU"))
                 {
-                    strncpy(cpu->name, tmp, NAME_LEN - 1);
-                    cpu->name[NAME_LEN-1] = '\0';
-                    free(tmp);
+                    char *tmp = NULL;
+                    // Willamette
+                    if (cpu->model == 1)
+                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Willamette)");
+                    // Northwood
+                    else if (cpu->model == 2)
+                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Northwood)");
+                    // Prescott
+                    // See: B80546PE0561M, RK80546PG0881M, RK80546PG0961M
+                    else if (cpu->model == 3 || cpu->model == 4)
+                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Prescott)");
+                    // Cedar Mill
+                    // See: Pentium 4 631 (5), Pentium 4 641 (2), Pentium 4 651 (4)
+                    else if (cpu->model == 6)
+                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Cedar Mill)");
+
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
                 }
-            }
-            // Ditto for Pentium D
-            else if (strstr(cpu->name, "D CPU"))
-            {
-                char *tmp = NULL;
-                // Smithfield
-                // See: Pentium D 805 (7), Pentium D 830 (4)
-                if (cpu->model == 4)
-                    tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Smithfield)");
-                // Presler
-                // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960 (4)
-                else if (cpu->model == 6)
-                    tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Presler)");
-
-                if (tmp)
+                // Ditto for Pentium D
+                else if (strstr(cpu->name, "D CPU"))
                 {
-                    strncpy(cpu->name, tmp, NAME_LEN - 1);
-                    cpu->name[NAME_LEN-1] = '\0';
-                    free(tmp);
+                    char *tmp = NULL;
+                    // Smithfield
+                    // See: Pentium D 805 (7), Pentium D 830 (4)
+                    if (cpu->model == 4)
+                        tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Smithfield)");
+                    // Presler
+                    // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960 (4)
+                    else if (cpu->model == 6)
+                        tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Presler)");
+
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
                 }
             }
         }
