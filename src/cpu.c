@@ -1053,13 +1053,13 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
             }
-            // Clarksfield/Lynnfield
-            else if (cpu->model == 30)
+            // Nehalem (Bloomfield (26), Clarksfield/Lynnfield (30))
+            else if (cpu->model == 26 || cpu->model == 30)
             {
                 // If present at all, Nehalem has what should be the suffix as
                 // the prefix *and* Clarksfield specifically lacks the "M" to
                 // denote those are mobile chips
-                // See: Core i7-740QM, Core i7-920XM
+                // See: Core i5-750, Core i7-740QM, Core i7-860S, Core i7-920XM
                 if (cpu->stepping == 5)
                 {
                     const char *suffix = NULL;
@@ -1106,6 +1106,19 @@ char *interpretCPU(CPU_DATA *cpu)
                             cpu->name[NAME_LEN - 1] = '\0';
                             free(tmp);
                         }
+                    }
+                }
+
+                // Bloomfield Core i7 Extremes do not call themselves "Extreme"
+                // See: Core i7-965 Extreme Edition (etc.)
+                if (cpu->model == 26 && (strstr(cpu->name, "965") || strstr(cpu->name, "975")))
+                {
+                    char *needle = strrchr(cpu->name, '@');
+                    if (needle)
+                    {
+                        char *p = needle - 1;
+                        while (p > cpu->name && *p == ' ') p--;
+                        strcpy(p + 1, " Extreme");
                     }
                 }
             }
@@ -1197,7 +1210,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 char *vNeedle = strstr(cpu->name, "V");
                 if (vNeedle) *vNeedle = 'v';
             }
-            // Silvermont: Merriefield
+            // Silvermont (Merriefield)
             else if (cpu->model == 74)
             {
                 // The 500MHz Intel Atom variant for the Intel Edison has a
