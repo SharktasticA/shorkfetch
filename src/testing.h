@@ -18,10 +18,43 @@
 #include "cpu.h"
 #include "gpu.h"
 
+#include <ctype.h>
 #include <dirent.h>
 #include <linux/limits.h>
 
 
+
+/**
+ * Natural sort comparison.
+ */
+int natCmp(const void *a, const void *b)
+{
+    const char *s1 = *(const char **)a;
+    const char *s2 = *(const char **)b;
+
+    while (*s1 && *s2)
+    {
+        if (isdigit(*s1) && isdigit(*s2))
+        {
+            char *end1, *end2;
+            long n1 = strtol(s1, &end1, 10);
+            long n2 = strtol(s2, &end2, 10);
+            if (n1 != n2) return (n1 > n2) - (n1 < n2);
+            s1 = end1;
+            s2 = end2;
+        }
+        else
+        {
+            int c1 = tolower(*s1);
+            int c2 = tolower(*s2);
+            if (c1 != c2) return c1 - c2;
+            s1++;
+            s2++;
+        }
+    }
+
+    return *s1 - *s2;
+}
 
 /**
  * Tests the getCPU (and by extension the cleanCPUName) function to ensure they
@@ -37,7 +70,7 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char *cpuinfos[200];
+    char *cpuinfos[300];
     int count = 0;
     int showRaw = 0;
 
@@ -50,8 +83,7 @@ void testGetCPU(void)
     }
     closedir(testingDir);
 
-    int cmp(const void *a, const void *b) { return strcmp(*(const char **)a, *(const char **)b); }
-    qsort(cpuinfos, count, sizeof(char *), cmp);
+    qsort(cpuinfos, count, sizeof(char *), natCmp);
     for (int i = 0; i < count; i++)
     {
         char cpuinfo[PATH_MAX];
@@ -67,21 +99,35 @@ void testGetCPU(void)
         CPU_DATA *cpu = getCPU(cpuinfo, &gpuFromCPU);
         char *cpuStr = interpretCPU(cpu);
 
-        int maxLeft = 41;
-        int maxRight = 52;
-
         if (!showRaw)
         {
+            int maxLeft = 41;
+            int maxRight = 52;
+            int colWidth = maxLeft + 1 + maxRight;
+
+            int numCols;
+            if (TERM_SIZE.ws_col >= colWidth * 5 + 4)
+                numCols = 5;
+            else if (TERM_SIZE.ws_col >= colWidth * 4 + 3)
+                numCols = 4;
+            else if (TERM_SIZE.ws_col >= colWidth * 3 + 2)
+                numCols = 3;
+            else if (TERM_SIZE.ws_col >= colWidth * 2 + 1)
+                numCols = 2;
+            else
+                numCols = 1;
+
             char rightSide[512];
             if (gpuFromCPU)
                 snprintf(rightSide, sizeof(rightSide), "%s (%s)", cpuStr, gpuFromCPU);
             else
                 snprintf(rightSide, sizeof(rightSide), "%s", cpuStr ? cpuStr : "");
 
-            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, bName, maxRight, rightSide);
-
-            if ((i + 1) % 2 == 0 || i + 1 == count)
+            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, bName, (i + 1) % numCols == 0 || i + 1 == count ? 0 : maxRight, rightSide);
+            if ((i + 1) % numCols == 0 || i + 1 == count)
                 printf("\n");
+            else
+                printf("  ");
         }
         else
         {

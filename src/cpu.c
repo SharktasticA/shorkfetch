@@ -1190,20 +1190,26 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->name = strdup("Intel Atom Z34xx (Edison)");
                 }
             }
-            // Skylake
-            else if (cpu->model == 94)
+
+            // There are some examples of Intel Core processors with generic
+            // names (likely from hosting/virtualisation platforms) that we
+            // want to tidy up a bit. This can happen to several micro-
+            // architectures...
+            if (strstr(cpu->name, "Core Processor ("))
             {
-                // There are some examples of Skylake-based Intel Cores with a
-                // generic name, so we will tidy it up a bit
-                if (cpu->stepping == 3 && strstr(cpu->name, "Processor (Skylake, IBRS)"))
+                char *uarch = NULL;
+                // Broadwell
+                if (cpu->model == 61)
+                    uarch = "Broadwell";
+                // Skylake
+                else if (cpu->model == 94)
+                    uarch = "Skylake";
+
+                if (uarch)
                 {
-                    char *tmp = findReplace(cpu->name, NAME_LEN, "Processor (Skylake, IBRS)", "(Skylake)");
-                    if (tmp)
-                    {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
-                    }
+                    char *needle = strstr(cpu->name, " Processor");
+                    if (needle)
+                        snprintf(needle, NAME_LEN - (needle - cpu->name), " (%s)", uarch);
                 }
             }
         }
