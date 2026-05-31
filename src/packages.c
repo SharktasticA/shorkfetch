@@ -106,6 +106,7 @@ char *getPackages(const char *os)
         {
             DIR *flatpakDir = opendir(flatpakDirs[i]);
             if (!flatpakDir) continue;
+            size_t currFlatpakDirLen = strlen(flatpakDirs[i]);
 
             // Enter arch
             struct dirent *nameEntry;
@@ -114,7 +115,9 @@ char *getPackages(const char *os)
                 if (nameEntry->d_name[0] == '.') continue;
 
                 char archPath[PATH_MAX];
-                snprintf(archPath, PATH_MAX, "%s/%s", flatpakDirs[i], nameEntry->d_name);
+                int archPathLen = snprintf(archPath, PATH_MAX, "%s/%s", flatpakDirs[i], nameEntry->d_name);
+                if (archPathLen < 0 || archPathLen >= PATH_MAX - currFlatpakDirLen)
+                    continue;
                 DIR *archDir = opendir(archPath);
                 if (!archDir) continue;
 
@@ -125,7 +128,9 @@ char *getPackages(const char *os)
                     if (archEntry->d_name[0] == '.') continue;
 
                     char branchPath[PATH_MAX];
-                    snprintf(branchPath, PATH_MAX, "%s/%s", archPath, archEntry->d_name);
+                    int branchPathLen = snprintf(branchPath, PATH_MAX, "%s/%s", archPath, archEntry->d_name);
+                    if (branchPathLen < 0 || branchPathLen >= PATH_MAX - archPathLen)
+                        continue;
                     DIR *branchDir = opendir(branchPath);
                     if (!branchDir) continue;
 
@@ -136,8 +141,11 @@ char *getPackages(const char *os)
                         if (branchEntry->d_name[0] == '.') continue;
 
                         char activePath[PATH_MAX];
-                        snprintf(activePath, PATH_MAX, "%s/%s/active", branchPath, branchEntry->d_name);
-                        if (access(activePath, F_OK) != 0) continue;
+                        int activePathLen = snprintf(activePath, PATH_MAX, "%s/%s/active", branchPath, branchEntry->d_name);
+                        if (activePathLen < 0 || activePathLen >= PATH_MAX - branchPathLen)
+                            continue;
+                        if (access(activePath, F_OK) != 0)
+                            continue;
 
                         // flatpak list seems to skip .Locale, so we do so to
                         // match its output
