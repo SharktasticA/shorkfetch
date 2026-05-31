@@ -1253,8 +1253,8 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'A')
             {
-                // SledgeHammer (5), Athens/Troy (37), San Diego (39)
-                if ((cpu->model == 5 || cpu->model == 37 || cpu->model == 39))
+                // SledgeHammer (5), Athens/Troy (37),  San Diego (39)
+                if (cpu->model == 5 || cpu->model == 37 || cpu->model == 39)
                 {
                     // Some entire models of K8-based Opterons were always
                     // single core, so if the processor index is higher, we are
@@ -1269,9 +1269,9 @@ char *interpretCPU(CPU_DATA *cpu)
             }
             else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
-                // Early Pentium 4s generally don't have a model number, and the
-                // later ones that do don't report it, so we will distinguish them
-                // via their microarchitecture name
+                // Early Pentium 4s generally don't have a model number, and
+                // the later ones that do don't report it, so we will
+                // distinguish them via their microarchitecture name
                 if (strstr(cpu->name, "4 CPU"))
                 {
                     char *tmp = NULL;
@@ -1286,7 +1286,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     else if (cpu->model == 3 || cpu->model == 4)
                         tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Prescott)");
                     // Cedar Mill
-                    // See: Pentium 4 631 (5), Pentium 4 641 (2), Pentium 4 651 (4)
+                    // See: Pentium 4 631 (5), Pentium 4 641 (2), Pentium 4 651
+                    //      (4)
                     else if (cpu->model == 6)
                         tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Cedar Mill)");
 
@@ -1306,7 +1307,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     if (cpu->model == 4)
                         tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Smithfield)");
                     // Presler
-                    // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960 (4)
+                    // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960
+                    //      (4)
                     else if (cpu->model == 6)
                         tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Presler)");
 
