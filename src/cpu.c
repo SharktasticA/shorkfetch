@@ -668,29 +668,40 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         // If the model name has GPU name in it, we will extract it and save if
         // for later in case we need it as a fallback when GPU detection fails
         // or produces no results
-        const char *gpuNeedles[] = { "with Radeon", "w/ Radeon", "with GeForce", "w/ GeForce" };
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < GPU_FROM_CPU_NEEDLES_LEN; i++)
         {
-            char *found = strstr(result->name, gpuNeedles[i]);
+            char *found = strstr(result->name, GPU_FROM_CPU_NEEDLES[i]);
             if (found)
             {
                 // Save it for later
                 *gpuFromCPU = malloc(GPU_NAME_LEN);
                 if (*gpuFromCPU)
                 {
-                    const char *gpuVendor = (i < 2) ? "AMD" : "NVIDIA";
-                    snprintf(*gpuFromCPU, GPU_NAME_LEN, "%s %s", gpuVendor, found + (strchr(gpuNeedles[i], ' ') - gpuNeedles[i]) + 1);
+                    const char *gpuVendor = "AMD";
+                    snprintf(*gpuFromCPU, GPU_NAME_LEN, "%s %s", gpuVendor, found + (strchr(GPU_FROM_CPU_NEEDLES[i], ' ') - GPU_FROM_CPU_NEEDLES[i]) + 1);
 
-                    char *tmp = cleanGPUName(gpuVendor, *gpuFromCPU, 1);
-                    strncpy(*gpuFromCPU, tmp, GPU_NAME_LEN - 1);
-                    (*gpuFromCPU)[GPU_NAME_LEN - 1] = '\0';
-                    free(tmp);
+                    // Discard comma and after if present
+                    // See: AMD A4-9120e
+                    char *commaNeedle = strchr(*gpuFromCPU, ',');
+                    if (commaNeedle)
+                        *commaNeedle = '\0';
 
                     // Remove trailing " Graphics" if present
                     size_t gpuLen = strlen(*gpuFromCPU);
                     size_t suffixLen = strlen(" Graphics");
                     if (gpuLen > suffixLen && strcmp(*gpuFromCPU + gpuLen - suffixLen, " Graphics") == 0)
                         (*gpuFromCPU)[gpuLen - suffixLen] = '\0';
+
+                    // Replace "RADEON" -> "Radeon"
+                    // See: AMD A4-9120e
+                    char *capsRadeonNeedle = strstr(*gpuFromCPU, "RADEON");
+                    if (capsRadeonNeedle)
+                        memcpy(capsRadeonNeedle, "Radeon", 6);
+
+                    char *tmp = cleanGPUName(gpuVendor, *gpuFromCPU, 1);
+                    strncpy(*gpuFromCPU, tmp, GPU_NAME_LEN - 1);
+                    (*gpuFromCPU)[GPU_NAME_LEN - 1] = '\0';
+                    free(tmp);
                 }
 
                 // Remove it from model name

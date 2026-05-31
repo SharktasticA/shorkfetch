@@ -92,6 +92,15 @@ static const char *ARM_IMPLEMENTERS[193] = {
     [0xC0] = "Ampere"
 };
 
+// Hardcoded search needles to use when looking for a GPU name inside a CPU
+// name
+static const char *GPU_FROM_CPU_NEEDLES[] = {
+    "with Radeon",
+    "w/ Radeon",
+    " RADEON",
+};
+static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) / sizeof(GPU_FROM_CPU_NEEDLES[0]);
+
 
 
 char *cleanCPUName(const char *, size_t);
