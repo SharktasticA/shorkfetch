@@ -1054,7 +1054,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
             }
             // Nehalem (Bloomfield (26), Clarksfield/Lynnfield (30))
-            // & Westmere (Arrandale (37), Gulftown (44))
+            // & Westmere (Arrandale/Clarkdale (37), Gulftown (44))
             else if (cpu->model == 26 || cpu->model == 30 || cpu->model == 37 || cpu->model == 44)
             {
                 // If present at all, Nehalem/Westmere has what should be the
@@ -1063,7 +1063,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 // See: Core i3-380UM, Core i5-540M, Core i5-750, Core i7-640LM
                 //      Core i7-740QM, Core i7-860S, Core i7-920XM, Core i7-980
                 //      Core i7-990X
-                if (cpu->stepping == 2 || cpu->stepping == 5)
+                if ((cpu->stepping == 2 || cpu->stepping == 5) && strstr(cpu->name, "Core"))
                 {
                     const char *suffix = NULL;
                     if (strstr(cpu->name, "       M"))
