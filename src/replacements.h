@@ -38,12 +38,13 @@ static const struct Replacement AMD_REPLACES[] = {
     { "K6 3D",                  "K6-2",             0 },
     { "K6-III ",                "K6-2+/K6-III+",    1 },
     { "AMD-",                   "AMD ",             0 },
-    { " Dual Core",             "",                 0 },    // For AMD Athlon
-    { " Quad Core",             "",                 0 },    // See AMD Athlon X4 760K
-    { " Quad-Core",             "",                 0 },    // See AMD FX-4300
-    { " Six-Core",              "",                 0 },    // See AMD FX-6300
-    { " Eight-Core",            "",                 0 },    // See AMD FX-8320
-    { "RYZEN AI MAX",           "Ryzen AI Max",     0 }     // See AMD Ryzen AI Max+ 395
+    { "Dual Core ",             "",                 0 },    // See Athlon 64 X2 4800+
+    { "Dual-Core ",             "",                 0 },    // See Opteron 1216
+    { "Quad Core ",             "",                 0 },    // See Athlon X4 760K
+    { "Quad-Core ",             "",                 0 },    // See FX-4300, Opteron 2350 HE
+    { "Six-Core ",              "",                 0 },    // See FX-6300
+    { "Eight-Core ",            "",                 0 },    // See FX-8320
+    { "RYZEN AI MAX",           "Ryzen AI Max",     0 }     // See Ryzen AI Max+ 395
 };
 static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0]);
 
@@ -142,7 +143,7 @@ static const struct Replacement INTEL_REPLACES[] = {
     { "Pentium 4 - M",          "Pentium 4-M",          0 },
     { "Core2",                  "Core 2",               0 },
     { "Generation Core",        "Gen Core",             0 },
-    { " Dual-Core",             "",                     0 }     // See Intel Pentium E5300
+    { " Dual-Core",             "",                     0 }     // See Pentium E5300
 };
 static const int INTEL_REPLACES_LEN = sizeof(INTEL_REPLACES) / sizeof(INTEL_REPLACES[0]);
 
