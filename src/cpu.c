@@ -1053,11 +1053,12 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
             }
-            // Clarksfield
+            // Clarksfield/Lynnfield
             else if (cpu->model == 30)
             {
-                // Clarksfield has what should be the suffix as the prefix
-                // *and* lacks the "M" to denote these are mobile chips
+                // If present at all, Nehalem has what should be the suffix as
+                // the prefix *and* Clarksfield specifically lacks the "M" to
+                // denote those are mobile chips
                 // See: Core i7-740QM, Core i7-920XM
                 if (cpu->stepping == 5)
                 {
@@ -1066,6 +1067,10 @@ char *interpretCPU(CPU_DATA *cpu)
                         suffix = "QM";
                     else if (strstr(cpu->name, "       X"))
                         suffix = "XM";
+                    else if (strstr(cpu->name, "       S"))
+                        suffix = "S";
+                    else if (strstr(cpu->name, "       K"))
+                        suffix = "K";
 
                     if (suffix)
                     {
@@ -1088,6 +1093,18 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *p = needle - 1;
                             while (p > cpu->name && *p == ' ') p--;
                             strcpy(p + 1, suffix);
+                        }
+                    }
+                    // If no suffix was found/chosen, we still need to close
+                    // the gap between "iX" and the model number...
+                    else if (strstr(cpu->name, ") i") && strstr(cpu->name, " CPU         "))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, " CPU         ", "-");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN - 1] = '\0';
+                            free(tmp);
                         }
                     }
                 }
