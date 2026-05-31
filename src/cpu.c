@@ -1054,19 +1054,21 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
             }
             // Nehalem (Bloomfield (26), Clarksfield/Lynnfield (30))
-            else if (cpu->model == 26 || cpu->model == 30)
+            // & Westmere (Gulftown (44))
+            else if (cpu->model == 26 || cpu->model == 30 || cpu->model == 44)
             {
-                // If present at all, Nehalem has what should be the suffix as
-                // the prefix *and* Clarksfield specifically lacks the "M" to
-                // denote those are mobile chips
-                // See: Core i5-750, Core i7-740QM, Core i7-860S, Core i7-920XM
-                if (cpu->stepping == 5)
+                // If present at all, Nehalem/Westmere has what should be the
+                // suffix as the prefix *and* Clarksfield specifically lacks
+                // the "M" to denote those are mobile chips
+                // See: Core i5-750, Core i7-740QM, Core i7-860S,
+                //      Core i7-920XM, Core i7-980, Core i7-990X
+                if (cpu->stepping == 2 || cpu->stepping == 5)
                 {
                     const char *suffix = NULL;
                     if (strstr(cpu->name, "       Q"))
                         suffix = "QM";
                     else if (strstr(cpu->name, "       X"))
-                        suffix = "XM";
+                        suffix = (cpu->model == 30) ? "XM" : (cpu->model == 44) ? "X" : suffix;
                     else if (strstr(cpu->name, "       S"))
                         suffix = "S";
                     else if (strstr(cpu->name, "       K"))
