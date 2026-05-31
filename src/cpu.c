@@ -1248,10 +1248,26 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->name = strdup("Intel Xeon Phi");
             }
         }
-        // NetBurst
+        // NetBurst & K8
         else if (cpu->family == 15)
         {
-            if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
+            if (cpu->vendor[0] == 'A')
+            {
+                // SledgeHammer (5), Athens/Troy (37), San Diego (39)
+                if ((cpu->model == 5 || cpu->model == 37 || cpu->model == 39))
+                {
+                    // Some entire models of K8-based Opterons were always
+                    // single core, so if the processor index is higher, we are
+                    // definitely dealing with a multi-CPU config and should
+                    // set the core/thread count to 1 to correctly flag for
+                    // later
+                    // See: Opteron 148 (E4), Opteron 246 (CG), Opteron 246
+                    //      (E4), Opteron 848 (E4)
+                    if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
+                        cpu->cores = cpu->threads = 1;
+                }
+            }
+            else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
                 // Early Pentium 4s generally don't have a model number, and the
                 // later ones that do don't report it, so we will distinguish them
