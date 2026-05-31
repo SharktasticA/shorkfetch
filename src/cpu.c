@@ -811,14 +811,14 @@ char *interpretCPU(CPU_DATA *cpu)
                 if (cpu->model == 6)
                 {
                     char tmp[NAME_LEN];
-                    snprintf(tmp, NAME_LEN, "AMD K6 Model 6");
+                    snprintf(tmp, NAME_LEN, "AMD K6 (Model 6)");
                     strncpy(cpu->name, tmp, NAME_LEN-1);
                     cpu->name[NAME_LEN-1] = '\0';
                 }
                 else if (cpu->model == 7)
                 {
                     char tmp[NAME_LEN];
-                    snprintf(tmp, NAME_LEN, "AMD K6 Model 7");
+                    snprintf(tmp, NAME_LEN, "AMD K6 (Model 7)");
                     strncpy(cpu->name, tmp, NAME_LEN-1);
                     cpu->name[NAME_LEN-1] = '\0';
                 }
@@ -887,118 +887,87 @@ char *interpretCPU(CPU_DATA *cpu)
         // Pentium/P6 and descendants
         else if (cpu->family == 6)
         {
-            // Deschutes & Covington
-            if (cpu->model == 5)
+            if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
-                // Pentium II (Deschutes) and the Deschutes-based Pentium II Xeon
-                // and Celeron (Covington) have basically the same CPU ID, but we
-                // can tell *some* apart from the cache size. For sure: 32KB =
-                // Celeron; 512KB = Pentium II; 1024/2048KB = Pentium II Xeon. The
-                // 512KB Xeon cannot presently be distinguished, though...
-                if (cpu->cacheSize == 32)
+                // Deschutes & Covington
+                if (cpu->model == 5)
                 {
-                    char tmp[NAME_LEN];
-                    snprintf(tmp, NAME_LEN, "Intel Celeron (Covington)");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
-                }
-                else if (cpu->cacheSize == 512)
-                {
-                    // Don't need to do anything, yet... At some point, we will try
-                    // to distinguish standard II and II Xeon at this cache amount
-                }
-                else if (cpu->cacheSize >= 1024)
-                {
-                    char tmp[NAME_LEN];
-                    snprintf(tmp, NAME_LEN, "Intel Pentium II Xeon");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
-                }
-            }
-            // Banias
-            else if (cpu->model == 9)
-            {
-                // Both generations of Pentium M and related Celeron M do not
-                // distinguish themselves in their model names nor model numbers,
-                // so we add "(Banias)" to the first gen's name to distinguish it
-                // from second-gen Dothan
-                if (strstr(cpu->name, "(R) M p"))
-                {
-                    char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Banias)");
-                    if (tmp)
+                    // Pentium II (Deschutes) and the Deschutes-based Pentium II Xeon
+                    // and Celeron (Covington) have basically the same CPU ID, but we
+                    // can tell *some* apart from the cache size. For sure: 32KB =
+                    // Celeron; 512KB = Pentium II; 1024/2048KB = Pentium II Xeon. The
+                    // 512KB Xeon cannot presently be distinguished, though...
+                    if (cpu->cacheSize == 32)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        char tmp[NAME_LEN];
+                        snprintf(tmp, NAME_LEN, "Intel Celeron (Covington)");
+                        strncpy(cpu->name, tmp, NAME_LEN-1);
                         cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                    }
+                    else if (cpu->cacheSize == 512)
+                    {
+                        // Don't need to do anything, yet... At some point, we will try
+                        // to distinguish standard II and II Xeon at this cache amount
+                    }
+                    else if (cpu->cacheSize >= 1024)
+                    {
+                        char tmp[NAME_LEN];
+                        snprintf(tmp, NAME_LEN, "Intel Pentium II Xeon");
+                        strncpy(cpu->name, tmp, NAME_LEN-1);
+                        cpu->name[NAME_LEN-1] = '\0';
                     }
                 }
-            }
-            // Dothan
-            else if (cpu->model == 13)
-            {
-                // Both generations of Pentium M and related Celeron M do not
-                // distinguish themselves in their model names nor model numbers,
-                // so we add "(Dothan)" to the second gen's name to distinguish it
-                // from first-gen Banias
-                if (strstr(cpu->name, "(R) M p"))
+                // Banias
+                else if (cpu->model == 9)
                 {
-                    char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Dothan)");
-                    if (tmp)
+                    // Both generations of Pentium M and related Celeron M do not
+                    // distinguish themselves in their model names nor model numbers,
+                    // so we add "(Banias)" to the first gen's name to distinguish it
+                    // from second-gen Dothan
+                    if (strstr(cpu->name, "(R) M p"))
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Banias)");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
                     }
                 }
-            }
-            // Yonah
-            else if (cpu->model == 14)
-            {
-                // Core (Yonah) may not have "Core" in their name, so we will
-                // try to add it and a "Solo" or "Duo" suffix depending on the
-                // core count
-                // See: Core Solo T1300, Core Duo T2300
-                if (cpu->stepping == 8 && strstr(cpu->name, "Intel(R) CPU"))
+                // Dothan
+                else if (cpu->model == 13)
                 {
-                    char *tmp = NULL;
-                    if (cpu->cores == 1 || cpu->index == 1)
-                        tmp = findReplace(cpu->name, NAME_LEN, "CPU           ", "Core Solo ");
-                    else if (cpu->cores == 2 || cpu->index == 2)
-                        tmp = findReplace(cpu->name, NAME_LEN, "CPU           ", "Core Duo ");
+                    // Both generations of Pentium M and related Celeron M do not
+                    // distinguish themselves in their model names nor model numbers,
+                    // so we add "(Dothan)" to the second gen's name to distinguish it
+                    // from first-gen Banias
+                    if (strstr(cpu->name, "(R) M p"))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Dothan)");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                }
+                // Yonah
+                else if (cpu->model == 14)
+                {
+                    // Core (Yonah) may not have "Core" in their name, so we will
+                    // try to add it and a "Solo" or "Duo" suffix depending on the
+                    // core count
+                    // See: Core Solo T1300, Core Duo T2300
+                    if (cpu->stepping == 8 && strstr(cpu->name, "Intel(R) CPU"))
+                    {
+                        char *tmp = NULL;
+                        if (cpu->cores == 1 || cpu->index == 1)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU           ", "Core Solo ");
+                        else if (cpu->cores == 2 || cpu->index == 2)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU           ", "Core Duo ");
 
-                    if (tmp)
-                    {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
-                    }
-                }
-                // Some Yonah-based Celeron Ms only report as simply "Celeron",
-                // so we will add the "M" in if so
-                // See: Celeron M 215
-                else if (cpu->stepping == 8 && strstr(cpu->name, "Celeron(R) CPU"))
-                {
-                    char *tmp = findReplace(cpu->name, NAME_LEN, "Celeron(R) CPU", "Celeron M");
-                    if (tmp)
-                    {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
-                    }
-                }
-            }
-            // Merom
-            else if (cpu->model == 15)
-            {
-                // Core 2 Duo
-                if (cpu->cores == 2 || cpu->index == 2)
-                {
-                    // Some Merom-based Pentium Dual-Cores have a rogue "Dual" in
-                    // their name
-                    // See: Pentium T3200
-                    if (strstr(cpu->name, "Dual  CPU"))
-                    {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, "Dual  CPU", " ");
                         if (tmp)
                         {
                             strncpy(cpu->name, tmp, NAME_LEN - 1);
@@ -1006,12 +975,12 @@ char *interpretCPU(CPU_DATA *cpu)
                             free(tmp);
                         }
                     }
-                    // Mobile Core 2 Duo (Merom) may not have "Duo" in their name,
-                    // so we will try to add it in
-                    // See: Core 2 Duo T7400
-                    else if (strstr(cpu->name, "2 CPU"))
+                    // Some Yonah-based Celeron Ms only report as simply "Celeron",
+                    // so we will add the "M" in if so
+                    // See: Celeron M 215
+                    else if (cpu->stepping == 8 && strstr(cpu->name, "Celeron(R) CPU"))
                     {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, "CPU         ", "Duo ");
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "Celeron(R) CPU", "Celeron M");
                         if (tmp)
                         {
                             strncpy(cpu->name, tmp, NAME_LEN - 1);
@@ -1020,128 +989,179 @@ char *interpretCPU(CPU_DATA *cpu)
                         }
                     }
                 }
-            }
-            // Penryn
-            else if (cpu->model == 23)
-            {
-                if (cpu->stepping == 10)
+                // Merom
+                else if (cpu->model == 15)
                 {
-                    // ULV Pentium Dual-Core Mobile lacks both the "Pentium"
-                    // branding and the "S" in their model number
-                    // See: Pentium SU2700, Pentium SU4100
-                    if (strstr(cpu->name, "Intel(R) CPU           U"))
+                    // Core 2 Duo
+                    if (cpu->cores == 2 || cpu->index == 2)
                     {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, "(R) CPU           ", " Pentium S");
-                        if (tmp)
+                        // Some Merom-based Pentium Dual-Cores have a rogue "Dual" in
+                        // their name
+                        // See: Pentium T3200
+                        if (strstr(cpu->name, "Dual  CPU"))
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            char *tmp = findReplace(cpu->name, NAME_LEN, "Dual  CPU", " ");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN-1] = '\0';
+                                free(tmp);
+                            }
                         }
-                    }
-                    // LV Core 2 Duo lacks the "S" in their model number
-                    // See: Core 2 Duo SL9600
-                    else if (strstr(cpu->name, "Duo CPU     L"))
-                    {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, "CPU     ", "S");
-                        if (tmp)
+                        // Mobile Core 2 Duo (Merom) may not have "Duo" in their name,
+                        // so we will try to add it in
+                        // See: Core 2 Duo T7400
+                        else if (strstr(cpu->name, "2 CPU"))
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            char *tmp = findReplace(cpu->name, NAME_LEN, "CPU         ", "Duo ");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN-1] = '\0';
+                                free(tmp);
+                            }
                         }
                     }
                 }
-            }
-            // Nehalem (Bloomfield (26), Clarksfield/Lynnfield (30))
-            // & Westmere (Arrandale/Clarkdale (37), Gulftown (44))
-            else if (cpu->model == 26 || cpu->model == 30 || cpu->model == 37 || cpu->model == 44)
-            {
-                // If present at all, Nehalem/Westmere has what should be the
-                // suffix as the prefix *and* Clarksfield specifically lacks
-                // the "M" to denote those are mobile chips
-                // See: Core i3-380UM, Core i5-540M, Core i5-750, Core i7-640LM
-                //      Core i7-740QM, Core i7-860S, Core i7-920XM, Core i7-980
-                //      Core i7-990X
-                if ((cpu->stepping == 2 || cpu->stepping == 5) && strstr(cpu->name, "Core"))
+                // Penryn
+                else if (cpu->model == 23)
                 {
-                    const char *suffix = NULL;
-                    if (strstr(cpu->name, "       M"))
-                        suffix = "M";
-                    else if (strstr(cpu->name, "       Q"))
-                        suffix = "QM";
-                    else if (strstr(cpu->name, "       X"))
-                        suffix = (cpu->model == 30) ? "XM" : (cpu->model == 44) ? "X" : suffix;
-                    else if (strstr(cpu->name, "       S"))
-                        suffix = "S";
-                    else if (strstr(cpu->name, "       K"))
-                        suffix = "K";
-                    else if (strstr(cpu->name, "       L"))
-                        suffix = "LM";
-                    else if (strstr(cpu->name, "       U"))
-                        suffix = "UM";
+                    if (cpu->stepping == 10)
+                    {
+                        // ULV Pentium Dual-Core Mobile lacks both the "Pentium"
+                        // branding and the "S" in their model number
+                        // See: Pentium SU2700, Pentium SU4100
+                        if (strstr(cpu->name, "Intel(R) CPU           U"))
+                        {
+                            char *tmp = findReplace(cpu->name, NAME_LEN, "(R) CPU           ", " Pentium S");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN-1] = '\0';
+                                free(tmp);
+                            }
+                        }
+                        // LV Core 2 Duo lacks the "S" in their model number
+                        // See: Core 2 Duo SL9600
+                        else if (strstr(cpu->name, "Duo CPU     L"))
+                        {
+                            char *tmp = findReplace(cpu->name, NAME_LEN, "CPU     ", "S");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN-1] = '\0';
+                                free(tmp);
+                            }
+                        }
+                    }
+                }
+                // Nehalem (Bloomfield (26), Clarksfield/Lynnfield (30))
+                // & Westmere (Arrandale/Clarkdale (37), Gulftown (44))
+                else if (cpu->model == 26 || cpu->model == 30 || cpu->model == 37 || cpu->model == 44)
+                {
+                    // If present at all, Nehalem/Westmere has what should be the
+                    // suffix as the prefix *and* Clarksfield specifically lacks
+                    // the "M" to denote those are mobile chips
+                    // See: Core i3-380UM, Core i5-540M, Core i5-750, Core i7-640LM
+                    //      Core i7-740QM, Core i7-860S, Core i7-920XM, Core i7-980
+                    //      Core i7-990X
+                    if ((cpu->stepping == 2 || cpu->stepping == 5) && strstr(cpu->name, "Core"))
+                    {
+                        const char *suffix = NULL;
+                        if (strstr(cpu->name, "       M"))
+                            suffix = "M";
+                        else if (strstr(cpu->name, "       Q"))
+                            suffix = "QM";
+                        else if (strstr(cpu->name, "       X"))
+                            suffix = (cpu->model == 30) ? "XM" : (cpu->model == 44) ? "X" : suffix;
+                        else if (strstr(cpu->name, "       S"))
+                            suffix = "S";
+                        else if (strstr(cpu->name, "       K"))
+                            suffix = "K";
+                        else if (strstr(cpu->name, "       L"))
+                            suffix = "LM";
+                        else if (strstr(cpu->name, "       U"))
+                            suffix = "UM";
 
-                    if (suffix)
-                    {
-                        // Remove the incorrect prefix
-                        char search[32];
-                        snprintf(search, 32, " CPU       %c ", suffix[0]);
-                        char *tmp = findReplace(cpu->name, NAME_LEN, search, "-");
-                        if (tmp)
+                        if (suffix)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN - 1] = '\0';
-                            free(tmp);
-                        }
+                            // Remove the incorrect prefix
+                            char search[32];
+                            snprintf(search, 32, " CPU       %c ", suffix[0]);
+                            char *tmp = findReplace(cpu->name, NAME_LEN, search, "-");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN - 1] = '\0';
+                                free(tmp);
+                            }
 
-                        // Add the correct suffix and discard the clock speed
-                        // whilst we're at it
-                        char *needle = strchr(cpu->name, '@');
+                            // Add the correct suffix and discard the clock speed
+                            // whilst we're at it
+                            char *needle = strchr(cpu->name, '@');
+                            if (needle)
+                            {
+                                char *p = needle - 1;
+                                while (p > cpu->name && *p == ' ') p--;
+                                strcpy(p + 1, suffix);
+                            }
+                        }
+                        // If no suffix was found/chosen, we still need to close
+                        // the gap between "iX" and the model number...
+                        else if (strstr(cpu->name, ") i") && strstr(cpu->name, " CPU         "))
+                        {
+                            char *tmp = findReplace(cpu->name, NAME_LEN, " CPU         ", "-");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN - 1] = '\0';
+                                free(tmp);
+                            }
+                        }
+                    }
+
+                    // Bloomfield Core i7 Extremes do not call themselves "Extreme"
+                    // See: Core i7-965 Extreme Edition (etc.)
+                    if (cpu->model == 26 && (strstr(cpu->name, "965") || strstr(cpu->name, "975")))
+                    {
+                        char *needle = strrchr(cpu->name, '@');
                         if (needle)
                         {
                             char *p = needle - 1;
                             while (p > cpu->name && *p == ' ') p--;
-                            strcpy(p + 1, suffix);
+                            strcpy(p + 1, " Extreme");
                         }
                     }
-                    // If no suffix was found/chosen, we still need to close
-                    // the gap between "iX" and the model number...
-                    else if (strstr(cpu->name, ") i") && strstr(cpu->name, " CPU         "))
+                }
+                // Sandy Bridge
+                else if (cpu->model == 42)
+                {
+                    if (cpu->stepping == 7)
                     {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, " CPU         ", "-");
-                        if (tmp)
+                        // Sandy Bridge-based Xeon E3s may lack a "-" separating
+                        // the "E3" prefix and the rest of the model number
+                        // See: Xeon E3-1230, Xeon E3-1275
+                        if (strstr(cpu->name, "E31"))
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN - 1] = '\0';
-                            free(tmp);
+                            char *tmp = findReplace(cpu->name, NAME_LEN, "E31", " E3-1");
+                            if (tmp)
+                            {
+                                strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                cpu->name[NAME_LEN-1] = '\0';
+                                free(tmp);
+                            }
                         }
                     }
                 }
-
-                // Bloomfield Core i7 Extremes do not call themselves "Extreme"
-                // See: Core i7-965 Extreme Edition (etc.)
-                if (cpu->model == 26 && (strstr(cpu->name, "965") || strstr(cpu->name, "975")))
+                // Sandy Bridge-EP
+                else if (cpu->model == 45)
                 {
-                    char *needle = strrchr(cpu->name, '@');
-                    if (needle)
+                    // Some Xeon E5 names may have a rough "0" just after the model
+                    // number
+                    // See: Xeon E5-2690 (the original/v1)
+                    if (strstr(cpu->name, " 0 @"))
                     {
-                        char *p = needle - 1;
-                        while (p > cpu->name && *p == ' ') p--;
-                        strcpy(p + 1, " Extreme");
-                    }
-                }
-            }
-            // Sandy Bridge
-            else if (cpu->model == 42)
-            {
-                if (cpu->stepping == 7)
-                {
-                    // Sandy Bridge-based Xeon E3s may lack a "-" separating
-                    // the "E3" prefix and the rest of the model number
-                    // See: Xeon E3-1230, Xeon E3-1275
-                    if (strstr(cpu->name, "E31"))
-                    {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, "E31", " E3-1");
+                        char *tmp = findReplace(cpu->name, NAME_LEN, " 0 ", " ");
                         if (tmp)
                         {
                             strncpy(cpu->name, tmp, NAME_LEN - 1);
@@ -1150,52 +1170,34 @@ char *interpretCPU(CPU_DATA *cpu)
                         }
                     }
                 }
-            }
-            // Sandy Bridge-EP
-            else if (cpu->model == 45)
-            {
-                // Some Xeon E5 names may have a rough "0" just after the model
-                // number
-                // See: Xeon E5-2690 (the original/v1)
-                if (strstr(cpu->name, " 0 @"))
+                // Ivy Bridge
+                else if (cpu->model == 58)
                 {
-                    char *tmp = findReplace(cpu->name, NAME_LEN, " 0 ", " ");
-                    if (tmp)
+                    // Some Xeon refreshes may have a capital "V" in their version
+                    // discriminator when the marketing names standardise a
+                    // lowercase "v"
+                    // See: Xeon E3-1230 v2
+                    char *vNeedle = strstr(cpu->name, "V");
+                    if (vNeedle) *vNeedle = 'v';
+                }
+                // Silvermont (Merriefield)
+                else if (cpu->model == 74)
+                {
+                    // The 500MHz Intel Atom variant for the Intel Edison has a
+                    // non-descriptive name like "Intel 4000", thus we discard it
+                    // and create a new model name
+                    if (cpu->stepping == 8 && cpu->freq == 500)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        free(cpu->name);
+                        cpu->name = strdup("Intel Atom Z34xx (Edison)");
                     }
                 }
-            }
-            // Ivy Bridge
-            else if (cpu->model == 58)
-            {
-                // Some Xeon refreshes may have a capital "V" in their version
-                // discriminator when the marketing names standardise a
-                // lowercase "v"
-                // See: Xeon E3-1230 v2
-                char *vNeedle = strstr(cpu->name, "V");
-                if (vNeedle) *vNeedle = 'v';
-            }
-            // Silvermont (Merriefield)
-            else if (cpu->model == 74)
-            {
-                // The 500MHz Intel Atom variant for the Intel Edison has a
-                // non-descriptive name like "Intel 4000", thus we discard it
-                // and create a new model name
-                if (cpu->stepping == 8 && cpu->freq == 500)
-                {
-                    free(cpu->name);
-                    cpu->name = strdup("Intel Atom Z34xx (Edison)");
-                }
-            }
 
-            // There are some examples of Intel Core processors with generic
-            // names (likely from hosting/virtualisation platforms) that we
-            // want to tidy up a bit. This can happen to several micro-
-            // architectures...
-            if (strstr(cpu->name, "Core Processor ("))
+                // There are some examples of Intel Core processors with generic
+                // names (likely from hosting/virtualisation platforms) that we
+                // want to tidy up a bit. This can happen to several micro-
+                // architectures...
+                if (strstr(cpu->name, "Core Processor ("))
             {
                 char *uarch = NULL;
                 // Broadwell
@@ -1211,6 +1213,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     if (needle)
                         snprintf(needle, NAME_LEN - (needle - cpu->name), " (%s)", uarch);
                 }
+            }
             }
         }
         // Larrabee
