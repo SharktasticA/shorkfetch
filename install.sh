@@ -3,7 +3,7 @@
 ######################################################
 ##            SHORK UTILITY - SHORKFETCH            ##
 ######################################################
-## shorkfetch install script                        ##
+## SHORKFETCH quick download & install script       ##
 ######################################################
 ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
 ######################################################
