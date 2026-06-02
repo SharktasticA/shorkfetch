@@ -112,6 +112,7 @@ static const char *DELETIONS[] =
     "(tm )",                            // For AMD Duron
     "tm",
     "(TM)",
+    "™",
     " APU",
     " Controller",
     " Corporation",

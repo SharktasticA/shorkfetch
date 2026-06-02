@@ -1253,7 +1253,7 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'A')
             {
-                // SledgeHammer (5), Athens/Troy (37),  San Diego (39)
+                // SledgeHammer (5), Athens/Troy (37), San Diego (39)
                 if (cpu->model == 5 || cpu->model == 37 || cpu->model == 39)
                 {
                     // Some entire models of K8-based Opterons were always
@@ -1265,6 +1265,19 @@ char *interpretCPU(CPU_DATA *cpu)
                     //      (E4), Opteron 848 (E4)
                     if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
                         cpu->cores = cpu->threads = 1;
+                }
+
+                // Early AMD Mobile Semprons may have the "Mobile" part before
+                // "AMD"
+                if (strstr(cpu->name, "Mobile AMD Sempron"))
+                {
+                    char *tmp = findReplace(cpu->name, NAME_LEN, "Mobile AMD Sempron", "AMD Mobile Sempron");
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
                 }
             }
             else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
