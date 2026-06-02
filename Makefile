@@ -4,7 +4,6 @@ RANLIB ?= ranlib
 STRIP ?= strip
 
 CFLAGS += -I.
-LDFLAGS += -static
 
 ifdef TESTS
 	CFLAGS += -DTESTS

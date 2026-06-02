@@ -18,7 +18,7 @@
                     ];
 
                     buildInputs = [
-                        pkgs.glibc.static 
+                        pkgs.glibc 
                     ];
 
                     makeFlags = [ "PREFIX=$(out)" ];

@@ -18,7 +18,7 @@ SHORKFETCH is young, and I would love to hear from you if you have tried SHORKFE
 
 
 
-## Installing
+## Building & installing
 
 ### Arch
 
@@ -36,33 +36,19 @@ SHORKFETCH is available on the [AUR](https://aur.archlinux.org/packages/shorkfet
 
     nix profile install github:SharktasticA/shorkfetch
 
-### Everything else (quick compilation)
+### Everything else
 
-_This assumes you already have the prerequisites for compilation already installed._
+#### Requirements
+
+You will need a C compiler, `make` and libc. SHORKFETCH is often tested with GCC + glibc or musl.
+
+#### Quick/automated install
 
     curl -fsSL https://raw.githubusercontent.com/SharktasticA/shorkfetch/refs/heads/main/install.sh | bash
 
+#### Manual install
 
-
-## Building
-
-### Requirements
-
-You just need a C compiler (tested with GCC with either glibc or musl) and `make` installed.
-
-### Compilation
-
-Simply run `make` to compile SHORKFETCH.
-
-### Installation
-
-Run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install`.
-
-### Possible errors
-
-#### Errors with static building
-
-If you experience errors with building SHORKFETCH statically, you can modify the `Makefile` to comment out or delete the line `LDFLAGS += -static` to build dynamically instead.
+Clone this repository by running `git clone https://github.com/SharktasticA/shorkfetch`, or downloading as a zip file and extracting it. When inside the new directory, run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install` to install it to `/usr/local/bin`.
 
 
 
