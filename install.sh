@@ -16,6 +16,7 @@ set -e
 
 
 
+START_DIR="$(pwd)"
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -36,6 +37,16 @@ fi
 
 
 
+cleanup()
+{
+    echo -e "${YELLOW}Cleaning up...${RESET}"
+    cd "$START_DIR"
+    rm -rf shorkfetch shorkfetch-main main.zip 2>/dev/null || true;
+}
+trap cleanup EXIT
+
+
+
 if git --version >/dev/null 2>&1; then
     echo -e "${YELLOW}Cloning shorkfetch repo...${RESET}"
     git clone https://github.com/SharktasticA/shorkfetch
@@ -43,10 +54,6 @@ if git --version >/dev/null 2>&1; then
 
     echo -e "${YELLOW}Installing shorkfetch (you may be asked for sudo)...${RESET}"
     sudo make install
-
-    echo -e "${YELLOW}Cleaning up...${RESET}"
-    cd ..
-    rm -rf shorkfetch
 else
     echo -e "${YELLOW}Downloading shorkfetch source...${RESET}"
     wget https://github.com/SharktasticA/shorkfetch/archive/refs/heads/main.zip
@@ -57,11 +64,7 @@ else
 
     echo -e "${YELLOW}Installing shorkfetch (you may be asked for sudo)...${RESET}"
     sudo make install
-
-    echo -e "${YELLOW}Cleaning up...${RESET}"
-    cd ..
-    rm -rf shorkfetch-main main.zip
 fi
 
 shorkfetch
-echo -e "${GREEN}All done! :) Run: shorkfetch${RESET}"
+echo -e "${GREEN}Installed! :) Run: shorkfetch${RESET}"
