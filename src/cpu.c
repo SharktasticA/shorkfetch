@@ -664,11 +664,18 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     if (commaNeedle)
                         *commaNeedle = '\0';
 
-                    // Remove trailing " Graphics" if present
-                    size_t gpuLen = strlen(*gpuFromCPU);
-                    size_t suffixLen = strlen(" Graphics");
-                    if (gpuLen > suffixLen && strcmp(*gpuFromCPU + gpuLen - suffixLen, " Graphics") == 0)
-                        (*gpuFromCPU)[gpuLen - suffixLen] = '\0';
+                    // Remove possible trailing suffixes like "Graphics" if
+                    // present
+                    for (int i = 0; i < GPU_FROM_CPU_SUFFIXES_LEN; i++)
+                    {
+                        size_t gpuLen = strlen(*gpuFromCPU);
+                        size_t suffixLen = strlen(GPU_FROM_CPU_SUFFIXES[i]);
+                        if (gpuLen > suffixLen && strcmp(*gpuFromCPU + gpuLen - suffixLen, GPU_FROM_CPU_SUFFIXES[i]) == 0)
+                        {
+                            (*gpuFromCPU)[gpuLen - suffixLen] = '\0';
+                            break;
+                        }
+                    }
 
                     // Replace "RADEON" -> "Radeon"
                     // See: AMD A4-9120e

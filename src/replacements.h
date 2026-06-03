@@ -132,6 +132,15 @@ static const int DELETIONS_LEN = sizeof(DELETIONS) / sizeof(DELETIONS[0]);
 
 
 
+static const char *GPU_FROM_CPU_SUFFIXES[] =
+{
+    " Graphics",
+    " Gfx"
+};
+static const int GPU_FROM_CPU_SUFFIXES_LEN = sizeof(GPU_FROM_CPU_SUFFIXES) / sizeof(GPU_FROM_CPU_SUFFIXES[0]);
+
+
+
 static const struct Replacement INTEL_REPLACES[] = {
     { " 486 SX",                " i486SX",              0 },
     { "486SX/2",                "486SX2",               0 },
