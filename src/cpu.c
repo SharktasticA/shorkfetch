@@ -326,8 +326,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         .cores = -1,
         .threads = -1,
         .cacheSize = -1,
-        .hasFPU = -1,
-        .hasHT = -1
+        .flags[0] = '\0'
     };
 
 
@@ -617,35 +616,14 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
-            // x86: get whether an FPU is present
-            else if (result->hasFPU == -1 && strncmp(buffer, "fpu", 3) == 0)
-            {
-                char *extract = extractFromPoint(buffer, 4, ':', 2);
-                if (extract)
-                {
-                    if (result->arch == UNKNOWN)
-                        result->arch = X86;
-
-                    if (strncmp(extract, "yes", 3) == 0)
-                        result->hasFPU = 1;
-                    else if (strncmp(extract, "no", 2) == 0)
-                        result->hasFPU = 0;
-                    free(extract);
-                }
-            }
-            // x86: get whether Hyper-Threading is present
-            else if (result->hasHT == -1 && strncmp(buffer, "flags", 5) == 0)
+            // x86: get CPU flags
+            else if (result->flags[0] == '\0' && strncmp(buffer, "flags", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':', 2);
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
-                        result->arch = X86;
-
-                    if (strstr(extract, " ht ") != NULL)
-                        result->hasHT = 1;
-                    else 
-                        result->hasHT = 0;
+                    strncpy(result->flags, extract, FLAGS_LEN - 1);
+                    result->flags[FLAGS_LEN - 1] = '\0';
                     free(extract);
                 }
             }
@@ -721,6 +699,39 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 }
 
 /**
+ * Checks if the given CPU flag is present in the captured data.
+ * @param cpu Initialised CPU_DATA struct containing the flags string to search
+ * @param flag The flag to find ("ht", "pae", etc.)
+ * @return 1 if flag found; 0 if not found or no data
+ */
+int hasFlag(const CPU_DATA *cpu, const char *flag)
+{
+    // No flags were found, so let's exit...
+    if (cpu->flags[0] == '\0')
+        return 0;
+
+    const char *needle = cpu->flags;
+    size_t flagLen = strlen(flag);
+
+    while ((needle = strstr(needle, flag)))
+    {
+        // Unless we're at the end of the flags string, we want to search for
+        // the flag with spaces surrounding it so we don't match "sse2" when we
+        // want "sse" (etc.). If we're at the start of the flags string, we add
+        // a "fake" space so the boundary check doesn't read before the buffer
+        char before = (needle == cpu->flags) ? ' ' : *(needle - 1);
+        char after  = *(needle + flagLen);
+
+        if (before == ' ' && (after == ' ' || after == '\0' || after == '\n'))
+            return 1;
+
+        needle += flagLen;
+    }
+
+    return 0;
+}
+
+/**
  * Builds a complete CPU string from given CPU data. It also applies various
  * corrections to handle quirks and edgecases, and tries to differentiate
  * processors with similar data.
@@ -780,7 +791,7 @@ char *interpretCPU(CPU_DATA *cpu)
             {
                 // If we have a Cx486Dxxx with FPU, make sure 387 is included in
                 // the model name
-                if ((strstr(cpu->name, "Cx486DLC") || strstr(cpu->name, "Cx486DRx2")) && cpu->hasFPU)
+                if ((strstr(cpu->name, "Cx486DLC") || strstr(cpu->name, "Cx486DRx2")) && hasFlag(cpu, "fpu"))
                 {
                     char tmp[NAME_LEN];
                     snprintf(tmp, NAME_LEN, "%s + 387", cpu->name);
@@ -789,7 +800,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
                 // If we have a Cx486S with FPU, make sure 487 is included in the
                 // model name
-                else if (strstr(cpu->name, "Cx486S") && cpu->hasFPU)
+                else if (strstr(cpu->name, "Cx486S") && hasFlag(cpu, "fpu"))
                 {
                     char tmp[NAME_LEN];
                     snprintf(tmp, NAME_LEN, "%s + 487", cpu->name);
@@ -805,7 +816,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 // presence of an FPU
                 if (cpu->model == 0 && (cpu->vendor[0] == '\0' || cpu->vendor[0] == 'u') && cpu->name[0] != '\0' && strcmp(cpu->name, "486") == 0)
                 {
-                    if (cpu->hasFPU)
+                    if (hasFlag(cpu, "fpu"))
                         snprintf(cpu->name, NAME_LEN, "486DX/487SX/486SX + 387");
                     else
                         snprintf(cpu->name, NAME_LEN, "486SX");

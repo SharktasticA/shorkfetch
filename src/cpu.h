@@ -19,10 +19,11 @@
 
 
 
-#define CPUINFO_BUFFER_LEN  1024
+#define CPUINFO_BUFFER_LEN  2048
+#define FLAGS_LEN           1536
+#define NAME_LEN            128
 #define UARCH_LEN           128
 #define VENDOR_LEN          16
-#define NAME_LEN            128
 
 
 
@@ -64,10 +65,8 @@ typedef struct {
     int threads;
     // Cache size in KB (x86)
     int cacheSize;
-    // Floating-point unit present (0=n;1=y) (x86)
-    int hasFPU;
-    // Hyper-Threading present (0=n;1=y) (x86)
-    int hasHT;
+    // CPU flags (x86)
+    char flags[FLAGS_LEN];
 } CPU_DATA;
 
 
@@ -105,6 +104,7 @@ static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) / sizeo
 
 char *cleanCPUName(const char *, size_t);
 CPU_DATA *getCPU(char *, char **);
+int hasFlag(const CPU_DATA*, const char*);
 char *interpretCPU(CPU_DATA*);
 
 #endif

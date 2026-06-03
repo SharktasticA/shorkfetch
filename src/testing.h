@@ -149,8 +149,7 @@ void testGetCPU(void)
             printf("    cores:     %d\n", cpu->cores);
             printf("    threads:   %d\n", cpu->threads);
             printf("    cacheSize: %d\n", cpu->cacheSize);
-            printf("    hasFPU:    %d\n", cpu->hasFPU);
-            printf("    hasHT:     %d\n", cpu->hasHT);
+            printf("    flags:     %s\n", cpu->flags);
         }
 
         free(cpu->uarch);
