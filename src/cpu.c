@@ -895,10 +895,44 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
             }
         }
-        // Pentium/P6 and descendants
+        // Pentium/P6 & K7
         else if (cpu->family == 6)
         {
-            if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
+            if (cpu->vendor[0] == 'A')
+            {
+                // There are multiple generations of K7-era Athlon and Duron
+                // that can reuse model numbers or lack them completely, so we
+                // should always append the core names to them
+                // See: Athlon K7750MTR52B A (6-2-2), Athlon K7850MPR52B A
+                //      (6-2-1), Athlon K7100MNR53B A (6-2-2)
+                if (cpu->model == 1)
+                    strncat(cpu->name, " (Argon)", NAME_LEN - strlen(cpu->name) - 1);
+                else if (cpu->model == 2)
+                {
+                    // Pluto and Orion are both model 2 and could have stepping
+                    // 1 or 2, but we at least know Orion is 900MHz and
+                    // higher...
+                    if (cpu->freq > 0 && cpu->freq < 855)
+                        strncat(cpu->name, " (Pluto)", NAME_LEN - strlen(cpu->name) - 1);
+                    else if (cpu->freq > 895)
+                        strncat(cpu->name, " (Orion)", NAME_LEN - strlen(cpu->name) - 1);
+                    else
+                        strncat(cpu->name, " (Pluto/Orion)", NAME_LEN - strlen(cpu->name) - 1);
+                }
+                else if (cpu->model == 3)
+                    strncat(cpu->name, " (Spitfire)", NAME_LEN - strlen(cpu->name) - 1);
+                else if (cpu->model == 4)
+                    strncat(cpu->name, " (Thunderbird)", NAME_LEN - strlen(cpu->name) - 1);
+                else if (cpu->model == 6)
+                    strncat(cpu->name, " (Palomino)", NAME_LEN - strlen(cpu->name) - 1);
+                else if (cpu->model == 7)
+                    strncat(cpu->name, " (Morgan)", NAME_LEN - strlen(cpu->name) - 1);
+                else if (cpu->model == 8)
+                    strncat(cpu->name, " (Thoroughbred)", NAME_LEN - strlen(cpu->name) - 1);
+                else if (cpu->model == 10)
+                    strncat(cpu->name, " (Barton)", NAME_LEN - strlen(cpu->name) - 1);
+            }
+            else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
                 // Deschutes & Covington
                 if (cpu->model == 5)
