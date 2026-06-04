@@ -70,7 +70,7 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char *cpuinfos[300];
+    char *cpuinfos[400];
     int count = 0;
     int showRaw = 0;
 

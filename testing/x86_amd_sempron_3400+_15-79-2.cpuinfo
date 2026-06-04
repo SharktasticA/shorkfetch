@@ -1,0 +1,21 @@
+processor       : 0
+vendor_id       : AuthenticAMD
+cpu family      : 15
+model           : 79
+model name      : AMD Sempron(tm) Processor 3400+
+stepping        : 2
+cpu MHz         : 1817.985
+cache size      : 256 KB
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat 
+                  pse36 clflush mmx fxsr sse sse2 syscall nx mmxext fxsr_opt lm 3dnowext 
+                  3dnow pni cx16 lahf_lm cr8_legacy
+bogomips        : 3642.17
+TLB size        : 1024 4K pages
+clflush size    : 64
+cache_alignment : 64
+address sizes   : 40 bits physical, 48 bits virtual
+power management: ts fid vid ttp tm stc

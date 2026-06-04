@@ -923,8 +923,10 @@ char *interpretCPU(CPU_DATA *cpu)
                 // should always append the core names to them
                 // See: Athlon K7750MTR52B A (6-2-2), Athlon K7850MPR52B A
                 //      (6-2-1), Athlon K7100MNR53B A (6-2-2)
+                // Argon: Athlon "Classic"
                 if (cpu->model == 1)
                     strncat(cpu->name, " (Argon)", NAME_LEN - strlen(cpu->name) - 1);
+                // Pluto/Orion: Athlon "Classic"
                 else if (cpu->model == 2)
                 {
                     // Pluto and Orion are both model 2 and could have stepping
@@ -937,18 +939,67 @@ char *interpretCPU(CPU_DATA *cpu)
                     else
                         strncat(cpu->name, " (Pluto/Orion)", NAME_LEN - strlen(cpu->name) - 1);
                 }
+                // Spitfire: Duron
                 else if (cpu->model == 3)
                     strncat(cpu->name, " (Spitfire)", NAME_LEN - strlen(cpu->name) - 1);
+                // Thunderbird: Athlon "Classic"
                 else if (cpu->model == 4)
                     strncat(cpu->name, " (Thunderbird)", NAME_LEN - strlen(cpu->name) - 1);
+                // Palomino: Athlon XP/MP
                 else if (cpu->model == 6)
                     strncat(cpu->name, " (Palomino)", NAME_LEN - strlen(cpu->name) - 1);
+                // Morgan: Duron
                 else if (cpu->model == 7)
                     strncat(cpu->name, " (Morgan)", NAME_LEN - strlen(cpu->name) - 1);
+                // Thoroughbred: Athlon XP/MP
                 else if (cpu->model == 8)
                     strncat(cpu->name, " (Thoroughbred)", NAME_LEN - strlen(cpu->name) - 1);
+                // Barton: Athlon XP/MP
                 else if (cpu->model == 10)
                     strncat(cpu->name, " (Barton)", NAME_LEN - strlen(cpu->name) - 1);
+
+
+
+                // Athlon XP/MP (models 6, 8 and 10) sometimes just call
+                // themselves "Athlon", and given XP and MP are basically the
+                // same, it is hard to distinguish them. We can try looking for
+                // the obvious signs (multi-CPU configuration) or if the "mp"
+                // (Linux's multi-processor) flag is present.
+                if (cpu->model == 6 || cpu->model == 8 || cpu->model == 10)
+                {
+                    if (strstr(cpu->name, "Athlon") && !strstr(cpu->name, " MP ") && !strstr(cpu->name, " XP "))
+                    {
+                        int hasMPFlag = hasFlag(cpu, "mp");
+                        char *tmp = NULL;
+
+                        // Literally checking for multiple CPUs counted is the
+                        // only sure way to figure this out for all possible
+                        // models
+                        if (cpu->index > 1)
+                            tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Athlon MP");
+                        // Palomino XP and MP always receive the "mp" flag, so
+                        // sans multiple CPUs counted, there is no reliable way
+                        // to tell XP and MP apart
+                        else if (cpu->model == 6)
+                            tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Athlon XP/MP");
+                        // Thoroughbred and Barton will be given the "mp" flag
+                        // appropriately, so we can use that!
+                        else if (cpu->model == 8 || cpu->model == 10)
+                        {
+                            if (hasMPFlag)
+                                tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Athlon MP");
+                            else
+                                tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Athlon XP");
+                        }
+
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                }
             }
             else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
