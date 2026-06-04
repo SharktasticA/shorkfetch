@@ -960,13 +960,14 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
 
-                // Athlon XP/MP (models 6, 8 and 10) sometimes just call
-                // themselves "Athlon", and given XP and MP are basically the
-                // same, it is hard to distinguish them. We can try looking for
-                // the obvious signs (multi-CPU configuration) or if the "mp"
-                // (Linux's multi-processor) flag is present.
                 if (cpu->model == 6 || cpu->model == 8 || cpu->model == 10)
                 {
+                    // Athlon XP/MP (models 6, 8 and 10) sometimes just call
+                    // themselves "Athlon", and given XP and MP are basically
+                    // the same, it is hard to distinguish them. We can try
+                    // looking for the obvious signs (multi-CPU configuration)
+                    // or if the "mp" (Linux's multi-processor) flag is
+                    // present.
                     if (strstr(cpu->name, "Athlon") && !strstr(cpu->name, " MP ") && !strstr(cpu->name, " XP "))
                     {
                         int hasMPFlag = hasFlag(cpu, "mp");
@@ -992,6 +993,19 @@ char *interpretCPU(CPU_DATA *cpu)
                                 tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Athlon XP");
                         }
 
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                
+                    // AMD Mobile Athlons may have the "Mobile" part before
+                    // "AMD"
+                    if (strstr(cpu->name, "mobile AMD"))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "mobile AMD", "AMD Mobile");
                         if (tmp)
                         {
                             strncpy(cpu->name, tmp, NAME_LEN - 1);
