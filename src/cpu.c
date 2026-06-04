@@ -918,6 +918,19 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'A')
             {
+                // AMD Mobile Athlon and Duron have the "mobile" part of their
+                // name before "AMD" *and* is not capitalised
+                if (strstr(cpu->name, "mobile AMD"))
+                {
+                    char *tmp = findReplace(cpu->name, NAME_LEN, "mobile AMD", "AMD Mobile");
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
+                }
+
                 // There are multiple generations of K7-era Athlon and Duron
                 // that can reuse model numbers or lack them completely, so we
                 // should always append the core names to them
@@ -958,8 +971,6 @@ char *interpretCPU(CPU_DATA *cpu)
                 else if (cpu->model == 10)
                     strncat(cpu->name, " (Barton)", NAME_LEN - strlen(cpu->name) - 1);
 
-
-
                 if (cpu->model == 6 || cpu->model == 8 || cpu->model == 10)
                 {
                     // Athlon XP/MP (models 6, 8 and 10) sometimes just call
@@ -993,19 +1004,6 @@ char *interpretCPU(CPU_DATA *cpu)
                                 tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Athlon XP");
                         }
 
-                        if (tmp)
-                        {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
-                        }
-                    }
-                
-                    // AMD Mobile Athlons may have the "Mobile" part before
-                    // "AMD"
-                    if (strstr(cpu->name, "mobile AMD"))
-                    {
-                        char *tmp = findReplace(cpu->name, NAME_LEN, "mobile AMD", "AMD Mobile");
                         if (tmp)
                         {
                             strncpy(cpu->name, tmp, NAME_LEN - 1);

@@ -1,0 +1,22 @@
+processor       : 0
+vendor_id       : AuthenticAMD
+cpu family      : 6
+model           : 7
+model name      : mobile AMD Duron(tm)
+stepping        : 1
+cpu MHz         : 500.065
+cache size      : 64 KB
+fdiv_bug        : no
+hlt_bug         : no
+f00f_bug        : no
+coma_bug        : no
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 1
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 sep mtrr pge mca cmov pat pse36 mmx fxsr sse syscall mp mmxext 3dnowext 3dnow up
+bogomips        : 1000.80
+clflush size    : 32
+cache_alignment : 32
+address sizes   : 34 bits physical, 32 bits virtual
+power management: ts fid vid
