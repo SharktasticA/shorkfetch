@@ -988,6 +988,14 @@ char *interpretCPU(CPU_DATA *cpu)
                             free(tmp);
                         }
                     }
+
+                    // All Athlon MPs were single core, so if the processor
+                    // index is higher than 1, we are definitely dealing with a
+                    // multi-CPU config and should set the core/thread count to
+                    // 1 to correctly flag this instead of 'ahving'' two cores
+                    // for later
+                    if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
+                        cpu->cores = cpu->threads = 1;
                 }
 
                 // There are multiple generations of K7-era Athlon and Duron
@@ -1341,22 +1349,22 @@ char *interpretCPU(CPU_DATA *cpu)
                 // want to tidy up a bit. This can happen to several micro-
                 // architectures...
                 if (strstr(cpu->name, "Core Processor ("))
-            {
-                char *uarch = NULL;
-                // Broadwell
-                if (cpu->model == 61)
-                    uarch = "Broadwell";
-                // Skylake
-                else if (cpu->model == 94)
-                    uarch = "Skylake";
-
-                if (uarch)
                 {
-                    char *needle = strstr(cpu->name, " Processor");
-                    if (needle)
-                        snprintf(needle, NAME_LEN - (needle - cpu->name), " (%s)", uarch);
+                    char *uarch = NULL;
+                    // Broadwell
+                    if (cpu->model == 61)
+                        uarch = "Broadwell";
+                    // Skylake
+                    else if (cpu->model == 94)
+                        uarch = "Skylake";
+
+                    if (uarch)
+                    {
+                        char *needle = strstr(cpu->name, " Processor");
+                        if (needle)
+                            snprintf(needle, NAME_LEN - (needle - cpu->name), " (%s)", uarch);
+                    }
                 }
-            }
             }
         }
         // Larrabee
@@ -1389,10 +1397,10 @@ char *interpretCPU(CPU_DATA *cpu)
                 if (cpu->model == 5 || cpu->model == 37 || cpu->model == 39)
                 {
                     // Some entire models of K8-based Opterons were always
-                    // single core, so if the processor index is higher, we are
-                    // definitely dealing with a multi-CPU config and should
-                    // set the core/thread count to 1 to correctly flag for
-                    // later
+                    // single core, so if the processor index is higher than 1,
+                    // we are definitely dealing with a multi-CPU config and
+                    // should set the core/thread count to 1 to correctly flag
+                    // this instead of 'having' two cores for later
                     // See: Opteron 148 (E4), Opteron 246 (CG), Opteron 246
                     //      (E4), Opteron 848 (E4)
                     if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
