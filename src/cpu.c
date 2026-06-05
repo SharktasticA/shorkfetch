@@ -1424,7 +1424,7 @@ char *interpretCPU(CPU_DATA *cpu)
             {
                 // Early Pentium 4s generally don't have a model number, and
                 // the later ones that do don't report it, so we will
-                // distinguish them via their microarchitecture name
+                // distinguish them via their core name
                 if (strstr(cpu->name, "4 CPU"))
                 {
                     char *tmp = NULL;
@@ -1451,25 +1451,52 @@ char *interpretCPU(CPU_DATA *cpu)
                         free(tmp);
                     }
                 }
-                // Ditto for Pentium D
-                else if (strstr(cpu->name, "D CPU"))
+                // Ditto for non-Extreme Pentium D
+                else if (cpu->cores == 2)
                 {
-                    char *tmp = NULL;
-                    // Smithfield
-                    // See: Pentium D 805 (7), Pentium D 830 (4)
-                    if (cpu->model == 4)
-                        tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Smithfield)");
-                    // Presler
-                    // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960
-                    //      (4)
-                    else if (cpu->model == 6)
-                        tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Presler)");
-
-                    if (tmp)
+                    // Non-Extreme (no Hyper-Threading)
+                    if (cpu->cores == cpu->threads)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        char *tmp = NULL;
+                        // Smithfield
+                        // See: Pentium D 805 (7), Pentium D 830 (4)
+                        if (cpu->model == 4)
+                            tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Smithfield)");
+                        // Presler
+                        // See: Pentium D 920 (2), Pentium D 945 (5), Pentium D 960
+                        //      (4)
+                        else if (cpu->model == 6)
+                            tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "D (Presler)");
+
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                    // There are so few 2C/4T Pentium Extreme Editions (really
+                    // Pentium D with Hyper-Threading) and all with unique
+                    // clock speeds that we might as well just fully identify
+                    // them instead of just adding the core name
+                    // See: Pentium Extreme 840, Pentium Extreme 955, Pentium
+                    //      Extreme 965
+                    else if (cpu->cores == 2 && cpu->threads == 4)
+                    {
+                        char *tmp = NULL;
+                        if (cpu->model == 4 && strstr(cpu->name, "3.2"))
+                            tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "Extreme 840");
+                        else if (cpu->model == 6 && strstr(cpu->name, "3.4"))
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "Pentium Extreme 955");
+                        else if (cpu->model == 6 && strstr(cpu->name, "3.7"))
+                            tmp = findReplace(cpu->name, NAME_LEN, "D CPU", "Extreme 965");
+
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
                     }
                 }
             }

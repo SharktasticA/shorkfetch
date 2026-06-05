@@ -1,0 +1,103 @@
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      : Intel(R) Pentium(R) D CPU 3.20GHz
+stepping        : 4
+microcode       : 0x6
+cpu MHz         : 3200.000
+cache size      : 1024 KB
+physical id     : 0
+siblings        : 4
+core id         : 0
+cpu cores       : 2
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc pebs bts nopl pni dtes64 monitor ds_cpl est cid cx16 xtpr
+bogomips        : 6400.00
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 36 bits physical, 48 bits virtual
+power management:
+
+processor       : 1
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      : Intel(R) Pentium(R) D CPU 3.20GHz
+stepping        : 4
+microcode       : 0x6
+cpu MHz         : 3200.000
+cache size      : 1024 KB
+physical id     : 0
+siblings        : 4
+core id         : 0
+cpu cores       : 2
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc pebs bts nopl pni dtes64 monitor ds_cpl est cid cx16 xtpr
+bogomips        : 6400.00
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 36 bits physical, 48 bits virtual
+power management:
+
+processor       : 2
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      : Intel(R) Pentium(R) D CPU 3.20GHz
+stepping        : 4
+microcode       : 0x6
+cpu MHz         : 3200.000
+cache size      : 1024 KB
+physical id     : 0
+siblings        : 4
+core id         : 0
+cpu cores       : 2
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc pebs bts nopl pni dtes64 monitor ds_cpl est cid cx16 xtpr
+bogomips        : 6400.00
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 36 bits physical, 48 bits virtual
+power management:
+
+processor       : 3
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      : Intel(R) Pentium(R) D CPU 3.20GHz
+stepping        : 4
+microcode       : 0x6
+cpu MHz         : 3200.000
+cache size      : 1024 KB
+physical id     : 0
+siblings        : 4
+core id         : 0
+cpu cores       : 2
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc pebs bts nopl pni dtes64 monitor ds_cpl est cid cx16 xtpr
+bogomips        : 6400.00
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 36 bits physical, 48 bits virtual
+power management:
