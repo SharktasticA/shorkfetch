@@ -1429,7 +1429,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 {
                     char *tmp = NULL;
                     // Willamette
-                    if (cpu->model == 1)
+                    if (cpu->model == 0 || cpu->model == 1)
                         tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Willamette)");
                     // Northwood
                     else if (cpu->model == 2)
