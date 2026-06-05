@@ -571,7 +571,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get logical thread count
-            else if (result->threads == -1 && strncmp(buffer, "siblings", 8) == 0)
+            else if (result->threads == -1 && (strncmp(buffer, "siblings", 8) == 0 || strncmp(buffer, "Number of siblings", 18) == 0))
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
