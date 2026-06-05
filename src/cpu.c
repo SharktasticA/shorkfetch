@@ -368,7 +368,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // ARM: get CPU implementer name
-            else if (!result->vendor && strncmp(buffer, "CPU implementer", 15) == 0)
+            else if (!result->vendor && (strncmp(buffer, "CPU implementer", 15) == 0 || strncmp(buffer, "CPU implementor", 15) == 0))
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 if (extract)
