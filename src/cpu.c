@@ -338,7 +338,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         while (fgets(buffer, sizeof(buffer), fStream))
         {
             // RISC-V: get micro architecture (uarch)
-            if (!result->uarch && strncmp(buffer, "uarch", 5) == 0)
+            if (!result->uarch && strncasecmp(buffer, "uarch", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, UARCH_LEN, ':', 2);
                 if (extract)
@@ -353,7 +353,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get vendor ID
-            else if (!result->vendor && strncmp(buffer, "vendor_id", 9) == 0)
+            else if (!result->vendor && strncasecmp(buffer, "vendor_id", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, VENDOR_LEN, ':', 2);
                 if (extract)
@@ -368,7 +368,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // ARM: get CPU implementer name
-            else if (!result->vendor && (strncmp(buffer, "CPU implementer", 15) == 0 || strncmp(buffer, "CPU implementor", 15) == 0))
+            else if (!result->vendor && (strncasecmp(buffer, "cpu implementer", 15) == 0 || strncasecmp(buffer, "cpu implementor", 15) == 0))
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 if (extract)
@@ -390,7 +390,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get model name
-            else if (!result->name && strncmp(buffer, "model name", 10) == 0)
+            else if (!result->name && strncasecmp(buffer, "model name", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
                 if (extract)
@@ -405,7 +405,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // ARM: get CPU architecture
-            else if (!result->name && strncmp(buffer, "CPU architecture", 16) == 0)
+            else if (!result->name && strncasecmp(buffer, "CPU architecture", 16) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
                 if (extract)
@@ -419,7 +419,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get family number
-            else if (result->family == -1 && strncmp(buffer, "cpu family", 10) == 0)
+            else if (result->family == -1 && strncasecmp(buffer, "cpu family", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':', 2);
                 if (extract)
@@ -432,7 +432,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get CPU type
-            else if (!result->name && strncmp(buffer, "cpu", 3) == 0)
+            else if (!result->name && strncasecmp(buffer, "cpu", 3) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
                 if (extract && extract[0] == 'P' && extract[4] == 'R')
@@ -451,7 +451,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // RISC-V: get instruction set architecture (ISA)
-            else if (!result->name && strncmp(buffer, "isa", 3) == 0)
+            else if (!result->name && strncasecmp(buffer, "isa", 3) == 0)
             {
                 char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':', 2);
                 if (extract && extract[0] == 'r' && extract[1] == 'v')
@@ -465,7 +465,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get model number
-            else if (result->model == -1 && strncmp(buffer, "model", 5) == 0)
+            else if (result->model == -1 && strncasecmp(buffer, "model", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':', 2);
                 if (extract)
@@ -478,7 +478,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get stepping number
-            else if (result->stepping == -1 && strncmp(buffer, "stepping", 8) == 0)
+            else if (result->stepping == -1 && strncasecmp(buffer, "stepping", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':', 2);
                 if (extract && extract[0] != 'u')
@@ -491,7 +491,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get clock frequency in MHz
-            else if (result->freq < 0 && strncmp(buffer, "cpu MHz", 7) == 0)
+            else if (result->freq < 0 && strncasecmp(buffer, "cpu mhz", 7) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 if (extract)
@@ -504,7 +504,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get clock speed in MHz
-            else if (result->freq < 0 && strncmp(buffer, "clock", 5) == 0)
+            else if (result->freq < 0 && strncasecmp(buffer, "clock", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 if (extract)
@@ -517,7 +517,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // RISC-V: get clock speed in MHz
-            else if (result->freq < 0 && strncmp(buffer, "cpu-freq", 8) == 0)
+            else if (result->freq < 0 && strncasecmp(buffer, "cpu-freq", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 if (extract)
@@ -533,7 +533,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
             // All: get processor index count (must repeat to get the final
             // value)
-            else if (strncmp(buffer, "processor", 9) == 0)
+            else if (strncasecmp(buffer, "processor", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
@@ -544,7 +544,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
             // x86: get maximum physical ID (must repeat to get the final
             // value)
-            else if (strncmp(buffer, "physical id", 11) == 0)
+            else if (strncasecmp(buffer, "physical id", 11) == 0)
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
@@ -558,7 +558,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get physical core count
-            else if (result->cores == -1 && strncmp(buffer, "cpu cores", 9) == 0)
+            else if (result->cores == -1 && strncasecmp(buffer, "cpu cores", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
@@ -571,7 +571,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get logical thread count
-            else if (result->threads == -1 && (strncmp(buffer, "siblings", 8) == 0 || strncmp(buffer, "Number of siblings", 18) == 0))
+            else if (result->threads == -1 && (strncasecmp(buffer, "siblings", 8) == 0 || strncasecmp(buffer, "Number of siblings", 18) == 0))
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
@@ -584,7 +584,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // RISC-V: get hardware thread (hart) count
-            else if (strncmp(buffer, "hart", 4) == 0)
+            else if (strncasecmp(buffer, "hart", 4) == 0)
             {
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
@@ -604,7 +604,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get cache size in KB
-            else if (result->cacheSize == -1 && strncmp(buffer, "cache size", 10) == 0)
+            else if (result->cacheSize == -1 && strncasecmp(buffer, "cache size", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':', 2);
                 if (extract)
@@ -617,7 +617,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get CPU flags
-            else if (result->flags[0] == '\0' && strncmp(buffer, "flags", 5) == 0)
+            else if (result->flags[0] == '\0' && strncasecmp(buffer, "flags", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':', 2);
                 if (extract)
