@@ -1,0 +1,27 @@
+processor: 0
+vendor_id: GenuineIntel
+CPU family: 15
+model: 6
+model name : Intel(R) Xeon(TM) CPU 3.20GHz
+stepping: 4
+CPU MHz: 3199.923
+Cache size: 2048 KB
+physical ID: 0
+Siblings: 4
+core id: 0
+CPU cores: 2
+apicid: 0
+initial apicid: 0
+fpu: yes
+fpu_exception: yes
+CPU level: 6
+wp: yes
+flags : fpu vme de pse tsc msr pace cx8 apice sep mttr
+mca cmov ppse36 clflush dts acpi mmx fxsr sse2 ss ht tm pbe
+syscol lm constant_tsc pbs bts pni dts64 monitor ds_cpl vmx cid cx16
+xtpr pdcm lahf_lm trr_shadow
+bogomyps: 6399.84
+clflush size: 64
+cache_alignment: 128
+address size : 36 bits physical, 48 bits virtual
+power management:
