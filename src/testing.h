@@ -136,20 +136,22 @@ void testGetCPU(void)
             else
                 printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
 
-            printf("    arch:      %d\n", cpu->arch);
-            printf("    uarch:     %s\n", cpu->uarch ? cpu->uarch : "(null)");
-            printf("    vendor:    %s\n", cpu->vendor ? cpu->vendor : "(null)");
-            printf("    name:      %s\n", cpu->name   ? cpu->name   : "(null)");
-            printf("    family:    %d\n", cpu->family);
-            printf("    model:     %d\n", cpu->model);
-            printf("    stepping:  %d\n", cpu->stepping);
-            printf("    freq:      %.0f\n", cpu->freq);
-            printf("    maxPhysID: %d\n", cpu->maxPhysID);
-            printf("    index:     %d\n", cpu->index);
-            printf("    cores:     %d\n", cpu->cores);
-            printf("    threads:   %d\n", cpu->threads);
-            printf("    cacheSize: %d\n", cpu->cacheSize);
-            printf("    flags:     %s\n", cpu->flags);
+            printf("    arch:         %d\n", cpu->arch);
+            printf("    uarch:        %s\n", cpu->uarch ? cpu->uarch : "(null)");
+            printf("    vendor:       %s\n", cpu->vendor ? cpu->vendor : "(null)");
+            printf("    name:         %s\n", cpu->name   ? cpu->name   : "(null)");
+            printf("    family:       %d\n", cpu->family);
+            printf("    model:        %d\n", cpu->model);
+            printf("    stepping:     %d\n", cpu->stepping);
+            printf("    freq:         %.0f\n", cpu->freq);
+            printf("    maxPhysID:    %d\n", cpu->maxPhysID);
+            printf("    index:        %d\n", cpu->index);
+            printf("    cores:        %d\n", cpu->cores);
+            printf("    threads:      %d\n", cpu->threads);
+            printf("    cacheSize:    %d\n", cpu->cacheSize);
+            printf("    flags:        %s\n", cpu->flags);
+            printf("    physAddrSize: %d\n", cpu->physAddrSize);
+            printf("    virtAddrSize: %d\n", cpu->virtAddrSize);
         }
 
         free(cpu->uarch);

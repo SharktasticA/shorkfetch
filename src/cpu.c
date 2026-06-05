@@ -326,7 +326,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         .cores = -1,
         .threads = -1,
         .cacheSize = -1,
-        .flags[0] = '\0'
+        .flags[0] = '\0',
+        .physAddrSize = -1,
+        .virtAddrSize = -1
     };
 
 
@@ -624,6 +626,24 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 {
                     strncpy(result->flags, extract, FLAGS_LEN - 1);
                     result->flags[FLAGS_LEN - 1] = '\0';
+                    free(extract);
+                }
+            }
+            // x86: get physical and virtual address sizes
+            else if ((result->physAddrSize == -1 || result->virtAddrSize == -1) && strncasecmp(buffer, "address sizes", 13) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 32, ':', 2);
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = X86;
+
+                    int phys, virt;
+                    if (sscanf(extract, "%d bits physical, %d bits virtual", &phys, &virt) == 2)
+                    {
+                        result->physAddrSize = phys;
+                        result->virtAddrSize = virt;
+                    }
                     free(extract);
                 }
             }

@@ -67,6 +67,10 @@ typedef struct {
     int cacheSize;
     // CPU flags (x86)
     char flags[FLAGS_LEN];
+    // Physical address size (x86)
+    int physAddrSize;
+    // Virtual address size (x86)
+    int virtAddrSize;
 } CPU_DATA;
 
 
