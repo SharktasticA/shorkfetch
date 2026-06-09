@@ -226,8 +226,9 @@ char *interpretScreen(Screen *screen)
     const int SCREEN_SIZE = 128;
     char *screenStr = malloc(SCREEN_SIZE);
 
-    // Prepare physical screen size
-    char physSize[32] = "";
+    // Prepare physical screen size (NOT PRESENTLY USED PENDING ACCURACY
+    // IMPROVEMENTS)
+    /*char physSize[32] = "";
     if (screen->physX > 0.0 && screen->physY > 0.0)
     {
         float diagMm = fSqrt(screen->physX * screen->physX + screen->physY * screen->physY);
@@ -243,7 +244,7 @@ char *interpretScreen(Screen *screen)
             else
                 snprintf(physSize, 32, "%.1f\" ", diagInRounded);
         }
-    }
+    }*/
 
     // Prepare refresh rate
     char refresh[32] = "";
@@ -263,9 +264,9 @@ char *interpretScreen(Screen *screen)
 
     // Assemble the string
     if (!COMPACT)
-        snprintf(screenStr, SCREEN_SIZE, "%s%dx%d%s%s", physSize, screen->resX, screen->resY, refresh, connector);
+        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s%s", screen->resX, screen->resY, refresh, connector);
     else
-        snprintf(screenStr, SCREEN_SIZE, "%s%dx%d%s", physSize, screen->resX, screen->resY, refresh);
+        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s", screen->resX, screen->resY, refresh);
 
     return screenStr;
 }
