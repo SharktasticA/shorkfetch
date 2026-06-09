@@ -1563,13 +1563,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
     if (!COMPACT)
     {
-        // If we don't have a cores value, set it to the same as threads
-        // so we don't try to show them both separately later
-        if (cpu->cores <= 0 && cpu->threads > 0)
-            cpu->cores = cpu->threads;
-
-        // If we don't have cores or threads, we use the processor index count in
-        // its place
+        // If we don't have cores or threads, we use the processor index count
+        // in its place
         if (cpu->cores <= 0 && cpu->threads <= 0 && cpu->index > 0)
         {
             // We don't have a good way to tell cores from threads for POWER
@@ -1579,10 +1574,15 @@ char *interpretCPU(CPU_DATA *cpu)
             else
                 snprintf(coresAndThreads, 16, "%dC", cpu->index);
         }
-        // If cores and threads are the same value, just show cores
+        // If we don't have cores but have threads, just show threads
+        else if (cpu->cores <= 0 && cpu->threads > 0)
+            snprintf(coresAndThreads, 16, "%dT", cpu->threads);
+        // If we have cores and threads, and they are the same value, just show
+        // cores
         else if (cpu->cores > 0 && cpu->cores == cpu->threads)
             snprintf(coresAndThreads, 16, "%dC", cpu->cores);
-        // If cores and threads are different values, show both
+        // If we have cores and threads, and they are different values, show
+        // both
         else if (cpu->cores > 0 && cpu->threads > 0)
             snprintf(coresAndThreads, 16, "%dC/%dT", cpu->cores, cpu->threads);
 
