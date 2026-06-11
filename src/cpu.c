@@ -1577,6 +1577,11 @@ char *interpretCPU(CPU_DATA *cpu)
         // If we don't have cores but have threads, just show threads
         else if (cpu->cores <= 0 && cpu->threads > 0)
             snprintf(coresAndThreads, 16, "%dT", cpu->threads);
+        // If we have cores but no threads, show cores as threads because we
+        // can't determine if SMT and better to not suggest all processors
+        // counted are real cores
+        else if (cpu->cores > 0 && cpu->threads <= 0)
+            snprintf(coresAndThreads, 16, "%dT", cpu->cores);
         // If we have cores and threads, and they are the same value, just show
         // cores
         else if (cpu->cores > 0 && cpu->cores == cpu->threads)
@@ -1617,9 +1622,9 @@ char *interpretCPU(CPU_DATA *cpu)
     // If maxPhysID was not computed or not x86, we can also infer likely
     // multi-CPU configuration when the processor index count is higher than
     // the thread count
-    else if (cpu->index > cpu->threads && cpu->threads > 0)
+    else if ((cpu->index > cpu->threads && cpu->threads > 0) || cpu->index > cpu->cores && cpu->cores > 0)
     {
-        int cpus = cpu->index / cpu->threads;
+        int cpus = cpu->threads > 0 ? cpu->index / cpu->threads : cpu->index / cpu->cores;
         char tmp[RESULT_LEN];
         snprintf(tmp, RESULT_LEN, "%dx %s", cpus, result);
         strncpy(result, tmp, RESULT_LEN-1);

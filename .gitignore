@@ -60,3 +60,4 @@ dkms.conf
 # shorkfetch specific
 shorkfetch
 testing/excluded
+testing/notes.txt
