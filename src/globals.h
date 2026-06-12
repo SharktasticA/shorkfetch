@@ -20,6 +20,14 @@
 
 
 
+typedef enum
+{
+    NORMAL = 0,
+    BULLETS,
+} VIEW_MODE;
+
+
+
 #define MAX_FIELDS  50
 
 static const char *POSSIBLE_FIELDS[] =

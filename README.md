@@ -58,12 +58,13 @@ Usage: shorkfetch [OPTIONS]
 
 ### Options
 
-* `-b`, `--bullets`: Uses bullet points instead of field headings; can also be used to specify a custom character
+* `-b`, `--bullet`: Specifies a custom character to use with bullet-point mode; no assignment returns the current character
 * `-cl`, `--colour`: Specifies a custom accent colour; no assignment returns the current colour
-* `-co`, `--compact`: Compacts field names (if not using bullets) and field values
+* `-co`, `--compact`: Compacts field names and field values
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields
 * `-h`, `--help`: Shows help information and exits
-* `-na`, `--no-art`: Disables the SHORK ASCII art (if compiled with art support)
+* `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
+* `-na`, `--no-art`: Disables the SHORK ASCII art
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-v`, `--version`: Displays version number and exits

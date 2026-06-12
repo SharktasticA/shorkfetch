@@ -56,15 +56,15 @@ void showHelp(void)
     formatNewLines(options, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", options);
 
-    char bullets[130] = "-b, --bullets   Uses bullet points instead of field headings; can also be used to specify a custom character\n";
-    formatNewLines(bullets, TERM_SIZE.ws_col, "                ", 0);
-    printf("%s", bullets);
+    char bullet[140] = "-b, --bullet    Specifies a custom character to use with bullet-point mode; no assignment returns the current character\n";
+    formatNewLines(bullet, TERM_SIZE.ws_col, "                ", 0);
+    printf("%s", bullet);
 
     char colour[100] = "-cl, --colour   Specifies a custom accent colour; no assignment returns the current colour\n";
     formatNewLines(colour, TERM_SIZE.ws_col, "                ", 0);
     printf("%s", colour);
 
-    char compact[100] = "-co, --compact  Compacts field names (if not using bullets) and field values\n";
+    char compact[70] = "-co, --compact  Compacts field names and field values\n";
     formatNewLines(compact, TERM_SIZE.ws_col, "                ", 0);
     printf("%s", compact);
 
@@ -75,6 +75,10 @@ void showHelp(void)
     char fields[150] = "-f, --fields    Specifies a custom fields list and order; no assignment returns list of current fields\n";
     formatNewLines(fields, TERM_SIZE.ws_col, "                ", 0);
     printf("%s", fields);
+
+    char mode[80] = "-m, --mode      Select what view mode to use: [n]ormal, [b]ullets\n";
+    formatNewLines(mode, TERM_SIZE.ws_col, "                ", 0);
+    printf("%s", mode);
 
     char noArt[100] = "-na, --no-art   Disables the SHORK ASCII art\n";
     formatNewLines(noArt, TERM_SIZE.ws_col, "                ", 0);
@@ -114,14 +118,10 @@ int main(int argc, char *argv[])
     int noIP = 0;
     int saveConf = 0;
     int shorkLine = 0;
-#ifdef NO_ART
-    int showShork = 0;
-#else
     int showShork = 1;
-#endif
-    int useBullets = 0;
+    VIEW_MODE mode = NORMAL;
 
-    readConf(&bullet, &COLOUR, &COMPACT, &fields, &noIP, &showShork, &useBullets);
+    readConf(&bullet, &COLOUR, &COMPACT, &fields, &mode, &noIP, &showShork);
 
     for (int i = 1; i < argc; i++)
     {
@@ -132,14 +132,12 @@ int main(int argc, char *argv[])
             free(fields);
             return 0;
         }
-        else if (strncmp(argv[i], "-b", 2) == 0 || strncmp(argv[i], "--bullets", 9) == 0)
+        else if (strncmp(argv[i], "-b", 2) == 0 || strncmp(argv[i], "--bullet", 8) == 0)
         {
-            useBullets = 1;
-
             char *bulletChar = NULL;
             if (strncmp(argv[i], "-b=", 3) == 0)
                 bulletChar = &argv[i][3];
-            else if (strncmp(argv[i], "--bullets=", 10) == 0)
+            else if (strncmp(argv[i], "--bullet=", 9) == 0)
                 bulletChar = &argv[i][10];
 
             if (bulletChar)
@@ -157,6 +155,13 @@ int main(int argc, char *argv[])
                     return 1;
                 }
                 bullet = bulletChar[0];
+            }
+            else
+            {
+                printf("\"%c\"\n", bullet);
+                free(COLOUR);
+                free(fields);
+                return 0;
             }
         }
         else if (strncmp(argv[i], "-cl", 3) == 0 || strncmp(argv[i], "--colour", 8) == 0)
@@ -186,7 +191,7 @@ int main(int argc, char *argv[])
                 printf("\"%s\"\n", fields);
                 free(COLOUR);
                 free(fields);
-                return 1;
+                return 0;
             }
 
             equalsNeedle++;
@@ -197,6 +202,46 @@ int main(int argc, char *argv[])
             size_t len = strlen(fields);
             if (len > 0 && fields[len - 1] == ',')
                 fields[len - 1] = '\0';
+        }
+        else if (strncmp(argv[i], "-m", 2) == 0 || strncmp(argv[i], "--mode", 6) == 0)
+        {
+            char *modeVal = NULL;
+            if (strncmp(argv[i], "-m=", 3) == 0)
+                modeVal = &argv[i][3];
+            else if (strncmp(argv[i], "--mode=", 7) == 0)
+                modeVal = &argv[i][7];
+
+            if (modeVal)
+            {
+                if (modeVal[0] == '\0')
+                {
+                    printf("ERROR: no mode given\n");
+                    free(fields);
+                    free(COLOUR);
+                    return 1;
+                }
+                else if (strcmp(modeVal, "n") == 0 || strcmp(modeVal, "normal") == 0)
+                    mode = NORMAL;
+                else if (strcmp(modeVal, "b") == 0 || strcmp(modeVal, "bullet") == 0 || strcmp(modeVal, "bullets") == 0)
+                    mode = BULLETS;
+                else
+                {
+                    printf("ERROR: unrecognised mode \"%s\"\n", modeVal);
+                    free(fields);
+                    free(COLOUR);
+                    return 1;
+                }
+            }
+            else
+            {
+                if (mode == NORMAL)
+                    printf("\"normal\"\n", mode);
+                else if (mode == BULLETS)
+                    printf("\"bullet\"\n", mode);
+                free(COLOUR);
+                free(fields);
+                return 0;
+            }
         }
         else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
             showShork = 0;
@@ -368,7 +413,7 @@ int main(int argc, char *argv[])
             if (os && os[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sOS:%s       %s\n", colAccent, colReset, os);
@@ -384,7 +429,7 @@ int main(int argc, char *argv[])
             if (kernel && kernel[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sKernel:%s   %s\n", colAccent, colReset, kernel);
@@ -401,7 +446,7 @@ int main(int argc, char *argv[])
             if (uptime && uptime[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sUptime:%s   %s\n", colAccent, colReset, uptime);
@@ -418,7 +463,7 @@ int main(int argc, char *argv[])
             if (pkgs && pkgs[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sPackages:%s %s\n", colAccent, colReset, pkgs);
@@ -444,7 +489,7 @@ int main(int argc, char *argv[])
                     {
                         if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
 
-                        if (!useBullets)
+                        if (mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -496,7 +541,7 @@ int main(int argc, char *argv[])
             if (de && de != wm && de[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sDE:%s       %s\n", colAccent, colReset, de);
@@ -520,7 +565,7 @@ int main(int argc, char *argv[])
                 }
 
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sWM:%s       %s%s\n", colAccent, colReset, wm, server);
@@ -542,7 +587,7 @@ int main(int argc, char *argv[])
             if (trm && trm[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sTerminal:%s %s (%dx%d)\n", colAccent, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
@@ -562,7 +607,7 @@ int main(int argc, char *argv[])
             else
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sConsole:%s  %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
@@ -585,7 +630,7 @@ int main(int argc, char *argv[])
             if (shell && shell[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sShell:%s    %s\n", colAccent, colReset, shell);
@@ -604,7 +649,7 @@ int main(int argc, char *argv[])
                 if (cpuStr && cpuStr[0] != '\0')
                 {
                     if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                    if (!useBullets)
+                    if (mode == NORMAL)
                     {
                         if (!COMPACT)
                             printf("%sCPU:%s      %s\n", colAccent, colReset, cpuStr);
@@ -630,7 +675,7 @@ int main(int argc, char *argv[])
                     if (gpuStr && gpuStr[0] != '\0')
                     {
                         if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                        if (!useBullets)
+                        if (mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -661,7 +706,7 @@ int main(int argc, char *argv[])
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sGPU:%s      %s\n", colAccent, colReset, gpuFromCPU);
@@ -678,7 +723,7 @@ int main(int argc, char *argv[])
             if (ram && ram[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sRAM:%s      %s\n", colAccent, colReset, ram);
@@ -701,7 +746,7 @@ int main(int argc, char *argv[])
             if (swap && swap[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sSwap:%s     %s\n", colAccent, colReset, swap);
@@ -724,7 +769,7 @@ int main(int argc, char *argv[])
             if (root && root[0] != '\0')
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sRoot:%s     %s\n", colAccent, colReset, root);
@@ -747,7 +792,7 @@ int main(int argc, char *argv[])
             if (localIP)
             {
                 if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-                if (!useBullets)
+                if (mode == NORMAL)
                 {
                     if (!COMPACT)
                         printf("%sLocal IP:%s %s\n", colAccent, colReset, localIP);
@@ -778,7 +823,7 @@ int main(int argc, char *argv[])
 
 
     if (saveConf)
-        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, noIP, showShorkOrig, useBullets);
+        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, mode, noIP, showShorkOrig);
 
     free(COLOUR);
     free(colAccent);

@@ -45,11 +45,11 @@ int deleteConf(void)
  * @param colour
  * @param compact
  * @param fields
+ * @param mode
  * @param noIP
  * @param showShork
- * @param useBullets
  */
-void readConf(char *bullet, char **colour, int *compact, char **fields, int *noIP, int *showShork, int *useBullets)
+void readConf(char *bullet, char **colour, int *compact, char **fields, VIEW_MODE *mode, int *noIP, int *showShork)
 {
     char path[PATH_MAX];
     snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
@@ -84,12 +84,12 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, int *noI
                 free(*fields);
                 *fields = strdup(value);
             }
+            else if (strcmp(key, "mode") == 0)
+                *mode = atoi(value);
             else if (strcmp(key, "noIP") == 0)
                 *noIP = atoi(value);
             else if (strcmp(key, "showShork") == 0)
                 *showShork = atoi(value);
-            else if (strcmp(key, "useBullets") == 0)
-                *useBullets = atoi(value);
         }
         fclose(shorkconf);
     }
@@ -101,11 +101,11 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, int *noI
  * @param colour
  * @param compact
  * @param fields
+ * @param mode
  * @param noIP
  * @param showShork
- * @param useBullets
  */
-void writeConf(char bullet, char *colour, int compact, char *fields, int noIP, int showShork, int useBullets)
+void writeConf(char bullet, char *colour, int compact, char *fields, VIEW_MODE mode, int noIP, int showShork)
 {
     char path[PATH_MAX];
 
@@ -124,9 +124,9 @@ void writeConf(char bullet, char *colour, int compact, char *fields, int noIP, i
         fprintf(shorkconf, "colour=%s\n", colour);
         fprintf(shorkconf, "compact=%d\n", compact);
         fprintf(shorkconf, "fields=%s\n", fields);
+        fprintf(shorkconf, "mode=%d\n", mode);
         fprintf(shorkconf, "noIP=%d\n", noIP);
         fprintf(shorkconf, "showShork=%d\n", showShork);
-        fprintf(shorkconf, "useBullets=%d\n", useBullets);
         fclose(shorkconf);
     }
 }
