@@ -44,21 +44,21 @@ char *getUptime(void)
 
             if (!COMPACT)
             {
-                const char *dayUnit = (days == 1) ? "day" : "days";
-                const char *hourUnit = (hours == 1) ? "hour" : "hours";
-                const char *minUnit = (minutes == 1) ? "minute" : "minutes";
-
                 if (days > 0)
-                    snprintf(uptime, 128, "%d %s, %d %s, %d %s", days, dayUnit, hours, hourUnit, minutes, minUnit);
+                    snprintf(uptime, 128, "%dd, %dh, %dm", days, hours, minutes);
+                else if (hours > 0)
+                    snprintf(uptime, 128, "%dh, %dm", hours, minutes);
                 else
-                    snprintf(uptime, 128, "%d %s, %d %s", hours, hourUnit, minutes, minUnit);
+                    snprintf(uptime, 128, "%dm", minutes);
             }
             else
             {
                 if (days > 0)
-                    snprintf(uptime, 128, "%d:%d:%d", days, hours, minutes);
+                    snprintf(uptime, 128, "%dd:%dh:%dm", days, hours, minutes);
+                else if (hours > 0)
+                    snprintf(uptime, 128, "%dh:%dm", hours, minutes);
                 else
-                    snprintf(uptime, 128, "%d:%d", hours, minutes);
+                    snprintf(uptime, 128, "%dm", minutes);
             }
         }
         fclose(fStream);
