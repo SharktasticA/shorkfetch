@@ -1622,9 +1622,17 @@ char *interpretCPU(CPU_DATA *cpu)
     // If maxPhysID was not computed or not x86, we can also infer likely
     // multi-CPU configuration when the processor index count is higher than
     // the thread count
-    else if ((cpu->index > cpu->threads && cpu->threads > 0) || cpu->index > cpu->cores && cpu->cores > 0)
+    else if (cpu->threads > cpu->cores && cpu->index > cpu->threads && cpu->threads > 0)
     {
-        int cpus = cpu->threads > 0 ? cpu->index / cpu->threads : cpu->index / cpu->cores;
+        int cpus = cpu->index / cpu->threads;
+        char tmp[RESULT_LEN];
+        snprintf(tmp, RESULT_LEN, "%dx %s", cpus, result);
+        strncpy(result, tmp, RESULT_LEN-1);
+    }
+    // Ditto with core count if we don't have a valid thread count
+    else if (cpu->cores > cpu->threads && cpu->index > cpu->cores && cpu->cores > 0)
+    {
+        int cpus = cpu->index / cpu->cores;
         char tmp[RESULT_LEN];
         snprintf(tmp, RESULT_LEN, "%dx %s", cpus, result);
         strncpy(result, tmp, RESULT_LEN-1);
