@@ -14,7 +14,7 @@
 
 
 
-static const char *VERSION = "0.4.0";
+static const char *VERSION = "0.4.1";
 
 
 
@@ -471,18 +471,8 @@ int main(int argc, char *argv[])
                                     printf("     %s\n", screen);
                             }
                         }
-                        else 
-                        {
-                            // Compact - bullet - single or multiple screens
-                            if (COMPACT)
-                                printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
-                            else
-                            {
-                                // No compact - bullet - single screen
-                                if (noScreens == 1)
-                                    printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
-                            }
-                        }
+                        else
+                            printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
                     }
 
                     free(screen);
