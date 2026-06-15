@@ -24,13 +24,17 @@
 #include "general.h"
 #include "globals.h"
 #include "gpu.h"
+#ifndef EMBEDDED
 #include "replacements.h"
+#endif
 
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 
+
+#ifndef EMBEDDED
 
 /**
  * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
@@ -300,6 +304,24 @@ char *cleanCPUName(const char *input, size_t inputSize)
 
     return result;
 }
+
+#else
+
+char *cleanCPUName(const char *input, size_t inputSize)
+{
+    if (!input || inputSize < 2) return strdup("");
+
+    // Prepare result string
+    char *result = malloc(inputSize);
+    if (!result) return strdup("");
+    
+    // Copy input string to result
+    strncpy(result, input, inputSize - 1);
+    result[inputSize - 1] = '\0';
+    return result;
+}
+
+#endif
 
 /**
  * Extracts CPU data from the given cpuinfo file and packs it into a CPU_DATA
@@ -663,6 +685,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 
 
+#ifndef EMBEDDED
+
     if (result->arch == X86)
     {
         // If the model name has GPU name in it, we will extract it and save if
@@ -714,6 +738,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
         }
     }
+
+#endif
 
 
 

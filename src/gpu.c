@@ -17,7 +17,9 @@
 #include "general.h"
 #include "globals.h"
 #include "gpu.h"
+#ifndef EMBEDDED
 #include "replacements.h"
+#endif
 
 #include <dirent.h>
 #include <linux/limits.h>
@@ -27,6 +29,8 @@
 #include <unistd.h>
 
 
+
+#ifndef EMBEDDED
 
 /**
  * Cleans a GPU's name so it is less needlessly verbose and 'to the point'.
@@ -316,6 +320,23 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
     return result;
 }
 
+#else
+
+char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCPU)
+{
+    if (!vendor || !device) return strdup("");
+
+    // Prepare result strings
+    const size_t RESULT_SIZE = (GPU_NAME_LEN * 2) + 1;
+    char *result = malloc(RESULT_SIZE);
+    if (!result) return strdup("");
+
+    snprintf(result, RESULT_SIZE, "%s %s", vendor, device);
+    return result;
+}
+
+#endif
+
 /**
  * @param count Number of GPUs actually detected (intended to be used by reference)
  * @return Pointer to up to 4 GPU_IDS structs containing detected GPUs
@@ -402,6 +423,8 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 
 
 
+#ifndef EMBEDDED
+
     // If Intel GPU, query our pre-defined iGPU list
     if (gpu->vendor == 0x8086)
     {
@@ -455,6 +478,8 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
             fclose(fStream);
         }
     }
+
+#endif
 
 
 

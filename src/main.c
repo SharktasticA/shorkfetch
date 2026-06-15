@@ -14,7 +14,7 @@
 
 
 
-static const char *VERSION = "0.4.1";
+static const char *VERSION = "0.4.2";
 
 
 
@@ -110,7 +110,11 @@ int main(int argc, char *argv[])
     TERM_SIZE = getTerminalSize();
 
     char bullet = '*';
+#ifndef EMBEDDED
     char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,root,lip, ,clrs, ");
+#else
+    char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,root, ");
+#endif
     int noIP = 0;
     int saveConf = 0;
     int shorkLine = 0;

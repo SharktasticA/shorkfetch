@@ -31,6 +31,8 @@ typedef struct {
 
 
 
+#ifndef EMBEDDED
+
 // Harcoded Intel iGPU names to use via device ID lookup to replace "messy"
 // data from pci.ids
 static const char* INTEL_IGPUS[] = {
@@ -285,6 +287,8 @@ static const char* INTEL_IGPUS[] = {
     [0xa7ac] = "Graphics (80-96EU)",                    // Core 5 120U/7 150U
     [0xa7ad] = "Graphics (64EU)"                        // Core 3 100U
 };
+
+#endif
 
 
 
