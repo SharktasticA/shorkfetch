@@ -24,6 +24,7 @@ typedef enum
 {
     NORMAL = 0,
     BULLETS,
+    ICONS
 } VIEW_MODE;
 
 
@@ -56,6 +57,21 @@ static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) / sizeof(POSSIBLE
 extern char *COLOUR;
 extern int COMPACT;
 extern char *HOME;
+static const char *ICON_OS  = "🖳 ";
+static const char *ICON_KRN = "🖵 ";
+static const char *ICON_UPT  = "🖵 ";
+static const char *ICON_PKGS = "🖵 ";
+static const char *ICON_SCN = "🖵 ";
+static const char *ICON_DE = "🖵 ";
+static const char *ICON_WM = "🖵 ";
+static const char *ICON_TRM = "🖵 ";
+static const char *ICON_SH = "🖵 ";
+static const char *ICON_CPU = "🖵 ";
+static const char *ICON_GPU = "🖵 ";
+static const char *ICON_RAM = "🗐 ";
+static const char *ICON_SWAP = "🗘 ";
+static const char *ICON_ROOT = "🖴 ";
+static const char *ICON_LIP = "🖧 ";
 extern struct winsize TERM_SIZE;
 extern int WAYLAND_PRESENT;
 extern int X11_PRESENT;

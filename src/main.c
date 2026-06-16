@@ -224,6 +224,8 @@ int main(int argc, char *argv[])
                     mode = NORMAL;
                 else if (strcmp(modeVal, "b") == 0 || strcmp(modeVal, "bullet") == 0 || strcmp(modeVal, "bullets") == 0)
                     mode = BULLETS;
+                else if (strcmp(modeVal, "i") == 0 || strcmp(modeVal, "icon") == 0 || strcmp(modeVal, "icons") == 0)
+                    mode = ICONS;
                 else
                 {
                     printf("ERROR: unrecognised mode \"%s\"\n", modeVal);
@@ -237,7 +239,9 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                     printf("\"normal\"\n", mode);
                 else if (mode == BULLETS)
-                    printf("\"bullet\"\n", mode);
+                    printf("\"bullets\"\n", mode);
+                else if (mode == ICONS)
+                    printf("\"icons\"\n", mode);
                 free(COLOUR);
                 free(fields);
                 return 0;
@@ -420,7 +424,12 @@ int main(int argc, char *argv[])
                     else
                         printf("%sOS:%s  %s\n", colAccent, colReset, os);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, os);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_OS);
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, os);
+                }
             }
         }
         else if (strcmp(fieldsProcessed[i], "krn") == 0)
@@ -436,7 +445,12 @@ int main(int argc, char *argv[])
                     else
                         printf("%sKrn:%s %s\n", colAccent, colReset, kernel);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, kernel);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_KRN);
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, kernel);
+                }
             }
             free(kernel);
         }
@@ -453,7 +467,12 @@ int main(int argc, char *argv[])
                     else
                         printf("%sUp:%s  %s\n", colAccent, colReset, uptime);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, uptime);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_UPT);
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, uptime);
+                }
             }
             free(uptime);
         }
@@ -470,7 +489,12 @@ int main(int argc, char *argv[])
                     else
                         printf("%sPkg:%s %s\n", colAccent, colReset, pkgs);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, pkgs);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_PKGS);
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, pkgs);
+                }
             }
             free(pkgs);
         }
@@ -517,7 +541,11 @@ int main(int argc, char *argv[])
                             }
                         }
                         else
-                            printf(" %s%c%s %s\n", colAccent, bullet, colReset, screen);
+                        {
+                            char icon[10] = {bullet};
+                            if (mode == ICONS) snprintf(icon, 10, "%s", ICON_SCN);
+                            printf(" %s%s%s %s\n", colAccent, icon, colReset, screen);
+                        }
                     }
 
                     free(screen);
@@ -538,7 +566,12 @@ int main(int argc, char *argv[])
                     else
                         printf("%sDE:%s  %s\n", colAccent, colReset, de);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, de);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_DE);
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, de);
+                }
             }
         }
         else if (strcmp(fieldsProcessed[i], "wm") == 0)
@@ -564,10 +597,12 @@ int main(int argc, char *argv[])
                 }
                 else 
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_WM);
                     if (!COMPACT)
-                        printf(" %s%c%s %s%s\n", colAccent, bullet, colReset, wm, server);
+                        printf(" %s%s%s %s%s\n", colAccent, icon, colReset, wm, server);
                     else
-                        printf(" %s%c%s %s\n", colAccent, bullet, colReset, wm);
+                        printf(" %s%s%s %s\n", colAccent, icon, colReset, wm);
                 }
             }
         }
@@ -586,10 +621,13 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_TRM);
+
                     if (!COMPACT)
-                        printf(" %s%c%s %s (%dx%d)\n", colAccent, bullet, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        printf(" %s%s%s %s (%dx%d)\n", colAccent, icon, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        printf(" %s%c%s %s\n", colAccent, bullet, colReset, trm);
+                        printf(" %s%s%s %s\n", colAccent, icon, colReset, trm);
                 }
             }
             // If we don't have a terminal name, we can at least still show the
@@ -606,10 +644,13 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_TRM);
+
                     if (!COMPACT)
-                        printf(" %s%c%s %dx%d console\n", colAccent, bullet, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        printf(" %s%s%s %dx%d console\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        printf(" %s%c%s %dx%dch\n", colAccent, bullet, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        printf(" %s%s%s %dx%dch\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                 }
             }
             free(trm);
@@ -627,7 +668,13 @@ int main(int argc, char *argv[])
                     else
                         printf("%sSh:%s  %s\n", colAccent, colReset, shell);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, shell);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_SH);
+
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, shell);
+                }
             }
             free(shell);
         }
@@ -646,7 +693,12 @@ int main(int argc, char *argv[])
                         else
                             printf("%sCPU:%s %s\n", colAccent, colReset, cpuStr);
                     }
-                    else printf(" %s%c%s %s\n", colAccent, bullet, colReset, cpuStr);
+                    else
+                    {
+                        char icon[10] = {bullet};
+                        if (mode == ICONS) snprintf(icon, 10, "%s", ICON_CPU);
+                        printf(" %s%s%s %s\n", colAccent, icon, colReset, cpuStr);
+                    }
                 }
                 free(cpuStr);
             }
@@ -684,7 +736,12 @@ int main(int argc, char *argv[])
                                     printf("     %s\n", gpuStr);
                             }
                         }
-                        else printf(" %s%c%s %s\n", colAccent, bullet, colReset, gpuStr);
+                        else
+                        {
+                            char icon[10] = {bullet};
+                            if (mode == ICONS) snprintf(icon, 10, "%s", ICON_GPU);
+                            printf(" %s%s%s %s\n", colAccent, icon, colReset, gpuStr);
+                        }
                     }
 
                     free(gpuStr);
@@ -703,7 +760,12 @@ int main(int argc, char *argv[])
                     else
                         printf("%sGPU:%s %s\n", colAccent, colReset, gpuFromCPU);
                 }
-                else printf(" %s%c%s %s\n", colAccent, bullet, colReset, gpuFromCPU);
+                else
+                {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_GPU);
+                    printf(" %s%s%s %s\n", colAccent, icon, colReset, gpuFromCPU);
+                }
             }
             free(gpus);
         }
@@ -722,10 +784,12 @@ int main(int argc, char *argv[])
                 }
                 else 
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_RAM);
                     if (!COMPACT)
-                        printf(" %s%c%s %s RAM\n", colAccent, bullet, colReset, ram);
+                        printf(" %s%s%s %s RAM\n", colAccent, icon, colReset, ram);
                     else
-                        printf(" %s%c%s %s (R)\n", colAccent, bullet, colReset, ram);
+                        printf(" %s%s%s %s (R)\n", colAccent, icon, colReset, ram);
                 }
             }
             free(ram);
@@ -745,10 +809,13 @@ int main(int argc, char *argv[])
                 }
                 else 
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_SWAP);
+
                     if (!COMPACT)
-                        printf(" %s%c%s %s swap\n", colAccent, bullet, colReset, swap);
+                        printf(" %s%s%s %s swap\n", colAccent, icon, colReset, swap);
                     else
-                        printf(" %s%c%s %s (S)\n", colAccent, bullet, colReset, swap);
+                        printf(" %s%s%s %s (S)\n", colAccent, icon, colReset, swap);
                 }
             }
             free(swap);
@@ -768,10 +835,13 @@ int main(int argc, char *argv[])
                 }
                 else 
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_ROOT);
+
                     if (!COMPACT)
-                        printf(" %s%c%s %s root\n", colAccent, bullet, colReset, root);
+                        printf(" %s%s%s %s root\n", colAccent, icon, colReset, root);
                     else
-                        printf(" %s%c%s %s (/)\n", colAccent, bullet, colReset, root);
+                        printf(" %s%s%s %s (/)\n", colAccent, icon, colReset, root);
                 }
             }
             free(root);
@@ -791,10 +861,13 @@ int main(int argc, char *argv[])
                 }
                 else 
                 {
+                    char icon[10] = {bullet};
+                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_LIP);
+
                     if (!COMPACT)
-                        printf(" %s%c%s %s local\n", colAccent, bullet, colReset, localIP);
+                        printf(" %s%s%s %s local\n", colAccent, icon, colReset, localIP);
                     else
-                        printf(" %s%c%s %s (L)\n", colAccent, bullet, colReset, localIP);
+                        printf(" %s%s%s %s (L)\n", colAccent, icon, colReset, localIP);
                 }
                 free(localIP);
             }

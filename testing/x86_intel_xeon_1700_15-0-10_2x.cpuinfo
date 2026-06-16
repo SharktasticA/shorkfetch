@@ -7,6 +7,7 @@ stepping : 10
 cpu MHz : 1695.379
 cache size : 256 KB
 physical id : 0
+siblings : 1
 fdiv_bug : no
 hlt_bug : no
 f00f_bug : no
@@ -15,8 +16,7 @@ fpu : yes
 fpu_exception : yes
 cpuid level : 2
 wp : yes
-flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca
-cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm
+flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm
 bogomips : 3342.33
 
 processor : 1
@@ -28,6 +28,7 @@ stepping : 10
 cpu MHz : 1695.379
 cache size : 256 KB
 physical id : 0
+siblings : 1
 fdiv_bug : no
 hlt_bug : no
 f00f_bug : no
@@ -36,6 +37,5 @@ fpu : yes
 fpu_exception : yes
 cpuid level : 2
 wp : yes
-flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca
-cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm
+flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm
 bogomips : 3383.29
