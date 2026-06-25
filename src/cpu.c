@@ -12,11 +12,7 @@
 
 
 
-/*
-    OPTIMISATION TODO
-        * Intel
-            * Arrandale embedded (Core iX-XXXE/LE/UE)
-*/
+
 
 
 
@@ -1105,7 +1101,11 @@ char *interpretCPU(CPU_DATA *cpu)
                     if ((cpu->stepping == 2 || cpu->stepping == 5) && strstr(cpu->name, "Core"))
                     {
                         const char *suffix = NULL;
-                        if (strstr(cpu->name, "       M"))
+                        if (strstr(cpu->name, "       LE"))
+                            suffix = "LE";
+                        else if (strstr(cpu->name, "       UE"))
+                            suffix = "UE";
+                        else if (strstr(cpu->name, "       M"))
                             suffix = "M";
                         else if (strstr(cpu->name, "       Q"))
                             suffix = "QM";
@@ -1115,6 +1115,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             suffix = "S";
                         else if (strstr(cpu->name, "       K"))
                             suffix = "K";
+                        else if (strstr(cpu->name, "       E"))
+                            suffix = "E";
                         else if (strstr(cpu->name, "       L"))
                             suffix = "LM";
                         else if (strstr(cpu->name, "       U"))
