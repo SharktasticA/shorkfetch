@@ -24,13 +24,17 @@
 #include "general.h"
 #include "globals.h"
 #include "gpu.h"
+#ifndef EMBEDDED
 #include "replacements.h"
+#endif
 
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 
+
+#ifndef EMBEDDED
 
 /**
  * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
@@ -300,6 +304,24 @@ char *cleanCPUName(const char *input, size_t inputSize)
 
     return result;
 }
+
+#else
+
+char *cleanCPUName(const char *input, size_t inputSize)
+{
+    if (!input || inputSize < 2) return strdup("");
+
+    // Prepare result string
+    char *result = malloc(inputSize);
+    if (!result) return strdup("");
+    
+    // Copy input string to result
+    strncpy(result, input, inputSize - 1);
+    result[inputSize - 1] = '\0';
+    return result;
+}
+
+#endif
 
 /**
  * Extracts CPU data from the given cpuinfo file and packs it into a CPU_DATA
@@ -661,6 +683,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 
 
+#ifndef EMBEDDED
+
     if (result->arch == X86)
     {
         // If the model name has GPU name in it, we will extract it and save if
@@ -719,6 +743,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
         }
     }
+
+#endif
 
 
 
@@ -1060,8 +1086,21 @@ char *interpretCPU(CPU_DATA *cpu)
             }
             else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
-                // Deschutes & Covington
-                if (cpu->model == 5)
+                // Klamath & Deschutes (OverDrive)
+                if (cpu->model == 3)
+                {
+                    // Pentium II OverDrive is actually a Deschutes core
+                    // despite reporting the same model as Klamath
+                    if (cpu->stepping == 2)
+                    {
+                        char tmp[NAME_LEN];
+                        snprintf(tmp, NAME_LEN, "Intel Pentium II OverDrive (Deschutes)");
+                        strncpy(cpu->name, tmp, NAME_LEN-1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                    }
+                }
+                // Deschutes (non-OverDrive) & Covington
+                else if (cpu->model == 5)
                 {
                     // Pentium II (Deschutes) and the Deschutes-based Pentium II Xeon
                     // and Celeron (Covington) have basically the same CPU ID, but we

@@ -1,0 +1,24 @@
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 3
+model name	: Pentium II (Klamath)
+stepping	: 2
+microcode	: 0xffffffff
+cpu MHz		: 333.300
+cache size	: 512 KB
+fdiv_bug	: no
+f00f_bug	: no
+coma_bug	: no
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 2
+wp		: yes
+flags		: fpu vme pse tsc msr pae mce cx8 mtrr pge mca cmov pse36 mmx fxsr cpuid
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit spectre_v2_user old_microcode
+bogomips	: 666.60
+clflush size	: 32
+cache_alignment	: 32
+address sizes	: 36 bits physical, 32 bits virtual
+power management:
+

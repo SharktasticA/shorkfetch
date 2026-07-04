@@ -5,6 +5,10 @@ STRIP ?= strip
 
 CFLAGS += -I.
 
+ifdef EMBEDDED
+	CFLAGS += -DEMBEDDED
+endif
+
 ifdef TESTS
 	CFLAGS += -DTESTS
 endif

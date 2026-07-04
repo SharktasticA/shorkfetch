@@ -35,13 +35,18 @@ char *getRoot(void)
     root[0] = '\0';
 
     struct statvfs fs;
-
     if (statvfs("/", &fs) != 0)
         return root;
 
     long long total = (long long)fs.f_blocks * fs.f_frsize;
+    // If total = 0, return the blank result string to flag that we have
+    // nothing to show
+    if (total == 0)
+        return root;
+
     long long freeRoot  = (long long)fs.f_bfree * fs.f_frsize;
     long long used  = total - freeRoot;
+
     char *usedStr = bytesToReadable("B", used);
     char *totalStr = bytesToReadable("B", total);
 
