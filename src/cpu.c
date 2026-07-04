@@ -926,8 +926,21 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
-                // Deschutes & Covington
-                if (cpu->model == 5)
+                // Klamath & Deschutes (OverDrive)
+                if (cpu->model == 3)
+                {
+                    // Pentium II OverDrive is actually a Deschutes core
+                    // despite reporting the same model as Klamath
+                    if (cpu->stepping == 2)
+                    {
+                        char tmp[NAME_LEN];
+                        snprintf(tmp, NAME_LEN, "Intel Pentium II OverDrive (Deschutes)");
+                        strncpy(cpu->name, tmp, NAME_LEN-1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                    }
+                }
+                // Deschutes (non-OverDrive) & Covington
+                else if (cpu->model == 5)
                 {
                     // Pentium II (Deschutes) and the Deschutes-based Pentium II Xeon
                     // and Celeron (Covington) have basically the same CPU ID, but we

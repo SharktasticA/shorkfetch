@@ -1,0 +1,24 @@
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 1
+model name	: Pentium Pro
+stepping	: 7
+microcode	: 0xffffffff
+cpu MHz		: 199.982
+cache size	: 256 KB
+fdiv_bug	: no
+f00f_bug	: no
+coma_bug	: no
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 2
+wp		: yes
+flags		: fpu vme pse tsc msr pae mce cx8 mtrr pge mca cmov cpuid
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit spectre_v2_user
+bogomips	: 399.96
+clflush size	: 32
+cache_alignment	: 32
+address sizes	: 36 bits physical, 32 bits virtual
+power management:
+
