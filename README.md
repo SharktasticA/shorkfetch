@@ -97,7 +97,7 @@ Only one colour can be used at a time. "off" will use your system's/terminal emu
 These are possible field names you can use with the `--fields` argument. You enter then as a comma-separated list in double quotes. You can use any more than once and in any order, though there a maximum of 50 fields is presently supported.
 
 * (single blank space): New line
-* `---`: Category separator
+* `---`: Separator
 * `os`: Operating system
 * `krn`: Kernel
 * `upt`: Uptime
@@ -122,6 +122,10 @@ When customising SHORKFETCH with the options above, you can use the `--save` opt
     ~/.config/shorkutils/shorkfetch.conf
 
 To reset SHORKFETCH to its default configuration, simply run with the `--reset` option.
+
+### Notes
+
+* The SHORK ASCII art will be automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.
 
 
 

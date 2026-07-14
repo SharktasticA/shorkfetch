@@ -14,7 +14,7 @@
 
 
 
-static const char *VERSION = "0.4.3";
+static const char *VERSION = "0.4.4";
 
 
 
@@ -96,9 +96,13 @@ void showHelp(void)
     formatNewLines(colours, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", colours);
 
-    char fieldNames[200] = "Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, clrs, --- (category separator), single blank space (new line)\n";
+    char fieldNames[200] = "Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, clrs, --- (separator), single blank space (new line)\n\n";
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", fieldNames);
+
+    char notes[140] = "Note: the SHORK ASCII art is disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.\n";
+    formatNewLines(notes, TERM_SIZE.ws_col, NULL, 0);
+    printf("%s", notes);
 }
 
 
@@ -309,7 +313,7 @@ int main(int argc, char *argv[])
     }
 
     int showShorkOrig = showShork;
-    if (noFields <= 6)
+    if (noFields <= 6 || TERM_SIZE.ws_col < 62)
         showShork = 0;
 
 
