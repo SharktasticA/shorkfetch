@@ -34,7 +34,7 @@ typedef enum
 static const char *POSSIBLE_FIELDS[] =
 {
     " ",    // Blank line
-    "---",  // Category separator
+    "---",  // Separator
     "os",   // Operating system
     "krn",  // Kernel
     "upt",  // Uptime
