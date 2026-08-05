@@ -19,11 +19,21 @@
 
 
 
-#define CPUINFO_BUFFER_LEN  2048
-#define FLAGS_LEN           1536
-#define NAME_LEN            128
-#define UARCH_LEN           128
-#define VENDOR_LEN          16
+// /proc/cpuinfo read buffer string length
+#define CPUINFO_BUFFER_LEN      4096
+// Flag value for PHYS_IDS.noUniquePhysIDs when PHYS_IDS.uniquePhysIDs is
+// unreliable and should be ignored
+#define IGNORE_UNIQUE_PHYS_IDS   -1
+// CPU_DATA.flags string length
+#define FLAGS_LEN               1536
+// CPU_DATA.name string length
+#define NAME_LEN                128
+// CPU_DATA.uarch string length
+#define UARCH_LEN               128
+// PHYS_IDS.uniquePhysIDs array size
+#define UNIQUE_PHYS_IDS_SIZE     128
+// CPU_DATA.vendor string length
+#define VENDOR_LEN              16
 
 
 
@@ -37,6 +47,15 @@ typedef enum
 } CPU_ARCH;
 
 
+
+typedef struct {
+    // Unique physical IDs recorded
+    int uniquePhysIDs[UNIQUE_PHYS_IDS_SIZE];
+    // Number of unique physical IDs recorded
+    int noUniquePhysIDs;
+    // Highest phyiscal ID found
+    int maxPhysID;
+} PHYS_IDS;
 
 typedef struct {
     // Major architecture (all)
@@ -57,8 +76,8 @@ typedef struct {
     float freq;
     // Processor index count (ARM, POWER, some RISC-V, x86)
     int index;
-    // Maximum physical ID (x86)
-    int maxPhysID;
+    // Physical IDs (x86)
+    PHYS_IDS physIDs;
     // Physical core count (x86)
     int cores;
     // Logical thread count (RISC-V, x86)

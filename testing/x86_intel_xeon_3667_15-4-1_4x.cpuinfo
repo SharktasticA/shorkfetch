@@ -1,0 +1,199 @@
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 0
+siblings        : 2
+core id         : 0
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7321.79
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 1
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 4
+siblings        : 2
+core id         : 4
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7314.82
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 2
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 3
+siblings        : 2
+core id         : 3
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7315.15
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 3
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 7
+siblings        : 2
+core id         : 7
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7315.01
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 4
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 0
+siblings        : 2
+core id         : 0
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7315.01
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 5
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 4
+siblings        : 2
+core id         : 4
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7315.07
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 6
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 3
+siblings        : 2
+core id         : 3
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7315.13
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+processor       : 7
+vendor_id       : GenuineIntel
+cpu family      : 15
+model           : 4
+model name      :                Intel(R) Xeon(TM) MP CPU 3.66GHz
+stepping        : 1
+cpu MHz         : 3657.825
+cache size      : 1024 KB
+physical id     : 7
+siblings        : 2
+core id         : 7
+cpu cores       : 1
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 5
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov
+pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx lm pni monitor
+ds_cpl est tm2 cid cx16 xtpr
+bogomips        : 7315.03
+clflush size    : 64
+cache_alignment : 128
+address sizes   : 40 bits physical, 48 bits virtual
+power management:

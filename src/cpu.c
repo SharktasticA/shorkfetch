@@ -302,6 +302,13 @@ char *cleanCPUName(const char *input, size_t inputSize)
         }
     }
 
+    // Remove any leading spaces
+    char *start = result;
+    while (*start == ' ')
+        start++;
+    if (start != result)
+        memmove(result, start, strlen(start) + 1);
+
     return result;
 }
 
@@ -318,6 +325,14 @@ char *cleanCPUName(const char *input, size_t inputSize)
     // Copy input string to result
     strncpy(result, input, inputSize - 1);
     result[inputSize - 1] = '\0';
+
+    // Remove any leading spaces
+    char *start = result;
+    while (*start == ' ')
+        start++;
+    if (start != result)
+        memmove(result, start, strlen(start) + 1);
+
     return result;
 }
 
@@ -344,7 +359,11 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         .stepping = -1,
         .freq = -1,
         .index = 0,
-        .maxPhysID = -1,
+        .physIDs = (PHYS_IDS) {
+            .uniquePhysIDs = {0},
+            .noUniquePhysIDs = 0,
+            .maxPhysID = -1
+        },
         .cores = -1,
         .threads = -1,
         .cacheSize = -1,
@@ -573,11 +592,37 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 5, ':', 2);
                 if (extract)
                 {
-                    int val = atoi(extract) + 1;
-                    // This can sometimes count backwards, so we need this
-                    // check...
-                    if (val > result->maxPhysID)
-                        result->maxPhysID = val;
+                    int val = atoi(extract);
+
+                    if (result->physIDs.noUniquePhysIDs != IGNORE_UNIQUE_PHYS_IDS)
+                    {
+                        // Check if we already recorded this ID before
+                        int found = 0;
+                        for (int i = 0; i < result->physIDs.noUniquePhysIDs; i++)
+                        {
+                            if (result->physIDs.uniquePhysIDs[i] == val)
+                            {
+                                found = 1;
+                                break;
+                            }
+                        }
+
+                        // Record said ID if it's new
+                        if (!found)
+                        {
+                            if (result->physIDs.noUniquePhysIDs < UNIQUE_PHYS_IDS_SIZE)
+                                result->physIDs.uniquePhysIDs[result->physIDs.noUniquePhysIDs++] = val;
+                            // If over the buffer size, mark this as unreliable
+                            // instead of silently under-reporting it
+                            else
+                                result->physIDs.noUniquePhysIDs = IGNORE_UNIQUE_PHYS_IDS;
+                        }
+                    }
+
+                    // Find the highest recorded value (+1 so it starts at 1)
+                    if ((val + 1) > result->physIDs.maxPhysID)
+                        result->physIDs.maxPhysID = (val + 1);
+
                     free(extract);
                 }
             }
@@ -806,6 +851,12 @@ char *interpretCPU(CPU_DATA *cpu)
     // Run through our x86-specific quirks, distinctions and manipulation
     if (cpu->arch == X86 && cpu->vendor && cpu->name && (cpu->vendor[0] != '\0' || cpu->name[0] != '\0'))
     {
+        // Physical IDs don't always seem to be sequential, so may defer to our
+        // count of now many unique IDs were recorded instead of the highest
+        // value recorded.
+        if(cpu->physIDs.noUniquePhysIDs > 1)
+            cpu->physIDs.maxPhysID = cpu->physIDs.noUniquePhysIDs;
+
         // Check if model name lacks the vendor name and if we need to try
         // adding it in manually
         if ((cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u') && (cpu->name[0] != '\0' && cpu->name[0] != 'u'))
@@ -1482,7 +1533,7 @@ char *interpretCPU(CPU_DATA *cpu)
             else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
             {
                 // Early Pentium 4s generally don't have a model number, and
-                // the later ones that do don't report it, so we will
+                // the later ones that do *don't* report it, so we will
                 // distinguish them via their core name
                 if (strstr(cpu->name, "4 CPU"))
                 {
@@ -1511,7 +1562,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
                 // Ditto for non-Extreme Pentium D
-                else if (cpu->cores == 2)
+                else if (!strstr(cpu->name, ") X") && cpu->cores == 2 && cpu->model != 4 && cpu->stepping != 8)
                 {
                     // Non-Extreme (no Hyper-Threading)
                     if (cpu->cores == cpu->threads)
@@ -1558,6 +1609,152 @@ char *interpretCPU(CPU_DATA *cpu)
                         }
                     }
                 }
+                // Ditto for Xeon
+                else
+                {
+                    char *tmp = NULL;
+
+                    // For Xeons that don't call themselves Xeon...
+                    if (strstr(cpu->name, "Intel(R) CPU"))
+                    {
+                        tmp = findReplace(cpu->name, NAME_LEN, "Intel(R) CPU", "Intel Xeon CPU");
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                        tmp = NULL;
+                    }
+
+                    // For Xeons that call themselves "XEON"...
+                    char *xeonPos = strstr(cpu->name, "XEON");
+                    if (xeonPos)
+                    {
+                        xeonPos[1] = 'e';
+                        xeonPos[2] = 'o';
+                        xeonPos[3] = 'n';
+                    }
+
+                    // Foster
+                    if (cpu->model == 0)
+                    {
+                        // If for some reason we don't have core/thread info,
+                        // we know for sure that Foster is always 1C/1T despite
+                        // exposing the "ht" flag
+                        if (cpu->cores == -1 || cpu->threads == -1)
+                            cpu->cores = cpu->threads = 1;
+
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Foster)");
+                    }
+                    // Foster & Foster MP
+                    else if (cpu->model == 1)
+                    {
+                        // We at least know either only has 1 core
+                        if (cpu->cores == -1)
+                            cpu->cores = 1;
+
+                        // Foster MP can support HT and up to octo-CPU config,
+                        // whereas Foster DP always lacks HT despite having the
+                        // "ht" flag and can only support up to dual-CPU config
+                        if (cpu->threads == 2 || cpu->index > 2 || cpu->physIDs.maxPhysID > 2)
+                        {
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Foster MP)");
+                            // If the processor index count is higher than 8,
+                            // we must have HT enabled, so we can set a sure
+                            // thread value if needed
+                            if (cpu->index > 8 && cpu->threads == -1)
+                                cpu->threads = 2;
+                        }
+                        // Foster MP only went up to 1.6GHz, so if the reported
+                        // frequency is more than that, we must be dealing with
+                        // a Foster DP
+                        else if (cpu->freq > 1650)
+                        {
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Foster)");
+                            // If for some reason we don't have core/thread
+                            // info, we know for sure that Foster is always 1C/
+                            // 1T despite exposing the "ht" flag
+                            if (cpu->cores == -1 || cpu->threads == -1)
+                                cpu->cores = cpu->threads = 1;
+                        }
+
+                        // Generic fallback
+                        if (!tmp)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Foster)");
+                    }
+                    // Prestonia, Gallatin or Gallatin MP
+                    else if (cpu->model == 2)
+                    {
+                        // We at least know all three only have 1 core
+                        if (cpu->cores == -1)
+                            cpu->cores = 1;
+
+                        // Gallatin MP support up to octo-CPU config, so we can
+                        // filter the other two out if we have processor index
+                        // or physical ID count more than 4 and 2 respectively
+                        if (cpu->index > 4 || cpu->physIDs.maxPhysID > 2)
+                        {
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Gallatin MP)");
+                            // If the processor index count is higher than 8,
+                            // we must have HT enabled, so we can set a sure
+                            // thread value if needed
+                            if (cpu->index > 8 && cpu->threads == -1)
+                                cpu->threads = 2;
+                        }
+
+                        // Generic fallback
+                        if (!tmp)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Prestonia/Gallatin)");
+                    }
+                    // Nocona
+                    else if (cpu->model == 3)
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Nocona)");
+                    // Cranford, Irwindale, Paxville DP or Paxville
+                    else if (cpu->model == 4)
+                    {
+                        // Cranford and others
+                        if (cpu->stepping == 1)
+                        {
+                            // For 15-4-1, Cranford is uniquely 3.16GHz or
+                            // 3.66GHz
+                            if (strstr(cpu->name, "3.16GHz") || strstr(cpu->name, "3.66GHz"))
+                                tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Cranford)");
+                        }
+                        // Paxville DP or Paxville
+                        else if (cpu->stepping == 8)
+                        {
+                            // Paxville DP only came as 2.8GHz and no MP has the
+                            // same speed
+                            if (strstr(cpu->name, "2.80GHz"))
+                                tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Paxville DP)");
+                            else
+                                tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Paxville)");
+                        }
+
+                        // Generic fallback
+                        if (!tmp)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Cranford/Irwindale/Paxville)");
+                    }
+                    // Dempsey or Tulsa
+                    else if (cpu->model == 6)
+                    {
+                        // If there is more than 2048KB cache, this must be a
+                        // Tusla
+                        if (cpu->cacheSize > 2048)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Tulsa)");
+                        else
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Dempsey/Tulsa)");
+
+                        // Generic fallback
+                        if (!tmp)
+                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Dempsey/Tulsa)");
+                    }
+
+                    if (tmp)
+                    {
+                        strncpy(cpu->name, tmp, NAME_LEN - 1);
+                        cpu->name[NAME_LEN-1] = '\0';
+                        free(tmp);
+                    }
+                }
             }
         }
         // Bulldozer
@@ -1572,8 +1769,8 @@ char *interpretCPU(CPU_DATA *cpu)
                 // a config if the processor index count and per-CPU thread
                 // count are equal (impossible on a real multi-CPU config).
                 // See: AMD FX-8150
-                if (cpu->maxPhysID > 1 && cpu->index == cpu->threads)
-                    cpu->maxPhysID--;
+                if (cpu->physIDs.maxPhysID > 1 && cpu->index == cpu->threads)
+                    cpu->physIDs.maxPhysID--;
             }
         }
     }
@@ -1652,16 +1849,16 @@ char *interpretCPU(CPU_DATA *cpu)
 
     // If the maximum physical ID found is more than 1, we should be dealing
     // with a multi-CPU configuration and need to indicate this
-    if (cpu->maxPhysID > 1)
+    if (cpu->physIDs.maxPhysID > 1)
     {
         char tmp[RESULT_LEN];
-        snprintf(tmp, RESULT_LEN, "%dx %s", cpu->maxPhysID, result);
+        snprintf(tmp, RESULT_LEN, "%dx %s", cpu->physIDs.maxPhysID, result);
         strncpy(result, tmp, RESULT_LEN-1);
     }
     // If maxPhysID was not computed or not x86, we can also infer likely
     // multi-CPU configuration when the processor index count is higher than
     // the thread count
-    else if (cpu->threads > cpu->cores && cpu->index > cpu->threads && cpu->threads > 0)
+    else if (cpu->index > cpu->threads && cpu->threads > 0)
     {
         int cpus = cpu->index / cpu->threads;
         char tmp[RESULT_LEN];
