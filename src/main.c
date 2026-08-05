@@ -232,8 +232,6 @@ int main(int argc, char *argv[])
                     mode = NORMAL;
                 else if (strcmp(modeVal, "b") == 0 || strcmp(modeVal, "bullet") == 0 || strcmp(modeVal, "bullets") == 0)
                     mode = BULLETS;
-                else if (strcmp(modeVal, "i") == 0 || strcmp(modeVal, "icon") == 0 || strcmp(modeVal, "icons") == 0)
-                    mode = ICONS;
                 else
                 {
                     printf("ERROR: unrecognised mode \"%s\"\n", modeVal);
@@ -248,8 +246,6 @@ int main(int argc, char *argv[])
                     printf("\"normal\"\n", mode);
                 else if (mode == BULLETS)
                     printf("\"bullets\"\n", mode);
-                else if (mode == ICONS)
-                    printf("\"icons\"\n", mode);
                 free(COLOUR);
                 free(fields);
                 return 0;
@@ -435,7 +431,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_OS);
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, os);
                 }
             }
@@ -456,7 +451,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_KRN);
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, kernel);
                 }
             }
@@ -478,7 +472,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_UPT);
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, uptime);
                 }
             }
@@ -500,7 +493,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_PKGS);
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, pkgs);
                 }
             }
@@ -551,7 +543,6 @@ int main(int argc, char *argv[])
                         else
                         {
                             char icon[10] = {bullet};
-                            if (mode == ICONS) snprintf(icon, 10, "%s", ICON_SCN);
                             printf(" %s%s%s %s\n", colAccent, icon, colReset, screen);
                         }
                     }
@@ -577,7 +568,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_DE);
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, de);
                 }
             }
@@ -606,7 +596,6 @@ int main(int argc, char *argv[])
                 else 
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_WM);
                     if (!COMPACT)
                         printf(" %s%s%s %s%s\n", colAccent, icon, colReset, wm, server);
                     else
@@ -630,8 +619,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_TRM);
-
                     if (!COMPACT)
                         printf(" %s%s%s %s (%dx%d)\n", colAccent, icon, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
@@ -653,8 +640,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_TRM);
-
                     if (!COMPACT)
                         printf(" %s%s%s %dx%d console\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
@@ -679,8 +664,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_SH);
-
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, shell);
                 }
             }
@@ -704,7 +687,6 @@ int main(int argc, char *argv[])
                     else
                     {
                         char icon[10] = {bullet};
-                        if (mode == ICONS) snprintf(icon, 10, "%s", ICON_CPU);
                         printf(" %s%s%s %s\n", colAccent, icon, colReset, cpuStr);
                     }
                 }
@@ -747,7 +729,6 @@ int main(int argc, char *argv[])
                         else
                         {
                             char icon[10] = {bullet};
-                            if (mode == ICONS) snprintf(icon, 10, "%s", ICON_GPU);
                             printf(" %s%s%s %s\n", colAccent, icon, colReset, gpuStr);
                         }
                     }
@@ -771,7 +752,6 @@ int main(int argc, char *argv[])
                 else
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_GPU);
                     printf(" %s%s%s %s\n", colAccent, icon, colReset, gpuFromCPU);
                 }
             }
@@ -793,7 +773,6 @@ int main(int argc, char *argv[])
                 else 
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_RAM);
                     if (!COMPACT)
                         printf(" %s%s%s %s RAM\n", colAccent, icon, colReset, ram);
                     else
@@ -818,8 +797,6 @@ int main(int argc, char *argv[])
                 else 
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_SWAP);
-
                     if (!COMPACT)
                         printf(" %s%s%s %s swap\n", colAccent, icon, colReset, swap);
                     else
@@ -844,8 +821,6 @@ int main(int argc, char *argv[])
                 else 
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_ROOT);
-
                     if (!COMPACT)
                         printf(" %s%s%s %s root\n", colAccent, icon, colReset, root);
                     else
@@ -870,8 +845,6 @@ int main(int argc, char *argv[])
                 else 
                 {
                     char icon[10] = {bullet};
-                    if (mode == ICONS) snprintf(icon, 10, "%s", ICON_LIP);
-
                     if (!COMPACT)
                         printf(" %s%s%s %s local\n", colAccent, icon, colReset, localIP);
                     else
