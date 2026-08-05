@@ -1419,7 +1419,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 {
                     // Some Xeon E5 names may have a rough "0" just after the model
                     // number
-                    // See: Xeon E5-2690 (the original/v1)
+                    // See: Xeon E5-2690 (original/v1)
                     if (strstr(cpu->name, " 0 @"))
                     {
                         char *tmp = findReplace(cpu->name, NAME_LEN, " 0 ", " ");
@@ -1434,9 +1434,9 @@ char *interpretCPU(CPU_DATA *cpu)
                 // Westmere EX
                 else if (cpu->model == 47)
                 {
-                    // Some Xeon E7 model names have a space after the dash
-                    // separating the "E7" prefix and the four numbers
-                    // See: Xeon E7-4820 (the original/v1)
+                    // Some Xeon E7 model names have a rogue space between the
+                    // "E7-" prefix and the following four numbers
+                    // See: Xeon E7-4820 (original/v1)
                     if (strstr(cpu->name, "- "))
                     {
                         char *tmp = findReplace(cpu->name, NAME_LEN, "- ", "-");
@@ -1795,7 +1795,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
     // Use the CPU name as the core of the result string
-    strncpy(result, cpu->name, RESULT_LEN-1);
+    if (cpu->name)
+        strncpy(result, cpu->name, RESULT_LEN-1);
 
 
 
