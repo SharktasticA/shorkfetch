@@ -1,4 +1,4 @@
-# shorkfetch
+# SHORKFETCH
 
 A cute shark-themed Linux fetch tool made with speed, consistent output, and vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but often faster and provides cleaner output by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed for use on a wide range of hardware going back to the 486 era. But it works on modern Linux systems just fine.
 
