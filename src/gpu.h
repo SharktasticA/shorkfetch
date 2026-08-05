@@ -18,7 +18,8 @@
 
 
 
-#define GPU_NAME_LEN 256
+#define GPU_NAME_LEN    256
+#define MAX_GPUS        4
 
 
 

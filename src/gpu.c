@@ -339,7 +339,7 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 
 /**
  * @param count Number of GPUs actually detected (intended to be used by reference)
- * @return Pointer to up to 4 GPU_IDS structs containing detected GPUs
+ * @return Pointer to up to MAX_GPUS of GPU_IDS structs containing detected GPUs
  */
 GPU_IDS* getGPUs(int *count)
 {
@@ -353,7 +353,7 @@ GPU_IDS* getGPUs(int *count)
     }
 
     struct dirent *entry;
-    GPU_IDS *gpus = malloc(4 * sizeof(GPU_IDS));
+    GPU_IDS *gpus = malloc(MAX_GPUS * sizeof(GPU_IDS));
     if (!gpus) 
     {
         *count = 0;
@@ -400,7 +400,7 @@ GPU_IDS* getGPUs(int *count)
             gpus[*count].revision = revision;
             (*count)++;
 
-            if (*count == 4) break;
+            if (*count == MAX_GPUS) break;
         }
     }
     closedir(dir);

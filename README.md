@@ -62,6 +62,7 @@ Usage: shorkfetch [OPTIONS]
 * `-cl`, `--colour`: Specifies a custom accent colour; no assignment returns the current colour
 * `-co`, `--compact`: Compacts field names and field values
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields
+* `-fa`, `--force-art`: Forces the SHORK ASCII art to display no matter the setting, number of fields or terminal size
 * `-h`, `--help`: Shows help information and exits
 * `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
 * `-na`, `--no-art`: Disables the SHORK ASCII art
@@ -81,26 +82,28 @@ Only one colour can be used at a time. "off" will use your system's/terminal emu
 
 ### Fields
 
-These are possible field names you can use with the `--fields` argument. You enter then as a comma-separated list in double quotes. You can use any more than once and in any order, though there a maximum of 50 fields is presently supported.
+These are possible field names you can use with the `--fields` argument. You enter then as a comma-separated list in double quotes. You can use any more than once and in any order, though there is a maximum of 50 fields.
 
-* (single blank space): New line
-* `---`: Separator
-* `os`: Operating system
-* `krn`: Kernel
-* `upt`: Uptime
-* `pkgs`: Packages
-* `scn`: Screen(s)
-* `de`: Desktop environment
-* `wm`: Window manager and/or Wayland compositor
-* `trm`: Terminal emulator/console size
-* `sh`: Shell
-* `cpu`: CPU
-* `gpu`: GPU(s)
-* `ram`: System memory
-* `swap`: Swap memory
-* `root`: Root partition size
-* `lip`: Local IP address
-* `clrs`: ANSI escape code colour palette
+| Field | Description | Lines |
+| ----- | ----------- | ----- |
+| (single blank space) | New line | 1 |
+| `---` | Separator | 1 |
+| `os` | Operating system | 1 |
+| `krn` | Kernel | 1 |
+| `upt` | Uptime | 1 |
+| `pkgs` | Packages | 1 |
+| `scn` | Screen(s) | 1-∞ |
+| `de` | Desktop environment | 1 |
+| `wm` | Window manager and/or Wayland compositor | 1 |
+| `trm` | Terminal emulator/console size | 1 |
+| `sh` | Shell | 1 |
+| `cpu` | CPU | 1 |
+| `gpu` | GPU(s) | 1-4 |
+| `ram` | System memory | 1 |
+| `swap` | Swap memory | 1 |
+| `root` | Root partition size | 1 |
+| `lip` | Local IP address | 1 |
+| `clrs` | ANSI escape code 16-colour palette | 2 |
 
 ### Configuration
 
@@ -112,7 +115,7 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 ### Notes
 
-* The SHORK ASCII art will be automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.
+* By default, the SHORK ASCII art is automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present. The `--force-art` parameter can be used to override this.
 
 
 

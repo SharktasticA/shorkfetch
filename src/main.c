@@ -56,44 +56,48 @@ void showHelp(void)
     formatNewLines(options, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", options);
 
-    char bullet[140] = "-b, --bullet    Specifies a custom character to use with bullet-point mode; no assignment returns the current character\n";
-    formatNewLines(bullet, TERM_SIZE.ws_col, "                ", 0);
+    char bullet[140] = "-b, --bullet      Specifies a custom character to use with bullet-point mode; no assignment returns the current character\n";
+    formatNewLines(bullet, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", bullet);
 
-    char colour[100] = "-cl, --colour   Specifies a custom accent colour; no assignment returns the current colour\n";
-    formatNewLines(colour, TERM_SIZE.ws_col, "                ", 0);
+    char colour[100] = "-cl, --colour     Specifies a custom accent colour; no assignment returns the current colour\n";
+    formatNewLines(colour, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", colour);
 
-    char compact[70] = "-co, --compact  Compacts field names and field values\n";
-    formatNewLines(compact, TERM_SIZE.ws_col, "                ", 0);
+    char compact[70] = "-co, --compact    Compacts field names and field values\n";
+    formatNewLines(compact, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", compact);
 
-    char help[70] = "-h, --help      Displays help information and exits\n";
-    formatNewLines(help, TERM_SIZE.ws_col, "                ", 0);
+    char help[70] = "-h, --help        Displays help information and exits\n";
+    formatNewLines(help, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", help);
 
-    char fields[150] = "-f, --fields    Specifies a custom fields list and order; no assignment returns list of current fields\n";
-    formatNewLines(fields, TERM_SIZE.ws_col, "                ", 0);
+    char fields[150] = "-f, --fields      Specifies a custom fields list and order; no assignment returns list of current fields\n";
+    formatNewLines(fields, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", fields);
 
-    char mode[80] = "-m, --mode      Select what view mode to use: [n]ormal, [b]ullets\n";
-    formatNewLines(mode, TERM_SIZE.ws_col, "                ", 0);
+    char forceArt[130] = "-fa, --force-art  Forces the SHORK ASCII art to display no matter the setting, number of fields or terminal size\n";
+    formatNewLines(forceArt, TERM_SIZE.ws_col, "                  ", 0);
+    printf("%s", forceArt);
+
+    char mode[80] = "-m, --mode        Select what view mode to use: [n]ormal, [b]ullets\n";
+    formatNewLines(mode, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", mode);
 
-    char noArt[100] = "-na, --no-art   Disables the SHORK ASCII art\n";
-    formatNewLines(noArt, TERM_SIZE.ws_col, "                ", 0);
+    char noArt[100] = "-na, --no-art     Disables the SHORK ASCII art\n";
+    formatNewLines(noArt, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", noArt);
 
-    char reset[80] = "-r, --reset     Resets to default, deletes configuration file and exits\n";
-    formatNewLines(reset, TERM_SIZE.ws_col, "                ", 0);
+    char reset[80] = "-r, --reset       Resets to default, deletes configuration file and exits\n";
+    formatNewLines(reset, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", reset);
 
-    char save[100] = "-s, --save      Saves chosen options to a custom configuration file\n";
-    formatNewLines(save, TERM_SIZE.ws_col, "                ", 0);
+    char save[100] = "-s, --save        Saves chosen options to a custom configuration file\n";
+    formatNewLines(save, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", save);
 
-    char version[100] = "-v, --version   Displays version number and exits\n\n";
-    formatNewLines(version, TERM_SIZE.ws_col, "                ", 0);
+    char version[100] = "-v, --version     Displays version number and exits\n\n";
+    formatNewLines(version, TERM_SIZE.ws_col, "                  ", 0);
     printf("%s", version);
 
     char colours[180] = "Colours: black, blue, bold_blue, bold_cyan, bold_green, bold_magenta, bold_red, bold_white, bold_yellow, cyan, green, grey, magenta, red, white, yellow, off\n\n";
@@ -104,7 +108,7 @@ void showHelp(void)
     formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", fieldNames);
 
-    char notes[140] = "Note: the SHORK ASCII art is disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.\n";
+    char notes[140] = "Note: by default, the SHORK ASCII art is disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.\n";
     formatNewLines(notes, TERM_SIZE.ws_col, NULL, 0);
     printf("%s", notes);
 }
@@ -123,13 +127,14 @@ int main(int argc, char *argv[])
 #else
     char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,root, ");
 #endif
+    int forceShork = 0;
     int noIP = 0;
     int saveConf = 0;
     int shorkLine = 0;
     int showShork = 1;
     VIEW_MODE mode = NORMAL;
 
-    readConf(&bullet, &COLOUR, &COMPACT, &fields, &mode, &noIP, &showShork);
+    readConf(&bullet, &COLOUR, &COMPACT, &fields, &forceShork, &mode, &noIP, &showShork);
 
     for (int i = 1; i < argc; i++)
     {
@@ -190,6 +195,8 @@ int main(int argc, char *argv[])
         }
         else if ((strcmp(argv[i], "-co") == 0) || (strcmp(argv[i], "--compact") == 0))
             COMPACT = 1;
+        else if ((strcmp(argv[i], "-fa") == 0) || (strcmp(argv[i], "--force-art") == 0))
+            forceShork = 1;
         else if (strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fields", 8) == 0)
         {
             // Find "=" as our needle
@@ -358,8 +365,13 @@ int main(int argc, char *argv[])
     }
 
     int showShorkOrig = showShork;
-    if (noFields <= 6 || TERM_SIZE.ws_col < 62)
-        showShork = 0;
+    if (forceShork)
+        showShork = 1;
+    else
+    {
+        if (noFields <= 6 || TERM_SIZE.ws_col < 62)
+            showShork = 0;
+    }
 
 
 
@@ -400,8 +412,6 @@ int main(int argc, char *argv[])
     char *wm = getWM(&de);
     char *gpuFromCPU = NULL;
     CPU_DATA *cpu = getCPU("/proc/cpuinfo", &gpuFromCPU);
-
-
 
     for (int i = 0; i < noFields; i++)
     {
@@ -864,10 +874,15 @@ int main(int argc, char *argv[])
         }
     }
 
+    // Finish off printing the SHORK is showShork was forced on
+    if (showShork && noFields <= 6)
+        for (int i = 0; i < 7 - noFields; i++)
+            printf("%s%s%s\n", colAccent, SHORK[shorkLine++], colReset);
+
 
 
     if (saveConf)
-        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, mode, noIP, showShorkOrig);
+        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, forceShork, mode, noIP, showShorkOrig);
 
     free(COLOUR);
     free(colAccent);
