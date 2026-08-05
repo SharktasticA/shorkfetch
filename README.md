@@ -123,12 +123,12 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 ### SHORKFETCH on real hardware + Debian 13
 
-<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/sharktastica-desktop_debian-13_tmux.png"></p>
+<p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on Debian 13" src="screenshots/sharktastica-desktop_debian-13_tmux.png"></p>
 
 ### SHORKFETCH on 86Box + SHORK 486
 
-<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/86box_shork-486_tmux.png"></p>
+<p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on SHORK 486 running inside 86Box" src="screenshots/86box_shork-486_tmux.png"></p>
 
 ### SHORKFETCH on VMware Workstation + SHORK 486
 
-<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/vmware_shork-486_tmux.png"></p>
+<p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on SHORK 486 running inside VMware Workstation" src="screenshots/vmware_shork-486_tmux.png"></p>
