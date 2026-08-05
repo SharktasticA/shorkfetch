@@ -119,6 +119,10 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 
 
+## Licence
+
+SHORKFETCH is licensed under GPLv3. The only exception is the contents of the `testing` directory, which contains anonymous, factual data (`/proc/cpuinfo` dumps) gathered online and via donations to expand testing of SHORKFETCH's CPU interpreting functionality. This is factual hardware listing output rather than creative work, so it isn't subject to copyright, nor do I claim ownership of anything inside.
+
 ## Screenshots
 
 ### SHORKFETCH on real hardware + Debian 13
