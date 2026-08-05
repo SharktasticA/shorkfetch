@@ -1431,6 +1431,23 @@ char *interpretCPU(CPU_DATA *cpu)
                         }
                     }
                 }
+                // Westmere EX
+                else if (cpu->model == 47)
+                {
+                    // Some Xeon E7 model names have a space after the dash
+                    // separating the "E7" prefix and the four numbers
+                    // See: Xeon E7-4820 (the original/v1)
+                    if (strstr(cpu->name, "- "))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "- ", "-");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                }
                 // Ivy Bridge
                 else if (cpu->model == 58)
                 {

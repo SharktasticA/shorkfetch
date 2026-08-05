@@ -1,0 +1,22 @@
+processor : 63
+vendor_id : GenuineIntel
+cpu family : 6
+model : 47
+model name : Intel(R) Xeon(R) CPU E7- 4820 @ 2.00GHz
+stepping : 2
+cpu MHz : 1064.000
+cache size : 18432 KB
+physical id : 3
+siblings : 16
+core id : 25
+cpu cores : 8
+fpu : yes
+fpu_exception : yes
+cpuid level : 11
+wp : yes
+flags : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm syscall nx rdtscp lm constant_tsc nonstop_tsc pni monitor ds_cpl vmx smx est tm2 cx16 xtpr dca popcnt lahf_lm ida arat
+bogomips : 3990.14
+clflush size : 64
+cache_alignment : 64
+address sizes : 44 bits physical, 48 bits virtual
+power management:
