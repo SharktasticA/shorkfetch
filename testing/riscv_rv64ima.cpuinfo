@@ -1,8 +1,0 @@
-processor       : 0
-hart            : 0
-isa             : rv64ima_zicntr_zicsr_zifencei_zihpm_zaamo_zalrsc
-mmu             : sv39
-mvendorid       : 0x0
-marchid         : 0x0
-mimpid          : 0x0
-hart isa        : rv64ima_zicntr_zicsr_zifencei_zihpm_zaamo_zalrsc
