@@ -438,15 +438,12 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     }
                 }
             }
-            // x86: get model name
+            // ARM/x86: get model name
             else if (!result->name && strncasecmp(buffer, "model name", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
-                        result->arch = X86;
-
                     result->name = malloc(NAME_LEN);
                     strncpy(result->name, extract, NAME_LEN - 1);
                     result->name[NAME_LEN - 1] = '\0';
@@ -454,7 +451,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // ARM: get CPU architecture
-            else if (!result->name && strncasecmp(buffer, "CPU architecture", 16) == 0)
+            else if (!result->uarch && strncasecmp(buffer, "CPU architecture", 16) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
                 if (extract)
@@ -462,8 +459,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     if (result->arch == UNKNOWN)
                         result->arch = ARM;
 
-                    result->name = malloc(NAME_LEN);
-                    snprintf(result->name, NAME_LEN, "Armv%s", extract);
+                    result->uarch = malloc(NAME_LEN);
+                    snprintf(result->uarch, NAME_LEN, "ARMv%s", extract);
                     free(extract);
                 }
             }
@@ -596,13 +593,23 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // All: get processor index count (must repeat to get the final
-            // value)
+            // value) OR ARM: get processor name
             else if (strncasecmp(buffer, "processor", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, 5, ':', 2);
+                char *extract = extractFromPoint(buffer, PROCESSOR_LEN, ':', 2);
                 if (extract)
                 {
-                    result->index = (atoi(extract) + 1);
+                    if (result->processor || isNumeric(extract, 1))
+                        result->index = (atoi(extract) + 1);
+                    else
+                    {
+                        if (result->arch == UNKNOWN)
+                            result->arch = ARM;
+
+                        result->processor = malloc(PROCESSOR_LEN);
+                        strncpy(result->processor, extract, PROCESSOR_LEN - 1);
+                        result->processor[PROCESSOR_LEN - 1] = '\0';
+                    }
                     free(extract);
                 }
             }
@@ -866,6 +873,60 @@ char *interpretCPU(CPU_DATA *cpu)
     char *result = malloc(RESULT_LEN);
     if (!result) return NULL;
     result[0] = '\0';
+
+
+
+    // Run through out ARM-specific quirks, distinctions and manipulation
+    if (cpu->arch == ARM)
+    {
+        // Flags if microarchitecture-related codepaths should be skipped when
+        // the microarchitecture name has already been integrated into the model
+        // name
+        int uarchAdded = 0;
+
+        // If no model name is present, try to substitute it...
+        if (!cpu->name || cpu->name[0] == '\0')
+        {
+            // ...with the processor name
+            if (cpu->processor && cpu->processor[0] != '\0')
+            {
+                if (!cpu->name)
+                    cpu->name = malloc(NAME_LEN);
+                if (cpu->name)
+                    snprintf(cpu->name, NAME_LEN, "%s", cpu->processor);
+            }
+            // ...or the microarchitecture name
+            else if (cpu->uarch && cpu->uarch[0] != '\0')
+            {
+                if (!cpu->name)
+                    cpu->name = malloc(NAME_LEN);
+                if (cpu->name)
+                    snprintf(cpu->name, NAME_LEN, "%s", cpu->uarch);
+                uarchAdded = 1;
+            }
+        }
+
+        if (cpu->name && cpu->name[0] != '\0')
+        {
+            // Remove any existing bracketed content
+            char *tmp = removeBrackets(cpu->name, NAME_LEN);
+            if (tmp)
+            {
+                free(cpu->name);
+                cpu->name = tmp;
+            }
+
+            // If the microarchitecture name hasn't already been added, add it
+            // in brackets
+            if (!uarchAdded && !strstr(cpu->name, "ARMv") && cpu->uarch && cpu->uarch[0] != '\0')
+            {
+                char tmp[NAME_LEN];
+                snprintf(tmp, NAME_LEN, "%s (%s)", cpu->name, cpu->uarch);
+                strncpy(cpu->name, tmp, NAME_LEN-1);
+                cpu->name[NAME_LEN-1] = '\0';
+            }
+        }
+    }
 
 
 
@@ -1878,7 +1939,7 @@ char *interpretCPU(CPU_DATA *cpu)
 
     // If we have a vendor name, add it to the start (not for x86 since that is
     // handled above)
-    if (cpu->arch != X86 && cpu->vendor && cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u')
+    if (cpu->arch != X86 && cpu->vendor && cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u' && !strstr(result, cpu->vendor))
     {
         char *tmp = malloc(RESULT_LEN);
         snprintf(tmp, RESULT_LEN, "%s %s", cpu->vendor, result);

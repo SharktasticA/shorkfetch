@@ -25,38 +25,6 @@
 
 
 /**
- * Natural sort comparison.
- */
-int natCmp(const void *a, const void *b)
-{
-    const char *s1 = *(const char **)a;
-    const char *s2 = *(const char **)b;
-
-    while (*s1 && *s2)
-    {
-        if (isdigit(*s1) && isdigit(*s2))
-        {
-            char *end1, *end2;
-            long n1 = strtol(s1, &end1, 10);
-            long n2 = strtol(s2, &end2, 10);
-            if (n1 != n2) return (n1 > n2) - (n1 < n2);
-            s1 = end1;
-            s2 = end2;
-        }
-        else
-        {
-            int c1 = tolower(*s1);
-            int c2 = tolower(*s2);
-            if (c1 != c2) return c1 - c2;
-            s1++;
-            s2++;
-        }
-    }
-
-    return *s1 - *s2;
-}
-
-/**
  * Tests the getCPU (and by extension the cleanCPUName) function to ensure they
  * intepret our a set ofcpuinfo examples and extract a GPU name if present in
  * the CPU name
@@ -70,7 +38,7 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char *cpuinfos[400];
+    char *cpuinfos[500];
     int count = 0;
     int showRaw = 0;
 

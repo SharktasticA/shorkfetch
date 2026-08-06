@@ -23,15 +23,17 @@
 #define CPUINFO_BUFFER_LEN      4096
 // Flag value for PHYS_IDS.noUniquePhysIDs when PHYS_IDS.uniquePhysIDs is
 // unreliable and should be ignored
-#define IGNORE_UNIQUE_PHYS_IDS   -1
+#define IGNORE_UNIQUE_PHYS_IDS  -1
 // CPU_DATA.flags string length
 #define FLAGS_LEN               1536
 // CPU_DATA.name string length
 #define NAME_LEN                128
+// CPU_DATA.processor string length
+#define PROCESSOR_LEN           128
 // CPU_DATA.uarch string length
 #define UARCH_LEN               128
 // PHYS_IDS.uniquePhysIDs array size
-#define UNIQUE_PHYS_IDS_SIZE     128
+#define UNIQUE_PHYS_IDS_SIZE    128
 // CPU_DATA.vendor string length
 #define VENDOR_LEN              16
 
@@ -61,7 +63,9 @@ typedef struct {
 typedef struct {
     // Major architecture (all)
     CPU_ARCH arch;
-    // Micro architecture (RISC-V)
+    // Processor name (ARM)
+    char *processor;
+    // Micro architecture (ARM, RISC-V)
     char *uarch;
     // Vendor name (ARM, x86)
     char *vendor;

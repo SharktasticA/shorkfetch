@@ -65,7 +65,8 @@ static const struct Replacement COMPACT_CPU_REPLACES[] = {
     { "Ryzen 3",                "R3",           0 },
     { "Ryzen 5",                "R5",           0 },
     { "Ryzen 7",                "R7",           0 },
-    { "Ryzen 9",                "R9",           0 }
+    { "Ryzen 9",                "R9",           0 },
+    { "rev ",                   "r",            0 }
 };
 static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) / sizeof(COMPACT_CPU_REPLACES[0]);
 
@@ -114,6 +115,7 @@ static const char *DELETIONS[] =
     "(TM)",
     "™",
     " APU",
+    "-compatible",                     // For ARM
     " Controller",
     " Corporation",
     " CPU",
