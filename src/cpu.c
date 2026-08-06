@@ -1095,7 +1095,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     // LX 600 (366MHz)
                     if (cpu->freq >= 350 && cpu->freq <= 380)
                         snprintf(tmp, NAME_LEN, "AMD Geode LX 600");
-                    // LX 700 (433)
+                    // LX 700 (433MHz)
                     else if (cpu->freq >= 420 && cpu->freq <= 450)
                         snprintf(tmp, NAME_LEN, "AMD Geode LX 700");
                     // LX 800 (500MHz)
@@ -1251,7 +1251,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     // All Athlon MPs were single core, so if the processor
                     // index is higher than 1, we are definitely dealing with a
                     // multi-CPU config and should set the core/thread count to
-                    // 1 to correctly flag this instead of 'ahving'' two cores
+                    // 1 to correctly flag this instead of 'having' two cores
                     // for later
                     if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
                         cpu->cores = cpu->threads = 1;
