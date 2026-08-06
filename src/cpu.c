@@ -1589,24 +1589,24 @@ char *interpretCPU(CPU_DATA *cpu)
                 // Early Pentium 4s generally don't have a model number, and
                 // the later ones that do *don't* report it, so we will
                 // distinguish them via their core name
-                if (strstr(cpu->name, "4 CPU"))
+                if (strstr(cpu->name, "Pentium(R) 4"))
                 {
                     char *tmp = NULL;
                     // Willamette
                     if (cpu->model == 0 || cpu->model == 1)
-                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Willamette)");
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU", " (Willamette)");
                     // Northwood
                     else if (cpu->model == 2)
-                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Northwood)");
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU", " (Northwood)");
                     // Prescott
                     // See: B80546PE0561M, RK80546PG0881M, RK80546PG0961M
                     else if (cpu->model == 3 || cpu->model == 4)
-                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Prescott)");
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU", " (Prescott)");
                     // Cedar Mill
                     // See: Pentium 4 631 (5), Pentium 4 641 (2), Pentium 4 651
                     //      (4)
                     else if (cpu->model == 6)
-                        tmp = findReplace(cpu->name, NAME_LEN, "4 CPU", "4 (Cedar Mill)");
+                        tmp = findReplace(cpu->name, NAME_LEN, "CPU", " (Cedar Mill)");
 
                     if (tmp)
                     {
