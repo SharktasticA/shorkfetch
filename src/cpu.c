@@ -1554,6 +1554,22 @@ char *interpretCPU(CPU_DATA *cpu)
                     if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
                         cpu->cores = cpu->threads = 1;
                 }
+                // Windsor
+                else if (cpu->model == 107)
+                {
+                    // Some Athlon 64 X2s do not report "X2" in their model name
+                    // See: Athlon 64 X2 5000+
+                    if (strstr(cpu->name, "64 Dual Core"))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "64 Dual Core", "64 X2");
+                        if (tmp)
+                        {
+                            strncpy(cpu->name, tmp, NAME_LEN - 1);
+                            cpu->name[NAME_LEN-1] = '\0';
+                            free(tmp);
+                        }
+                    }
+                }
 
                 // Early AMD Mobile Semprons may have the "Mobile" part before
                 // "AMD"
