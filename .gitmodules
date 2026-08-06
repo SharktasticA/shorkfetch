@@ -1,0 +1,3 @@
+[submodule "cpuinfo-ds"]
+	path = cpuinfo-ds
+	url = https://github.com/SharktasticA/cpuinfo-ds
