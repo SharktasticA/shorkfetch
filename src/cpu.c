@@ -969,6 +969,14 @@ char *interpretCPU(CPU_DATA *cpu)
                     strncpy(cpu->name, tmp, NAME_LEN-1);
                     cpu->name[NAME_LEN-1] = '\0';
                 }
+                // Geode LX
+                else if (cpu->model == 10 && cpu->name[0] == 'G')
+                {
+                    char tmp[NAME_LEN];
+                    snprintf(tmp, NAME_LEN, "AMD Geode LX");
+                    strncpy(cpu->name, tmp, NAME_LEN-1);
+                    cpu->name[NAME_LEN-1] = '\0';
+                }
                 // If we have a supposed K6-III, it may actually be a K6-2+ or
                 // K6-III+, and we may be able to tell from the stepping
                 else if (cpu->model == 13)
