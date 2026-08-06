@@ -4,14 +4,17 @@ RANLIB ?= ranlib
 STRIP ?= strip
 
 CFLAGS += -I.
-LDFLAGS += -static
 
-ifdef EMBEDDED
-	CFLAGS += -DEMBEDDED
+ifdef NO_STR_CLEANING
+	CFLAGS += -DNO_STR_CLEANING
 endif
 
 ifdef TESTS
 	CFLAGS += -DTESTS
+endif
+
+ifdef X86_ONLY
+	CFLAGS += -DX86_ONLY
 endif
 
 SRC = src/*.c

@@ -17,7 +17,7 @@
 #include "general.h"
 #include "globals.h"
 #include "gpu.h"
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 #include "replacements.h"
 #endif
 
@@ -30,7 +30,7 @@
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
 /**
  * Cleans a GPU's name so it is less needlessly verbose and 'to the point'.
@@ -339,7 +339,7 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 
 /**
  * @param count Number of GPUs actually detected (intended to be used by reference)
- * @return Pointer to up to 4 GPU_IDS structs containing detected GPUs
+ * @return Pointer to up to MAX_GPUS of GPU_IDS structs containing detected GPUs
  */
 GPU_IDS* getGPUs(int *count)
 {
@@ -353,7 +353,7 @@ GPU_IDS* getGPUs(int *count)
     }
 
     struct dirent *entry;
-    GPU_IDS *gpus = malloc(4 * sizeof(GPU_IDS));
+    GPU_IDS *gpus = malloc(MAX_GPUS * sizeof(GPU_IDS));
     if (!gpus) 
     {
         *count = 0;
@@ -400,7 +400,7 @@ GPU_IDS* getGPUs(int *count)
             gpus[*count].revision = revision;
             (*count)++;
 
-            if (*count == 4) break;
+            if (*count == MAX_GPUS) break;
         }
     }
     closedir(dir);
@@ -423,7 +423,7 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
     // If Intel GPU, query our pre-defined iGPU list
     if (gpu->vendor == 0x8086)

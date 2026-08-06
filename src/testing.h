@@ -25,52 +25,20 @@
 
 
 /**
- * Natural sort comparison.
- */
-int natCmp(const void *a, const void *b)
-{
-    const char *s1 = *(const char **)a;
-    const char *s2 = *(const char **)b;
-
-    while (*s1 && *s2)
-    {
-        if (isdigit(*s1) && isdigit(*s2))
-        {
-            char *end1, *end2;
-            long n1 = strtol(s1, &end1, 10);
-            long n2 = strtol(s2, &end2, 10);
-            if (n1 != n2) return (n1 > n2) - (n1 < n2);
-            s1 = end1;
-            s2 = end2;
-        }
-        else
-        {
-            int c1 = tolower(*s1);
-            int c2 = tolower(*s2);
-            if (c1 != c2) return c1 - c2;
-            s1++;
-            s2++;
-        }
-    }
-
-    return *s1 - *s2;
-}
-
-/**
  * Tests the getCPU (and by extension the cleanCPUName) function to ensure they
  * intepret our a set ofcpuinfo examples and extract a GPU name if present in
  * the CPU name
  */
 void testGetCPU(void)
 {
-    DIR *testingDir = opendir("testing");
+    DIR *testingDir = opendir("cpuinfo-ds");
     if (!testingDir) return;
 
     printf("##################\n");
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char *cpuinfos[300];
+    char *cpuinfos[500];
     int count = 0;
     int showRaw = 0;
 
@@ -87,7 +55,7 @@ void testGetCPU(void)
     for (int i = 0; i < count; i++)
     {
         char cpuinfo[PATH_MAX];
-        snprintf(cpuinfo, PATH_MAX, "testing/%s", cpuinfos[i]);
+        snprintf(cpuinfo, PATH_MAX, "cpuinfo-ds/%s", cpuinfos[i]);
 
         char bName[256];
         strncpy(bName, cpuinfos[i], sizeof(bName) - 1);
@@ -136,24 +104,31 @@ void testGetCPU(void)
             else
                 printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
 
-            printf("    arch:      %d\n", cpu->arch);
-            printf("    uarch:     %s\n", cpu->uarch ? cpu->uarch : "(null)");
-            printf("    vendor:    %s\n", cpu->vendor ? cpu->vendor : "(null)");
-            printf("    name:      %s\n", cpu->name   ? cpu->name   : "(null)");
-            printf("    family:    %d\n", cpu->family);
-            printf("    model:     %d\n", cpu->model);
-            printf("    stepping:  %d\n", cpu->stepping);
-            printf("    freq:      %.0f\n", cpu->freq);
-            printf("    maxPhysID: %d\n", cpu->maxPhysID);
-            printf("    index:     %d\n", cpu->index);
-            printf("    cores:     %d\n", cpu->cores);
-            printf("    threads:   %d\n", cpu->threads);
-            printf("    cacheSize: %d\n", cpu->cacheSize);
-            printf("    hasFPU:    %d\n", cpu->hasFPU);
-            printf("    hasHT:     %d\n", cpu->hasHT);
+            printf("    arch:               %d\n", cpu->arch);
+#ifndef X86_ONLY
+            printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
+#endif
+            printf("    vendor:             %s\n", cpu->vendor ? cpu->vendor : "(null)");
+            printf("    name:               %s\n", cpu->name   ? cpu->name   : "(null)");
+            printf("    family:             %d\n", cpu->family);
+            printf("    model:              %d\n", cpu->model);
+            printf("    stepping:           %d\n", cpu->stepping);
+            printf("    freq:               %.0f\n", cpu->freq);
+            printf("    noUniquePhysIDs:    %d\n", cpu->physIDs.noUniquePhysIDs);
+            printf("    maxPhysID:          %d\n", cpu->physIDs.maxPhysID);
+            printf("    index:              %d\n", cpu->index);
+            printf("    cores:              %d\n", cpu->cores);
+            printf("    threads:            %d\n", cpu->threads);
+            printf("    cacheSize:          %d\n", cpu->cacheSize);
+            printf("    flags:              %s\n", cpu->flags);
+            printf("    physAddrSize:       %d\n", cpu->physAddrSize);
+            printf("    virtAddrSize:       %d\n", cpu->virtAddrSize);
         }
 
+#ifndef X86_ONLY
+        free(cpu->processor);
         free(cpu->uarch);
+#endif
         free(cpu->vendor);
         free(cpu->name);
         free(cpu);

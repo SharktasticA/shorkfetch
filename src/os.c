@@ -15,7 +15,7 @@
 
 #include "general.h"
 #include "globals.h"
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 #include "replacements.h"
 #endif
 #include "os.h"
@@ -111,7 +111,7 @@ char *getOS(struct utsname u, int uStatus)
             }
         }
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
         int replaces = 0;
         for (int i = 0; i < COMPACT_OS_REPLACES_LEN; i++)

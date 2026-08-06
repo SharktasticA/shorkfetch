@@ -18,7 +18,8 @@
 
 
 
-#define GPU_NAME_LEN 256
+#define GPU_NAME_LEN    256
+#define MAX_GPUS        4
 
 
 
@@ -31,7 +32,7 @@ typedef struct {
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
 // Harcoded Intel iGPU names to use via device ID lookup to replace "messy"
 // data from pci.ids

@@ -1,9 +1,9 @@
 /*
     ######################################################
-    ##            SHORK UTILITY - SHORKFETCH            ##
+    ##                  SHORK UTILITY                   ##
     ######################################################
-    ## General, utility functions to be used throughout ##
-    ## SHORKFETCH                                       ##
+    ## General, utility functions for SHORK Utilities & ##
+    ## SHORK ENTERTAINMENT                              ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -16,10 +16,14 @@
 #include "general.h"
 #include "globals.h"
 
+#include <ctype.h>
 #include <dirent.h>
+#include <sys/ioctl.h>
 #include <linux/limits.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
 #include <unistd.h>
 
 
@@ -129,6 +133,47 @@ char *bytesToReadable(const char *from, const long long val)
 }
 
 /**
+ * Captures the output of the given program command capped at the given buffer
+ * size.
+ * @param command Program command to run
+ * @param bufferSize The maximum string size
+ * @return char* Captured program output as string
+ */
+char *captureProgramOutput(const char *command, const size_t bufferSize)
+{
+    FILE* stream = popen(command, "r");
+    if (!stream)
+        return NULL;
+
+    char *buffer = malloc(bufferSize);
+    if (!buffer)
+    {
+        pclose(stream);
+        return NULL;
+    }
+
+    size_t len = 0;
+    size_t chunkSize = 256;
+    char tmp[256];
+
+    while (len < bufferSize - 1)
+    {
+        size_t toRead = (bufferSize - 1 - len < chunkSize) ? bufferSize - 1 - len : chunkSize;
+
+        size_t bytesRead = fread(tmp, 1, toRead, stream);
+        if (bytesRead == 0)
+            break;
+
+        memcpy(buffer + len, tmp, bytesRead);
+        len += bytesRead;
+    }
+    pclose(stream);
+
+    buffer[len] = '\0';
+    return buffer;
+}
+
+/**
  * Extracts a substring from an input string after a given separation character
  * and offset. Also removes any surrounding quotes or trailing newline characters
  * present. 
@@ -171,6 +216,22 @@ char *extractFromPoint(char *input, size_t inputSize, char point, int offset)
         result[len - 1] = '\0';
 
     return result;
+}
+
+/**
+ * Checks if a file exists or not.
+ * @param file Full path to file
+ * @return 1 if file found; 0 if not or error
+ */
+int fileExists(const char *file)
+{
+    if (!file || file[0] == '\0')
+        return 0;
+
+    struct stat st;
+    if (stat(file, &st) == 0 && S_ISREG(st.st_mode))
+        return 1;
+    return 0;
 }
 
 /**
@@ -314,6 +375,7 @@ int formatNewLines(char *input, int width, char *indent, int trim)
                 }
             }
             widthCount = i - lastSpace;
+            lastSpace = -1;
         }
 
         widthCount++;
@@ -361,6 +423,26 @@ float fSqrt(float x)
     }
 
     return result;
+}
+
+/** 
+ * Returns the full path to the directory this program is stored in.
+ * @return Full path the binary is stored in
+ */
+char *getBinDir(void)
+{
+    // Get binary's full path
+    static char binDir[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", binDir, sizeof(binDir) - 1);
+    if (len <= 0) return NULL;
+    binDir[len] = '\0';
+
+    // Remove filename from path
+    char *slash = strrchr(binDir, '/');
+    if (!slash) return NULL;
+    *(slash + 1) = '\0';
+
+    return binDir;
 }
 
 /**
@@ -419,7 +501,46 @@ struct winsize getTerminalSize(void)
 }
 
 /**
- * @param prog Program's executable name
+ * @param currPath Current working directory path
+ * @param entry Directory entry to check
+ */
+int isFileExecutable(char *currPath, struct dirent *entry)
+{
+    char filePath[PATH_MAX + 256];
+    snprintf(filePath, PATH_MAX + 256, "%s/%s", currPath, entry->d_name);
+    if (access(filePath, X_OK) == 0) return 1;
+    else return 0;
+}
+
+/**
+ * Checks if the given string is entirely numeric.
+ * @param str Input string to test
+ * @param skipLeading Flags if you want to skip leading blank spaces before
+                      checking
+ * @return 1 if numeric; 0 if not or empty string
+ */
+int isNumeric(const char *str, const int skipLeading)
+{
+    if (skipLeading)
+    {
+        while (isspace((unsigned char)*str))
+            str++;
+    }
+
+    if (!*str)
+        return 0;
+
+    while (*str)
+    {
+        if (!isdigit((unsigned char)*str)) return 0;
+        str++;
+    }
+
+    return 1;
+}
+
+/**
+ * @param prog Program's executable name or full path
  * @param isExec Flags if the function should also check if a found program has
  *               execute permissions
  * @returns 1 if program is installed; 0 if not
@@ -427,6 +548,10 @@ struct winsize getTerminalSize(void)
 int isProgramInstalled(char *prog, int isExec)
 {
     int mode = isExec ? X_OK : F_OK;
+
+    // If prog contains '/' treat it as a full path
+    if (strchr(prog, '/') != NULL)
+        return (access(prog, mode) == 0);
 
     char *path = getenv("PATH");
     if (!path)
@@ -497,6 +622,102 @@ int iSqrt(int x)
 }
 
 /**
+ * Reduces a given string to the given maximum lines by counting '\n' escape
+ * codes.
+ * @param str Input string
+ * @param maxLines Number of lines before cutting the string
+ */
+void limitLines(char* str, const int maxLines)
+{
+    if (!str || maxLines <= 0)
+    {
+        if (str)
+            str[0] = '\0';
+        return;
+    }
+
+    int count = 0;
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] == '\n')
+        {
+            count++;
+            if (count == maxLines)
+            {
+                str[i + 1] = '\0';
+                return;
+            }
+        }
+    }
+}
+
+/**
+ * Parses a line taken from a CSV list into separate fields.
+ * @param line Raw line from CSV file to be processed
+ * @param out Array of separated fields
+ * @param maxFields Max number of fields to look for
+ * @return Number of fields detected
+ */
+int loadCSVLine(char *line, char *out[], int maxFields)
+{
+    int i = 0;
+
+    while (*line && i < maxFields)
+    {
+        out[i++] = line;
+        int inQuotes = 0;
+
+        while (*line)
+        {
+            if (*line == '"')
+            {
+                inQuotes = !inQuotes;
+                if (line[1] == '"') line++;
+            }
+            else if (*line == ',' && !inQuotes)
+            {
+                *line = '\0';
+                line++;
+                break;
+            }
+
+            line++;
+        }
+    }
+
+    return i;
+}
+
+int natCmp(const void *a, const void *b)
+{
+    const char *s1 = *(const char **)a;
+    const char *s2 = *(const char **)b;
+
+    while (*s1 && *s2)
+    {
+        if (isdigit(*s1) && isdigit(*s2))
+        {
+            char *end1, *end2;
+            long n1 = strtol(s1, &end1, 10);
+            long n2 = strtol(s2, &end2, 10);
+            if (n1 != n2) return (n1 > n2) - (n1 < n2);
+            s1 = end1;
+            s2 = end2;
+        }
+        else
+        {
+            int c1 = tolower(*s1);
+            int c2 = tolower(*s2);
+            if (c1 != c2) return c1 - c2;
+            s1++;
+            s2++;
+        }
+    }
+
+    return *s1 - *s2;
+}
+
+/**
  * Checks if a given process name is presently running and via the /proc 
  * filesystem.
  * @param name The process name to find
@@ -564,4 +785,81 @@ int readHexFile(const char *path)
     if (fscanf(fStream, "%x", &val) != 1) val = 0;
     fclose(fStream);
     return val;
+}
+
+/**
+ * Removes any bracketed/parenthesis contents from a given input string.
+ * @param input Input string
+ * @param inputSize Size to use when allocating the result string
+ * @return Result string after operation
+ */
+char *removeBrackets(const char *input, const size_t inputSize)
+{
+    if (!input)
+        return NULL;
+
+    // In case the input size happens to be too small...
+    size_t inputLen = strlen(input);
+    if (inputLen == 0)
+        return NULL;
+    size_t allocSize = inputSize;
+    if (allocSize < inputLen + 1)
+        allocSize = inputLen + 1;
+
+    // Prepare result string
+    char *result = calloc(allocSize, 1);
+    if (!result)
+        return NULL;
+
+    const char *src = input;
+    char *dst = result;
+    int depth = 0;
+    while (*src)
+    {
+        if (*src == '(')
+        {
+            depth++;
+            src++;
+        }
+        else if (*src == ')')
+        {
+            if (depth > 0)
+                depth--;
+            src++;
+        }
+        else if (depth == 0)
+            *dst++ = *src++;
+        else
+            src++;
+    }
+    *dst = '\0';
+
+    return result;
+}
+
+/**
+ * Splits a given string via any newline escape sequences into an array of strings.
+ * @param text Text to split
+ * @param textLines Text once split
+ * @param totalLines Number of newlines detected
+ */
+void splitText(char *text, char *textLines[], int totalLines)
+{
+    int count = 0;
+    char *curr = text;
+    char *start = text;
+
+    while (*curr && count < totalLines)
+    {
+        if (*curr == '\n')
+        {
+            *curr = '\0';
+            textLines[count++] = start;
+            start = curr + 1;
+        }
+        curr++;
+    }
+
+    if (count < totalLines)
+        textLines[count++] = start;
 }

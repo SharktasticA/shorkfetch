@@ -21,7 +21,7 @@
 #ifndef REPLACEMENTS
 #define REPLACEMENTS
 
-struct Replacement {
+struct REPLACEMENT {
     const char *match;
     const char *replacement;
     const int standalone;
@@ -29,7 +29,7 @@ struct Replacement {
 
 
 
-static const struct Replacement AMD_REPLACES[] = {
+static const struct REPLACEMENT AMD_REPLACES[] = {
     { " 486 DX",                " Am486DX",         0 },
     { "Am486DX/2",              "Am486DX2",         0 },
     { "Am486DX/4",              "Am486DX4",         0 },
@@ -50,7 +50,7 @@ static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0
 
 
 
-static const struct Replacement COMPACT_CPU_REPLACES[] = {
+static const struct REPLACEMENT COMPACT_CPU_REPLACES[] = {
     { "Core Solo",              "CS",           0 },
     { "Core Duo",               "CD",           0 },
     { "Core 2 Duo",             "C2D",          0 },
@@ -65,13 +65,14 @@ static const struct Replacement COMPACT_CPU_REPLACES[] = {
     { "Ryzen 3",                "R3",           0 },
     { "Ryzen 5",                "R5",           0 },
     { "Ryzen 7",                "R7",           0 },
-    { "Ryzen 9",                "R9",           0 }
+    { "Ryzen 9",                "R9",           0 },
+    { "rev ",                   "r",            0 }
 };
 static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) / sizeof(COMPACT_CPU_REPLACES[0]);
 
 
 
-static const struct Replacement COMPACT_GPU_REPLACES[] = {
+static const struct REPLACEMENT COMPACT_GPU_REPLACES[] = {
     { " Adapter",               "",             0 },
     { "Express ",               "",             0 },
     { "Extreme Graphics",       "ET",           0 },
@@ -93,7 +94,7 @@ static const int COMPACT_GPU_REPLACES_LEN = sizeof(COMPACT_GPU_REPLACES) / sizeo
 
 
 
-static const struct Replacement COMPACT_OS_REPLACES[] = {
+static const struct REPLACEMENT COMPACT_OS_REPLACES[] = {
     { " GNU/Linux", "",     0 },
     { " INDEV",     "",     0 },
     { " Linux",     "",     0 }
@@ -112,7 +113,9 @@ static const char *DELETIONS[] =
     "(tm )",                            // For AMD Duron
     "tm",
     "(TM)",
+    "™",
     " APU",
+    "-compatible",                     // For ARM
     " Controller",
     " Corporation",
     " CPU",
@@ -131,7 +134,16 @@ static const int DELETIONS_LEN = sizeof(DELETIONS) / sizeof(DELETIONS[0]);
 
 
 
-static const struct Replacement INTEL_REPLACES[] = {
+static const char *GPU_FROM_CPU_SUFFIXES[] =
+{
+    " Graphics",
+    " Gfx"
+};
+static const int GPU_FROM_CPU_SUFFIXES_LEN = sizeof(GPU_FROM_CPU_SUFFIXES) / sizeof(GPU_FROM_CPU_SUFFIXES[0]);
+
+
+
+static const struct REPLACEMENT INTEL_REPLACES[] = {
     { " 486 SX",                " i486SX",              0 },
     { "486SX/2",                "486SX2",               0 },
     { " 486 DX/4",              "DX4",                  0 },
@@ -149,7 +161,7 @@ static const int INTEL_REPLACES_LEN = sizeof(INTEL_REPLACES) / sizeof(INTEL_REPL
 
 
 
-static const struct Replacement IDT_REPLACES[] = {
+static const struct REPLACEMENT IDT_REPLACES[] = {
     { " 05/04",         " WinChip",     0 },
     { "WinChip 2-3D",   "WinChip 2/3",  0 }
 };
@@ -157,7 +169,7 @@ static const int IDT_REPLACES_LEN = sizeof(IDT_REPLACES) / sizeof(IDT_REPLACES[0
 
 
 
-static const struct Replacement VIA_REPLACES[] = {
+static const struct REPLACEMENT VIA_REPLACES[] = {
     { "Samuel", "Cyrix III",    0 }
 };
 static const int VIA_REPLACES_LEN = sizeof(VIA_REPLACES) / sizeof(VIA_REPLACES[0]);
