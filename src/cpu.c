@@ -55,15 +55,19 @@ char *cleanCPUName(const char *input, size_t inputSize)
     result[inputSize - 1] = '\0';
     size_t strLen  = strlen(result);
 
-    // Remove double-spaces
+    // Collapse multiple contiguous spaces or tabs
     char *src = result, *dst = result;
     while (*src)
     {
-        *dst++ = *src;
-        // If we hit a space, let's begin skipping them...
-        if (*src++ == ' ')
-            while (*src == ' ')
+        if (*src == ' ' || *src == '\t')
+        {
+            if (dst != result)
+                *dst++ = ' ';
+            while (*src == ' ' || *src == '\t')
                 src++;
+        }
+        else
+            *dst++ = *src++;
     }
     *dst = '\0';
 
@@ -302,13 +306,6 @@ char *cleanCPUName(const char *input, size_t inputSize)
         }
     }
 
-    // Remove any leading spaces
-    char *start = result;
-    while (*start == ' ')
-        start++;
-    if (start != result)
-        memmove(result, start, strlen(start) + 1);
-
     return result;
 }
 
@@ -326,12 +323,21 @@ char *cleanCPUName(const char *input, size_t inputSize)
     strncpy(result, input, inputSize - 1);
     result[inputSize - 1] = '\0';
 
-    // Remove any leading spaces
-    char *start = result;
-    while (*start == ' ')
-        start++;
-    if (start != result)
-        memmove(result, start, strlen(start) + 1);
+    // Collapse multiple contiguous spaces or tabs
+    char *src = result, *dst = result;
+    while (*src)
+    {
+        if (*src == ' ' || *src == '\t')
+        {
+            if (dst != result)
+                *dst++ = ' ';
+            while (*src == ' ' || *src == '\t')
+                src++;
+        }
+        else
+            *dst++ = *src++;
+    }
+    *dst = '\0';
 
     return result;
 }
@@ -471,6 +477,21 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         result->arch = X86;
 
                     result->family = atoi(extract);
+                    free(extract);
+                }
+            }
+            // MIPS: get CPU model name
+            else if (!result->name && strncasecmp(buffer, "cpu model", 9) == 0)
+            {
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = MIPS;
+
+                    result->name = malloc(NAME_LEN);
+                    strncpy(result->name, extract, NAME_LEN - 1);
+                    result->name[NAME_LEN - 1] = '\0';
                     free(extract);
                 }
             }

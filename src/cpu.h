@@ -41,6 +41,7 @@ typedef enum
 {
     UNKNOWN = 0,
     ARM,
+    MIPS,
     POWER,
     RISCV,
     X86
