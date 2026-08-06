@@ -2001,10 +2001,25 @@ char *interpretCPU(CPU_DATA *cpu)
     // handled above)
     if (cpu->arch != X86 && cpu->vendor && cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u' && !strstr(result, cpu->vendor))
     {
-        char *tmp = malloc(RESULT_LEN);
-        snprintf(tmp, RESULT_LEN, "%s %s", cpu->vendor, result);
-        strncpy(result, tmp, RESULT_LEN-1);
-        free(tmp);
+        int proceed = 1;
+        // If the current result already contains an alias to a known vendor,
+        // we don't need to proceed with adding another such name
+        for (int i = 0; i < VENDOR_ALIASES_LEN; i++)
+        {
+            if (strstr(result, VENDOR_ALIASES[i].alias) && strstr(cpu->vendor, VENDOR_ALIASES[i].canonical))
+            {
+                proceed = 0;
+                break;
+            }
+        }
+
+        if (proceed)
+        {
+            char *tmp = malloc(RESULT_LEN);
+            snprintf(tmp, RESULT_LEN, "%s %s", cpu->vendor, result);
+            strncpy(result, tmp, RESULT_LEN-1);
+            free(tmp);
+        }
     }
 
 #endif
@@ -2021,9 +2036,10 @@ char *interpretCPU(CPU_DATA *cpu)
         if (cpu->cores <= 0 && cpu->threads <= 0 && cpu->index > 0)
         {
 #ifndef X86_ONLY
-            // We don't have a good way to tell cores from threads for POWER
-            // CPUs at the moment, so let's not imply our value is for cores
-            if (cpu->arch == POWER)
+            // We don't have a good way to tell cores from threads for ARM and
+            // POWER CPUs at the moment, so let's not imply our value is for
+            // cores
+            if (cpu->arch == ARM || cpu->arch == POWER)
                 snprintf(coresAndThreads, 16, "%dT", cpu->index);
             else
 #endif

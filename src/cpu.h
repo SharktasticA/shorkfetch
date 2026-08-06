@@ -39,6 +39,7 @@
 
 
 
+// The CPU architectures supported by SHORKFETCH
 typedef enum
 {
     UNKNOWN = 0,
@@ -54,6 +55,7 @@ typedef enum
 
 
 
+// Datapoints for x86 physical ID
 typedef struct {
     // Unique physical IDs recorded
     int uniquePhysIDs[UNIQUE_PHYS_IDS_SIZE];
@@ -63,6 +65,7 @@ typedef struct {
     int maxPhysID;
 } PHYS_IDS;
 
+// Datapoints for a CPU being read and processed
 typedef struct {
     // Major architecture (all)
     CPU_ARCH arch;
@@ -84,7 +87,7 @@ typedef struct {
     int stepping;
     // Clock frequency in MHz (m68k, POWER, some RISC-V, x86)
     float freq;
-    // Processor index count (ARM, POWER, some RISC-V, x86)
+    // Processor index count (some ARM, POWER, some RISC-V, x86)
     int index;
     // Physical IDs (x86)
     PHYS_IDS physIDs;
@@ -102,6 +105,12 @@ typedef struct {
     int virtAddrSize;
 } CPU_DATA;
 
+// Maps a canonical/base CPU vendor name to an alias
+typedef struct {
+    const char *canonical;
+    const char *alias;
+} VENDOR_ALIAS;
+
 
 
 #ifndef X86_ONLY
@@ -115,14 +124,18 @@ static const char *ARM_IMPLEMENTERS[193] = {
     [0x43] = "Cavium",
     [0x44] = "DEC",
     [0x46] = "Fujitsu",
+    [0x48] = "HiSilicon",
     [0x49] = "Infineon",
     [0x4D] = "Motorola/Freescale",
     [0x4E] = "NVIDIA",
-    [0x50] = "AMCC",
+    [0x50] = "AMCC/Ampere",
     [0x51] = "Qualcomm",
     [0x56] = "Marvell",
     [0x61] = "Apple",
+    [0x66] = "Faraday",
     [0x69] = "Intel",
+    [0x6D] = "Microsoft",
+    [0x70] = "Phytium",
     [0xC0] = "Ampere"
 };
 
@@ -140,6 +153,12 @@ static const char *GPU_FROM_CPU_NEEDLES[] = {
 static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) / sizeof(GPU_FROM_CPU_NEEDLES[0]);
 
 #endif
+
+// Known CPU vendor canonical-alias name mappings
+static const VENDOR_ALIAS VENDOR_ALIASES[] = {
+    { "HiSilicon",  "HUAWEI" }
+};
+static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) / sizeof(VENDOR_ALIASES[0]);
 
 
 
