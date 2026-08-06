@@ -63,7 +63,7 @@ int natCmp(const void *a, const void *b)
  */
 void testGetCPU(void)
 {
-    DIR *testingDir = opendir("testing");
+    DIR *testingDir = opendir("cpuinfo-ds");
     if (!testingDir) return;
 
     printf("##################\n");
@@ -87,7 +87,7 @@ void testGetCPU(void)
     for (int i = 0; i < count; i++)
     {
         char cpuinfo[PATH_MAX];
-        snprintf(cpuinfo, PATH_MAX, "testing/%s", cpuinfos[i]);
+        snprintf(cpuinfo, PATH_MAX, "cpuinfo-ds/%s", cpuinfos[i]);
 
         char bName[256];
         strncpy(bName, cpuinfos[i], sizeof(bName) - 1);

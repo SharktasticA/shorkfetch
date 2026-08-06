@@ -117,12 +117,6 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 * By default, the SHORK ASCII art is automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present. The `--force-art` parameter can be used to override this.
 
-
-
-## Licence
-
-SHORKFETCH is licensed under GPLv3. The only exception is the contents of the `testing` directory, which contains anonymous, factual data (`/proc/cpuinfo` dumps) gathered online and via donations to expand testing of SHORKFETCH's CPU interpreting functionality. This is factual hardware listing output rather than creative work, so it isn't subject to copyright, nor do I claim ownership of anything inside.
-
 ## Screenshots
 
 ### SHORKFETCH on real hardware + Debian 13
