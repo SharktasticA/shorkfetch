@@ -43,6 +43,7 @@ typedef enum
 {
     UNKNOWN = 0,
     ARM,
+    M68K,
     MIPS,
     POWER,
     RISCV,
@@ -77,7 +78,7 @@ typedef struct {
     int model;
     // Stepping number (x86)
     int stepping;
-    // Clock frequency in MHz (POWER, some RISC-V, x86)
+    // Clock frequency in MHz (m68k, POWER, some RISC-V, x86)
     float freq;
     // Processor index count (ARM, POWER, some RISC-V, x86)
     int index;

@@ -1,8 +1,8 @@
 # SHORKFETCH
 
-A cute shark-themed Linux fetch tool made with speed, consistent output, and vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but often faster and provides cleaner output by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), designed for use on a wide range of hardware going back to the 486 era. But it works on modern Linux systems just fine.
+A cute shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but can be faster and provides cleaner output by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but it works on other modern Linux systems just fine.
 
-SHORKFETCH also has a focus on providing clean CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus SHORKFETCH is designed to help address this.
+SHORKFETCH also has a focus on providing clean and accurate CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus SHORKFETCH is designed to help address this.
 
 <p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/86box_shork-486.png"></p>
 
@@ -10,7 +10,7 @@ SHORKFETCH also has a focus on providing clean CPU and GPU name reporting, espec
 
 ## Help wanted!
 
-SHORKFETCH is young, and I would love to hear from you if you have tried SHORKFETCH and found that (in particular) the **DE, WM and/or GPU fields** were incorrect or imprecise, or in your opinion, were overly verbose, containing marks like "(R)", "TM", etc. and could likely be shortened without compromising understanding. Feel free to create an issue here or contact me via [email](https://sharktastica.co.uk/contact), Discord (@sharktastica) or Reddit (u/sharktastica), and I will take your feedback on board! Please include a screenshot of your SHORKFETCH's output, some context about your system's real specifications, and especially the following depending on the issue:
+SHORKFETCH is young, and I would love to hear from you if you have tried SHORKFETCH and found that (in particular) the **CPU, DE, WM and/or GPU fields** were incorrect or imprecise, or in your opinion, were overly verbose, containing marks like "(R)", "TM", etc. and could likely be shortened without compromising understanding. Feel free to create an issue here or contact me via [email](https://sharktastica.co.uk/contact), Discord (@sharktastica) or Reddit (u/sharktastica), and I will take your feedback on board! Please include a screenshot of your SHORKFETCH's output, some context about your system's real specifications and environment, and especially the following depending on the issue:
 
 * CPU: `cat /proc/cpuinfo`
 * DE/WM: `echo $XDG_CURRENT_DESKTOP`

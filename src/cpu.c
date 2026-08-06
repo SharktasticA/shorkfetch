@@ -492,6 +492,21 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+            // m68k: get CPU model name
+            else if (!result->name && strncmp(buffer, "CPU:", 4) == 0)
+            {
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = M68K;
+
+                    result->name = malloc(NAME_LEN);
+                    strncpy(result->name, extract, NAME_LEN - 1);
+                    result->name[NAME_LEN - 1] = '\0';
+                    free(extract);
+                }
+            }
             // POWER: get CPU type
             else if (!result->name && strncasecmp(buffer, "cpu", 3) == 0)
             {
@@ -559,6 +574,19 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 {
                     if (result->arch == UNKNOWN)
                         result->arch = X86;
+
+                    result->freq = atof(extract);
+                    free(extract);
+                }
+            }
+            // m68k: get clocking speed in MHz
+            else if (result->freq < 0 && strncasecmp(buffer, "clocking", 8) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = M68K;
 
                     result->freq = atof(extract);
                     free(extract);
@@ -928,7 +956,12 @@ char *interpretCPU(CPU_DATA *cpu)
         }
     }
 
-
+    // Run through out m68k-specific quirks, distinctions and manipulation
+    if (cpu->arch == M68K)
+    {
+        // m68k is guaranteed to be single-core
+        cpu->index = cpu->cores = cpu->threads = 1;
+    }
 
     // Run through our x86-specific quirks, distinctions and manipulation
     if (cpu->arch == X86 && cpu->vendor && cpu->name && (cpu->vendor[0] != '\0' || cpu->name[0] != '\0'))
