@@ -973,7 +973,21 @@ char *interpretCPU(CPU_DATA *cpu)
                 else if (cpu->model == 10 && cpu->name[0] == 'G')
                 {
                     char tmp[NAME_LEN];
-                    snprintf(tmp, NAME_LEN, "AMD Geode LX");
+                    // LX 600 (366MHz)
+                    if (cpu->freq >= 350 && cpu->freq <= 380)
+                        snprintf(tmp, NAME_LEN, "AMD Geode LX 600");
+                    // LX 700 (433)
+                    else if (cpu->freq >= 420 && cpu->freq <= 450)
+                        snprintf(tmp, NAME_LEN, "AMD Geode LX 700");
+                    // LX 800 (500MHz)
+                    else if (cpu->freq >= 480 && cpu->freq <= 520)
+                        snprintf(tmp, NAME_LEN, "AMD Geode LX 800");
+                    // LX 900 (600MHz)
+                    else if (cpu->freq >= 580 && cpu->freq <= 620)
+                        snprintf(tmp, NAME_LEN, "AMD Geode LX 900");
+                    // Generic fallback
+                    else
+                        snprintf(tmp, NAME_LEN, "AMD Geode LX");
                     strncpy(cpu->name, tmp, NAME_LEN-1);
                     cpu->name[NAME_LEN-1] = '\0';
                 }
