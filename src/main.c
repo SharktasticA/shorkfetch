@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     TERM_SIZE = getTerminalSize();
 
     char bullet = '*';
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
     char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,root,lip, ,clrs, ");
 #else
     char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,root, ");
@@ -895,7 +895,10 @@ int main(int argc, char *argv[])
     free(gpuFromCPU);
     if (cpu)
     {
+#ifndef X86_ONLY
+        free(cpu->processor);
         free(cpu->uarch);
+#endif
         free(cpu->vendor);
         free(cpu->name);
         free(cpu);

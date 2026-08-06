@@ -42,11 +42,13 @@
 typedef enum
 {
     UNKNOWN = 0,
+#ifndef X86_ONLY
     ARM,
     M68K,
     MIPS,
     POWER,
     RISCV,
+#endif
     X86
 } CPU_ARCH;
 
@@ -64,10 +66,12 @@ typedef struct {
 typedef struct {
     // Major architecture (all)
     CPU_ARCH arch;
+#ifndef X86_ONLY
     // Processor name (ARM)
     char *processor;
     // Micro architecture (ARM, RISC-V)
     char *uarch;
+#endif
     // Vendor name (ARM, x86)
     char *vendor;
     // Model or architecture name (all)
@@ -100,6 +104,8 @@ typedef struct {
 
 
 
+#ifndef X86_ONLY
+
 // Hardcoded ARM CPU implementer values to allow basic ARM CPU vendor
 // identification
 static const char *ARM_IMPLEMENTERS[193] = {
@@ -120,7 +126,9 @@ static const char *ARM_IMPLEMENTERS[193] = {
     [0xC0] = "Ampere"
 };
 
-#ifndef EMBEDDED
+#endif
+
+#ifndef NO_STR_CLEANING
 
 // Hardcoded search needles to use when looking for a GPU name inside a CPU
 // name

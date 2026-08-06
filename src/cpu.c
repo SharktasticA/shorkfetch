@@ -24,7 +24,7 @@
 #include "general.h"
 #include "globals.h"
 #include "gpu.h"
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 #include "replacements.h"
 #endif
 
@@ -34,7 +34,7 @@
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
 /**
  * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
@@ -386,6 +386,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         char buffer[CPUINFO_BUFFER_LEN];
         while (fgets(buffer, sizeof(buffer), fStream))
         {
+#ifndef X86_ONLY
             // RISC-V: get micro architecture (uarch)
             if (!result->uarch && strncasecmp(buffer, "uarch", 5) == 0)
             {
@@ -403,6 +404,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
             // x86: get vendor ID
             else if (!result->vendor && strncasecmp(buffer, "vendor_id", 9) == 0)
+#else
+            if (!result->vendor && strncasecmp(buffer, "vendor_id", 9) == 0)
+#endif
             {
                 char *extract = extractFromPoint(buffer, VENDOR_LEN, ':', 2);
                 if (extract)
@@ -416,6 +420,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
             // ARM: get CPU implementer name
             else if (!result->vendor && (strncasecmp(buffer, "cpu implementer", 15) == 0 || strncasecmp(buffer, "cpu implementor", 15) == 0))
             {
@@ -438,6 +443,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     }
                 }
             }
+#endif
             // ARM/x86: get model name
             else if (!result->name && strncasecmp(buffer, "model name", 10) == 0)
             {
@@ -450,6 +456,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
             // ARM: get CPU architecture
             else if (!result->uarch && strncasecmp(buffer, "CPU architecture", 16) == 0)
             {
@@ -464,6 +471,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#endif
             // x86: get family number
             else if (result->family == -1 && strncasecmp(buffer, "cpu family", 10) == 0)
             {
@@ -477,6 +485,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
             // MIPS: get CPU model name
             else if (!result->name && strncasecmp(buffer, "cpu model", 9) == 0)
             {
@@ -540,6 +549,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->name[NAME_LEN - 1] = '\0';
                 }
             }
+#endif
             // x86: get model number
             else if (result->model == -1 && strncasecmp(buffer, "model", 5) == 0)
             {
@@ -579,6 +589,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
             // m68k: get clocking speed in MHz
             else if (result->freq < 0 && strncasecmp(buffer, "clocking", 8) == 0)
             {
@@ -620,6 +631,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#endif
             // All: get processor index count (must repeat to get the final
             // value) OR ARM: get processor name
             else if (strncasecmp(buffer, "processor", 9) == 0)
@@ -627,8 +639,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, PROCESSOR_LEN, ':', 2);
                 if (extract)
                 {
-                    if (result->processor || isNumeric(extract, 1))
+                    if (isNumeric(extract, 1))
                         result->index = (atoi(extract) + 1);
+#ifndef X86_ONLY
                     else
                     {
                         if (result->arch == UNKNOWN)
@@ -638,6 +651,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         strncpy(result->processor, extract, PROCESSOR_LEN - 1);
                         result->processor[PROCESSOR_LEN - 1] = '\0';
                     }
+#endif
                     free(extract);
                 }
             }
@@ -708,6 +722,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
             // RISC-V: get hardware thread (hart) count
             else if (strncasecmp(buffer, "hart", 4) == 0)
             {
@@ -728,6 +743,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         result->threads--;
                 }
             }
+#endif
             // x86: get cache size in KB
             else if (result->cacheSize == -1 && strncasecmp(buffer, "cache size", 10) == 0)
             {
@@ -775,7 +791,10 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
     }
     else 
     {
+#ifndef X86_ONLY
+        free(result->processor);
         free(result->uarch);
+#endif
         free(result->vendor);
         free(result->name);
         free(result);
@@ -784,7 +803,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
     if (result->arch == X86)
     {
@@ -904,6 +923,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
 
+#ifndef X86_ONLY
+
     // Run through out ARM-specific quirks, distinctions and manipulation
     if (cpu->arch == ARM)
     {
@@ -936,6 +957,7 @@ char *interpretCPU(CPU_DATA *cpu)
 
         if (cpu->name && cpu->name[0] != '\0')
         {
+#ifndef NO_STR_CLEANING
             // Remove any existing bracketed content
             char *tmp = removeBrackets(cpu->name, NAME_LEN);
             if (tmp)
@@ -943,6 +965,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 free(cpu->name);
                 cpu->name = tmp;
             }
+#endif
 
             // If the microarchitecture name hasn't already been added, add it
             // in brackets
@@ -962,6 +985,8 @@ char *interpretCPU(CPU_DATA *cpu)
         // m68k is guaranteed to be single-core
         cpu->index = cpu->cores = cpu->threads = 1;
     }
+
+#endif
 
     // Run through our x86-specific quirks, distinctions and manipulation
     if (cpu->arch == X86 && cpu->vendor && cpu->name && (cpu->vendor[0] != '\0' || cpu->name[0] != '\0'))
@@ -1970,6 +1995,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
 
+#ifndef X86_ONLY
+
     // If we have a vendor name, add it to the start (not for x86 since that is
     // handled above)
     if (cpu->arch != X86 && cpu->vendor && cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u' && !strstr(result, cpu->vendor))
@@ -1979,6 +2006,8 @@ char *interpretCPU(CPU_DATA *cpu)
         strncpy(result, tmp, RESULT_LEN-1);
         free(tmp);
     }
+
+#endif
 
 
 
@@ -1991,11 +2020,13 @@ char *interpretCPU(CPU_DATA *cpu)
         // in its place
         if (cpu->cores <= 0 && cpu->threads <= 0 && cpu->index > 0)
         {
+#ifndef X86_ONLY
             // We don't have a good way to tell cores from threads for POWER
             // CPUs at the moment, so let's not imply our value is for cores
             if (cpu->arch == POWER)
                 snprintf(coresAndThreads, 16, "%dT", cpu->index);
             else
+#endif
                 snprintf(coresAndThreads, 16, "%dC", cpu->index);
         }
         // If we don't have cores but have threads, just show threads

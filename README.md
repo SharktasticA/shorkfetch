@@ -50,6 +50,14 @@ You will need a C compiler, `make` and libc. SHORKFETCH is often tested with GCC
 
 Clone this repository by running `git clone https://github.com/SharktasticA/shorkfetch`, or downloading as a zip file and extracting it. When inside the new directory, run `make install` to install to `/usr/bin` (you may need `sudo` if not installing as root). If you want to install it elsewhere, you can override the install location prefix like `make PREFIX=/usr/local install` to install it to `/usr/local/bin`.
 
+#### Build parameters
+
+Below are some optional parameters you can include when running `make` or `make install`.
+
+* `NO_STR_CLEANING=1`: Configures SHORKFETCH to exclude most code relating to string replacement and cleaning to reduce the binary size by ~1MB and speed up processing time. It is useful for embedded systems and/or systems severely space constrained. It is presently used for SHORK DISKETTE's version of SHORKFETCH.
+
+* `X86_ONLY=1`: Configures SHORKFETCH to exclude any code relating to CPU architectures other than x86 to reduce the binary size by ~10KB and speed up processing time. This option is presently used for SHORK 486's and SHORK DISC's version of SHORKFETCH.
+
 
 
 ## Running

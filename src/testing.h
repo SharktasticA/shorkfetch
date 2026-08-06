@@ -105,7 +105,9 @@ void testGetCPU(void)
                 printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
 
             printf("    arch:               %d\n", cpu->arch);
+#ifndef X86_ONLY
             printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
+#endif
             printf("    vendor:             %s\n", cpu->vendor ? cpu->vendor : "(null)");
             printf("    name:               %s\n", cpu->name   ? cpu->name   : "(null)");
             printf("    family:             %d\n", cpu->family);
@@ -123,7 +125,10 @@ void testGetCPU(void)
             printf("    virtAddrSize:       %d\n", cpu->virtAddrSize);
         }
 
+#ifndef X86_ONLY
+        free(cpu->processor);
         free(cpu->uarch);
+#endif
         free(cpu->vendor);
         free(cpu->name);
         free(cpu);

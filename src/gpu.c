@@ -17,7 +17,7 @@
 #include "general.h"
 #include "globals.h"
 #include "gpu.h"
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 #include "replacements.h"
 #endif
 
@@ -30,7 +30,7 @@
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
 /**
  * Cleans a GPU's name so it is less needlessly verbose and 'to the point'.
@@ -423,7 +423,7 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 
 
 
-#ifndef EMBEDDED
+#ifndef NO_STR_CLEANING
 
     // If Intel GPU, query our pre-defined iGPU list
     if (gpu->vendor == 0x8086)
