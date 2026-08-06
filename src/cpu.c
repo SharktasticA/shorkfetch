@@ -1554,7 +1554,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     if (cpu->index > 1 && cpu->cores == -1 && cpu->threads == -1)
                         cpu->cores = cpu->threads = 1;
                 }
-                // Windsor
+                // Brisbane
                 else if (cpu->model == 107)
                 {
                     // Some Athlon 64 X2s do not report "X2" in their model name
