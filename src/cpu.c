@@ -1271,7 +1271,7 @@ char *interpretCPU(CPU_DATA *cpu)
                         }
                     }
                 }
-                // Merom
+                // Merom and Allendale
                 else if (cpu->model == 15)
                 {
                     // Core 2 Duo
@@ -1301,6 +1301,23 @@ char *interpretCPU(CPU_DATA *cpu)
                                 strncpy(cpu->name, tmp, NAME_LEN - 1);
                                 cpu->name[NAME_LEN-1] = '\0';
                                 free(tmp);
+                            }
+                        }
+
+                        // Allendale-based Core 2 Duo E4xxx and E6xxx may lack
+                        // the "E" in their name
+                        // See: Core 2 Duo E4400, Core 2 Duo E6300
+                        if (cpu->stepping == 2)
+                        {
+                            if (strstr(cpu->name, "Duo  4") || strstr(cpu->name, "Duo  6"))
+                            {
+                                char *tmp = findReplace(cpu->name, NAME_LEN, "Duo  ", "Duo E");
+                                if (tmp)
+                                {
+                                    strncpy(cpu->name, tmp, NAME_LEN - 1);
+                                    cpu->name[NAME_LEN-1] = '\0';
+                                    free(tmp);
+                                }
                             }
                         }
                     }
