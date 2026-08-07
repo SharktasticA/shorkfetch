@@ -125,6 +125,8 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 * By default, the SHORK ASCII art is automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present. The `--force-art` parameter can be used to override this.
 
+
+
 ## Screenshots
 
 ### SHORKFETCH on real hardware + Debian 13
@@ -138,3 +140,9 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 ### SHORKFETCH on VMware Workstation + SHORK 486
 
 <p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on SHORK 486 running inside VMware Workstation" src="screenshots/vmware_shork-486_tmux.png"></p>
+
+
+
+## AI policy
+
+SHORKFETCH is developed under a **no LLM-generated code or documentation** policy. PR requests that contain contributions from an LLM bot or are obviously LLM-generated/vibecoded will be denied. I cannot vouch this for third-party libraries, or that the tutorials I'm learning from and sources I'm reading weren't influenced by LLM content unbeknownst to me, but I will do my best to recognise such and ensure this doesn't affect the things I control. Even considering locally-trained models or limiting LLM usage to speeding up repetitive tasks (etc.), my wish is for the SHORK family (SHORK 486, SHORK Utilities and SHORK Entertainment) to be a human-made project. :)
