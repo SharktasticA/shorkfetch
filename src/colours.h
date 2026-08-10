@@ -61,7 +61,7 @@ typedef struct {
 
 
 
-ColourPalette getColourPalette(void);
+ColourPalette getColourPalette(const int);
 char *validateColour(char*);
 
 #endif

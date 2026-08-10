@@ -320,83 +320,6 @@ char *findReplace(const char *input, const size_t inputSize, const char *needle,
 }
 
 /**
- * Adds new lines to a given string based on the requested line width.
- * @param input Input string
- * @param width Characters per line
- * @param indent Indent to include after newly inserted new line
- * @param trim Flags that any trailing newlines should be removed
- * @return Number of lines in the string
- */
-int formatNewLines(char *input, int width, char *indent, int trim)
-{
-    if (!input || width < 1) return 0;
-
-    // Initialse variables that help us track progress
-    size_t inputStrLen = strlen(input);
-    size_t indentLen = indent ? strlen(indent) : 0;
-    int lines = 1;
-    int lastSpace = -1;
-    int widthCount = 1;
-
-    // Iterate through the input string to find line breaks or places to add new ones
-    for (int i = 0; i < inputStrLen; i++)
-    {
-        if (input[i] == '\033')
-        {
-            while (i < inputStrLen && input[i] != 'm') i++;
-            if (i >= inputStrLen) break;
-            continue; 
-        }
-        
-        // Track where the last space was in case so we can go back for a future word wrap
-        if (input[i] == ' ') lastSpace = i;
-        // Reset tracking and take into account if we find an existing new line
-        else if (input[i] == '\n')
-        {
-            lines++;
-            widthCount = 0;
-            continue;
-        }
-
-        // Begin word wrapping once the line width is saturated
-        if (widthCount == width)
-        {
-            if (lastSpace != -1)
-            {
-                input[lastSpace] = '\n';
-                lines++;
-
-                if (indent && indentLen > 0)
-                {
-                    memmove(input + lastSpace + 1 + indentLen, input + lastSpace + 1, inputStrLen - lastSpace);
-                    memcpy(input + lastSpace + 1, indent, indentLen);
-                    inputStrLen += indentLen;
-                    if (lastSpace <= i) i += indentLen;
-                }
-            }
-            widthCount = i - lastSpace;
-            lastSpace = -1;
-        }
-
-        widthCount++;
-    }
-
-    // If desired, strip possible trailing new line
-    if (trim)
-    {
-        int end = strlen(input) - 1;
-        while (end >= 0 && input[end] == '\n')
-        {
-            input[end] = '\0';
-            end--;
-            lines--;
-        }
-    }
-
-    return lines;
-}
-
-/**
  * Calculates the square root of a given number (and helps us avoid including
  * math.h) - float variant.
  * @param x Input value
@@ -448,11 +371,11 @@ char *getBinDir(void)
 /**
  * Gets the parent process ID (PPID) and name of a given process ID (PID).
  * @param pid The input PID
- * @return Process struct with the found PPID and name; pid is -1 if something went wrong
+ * @return PROCESS struct with the found PPID and name; pid is -1 if something went wrong
  */
-Process getParentProcess(int pid)
+PROCESS getParentProcess(int pid)
 {
-    Process result = { -1, "" };
+    PROCESS result = { -1, "" };
 
     // Open the process's status file
     char pidPath[PATH_MAX];
@@ -862,4 +785,200 @@ void splitText(char *text, char *textLines[], int totalLines)
 
     if (count < totalLines)
         textLines[count++] = start;
+}
+
+/**
+ * Word-wraps a given string based on the requested width, optionalling adding
+ * indents to the start of each newly-made line.
+ * @param input Input string
+ * @param width Number of characters per line
+ * @param indent Indent to include after a wrap
+ * @param hardBreak Flags if the function should hard-break words if needed
+ * @param trim Flags that any trailing newlines should be removed
+ * @return Malloc'd WORD_WRAPPED struct containing the result string, how long
+ *         it is & how many lines it has
+ * TODO: soft-wrapping should also include breaking after '.', ',', '-' or '_'
+ */
+WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int trim)
+{
+    if (!input || width < 1)
+        return NULL;
+    
+    // Initialse variables that help us track progress
+    size_t inputStrLen = strlen(input);
+    size_t indentLen = indent ? strlen(indent) : 0;
+    // Count of lines found in the ouptu
+    int lines = 1;
+    // Index of the most recent breakable character
+    int lastBreakPos = -1;
+    // The character lastBreakPos points to
+    char lastBreakChar = '\0';
+    // The current size of the line being processed 
+    int widthCount = 1;
+
+    // Allocate a buffer for the result string that we can grow if needed
+    size_t capacity = inputStrLen + 1;
+    char *result = malloc(capacity);
+    if (!result)
+        return NULL;
+    memcpy(result, input, inputStrLen + 1);
+
+    // Iterate through the input string to find line breaks or places to add new ones
+    for (int i = 0; i < inputStrLen; i++)
+    {
+        // Skip counting ANSI escape sequences
+        if (result[i] == '\033')
+        {
+            while (i < inputStrLen && result[i] != 'm')
+                i++;
+            if (i >= inputStrLen)
+                break;
+            continue;
+        }
+
+        // If a newline is already in the string, handle it and advance to next
+        // iteration
+        if (result[i] == '\n')
+        {
+            lines++;
+            widthCount = 0;
+            lastBreakPos = -1;
+            lastBreakChar = '\0';
+            continue;
+        }
+
+        // If we have an indent, add some grace in case it's being used to
+        // skip over a field heading (etc.)
+        if (indentLen > 0 && widthCount < indentLen)
+        {
+            widthCount++;
+            continue;
+        }
+        
+        // Begin word wrapping once the line width is saturated
+        if (widthCount >= width)
+        {
+            int breaking = 0;
+
+            // Preferred case: make a soft wrap at lastBreak
+            if (lastBreakPos != -1)
+                breaking = 1;
+            // Fallback case: if hardBreak=1, wrap immediately
+            else if (hardBreak && result[i] != '\n' && result[i] != ' ')
+                breaking = 1;
+
+            if (breaking)
+            {
+                int breakPos;
+
+                // If lastBreak is a space, we can just overwrite it with '\n'
+                if (lastBreakPos != -1 && lastBreakChar == ' ')
+                {
+                    breakPos = lastBreakPos;
+                    result[breakPos] = '\n';
+                }
+                // If lastBreak is not a space, we need to make space instead
+                // of overwrite lastBreak's current character
+                else
+                {
+                    // Where to insert
+                    int insertAt = (lastBreakPos != -1) ? lastBreakPos + 1 : i;
+
+                    // Make sure there is room for new newline char
+                    size_t needed = inputStrLen + 1 + 1;
+                    if (needed > capacity)
+                    {
+                        size_t newCapacity = capacity ? capacity * 2 : 16;
+                        while (newCapacity < needed)
+                            newCapacity *= 2;
+
+                        char *newResult = realloc(result, newCapacity);
+                        if (!newResult) { free(result); return NULL; }
+                        result = newResult;
+                        capacity = newCapacity;
+                    }
+
+                    memmove(result + insertAt + 1, result + insertAt, inputStrLen - insertAt + 1);
+                    inputStrLen++;
+                    result[insertAt] = '\n';
+                    i = insertAt + 1;
+                    breakPos = insertAt;
+                }
+
+                lines++;
+
+                // If indent is desired, time to add that to the start of the line
+                if (indent && indentLen > 0)
+                {
+                    size_t needed2 = inputStrLen + indentLen + 1;
+                    if (needed2 > capacity)
+                    {
+                        // Make sure there is room for the extra length needed for
+                        // inserting an indent
+                        size_t newCapacity = capacity ? capacity * 2 : 16;
+                        while (newCapacity < needed2)
+                            newCapacity *= 2;
+
+                        char *newResult = realloc(result, newCapacity);
+                        if (!newResult)
+                        {
+                            free(result);
+                            return NULL;
+                        }
+                        result = newResult;
+                        capacity = newCapacity;
+                    }
+
+                    memmove(result + breakPos + 1 + indentLen, result + breakPos + 1, inputStrLen - breakPos);
+                    memcpy(result + breakPos + 1, indent, indentLen);
+                    inputStrLen += indentLen;
+                    if (breakPos <= i)
+                        i += indentLen;
+                }
+
+                widthCount = i - breakPos;
+                lastBreakPos = -1;
+                lastBreakChar = '\0';
+            }
+        }
+
+        // Track where the last break char was so we can go back to wrap from it
+        for (int j = 0; j < BREAK_CHARS_LEN - 1; j++)
+        {
+            if (result[i] == BREAK_CHARS[j])
+            {
+                lastBreakPos = i;
+                lastBreakChar = BREAK_CHARS[j];
+                break;
+            }
+        }
+
+        widthCount++;
+    }
+
+    // If desired, strip possible trailing new line
+    if (trim)
+    {
+        int end = strlen(result) - 1;
+        while (end >= 0 && result[end] == '\n')
+        {
+            result[end] = '\0';
+            end--;
+            lines--;
+        }
+        inputStrLen = strlen(result);
+    }
+
+    WORD_WRAPPED *wrapped = malloc(sizeof(WORD_WRAPPED));
+    if (!wrapped)
+    {
+        free(result);
+        return NULL;
+    }
+
+    wrapped->str = result;
+    wrapped->len = inputStrLen;
+    wrapped->lines = lines;
+
+    return wrapped;
 }

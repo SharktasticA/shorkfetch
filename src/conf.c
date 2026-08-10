@@ -13,8 +13,8 @@
 
 
 
+#include "conf.h"
 #include "globals.h"
-#include "shorkconf.h"
 
 #include <linux/limits.h>
 #include <sys/stat.h>
@@ -45,21 +45,20 @@ int deleteConf(void)
  * @param colour
  * @param compact
  * @param fields
- * @param forceShork
  * @param mode
  * @param noIP
  * @param showShork
  */
-void readConf(char *bullet, char **colour, int *compact, char **fields, int *forceShork, VIEW_MODE *mode, int *noIP, int *showShork)
+void readConf(char *bullet, char **colour, int *compact, char **fields, VIEW_MODE *mode, int *noIP, int *showShork)
 {
     char path[PATH_MAX];
     snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
 
-    FILE *shorkconf = fopen(path, "r");
-    if (shorkconf)
+    FILE *conf = fopen(path, "r");
+    if (conf)
     {
         char line[512];
-        while (fgets(line, sizeof(line), shorkconf))
+        while (fgets(line, sizeof(line), conf))
         {
             if (line[0] == '\n') continue;
             line[strcspn(line, "\n")] = '\0';
@@ -85,8 +84,6 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, int *for
                 free(*fields);
                 *fields = strdup(value);
             }
-            else if (strcmp(key, "forceShork") == 0)
-                *forceShork = atoi(value);
             else if (strcmp(key, "mode") == 0)
                 *mode = atoi(value);
             else if (strcmp(key, "noIP") == 0)
@@ -94,7 +91,7 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, int *for
             else if (strcmp(key, "showShork") == 0)
                 *showShork = atoi(value);
         }
-        fclose(shorkconf);
+        fclose(conf);
     }
 }
 
@@ -104,12 +101,11 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, int *for
  * @param colour
  * @param compact
  * @param fields
- * @param forceShork
  * @param mode
  * @param noIP
  * @param showShork
  */
-void writeConf(char bullet, char *colour, int compact, char *fields, int forceShork, VIEW_MODE mode, int noIP, int showShork)
+void writeConf(char bullet, char *colour, int compact, char *fields, VIEW_MODE mode, int noIP, int showShork)
 {
     char path[PATH_MAX];
 
@@ -121,17 +117,16 @@ void writeConf(char bullet, char *colour, int compact, char *fields, int forceSh
     mkdir(path, 0755);
 
     strncat(path, "shorkfetch.conf", PATH_MAX - strlen(path) - 1);
-    FILE *shorkconf = fopen(path, "w");
-    if (shorkconf)
+    FILE *conf = fopen(path, "w");
+    if (conf)
     {
-        fprintf(shorkconf, "bullet=%c\n", bullet);
-        fprintf(shorkconf, "colour=%s\n", colour);
-        fprintf(shorkconf, "compact=%d\n", compact);
-        fprintf(shorkconf, "fields=%s\n", fields);
-        fprintf(shorkconf, "forceShork=%d\n", forceShork);
-        fprintf(shorkconf, "mode=%d\n", mode);
-        fprintf(shorkconf, "noIP=%d\n", noIP);
-        fprintf(shorkconf, "showShork=%d\n", showShork);
-        fclose(shorkconf);
+        fprintf(conf, "bullet=%c\n", bullet);
+        fprintf(conf, "colour=%s\n", colour);
+        fprintf(conf, "compact=%d\n", compact);
+        fprintf(conf, "fields=%s\n", fields);
+        fprintf(conf, "mode=%d\n", mode);
+        fprintf(conf, "noIP=%d\n", noIP);
+        fprintf(conf, "showShork=%d\n", showShork);
+        fclose(conf);
     }
 }

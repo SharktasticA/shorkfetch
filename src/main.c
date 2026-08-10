@@ -14,12 +14,9 @@
 
 
 
-static const char *VERSION = "0.6-wip";
-
-
-
 #include "art.h"
 #include "colours.h"
+#include "conf.h"
 #include "cpu.h"
 #include "de-wm.h"
 #include "disk.h"
@@ -34,7 +31,6 @@ static const char *VERSION = "0.6-wip";
 #include "packages.h"
 #include "screen.h"
 #include "shell.h"
-#include "shorkconf.h"
 #include "terminal.h"
 #include "testing.h"
 #include "uptime.h"
@@ -42,75 +38,92 @@ static const char *VERSION = "0.6-wip";
 
 
 
+#define VERSION     "0.6-wip"
+#define OUTPUT_LEN  8192
+
+
+
 void showHelp(void)
 {
-    char desc[100] = "A tool that displays basic system and environment information in a summarised format.\n";
-    formatNewLines(desc, TERM_SIZE.ws_col, NULL, 0);
-    printf("%s\n", desc);
+    WORD_WRAPPED *desc = wordWrap("A tool that displays basic system and environment information in a summarised format.\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    printf("%s\n", desc->str);
+    free(desc->str);
+    free(desc);
 
-    char usage[50] = "Usage: shorkfetch [OPTIONS]\n\n";
-    formatNewLines(usage, TERM_SIZE.ws_col, NULL, 0);
-    printf("%s", usage);
+    WORD_WRAPPED *usage = wordWrap("Usage: shorkfetch [OPTIONS]\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    printf("%s", usage->str);
+    free(usage->str);
+    free(usage);
 
-    char options[20] = "Options:\n";
-    formatNewLines(options, TERM_SIZE.ws_col, NULL, 0);
-    printf("%s", options);
+    WORD_WRAPPED *options = wordWrap("Options:\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    printf("%s", options->str);
+    free(options->str);
+    free(options);
 
-    char bullet[140] = "-b, --bullet      Specifies a custom character to use with bullet-point mode; no assignment returns the current character\n";
-    formatNewLines(bullet, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", bullet);
+    WORD_WRAPPED *bullet = wordWrap("-b, --bullet      Specifies a custom character to use with bullet-point mode; no assignment returns the current character\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", bullet->str);
+    free(bullet->str);
+    free(bullet);
 
-    char colour[100] = "-cl, --colour     Specifies a custom accent colour; no assignment returns the current colour\n";
-    formatNewLines(colour, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", colour);
+    WORD_WRAPPED *colour = wordWrap("-cl, --colour     Specifies a custom accent colour; no assignment returns the current colour\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", colour->str);
+    free(colour->str);
+    free(colour);
 
-    char compact[70] = "-co, --compact    Compacts field names and field values\n";
-    formatNewLines(compact, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", compact);
+    WORD_WRAPPED *compact = wordWrap("-co, --compact    Compacts field names and field values\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", compact->str);
+    free(compact->str);
+    free(compact);
 
-    char help[70] = "-h, --help        Displays help information and exits\n";
-    formatNewLines(help, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", help);
+    WORD_WRAPPED *help = wordWrap("-h, --help        Displays help information and exits\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", help->str);
+    free(help->str);
+    free(help);
 
-    char fields[150] = "-f, --fields      Specifies a custom fields list and order; no assignment returns list of current fields\n";
-    formatNewLines(fields, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", fields);
+    WORD_WRAPPED *fields = wordWrap("-f, --fields      Specifies a custom fields list and order; no assignment returns list of current fields\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", fields->str);
+    free(fields->str);
+    free(fields);
 
-    char forceArt[130] = "-fa, --force-art  Forces the SHORK ASCII art to display no matter the setting, number of fields or terminal size\n";
-    formatNewLines(forceArt, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", forceArt);
+    WORD_WRAPPED *mode = wordWrap("-m, --mode        Select what view mode to use: [n]ormal, [b]ullets\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", mode->str);
+    free(mode->str);
+    free(mode);
 
-    char mode[80] = "-m, --mode        Select what view mode to use: [n]ormal, [b]ullets\n";
-    formatNewLines(mode, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", mode);
+    WORD_WRAPPED *noArt = wordWrap("-na, --no-art     Disables the SHORK ASCII art\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", noArt->str);
+    free(noArt->str);
+    free(noArt);
 
-    char noArt[100] = "-na, --no-art     Disables the SHORK ASCII art\n";
-    formatNewLines(noArt, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", noArt);
+    WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, deletes configuration file and exits\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", reset->str);
+    free(reset->str);
+    free(reset);
 
-    char reset[80] = "-r, --reset       Resets to default, deletes configuration file and exits\n";
-    formatNewLines(reset, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", reset);
+    WORD_WRAPPED *save = wordWrap("-s, --save        Saves chosen options to a configuration file\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", save->str);
+    free(save->str);
+    free(save);
 
-    char save[100] = "-s, --save        Saves chosen options to a custom configuration file\n";
-    formatNewLines(save, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", save);
+    WORD_WRAPPED *version = wordWrap("-v, --version     Displays version number and exits\n\n", TERM_SIZE.ws_col, "                  ", 0, 0);
+    printf("%s", version->str);
+    free(version->str);
+    free(version);
 
-    char version[100] = "-v, --version     Displays version number and exits\n\n";
-    formatNewLines(version, TERM_SIZE.ws_col, "                  ", 0);
-    printf("%s", version);
+    WORD_WRAPPED *colours = wordWrap("Colours: black, blue, bold_blue, bold_cyan, bold_green, bold_magenta, bold_red, bold_white, bold_yellow, cyan, green, grey, magenta, red, white, yellow, off\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    printf("%s", colours->str); 
+    free(colours->str);
+    free(colours);
 
-    char colours[180] = "Colours: black, blue, bold_blue, bold_cyan, bold_green, bold_magenta, bold_red, bold_white, bold_yellow, cyan, green, grey, magenta, red, white, yellow, off\n\n";
-    formatNewLines(colours, TERM_SIZE.ws_col, NULL, 0);
-    printf("%s", colours);
+    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, clrs, --- (separator), single blank space (new line)\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    printf("%s", fieldNames->str);
+    free(fieldNames->str);
+    free(fieldNames);
 
-    char fieldNames[200] = "Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, clrs, --- (separator), single blank space (new line)\n\n";
-    formatNewLines(fieldNames, TERM_SIZE.ws_col, NULL, 0);
-    printf("%s", fieldNames);
-
-    char notes[140] = "Note: by default, the SHORK ASCII art is disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.\n";
-    formatNewLines(notes, TERM_SIZE.ws_col, NULL, 0);
-    printf("%s", notes);
+    WORD_WRAPPED *notes = wordWrap("Note: by default, the SHORK ASCII art is disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    printf("%s", notes->str);
+    free(notes->str);
+    free(notes);
 }
 
 
@@ -127,14 +140,13 @@ int main(int argc, char *argv[])
 #else
     char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,root, ");
 #endif
-    int forceShork = 0;
     int noIP = 0;
     int saveConf = 0;
     int shorkLine = 0;
     int showShork = 1;
     VIEW_MODE mode = NORMAL;
 
-    readConf(&bullet, &COLOUR, &COMPACT, &fields, &forceShork, &mode, &noIP, &showShork);
+    readConf(&bullet, &COLOUR, &COMPACT, &fields, &mode, &noIP, &showShork);
 
     for (int i = 1; i < argc; i++)
     {
@@ -195,8 +207,6 @@ int main(int argc, char *argv[])
         }
         else if ((strcmp(argv[i], "-co") == 0) || (strcmp(argv[i], "--compact") == 0))
             COMPACT = 1;
-        else if ((strcmp(argv[i], "-fa") == 0) || (strcmp(argv[i], "--force-art") == 0))
-            forceShork = 1;
         else if (strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fields", 8) == 0)
         {
             // Find "=" as our needle
@@ -250,9 +260,9 @@ int main(int argc, char *argv[])
             else
             {
                 if (mode == NORMAL)
-                    printf("\"normal\"\n", mode);
+                    printf("\"normal\"\n");
                 else if (mode == BULLETS)
-                    printf("\"bullets\"\n", mode);
+                    printf("\"bullets\"\n");
                 free(COLOUR);
                 free(fields);
                 return 0;
@@ -364,15 +374,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int showShorkOrig = showShork;
-    if (forceShork)
-        showShork = 1;
-    else
-    {
-        if (noFields <= 6 || TERM_SIZE.ws_col < 62)
-            showShork = 0;
-    }
-
 
 
     MemInfo mi = getMemInfo();
@@ -389,22 +390,39 @@ int main(int argc, char *argv[])
 
 
 
+    // Print SHORK (if needed)
+    if (showShork)
+    {
+        printf("%s", colAccent);
+        if (COMPACT)
+        {
+            for (int i = 0; i < SHORK_COMP_HEIGHT; i++)
+                printf("%s\n", SHORK_COMP[i]);
+        }
+        else
+        {
+            for (int i = 0; i < SHORK_NORM_HEIGHT; i++)
+                printf("%s\n", SHORK_NORM[i]);
+        }
+        printf("%s", colReset);
+    }
+
+    // Output buffer
+    char output[OUTPUT_LEN];
+    size_t outputPos = 0;
+
     // Print header
     char *username = getUsername();
     char *hostname = getHostname(u, uStatus);
     size_t headerWidth = 12;
     if (username[0] != '\0' && hostname[0] != '\0')
     {
-        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-        printf("%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent, hostname, colReset);
-        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-
+        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent, hostname, colReset);
         headerWidth = strlen(username) + 1 + strlen(hostname);
-        for (size_t i = 0; i < headerWidth; i++) printf("-");
-        putchar('\n');
+        for (size_t i = 0; i < headerWidth; i++)
+            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "-");
+        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "\n");
     }
-
-
 
     // Some things are dependent on others, so we have to look them up regardless
     char *os = getOS(u, uStatus);
@@ -413,35 +431,32 @@ int main(int argc, char *argv[])
     char *gpuFromCPU = NULL;
     CPU_DATA *cpu = getCPU("/proc/cpuinfo", &gpuFromCPU);
 
+    // Assemble output
     for (int i = 0; i < noFields; i++)
     {
         if (strcmp(fieldsProcessed[i], " ") == 0)
-        {
-            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-            putchar('\n');
-        }
+            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "\n");
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
-            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-            for (size_t i = 0; i < headerWidth; i++) printf("-");
-            putchar('\n');
+            for (size_t i = 0; i < headerWidth; i++)
+                outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "-");
+            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "\n");
         }
         else if (strcmp(fieldsProcessed[i], "os") == 0)
         {
             if (os && os[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sOS:%s       %s\n", colAccent, colReset, os);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sOS:%s       %s\n", colAccent, colReset, os);
                     else
-                        printf("%sOS:%s  %s\n", colAccent, colReset, os);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sOS:%s  %s\n", colAccent, colReset, os);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, os);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, os);
                 }
             }
         }
@@ -450,18 +465,17 @@ int main(int argc, char *argv[])
             char *kernel = getKernel(u, uStatus);
             if (kernel && kernel[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sKernel:%s   %s\n", colAccent, colReset, kernel);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sKernel:%s   %s\n", colAccent, colReset, kernel);
                     else
-                        printf("%sKrn:%s %s\n", colAccent, colReset, kernel);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sKrn:%s %s\n", colAccent, colReset, kernel);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, kernel);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, kernel);
                 }
             }
             free(kernel);
@@ -471,18 +485,17 @@ int main(int argc, char *argv[])
             char *uptime = getUptime();
             if (uptime && uptime[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sUptime:%s   %s\n", colAccent, colReset, uptime);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sUptime:%s   %s\n", colAccent, colReset, uptime);
                     else
-                        printf("%sUp:%s  %s\n", colAccent, colReset, uptime);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sUp:%s  %s\n", colAccent, colReset, uptime);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, uptime);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, uptime);
                 }
             }
             free(uptime);
@@ -492,18 +505,17 @@ int main(int argc, char *argv[])
             char *pkgs = getPackages(os);
             if (pkgs && pkgs[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sPackages:%s %s\n", colAccent, colReset, pkgs);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sPackages:%s %s\n", colAccent, colReset, pkgs);
                     else
-                        printf("%sPkg:%s %s\n", colAccent, colReset, pkgs);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sPkg:%s %s\n", colAccent, colReset, pkgs);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, pkgs);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, pkgs);
                 }
             }
             free(pkgs);
@@ -521,39 +533,37 @@ int main(int argc, char *argv[])
 
                     if (screen && screen[0] != '\0')
                     {
-                        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-
                         if (mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
                                 // No compact - no bullet - single screen
                                 if (noScreens == 1)
-                                    printf("%sScreen:%s   %s\n", colAccent, colReset, screen);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sScreen:%s   %s\n", colAccent, colReset, screen);
                                 // No compact - no bullet - multiple screens - first screen
                                 else if (!pastFirstScreen)
-                                    printf("%sScreens:%s  %s\n", colAccent, colReset, screen);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sScreens:%s  %s\n", colAccent, colReset, screen);
                                 // No compact - no bullet - multiple screens - subsequent screens
                                 else 
-                                    printf("          %s\n", screen);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "          %s\n", screen);
                             }
                             else
                             {
                                 // Compact - no bullet - single screen
                                 if (noScreens == 1)
-                                    printf("%sScn:%s %s\n", colAccent, colReset, screen);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sScn:%s %s\n", colAccent, colReset, screen);
                                 // Compact - no bullet - multiple screens - first screen
                                 else if (!pastFirstScreen)
-                                    printf("%sScn:%s %s\n", colAccent, colReset, screen);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sScn:%s %s\n", colAccent, colReset, screen);
                                 // Compact - no bullet - multiple screens - subsequent screens
                                 else 
-                                    printf("     %s\n", screen);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", screen);
                             }
                         }
                         else
                         {
                             char icon[10] = {bullet};
-                            printf(" %s%s%s %s\n", colAccent, icon, colReset, screen);
+                            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, screen);
                         }
                     }
 
@@ -567,18 +577,17 @@ int main(int argc, char *argv[])
         {
             if (de && de != wm && de[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sDE:%s       %s\n", colAccent, colReset, de);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sDE:%s       %s\n", colAccent, colReset, de);
                     else
-                        printf("%sDE:%s  %s\n", colAccent, colReset, de);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sDE:%s  %s\n", colAccent, colReset, de);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, de);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, de);
                 }
             }
         }
@@ -594,22 +603,20 @@ int main(int argc, char *argv[])
                     else if (X11_PRESENT)
                         snprintf(server, 32, " (X11)");
                 }
-
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sWM:%s       %s%s\n", colAccent, colReset, wm, server);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sWM:%s       %s%s\n", colAccent, colReset, wm, server);
                     else
-                        printf("%sWM:%s  %s\n", colAccent, colReset, wm);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sWM:%s  %s\n", colAccent, colReset, wm);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %s%s\n", colAccent, icon, colReset, wm, server);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s%s\n", colAccent, icon, colReset, wm, server);
                     else
-                        printf(" %s%s%s %s\n", colAccent, icon, colReset, wm);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, wm);
                 }
             }
         }
@@ -618,42 +625,40 @@ int main(int argc, char *argv[])
             char *trm = getTerminal();
             if (trm && trm[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sTerminal:%s %s (%dx%d)\n", colAccent, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sTerminal:%s %s (%dx%d)\n", colAccent, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        printf("%sTrm:%s %s\n", colAccent, colReset, trm);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sTrm:%s %s\n", colAccent, colReset, trm);
                 }
                 else
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %s (%dx%d)\n", colAccent, icon, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (%dx%d)\n", colAccent, icon, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        printf(" %s%s%s %s\n", colAccent, icon, colReset, trm);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, trm);
                 }
             }
             // If we don't have a terminal name, we can at least still show the
             // console size
             else
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sConsole:%s  %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sConsole:%s  %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        printf("%sCon:%s %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sCon:%s %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                 }
                 else
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %dx%d console\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %dx%d console\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        printf(" %s%s%s %dx%dch\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %dx%dch\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                 }
             }
             free(trm);
@@ -663,18 +668,17 @@ int main(int argc, char *argv[])
             char *shell = getShell();
             if (shell && shell[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sShell:%s    %s\n", colAccent, colReset, shell);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sShell:%s    %s\n", colAccent, colReset, shell);
                     else
-                        printf("%sSh:%s  %s\n", colAccent, colReset, shell);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sSh:%s  %s\n", colAccent, colReset, shell);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, shell);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, shell);
                 }
             }
             free(shell);
@@ -686,18 +690,17 @@ int main(int argc, char *argv[])
                 char *cpuStr = interpretCPU(cpu);
                 if (cpuStr && cpuStr[0] != '\0')
                 {
-                    if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                     if (mode == NORMAL)
                     {
                         if (!COMPACT)
-                            printf("%sCPU:%s      %s\n", colAccent, colReset, cpuStr);
+                            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sCPU:%s      %s\n", colAccent, colReset, cpuStr);
                         else
-                            printf("%sCPU:%s %s\n", colAccent, colReset, cpuStr);
+                            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sCPU:%s %s\n", colAccent, colReset, cpuStr);
                     }
                     else
                     {
                         char icon[10] = {bullet};
-                        printf(" %s%s%s %s\n", colAccent, icon, colReset, cpuStr);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, cpuStr);
                     }
                 }
                 free(cpuStr);
@@ -716,30 +719,29 @@ int main(int argc, char *argv[])
 
                     if (gpuStr && gpuStr[0] != '\0')
                     {
-                        if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                         if (mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
                                 if (noGPUs == 1)
-                                    printf("%sGPU:%s      %s\n", colAccent, colReset, gpuStr);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s      %s\n", colAccent, colReset, gpuStr);
                                 else if (!pastFirstGPU)
-                                    printf("%sGPUs:%s     %s\n", colAccent, colReset, gpuStr);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sGPUs:%s     %s\n", colAccent, colReset, gpuStr);
                                 else
-                                    printf("          %s\n", gpuStr);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "          %s\n", gpuStr);
                             }
                             else
                             {
                                 if (noGPUs == 1 || !pastFirstGPU)
-                                    printf("%sGPU:%s %s\n", colAccent, colReset, gpuStr);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s %s\n", colAccent, colReset, gpuStr);
                                 else
-                                    printf("     %s\n", gpuStr);
+                                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", gpuStr);
                             }
                         }
                         else
                         {
                             char icon[10] = {bullet};
-                            printf(" %s%s%s %s\n", colAccent, icon, colReset, gpuStr);
+                            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, gpuStr);
                         }
                     }
 
@@ -751,18 +753,17 @@ int main(int argc, char *argv[])
             // a fallback found during CPU name processing
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sGPU:%s      %s\n", colAccent, colReset, gpuFromCPU);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s      %s\n", colAccent, colReset, gpuFromCPU);
                     else
-                        printf("%sGPU:%s %s\n", colAccent, colReset, gpuFromCPU);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s %s\n", colAccent, colReset, gpuFromCPU);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    printf(" %s%s%s %s\n", colAccent, icon, colReset, gpuFromCPU);
+                    outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, gpuFromCPU);
                 }
             }
             free(gpus);
@@ -772,21 +773,20 @@ int main(int argc, char *argv[])
             char *ram = getRAM(mi);
             if (ram && ram[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sRAM:%s      %s\n", colAccent, colReset, ram);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sRAM:%s      %s\n", colAccent, colReset, ram);
                     else
-                        printf("%sRAM:%s %s\n", colAccent, colReset, ram);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sRAM:%s %s\n", colAccent, colReset, ram);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %s RAM\n", colAccent, icon, colReset, ram);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s RAM\n", colAccent, icon, colReset, ram);
                     else
-                        printf(" %s%s%s %s (R)\n", colAccent, icon, colReset, ram);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (R)\n", colAccent, icon, colReset, ram);
                 }
             }
             free(ram);
@@ -796,21 +796,20 @@ int main(int argc, char *argv[])
             char *swap = getSwap(mi);
             if (swap && swap[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sSwap:%s     %s\n", colAccent, colReset, swap);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sSwap:%s     %s\n", colAccent, colReset, swap);
                     else
-                        printf("%sSwp:%s %s\n", colAccent, colReset, swap);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sSwp:%s %s\n", colAccent, colReset, swap);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %s swap\n", colAccent, icon, colReset, swap);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s swap\n", colAccent, icon, colReset, swap);
                     else
-                        printf(" %s%s%s %s (S)\n", colAccent, icon, colReset, swap);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (S)\n", colAccent, icon, colReset, swap);
                 }
             }
             free(swap);
@@ -820,21 +819,20 @@ int main(int argc, char *argv[])
             char *root = getRoot();
             if (root && root[0] != '\0')
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sRoot:%s     %s\n", colAccent, colReset, root);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sRoot:%s     %s\n", colAccent, colReset, root);
                     else
-                        printf("%s/:%s   %s\n", colAccent, colReset, root);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%s/:%s   %s\n", colAccent, colReset, root);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %s root\n", colAccent, icon, colReset, root);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s root\n", colAccent, icon, colReset, root);
                     else
-                        printf(" %s%s%s %s (/)\n", colAccent, icon, colReset, root);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (/)\n", colAccent, icon, colReset, root);
                 }
             }
             free(root);
@@ -844,45 +842,89 @@ int main(int argc, char *argv[])
             char *localIP = getLocalIP();
             if (localIP)
             {
-                if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        printf("%sLocal IP:%s %s\n", colAccent, colReset, localIP);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sLocal IP:%s %s\n", colAccent, colReset, localIP);
                     else
-                        printf("%sLoc:%s %s\n", colAccent, colReset, localIP);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%sLoc:%s %s\n", colAccent, colReset, localIP);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        printf(" %s%s%s %s local\n", colAccent, icon, colReset, localIP);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s local\n", colAccent, icon, colReset, localIP);
                     else
-                        printf(" %s%s%s %s (L)\n", colAccent, icon, colReset, localIP);
+                        outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (L)\n", colAccent, icon, colReset, localIP);
                 }
                 free(localIP);
             }
         }
         else if (strcmp(fieldsProcessed[i], "clrs") == 0)
         {
-            ColourPalette palette = getColourPalette();
-
-            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-            printf("%s\n", palette.normalCols);
-            if (showShork) printf("%s%s%s", colAccent, SHORK[shorkLine++], colReset);
-            printf("%s\n", palette.boldCols);
+            ColourPalette palette = getColourPalette(showShork);
+            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%s\n", palette.normalCols);
+            outputPos += snprintf(output + outputPos, OUTPUT_LEN - outputPos, "%s\n", palette.boldCols);
         }
     }
 
-    // Finish off printing the SHORK is showShork was forced on
-    if (showShork && noFields <= 6)
-        for (int i = 0; i < 7 - noFields; i++)
-            printf("%s%s%s\n", colAccent, SHORK[shorkLine++], colReset);
+    // Print output
+    int shorkWidth = SHORK_NORM_WIDTH;
+    int shorkHeight = SHORK_NORM_HEIGHT;
+    if (!showShork)
+        shorkWidth = 0;
+    else if (COMPACT)
+    {
+        shorkWidth = SHORK_COMP_WIDTH;
+        shorkHeight = SHORK_COMP_HEIGHT;
+    }
+
+    WORD_WRAPPED *data = NULL;
+    if (mode == BULLETS)
+        data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth, "   ", 1, 0);
+    else
+    {
+        if (COMPACT)
+            data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth, "     ", 1, 0);
+        else
+            data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth, "          ", 1, 0);
+    }
+
+    if (data)
+    {
+        if (showShork)
+        {
+            // Move cursor across art to where data should start
+            printf("\033[%dA", shorkHeight);
+            printf("\033[%dC", shorkWidth);
+        }
+
+        for (size_t i = 0; i < data->len; i++)
+        {
+            putchar(data->str[i]);
+            if (showShork)
+            {
+                if (data->str[i] == '\n')
+                    printf("\033[%dC", shorkWidth);
+            }
+        }
+
+        if (showShork && data->lines < shorkHeight)
+            printf("\033[%dB", shorkHeight - data->lines);
+
+        free(data->str);
+        free(data);
+
+        if (showShork)
+            printf("\r");
+    }
+    else
+        printf("ERROR: could not process output string\n");
 
 
 
     if (saveConf)
-        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, forceShork, mode, noIP, showShorkOrig);
+        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, mode, noIP, showShork);
 
     free(COLOUR);
     free(colAccent);

@@ -44,7 +44,7 @@ char *getTerminal(void)
     // Try looking through our parent processes to get the name
     if (!terminal)
     {
-        Process process = getParentProcess(getpid());
+        PROCESS process = getParentProcess(getpid());
         while (process.pid > 1)
         {
             // Flags if we must not use this process as our terminal

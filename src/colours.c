@@ -25,10 +25,51 @@
  * @return ColourPalette struct containing completed strings for printing a
  *         "normal" and "bold" line of colours
  */
-ColourPalette getColourPalette(void)
+ColourPalette getColourPalette(const int showShork)
 {
     ColourPalette palette;
-    if (COMPACT)
+
+    // size = number of chars per colour box
+    int size = 3;
+    if (showShork)
+    {
+        if ((COMPACT && TERM_SIZE.ws_col < 32) || (!COMPACT && TERM_SIZE.ws_col < 35))
+            size = 1;
+        else if (COMPACT || (!COMPACT && TERM_SIZE.ws_col < 43))
+            size = 2;
+    }
+    else
+    {
+        if (TERM_SIZE.ws_col < 16)
+            size = 1;
+        else if (COMPACT || (!COMPACT && TERM_SIZE.ws_col < 24))
+            size = 2;
+    }
+
+    if (size == 1)
+    {
+        snprintf(palette.normalCols, 128, "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
+            COL_BAK_BLACK,
+            COL_BAK_RED,
+            COL_BAK_GREEN,
+            COL_BAK_YELLOW,
+            COL_BAK_BLUE,
+            COL_BAK_MAGENTA,
+            COL_BAK_CYAN,
+            COL_BAK_WHITE,
+            COL_RESET);
+        snprintf(palette.boldCols, 128, "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
+            COL_BAK_BOLD_BLACK,
+            COL_BAK_BOLD_RED,
+            COL_BAK_BOLD_GREEN,
+            COL_BAK_BOLD_YELLOW,
+            COL_BAK_BOLD_BLUE,
+            COL_BAK_BOLD_MAGENTA,
+            COL_BAK_BOLD_CYAN,
+            COL_BAK_BOLD_WHITE,
+            COL_RESET);
+    }
+    else if (size == 2)
     {
         snprintf(palette.normalCols, 128, "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
             COL_BAK_BLACK,
@@ -74,6 +115,7 @@ ColourPalette getColourPalette(void)
             COL_BAK_BOLD_WHITE,
             COL_RESET);
     }
+
     return palette;
 }
 
