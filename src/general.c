@@ -183,7 +183,7 @@ char *captureProgramOutput(const char *command, const size_t bufferSize)
  * @param inputSize Size to use when allocating the result string
  * @return String containing what's left after separation and cleaning
  */
-char *extractFromPoint(char *input, size_t inputSize, char point, int offset)
+char *extractFromPoint(char *input, size_t inputSize, char point)
 {
     if (!input || inputSize < 2) return strdup("");
 
@@ -196,8 +196,10 @@ char *extractFromPoint(char *input, size_t inputSize, char point, int offset)
     char *sep = strchr(input, point);
     if (!sep) return result;
 
-    // Our start position taking into account possible offset
-    char *start = sep + offset;
+    // Make our start position take into account any possible offset
+    char *start = sep + 1;
+    while (*start == ' ' || *start == '\t')
+        start++;
 
     // Trim potential leading double quote
     if (*start == '"') start++;

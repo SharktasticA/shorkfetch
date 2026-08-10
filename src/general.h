@@ -48,7 +48,7 @@ static const char BREAK_CHARS[BREAK_CHARS_LEN] = { " _-+,./\\" };
 
 char *bytesToReadable(const char *, const long long);
 char *captureProgramOutput(const char *, const size_t);
-char *extractFromPoint(char *, size_t, char, int);
+char *extractFromPoint(char *, size_t, char);
 int fileExists(const char*);
 char *findErase(const char *, const size_t, const char *);
 char *findReplace(const char *, const size_t, const char *, const char *);

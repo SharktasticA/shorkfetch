@@ -46,7 +46,7 @@ char *getOS(struct utsname u, int uStatus)
         {
             if (strncmp(buffer, "PRETTY_NAME=", 12) == 0)
             {
-                char *extract = extractFromPoint(buffer, osSize, '=', 1);
+                char *extract = extractFromPoint(buffer, osSize, '=');
                 strncpy(os, extract, osSize - 1);
                 free(extract);
                 break;

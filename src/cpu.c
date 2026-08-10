@@ -393,7 +393,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // RISC-V: get micro architecture (uarch)
             if (!result->uarch && strncasecmp(buffer, "uarch", 5) == 0)
             {
-                char *extract = extractFromPoint(buffer, UARCH_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, UARCH_LEN, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -411,7 +411,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             if (!result->vendor && strncasecmp(buffer, "vendor_id", 9) == 0)
 #endif
             {
-                char *extract = extractFromPoint(buffer, VENDOR_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, VENDOR_LEN, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -427,7 +427,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // ARM: get CPU implementer name
             else if (!result->vendor && (strncasecmp(buffer, "cpu implementer", 15) == 0 || strncasecmp(buffer, "cpu implementor", 15) == 0))
             {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -450,7 +450,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // ARM/x86: get model name
             else if (!result->name && strncasecmp(buffer, "model name", 10) == 0)
             {
-                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
                     result->name = malloc(NAME_LEN);
@@ -463,7 +463,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // ARM: get CPU architecture
             else if (!result->uarch && strncasecmp(buffer, "CPU architecture", 16) == 0)
             {
-                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -478,7 +478,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get family number
             else if (result->family == -1 && strncasecmp(buffer, "cpu family", 10) == 0)
             {
-                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -492,7 +492,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // MIPS: get CPU model name
             else if (!result->name && strncasecmp(buffer, "cpu model", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -504,10 +504,23 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+            // ARM: get revision number
+            else if (result->revision == -1 && strncasecmp(buffer, "CPU revision", 12) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 4, ':');
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = ARM;
+
+                    result->revision = atoi(extract);
+                    free(extract);
+                }
+            }
             // m68k: get CPU model name
             else if (!result->name && strncmp(buffer, "CPU:", 4) == 0)
             {
-                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -522,7 +535,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // POWER: get CPU type
             else if (!result->name && strncasecmp(buffer, "cpu", 3) == 0)
             {
-                char *extract = extractFromPoint(buffer, NAME_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract && extract[0] == 'P' && extract[4] == 'R')
                 {
                     if (result->arch == UNKNOWN)
@@ -541,7 +554,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // RISC-V: get instruction set architecture (ISA)
             else if (!result->name && strncasecmp(buffer, "isa", 3) == 0)
             {
-                char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':');
                 if (extract && extract[0] == 'r' && extract[1] == 'v')
                 {
                     if (result->arch == UNKNOWN)
@@ -556,7 +569,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get model number
             else if (result->model == -1 && strncasecmp(buffer, "model", 5) == 0)
             {
-                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -569,7 +582,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get stepping number
             else if (result->stepping == -1 && strncasecmp(buffer, "stepping", 8) == 0)
             {
-                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract && extract[0] != 'u')
                 {
                     if (result->arch == UNKNOWN)
@@ -579,25 +592,10 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
-#ifndef X86_ONLY
-            // ARM: get revision number
-            else if (strncasecmp(buffer, "CPU revision", 12) == 0)
-            {
-                char *extract = extractFromPoint(buffer, 4, ':', 2);
-                if (extract)
-                {
-                    if (result->arch == UNKNOWN)
-                        result->arch = ARM;
-
-                    result->revision = atoi(extract);
-                    free(extract);
-                }
-            }
-#endif
             // x86: get clock frequency in MHz
             else if (result->freq < 0 && strncasecmp(buffer, "cpu mhz", 7) == 0)
             {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -611,7 +609,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // m68k: get clocking speed in MHz
             else if (result->freq < 0 && strncasecmp(buffer, "clocking", 8) == 0)
             {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -624,7 +622,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // POWER: get clock speed in MHz
             else if (result->freq < 0 && strncasecmp(buffer, "clock", 5) == 0)
             {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -637,7 +635,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // RISC-V: get clock speed in MHz
             else if (result->freq < 0 && strncasecmp(buffer, "cpu-freq", 8) == 0)
             {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -654,7 +652,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // value) OR ARM: get processor name
             else if (strncasecmp(buffer, "processor", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, PROCESSOR_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, PROCESSOR_LEN, ':');
                 if (extract)
                 {
                     if (isNumeric(extract, 1))
@@ -677,7 +675,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // value)
             else if (strncasecmp(buffer, "physical id", 11) == 0)
             {
-                char *extract = extractFromPoint(buffer, 5, ':', 2);
+                char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
                     int val = atoi(extract);
@@ -717,7 +715,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get physical core count
             else if (result->cores == -1 && strncasecmp(buffer, "cpu cores", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, 5, ':', 2);
+                char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -730,7 +728,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get logical thread count
             else if (result->threads == -1 && (strncasecmp(buffer, "siblings", 8) == 0 || strncasecmp(buffer, "Number of siblings", 18) == 0))
             {
-                char *extract = extractFromPoint(buffer, 5, ':', 2);
+                char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -744,7 +742,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // RISC-V: get hardware thread (hart) count
             else if (strncasecmp(buffer, "hart", 4) == 0)
             {
-                char *extract = extractFromPoint(buffer, 5, ':', 2);
+                char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -765,7 +763,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get cache size in KB
             else if (result->cacheSize == -1 && strncasecmp(buffer, "cache size", 10) == 0)
             {
-                char *extract = extractFromPoint(buffer, 16, ':', 2);
+                char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -778,7 +776,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get CPU flags
             else if (result->flags[0] == '\0' && strncasecmp(buffer, "flags", 5) == 0)
             {
-                char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':', 2);
+                char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':');
                 if (extract)
                 {
                     strncpy(result->flags, extract, FLAGS_LEN - 1);
@@ -789,7 +787,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get physical and virtual address sizes
             else if ((result->physAddrSize == -1 || result->virtAddrSize == -1) && strncasecmp(buffer, "address sizes", 13) == 0)
             {
-                char *extract = extractFromPoint(buffer, 32, ':', 2);
+                char *extract = extractFromPoint(buffer, 32, ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
@@ -951,11 +949,38 @@ char *interpretCPU(CPU_DATA *cpu)
         // name
         int uarchAdded = 0;
 
-        // If no model name is present, try to substitute it...
+        // Derive a major ARM version from uarch for comparative purposes
+        // e.g. "ARMv6TEJ" -> "ARMv6"
+        char ver[6];
+        ver[0] = '\0';
+        if (cpu->uarch && cpu->uarch[0] != '\0')
+            snprintf(ver, 6, "%s", cpu->uarch);
+
+        // Flags if we should overwrite the model name if possible
+        int ignoreName = 0;
+        // If no model name is present, of course ignore it!
         if (!cpu->name || cpu->name[0] == '\0')
+            ignoreName = 1;
+        // Also ignore the name if its just a generic "ArmvX-compatible" one.
+        // That said, only do so if the version number matches that of uarch's
+        // - if it doesn't, then the name is actually trusted over uarch's and
+        // thus must be preserved.
+        else if (strstr(cpu->name, "-compatible processor") && (ver[0] == '\0' || strstr(cpu->name, ver)))
+            ignoreName = 1;
+
+        // Flags if we should ignore the processor name as a substitue for the
+        // model name (same principles as ignoreName)
+        int ignoreProcessor = 0;
+        if (!cpu->processor || cpu->processor[0] == '\0')
+            ignoreProcessor = 1;
+        else if (strstr(cpu->processor, "-compatible processor") && (ver[0] == '\0' || strstr(cpu->processor, ver)))
+            ignoreProcessor = 1;
+
+        // If no model name is present or its generic, try to substitute it...
+        if (ignoreName)
         {
             // ...with the processor name
-            if (cpu->processor && cpu->processor[0] != '\0')
+            if (!ignoreProcessor)
             {
                 if (!cpu->name)
                     cpu->name = malloc(NAME_LEN);
@@ -985,8 +1010,16 @@ char *interpretCPU(CPU_DATA *cpu)
             }
 #endif
 
-            // If the microarchitecture name hasn't already been added, add it
-            // in brackets
+            // If absent, add the revision number in
+            if (cpu->revision != -1 && !strstr(cpu->name, " rev "))
+            {
+                char tmp[NAME_LEN];
+                snprintf(tmp, NAME_LEN, "%s rev %d", cpu->name, cpu->revision);
+                strncpy(cpu->name, tmp, NAME_LEN-1);
+                cpu->name[NAME_LEN-1] = '\0';
+            }
+
+            // If the uarch name hasn't already been added, add it in brackets
             if (!uarchAdded && !strstr(cpu->name, "ARMv") && cpu->uarch && cpu->uarch[0] != '\0')
             {
                 char tmp[NAME_LEN];
@@ -2030,6 +2063,11 @@ char *interpretCPU(CPU_DATA *cpu)
                 break;
             }
         }
+
+        // For ARM with "Arm" implementer ID and a generic "ARMv..." name, don't
+        // bother adding the vendor name
+        if (cpu->arch == ARM && strcmp(cpu->vendor, "Arm") == 0 && strncmp(cpu->name, "ARMv", 4) == 0)
+            proceed = 0;
 
         if (proceed)
         {
