@@ -363,6 +363,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         .family = -1,
         .model = -1,
         .stepping = -1,
+#ifndef X86_ONLY
+        .revision = -1,
+#endif
         .freq = -1,
         .index = 0,
         .physIDs = (PHYS_IDS) {
@@ -576,6 +579,21 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
+            // ARM: get revision number
+            else if (strncasecmp(buffer, "CPU revision", 12) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 4, ':', 2);
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = ARM;
+
+                    result->revision = atoi(extract);
+                    free(extract);
+                }
+            }
+#endif
             // x86: get clock frequency in MHz
             else if (result->freq < 0 && strncasecmp(buffer, "cpu mhz", 7) == 0)
             {

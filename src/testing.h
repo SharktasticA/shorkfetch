@@ -113,6 +113,9 @@ void testGetCPU(void)
             printf("    family:             %d\n", cpu->family);
             printf("    model:              %d\n", cpu->model);
             printf("    stepping:           %d\n", cpu->stepping);
+#ifndef X86_ONLY
+            printf("    revision:           %d\n", cpu->revision);
+#endif
             printf("    freq:               %.0f\n", cpu->freq);
             printf("    noUniquePhysIDs:    %d\n", cpu->physIDs.noUniquePhysIDs);
             printf("    maxPhysID:          %d\n", cpu->physIDs.maxPhysID);

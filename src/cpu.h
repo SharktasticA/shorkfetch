@@ -85,6 +85,10 @@ typedef struct {
     int model;
     // Stepping number (x86)
     int stepping;
+#ifndef X86_ONLY
+    // Revision number (ARM)
+    int revision;
+#endif
     // Clock frequency in MHz (m68k, POWER, some RISC-V, x86)
     float freq;
     // Processor index count (some ARM, POWER, some RISC-V, x86)
