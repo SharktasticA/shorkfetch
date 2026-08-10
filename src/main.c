@@ -894,7 +894,6 @@ int main(int argc, char *argv[])
     {
         if (showShork)
         {
-            // Move cursor across art to where data should start
             printf("\033[%dA", shorkHeight);
             printf("\033[%dC", shorkWidth);
         }
