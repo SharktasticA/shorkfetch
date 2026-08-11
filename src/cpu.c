@@ -470,7 +470,12 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         result->arch = ARM;
 
                     result->uarch = malloc(NAME_LEN);
-                    snprintf(result->uarch, NAME_LEN, "ARMv%s", extract);
+                    // If likely ARM version number
+                    if (extract[0] >= '0' && extract[0] <= '9')
+                        snprintf(result->uarch, NAME_LEN, "ARMv%s", extract);
+                    // If "AArch64", etc.
+                    else
+                        snprintf(result->uarch, NAME_LEN, "%s", extract);
                     free(extract);
                 }
             }
@@ -944,6 +949,11 @@ char *interpretCPU(CPU_DATA *cpu)
     // Run through out ARM-specific quirks, distinctions and manipulation
     if (cpu->arch == ARM)
     {
+        // If we don't have a threads value already, see if can infer from the
+        // processor index count
+        if (cpu->threads <= 0 && cpu->index > 0)
+            cpu->threads = cpu->index;
+        
         // Flags if microarchitecture-related codepaths should be skipped when
         // the microarchitecture name has already been integrated into the model
         // name
@@ -1020,7 +1030,10 @@ char *interpretCPU(CPU_DATA *cpu)
             }
 
             // If the uarch name hasn't already been added, add it in brackets
-            if (!uarchAdded && !strstr(cpu->name, "ARMv") && cpu->uarch && cpu->uarch[0] != '\0')
+            if (!uarchAdded &&
+                !strstr(cpu->name, "ARMv") &&
+                !strstr(cpu->name, cpu->uarch) &&
+                cpu->uarch && cpu->uarch[0] != '\0')
             {
                 char tmp[NAME_LEN];
                 snprintf(tmp, NAME_LEN, "%s (%s)", cpu->name, cpu->uarch);
