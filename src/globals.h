@@ -29,6 +29,7 @@ typedef enum
 
 
 #define MAX_FIELDS  50
+#define OUTPUT_LEN  8192
 
 static const char *POSSIBLE_FIELDS[] =
 {
@@ -49,13 +50,15 @@ static const char *POSSIBLE_FIELDS[] =
     "swap", // Swap memory
     "root", // Root partition size
     "lip",  // Local IP address
-    "clrs"  // ANSI escape code colour palette
+    "clrs"  // ANSI escape code 16-colour palette
 };
 static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) / sizeof(POSSIBLE_FIELDS[0]);
 
 extern char *COLOUR;
 extern int COMPACT;
 extern char *HOME;
+extern int SHORK_LINE;
+extern int SHOW_SHORK;
 extern struct winsize TERM_SIZE;
 extern int WAYLAND_PRESENT;
 extern int X11_PRESENT;

@@ -16,7 +16,7 @@
 #define ART
 
 #define SHORK_COMP_WIDTH    16
-#define SHORK_COMP_HEIGHT   8
+#define SHORK_COMP_HEIGHT   9
 const char SHORK_COMP[SHORK_COMP_HEIGHT][SHORK_COMP_WIDTH+1] = {
     "                ",
     "^`.             ",
@@ -29,7 +29,7 @@ const char SHORK_COMP[SHORK_COMP_HEIGHT][SHORK_COMP_WIDTH+1] = {
 };
 
 #define SHORK_NORM_WIDTH    19
-#define SHORK_NORM_HEIGHT   9
+#define SHORK_NORM_HEIGHT   10
 const char SHORK_NORM[SHORK_NORM_HEIGHT][SHORK_NORM_WIDTH+1] = {
     "                   ",
     "^`.                ",

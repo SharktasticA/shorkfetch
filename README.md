@@ -73,13 +73,14 @@ Usage: shorkfetch [OPTIONS]
 * `-h`, `--help`: Shows help information and exits
 * `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
 * `-na`, `--no-art`: Disables the SHORK ASCII art
+* `-ne`, `--no-esc`: Disables all ANSI espace codes and colour features
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-v`, `--version`: Displays version number and exits
 
 ### Colours
 
-Only one colour can be used at a time. "off" will use your system's/terminal emulator's text colour, and doesn't use ANSI escape codes (increasing compatibility with commands that change the output colour of another such as [gay](https://github.com/ms-jpq/gay)).
+Only one colour can be used at a time. "off" will use your system's/terminal emulator's text colour.
 
     black           blue            cyan            green  
     magenta         red             white           yellow
@@ -122,7 +123,9 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 ### Notes
 
-* By default, the SHORK ASCII art is automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present. The `--force-art` parameter can be used to override this.
+#### Using with gay
+
+[gay](https://github.com/ms-jpq/gay) can be used to change the colour of stdout piped into it to a random or chosen LGBTQ+ flag. If you use it with SHORKFETCH as-is, you may notice it does not handle the ANSI escape codes SHORKFETCH uses to position its fields and construct the 16-colour palette. You can use the `-ne`/`--no-esc` option to disable all ANSI escape codes to increase compatibility with `gay` and perhaps similar commands with the same issue, though note the aforementioned colour palette will be disabled.
 
 
 
