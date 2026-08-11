@@ -1,6 +1,6 @@
 # SHORKFETCH
 
-A cute shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but can be faster and provides cleaner output by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but it works on other modern Linux systems just fine.
+A cute shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but can be faster, and provides cleaner output and word wrapping by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but it works on other modern Linux systems just fine.
 
 SHORKFETCH also has a focus on providing clean and accurate CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus SHORKFETCH is designed to help address this.
 
