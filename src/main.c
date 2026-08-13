@@ -643,7 +643,7 @@ int main(int argc, char *argv[])
             Screen *screens = getScreens(&noScreens);
             if (screens)
             {
-                int pastFirstScreen = 0;
+                int pastFirst = 0;
                 for (int j = 0; j < noScreens; j++)
                 {
                     char *screen = interpretScreen(&screens[j]);
@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
                                 if (noScreens == 1)
                                     outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScreen:%s   %s\n", colAccent, colReset, screen);
                                 // No compact - no bullet - multiple screens - first screen
-                                else if (!pastFirstScreen)
+                                else if (!pastFirst)
                                     outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScreens:%s  %s\n", colAccent, colReset, screen);
                                 // No compact - no bullet - multiple screens - subsequent screens
                                 else 
@@ -667,11 +667,8 @@ int main(int argc, char *argv[])
                             }
                             else
                             {
-                                // Compact - no bullet - single screen
-                                if (noScreens == 1)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScn:%s %s\n", colAccent, colReset, screen);
-                                // Compact - no bullet - multiple screens - first screen
-                                else if (!pastFirstScreen)
+                                // Compact - no bullet - single screen OR multiple screens - first screen
+                                if (noScreens == 1 || !pastFirst)
                                     outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScn:%s %s\n", colAccent, colReset, screen);
                                 // Compact - no bullet - multiple screens - subsequent screens
                                 else 
@@ -686,7 +683,7 @@ int main(int argc, char *argv[])
                     }
 
                     free(screen);
-                    pastFirstScreen = 1;
+                    pastFirst = 1;
                 }
                 free(screens);
             }
@@ -941,6 +938,56 @@ int main(int argc, char *argv[])
                 }
             }
             free(swap);
+        }
+        else if (strcmp(fieldsProcessed[i], "dsk") == 0)
+        {
+            DISKS *disks = getDisks();
+            if (disks && disks->count > 0)
+            {
+                //disks->count = 1;
+                int pastFirst = 0;
+                for (int i = 0; i < disks->count; i++)
+                {
+                    if (disks->disks[i][0] != '\0')
+                    {
+                        if (noEsc) printShorkLine(0);
+                        if (mode == NORMAL)
+                        {
+                            if (!COMPACT)
+                            {
+                                // No compact - no bullet - single disk
+                                if (disks->count == 1)
+                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDisk:%s     %s\n", colAccent, colReset, disks->disks[i]);
+                                // No compact - no bullet - multiple disks - first disk
+                                else if (!pastFirst)
+                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDisks:%s    %s\n", colAccent, colReset, disks->disks[i]);
+                                // No compact - no bullet - multiple disks - subsequent disks
+                                else 
+                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "          %s\n", disks->disks[i]);
+                            }
+                            else
+                            {
+                                // Compact - no bullet - single screen OR multiple screens - first screen
+                                if (disks->count == 1 || !pastFirst)
+                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDsk:%s %s\n", colAccent, colReset, disks->disks[i]);
+                                // Compact - no bullet - multiple screens - subsequent screens
+                                else 
+                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", disks->disks[i]);
+                            }
+                        }
+                        else
+                        {
+                            char icon[10] = {bullet};
+                            if (!COMPACT)
+                                outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s disk\n", colAccent, icon, colReset, disks->disks[i]);
+                            else
+                                outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, disks->disks[i]);
+                        }
+                    }
+                    pastFirst = 1;
+                }
+            }
+            free(disks);
         }
         else if (strcmp(fieldsProcessed[i], "root") == 0)
         {
