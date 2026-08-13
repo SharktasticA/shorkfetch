@@ -43,21 +43,29 @@ DISKS *getDisks(void)
     struct dirent *dirEntry;
     while ((dirEntry = readdir(blockDir)) != NULL)
     {
+        if (disks->count >= DISKS_LEN)
+            break;
+
         if (dirEntry->d_name[0] == '.')
             continue;
 
-        char blockDev[PATH_MAX];
-        snprintf(blockDev, PATH_MAX, "/dev/%s", dirEntry->d_name);
+        if (strstr(dirEntry->d_name, "dm-") != 0 ||
+            strstr(dirEntry->d_name, "sr") != 0)
+            continue;
+
+        char sizePath[PATH_MAX];
+        snprintf(sizePath, PATH_MAX, "/sys/block/%s/size", dirEntry->d_name);
 
         // Get size
-        int fd = open(blockDev, O_RDONLY);
-        if (fd == -1)
+        FILE *file = fopen(sizePath, "r");
+        if (!file)
             continue;
-        unsigned long long size = 0;
-        int ioctlRet = ioctl(fd, BLKGETSIZE64, &size);
-        close(fd);
-        if (ioctlRet == -1 || size == 0)
+        unsigned long long sectors = 0;
+        int scanned = fscanf(file, "%llu", &sectors);
+        fclose(file);
+        if (scanned != 1 || sectors == 0)
             continue;
+        unsigned long long size = sectors * 512ULL;
 
         // Convert size to str with appropriate unit
         char *sizeStr = bytesToReadable("B", size);
@@ -69,8 +77,10 @@ DISKS *getDisks(void)
 
         // Add to disks
         snprintf(disks->disks[disks->count], DISK_LEN, "%s (%s)", sizeStr, dirEntry->d_name);
+        free(sizeStr);
         disks->count++;
     }
+    closedir(blockDir);
 
     return disks;
 }
