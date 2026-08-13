@@ -944,7 +944,6 @@ int main(int argc, char *argv[])
             DISKS *disks = getDisks();
             if (disks && disks->count > 0)
             {
-                //disks->count = 1;
                 int pastFirst = 0;
                 for (int i = 0; i < disks->count; i++)
                 {
@@ -967,10 +966,10 @@ int main(int argc, char *argv[])
                             }
                             else
                             {
-                                // Compact - no bullet - single screen OR multiple screens - first screen
+                                // Compact - no bullet - single disks OR multiple disks - first screen
                                 if (disks->count == 1 || !pastFirst)
                                     outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDsk:%s %s\n", colAccent, colReset, disks->disks[i]);
-                                // Compact - no bullet - multiple screens - subsequent screens
+                                // Compact - no bullet - multiple disks - subsequent disks
                                 else 
                                     outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", disks->disks[i]);
                             }
