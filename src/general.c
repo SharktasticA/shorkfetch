@@ -440,28 +440,27 @@ int isFileExecutable(char *currPath, struct dirent *entry)
 /**
  * Checks if the given string is entirely numeric.
  * @param str Input string to test
- * @param skipLeading Flags if you want to skip leading blank spaces before
-                      checking
  * @return 1 if numeric; 0 if not or empty string
  */
-int isNumeric(const char *str, const int skipLeading)
+int isNumeric(const char *str)
 {
-    if (skipLeading)
-    {
-        while (isspace((unsigned char)*str))
-            str++;
-    }
-
-    if (!*str)
-        return 0;
-
+    int numeric = 0;
     while (*str)
     {
-        if (!isdigit((unsigned char)*str)) return 0;
+        // Skip over any whitespace
+        if (isspace((unsigned char)*str))
+        {
+            str++;
+            continue;
+        }
+
+        if (!isdigit((unsigned char)*str))
+            return 0;
+
+        numeric = 1;
         str++;
     }
-
-    return 1;
+    return numeric;
 }
 
 /**

@@ -660,7 +660,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, PROCESSOR_LEN, ':');
                 if (extract)
                 {
-                    if (isNumeric(extract, 1))
+                    if (isNumeric(extract))
                         result->index = (atoi(extract) + 1);
 #ifndef X86_ONLY
                     else
