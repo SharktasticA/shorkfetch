@@ -614,12 +614,12 @@ int loadCSVLine(char *line, char *out[], int maxFields)
 
 int natCmp(const void *a, const void *b)
 {
-    const char *s1 = *(const char **)a;
-    const char *s2 = *(const char **)b;
+    const char *s1 = (const char *)a;
+    const char *s2 = (const char *)b;
 
     while (*s1 && *s2)
     {
-        if (isdigit(*s1) && isdigit(*s2))
+        if (isdigit((unsigned char)*s1) && isdigit((unsigned char)*s2))
         {
             char *end1, *end2;
             long n1 = strtol(s1, &end1, 10);
@@ -630,8 +630,8 @@ int natCmp(const void *a, const void *b)
         }
         else
         {
-            int c1 = tolower(*s1);
-            int c2 = tolower(*s2);
+            int c1 = tolower((unsigned char)*s1);
+            int c2 = tolower((unsigned char)*s2);
             if (c1 != c2) return c1 - c2;
             s1++;
             s2++;

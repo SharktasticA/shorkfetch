@@ -28,6 +28,10 @@
 
 
 
+/**
+ * Gets a list of valid block device names and their total size.
+ * @return DISKS pointer countaining the list and entry count
+ */
 DISKS *getDisks(void)
 {
     // Get possible block devices 
@@ -35,26 +39,41 @@ DISKS *getDisks(void)
     if (!blockDir)
         return NULL;
 
-    DISKS *disks = malloc(sizeof(DISKS));
-    if (!disks)
+    DISKS *result = malloc(sizeof(DISKS));
+    if (!result)
         return NULL;
-    disks->count = 0;
+    result->count = 0;
 
+    // Read possible block devices beforehand
+    int noBlockDevs = 0;
+    char blockDevs[DISKS_LEN][PATH_MAX];
     struct dirent *dirEntry;
     while ((dirEntry = readdir(blockDir)) != NULL)
     {
-        if (disks->count >= DISKS_LEN)
+        if (noBlockDevs == DISKS_LEN)
             break;
 
         if (dirEntry->d_name[0] == '.')
             continue;
 
-        if (strstr(dirEntry->d_name, "dm-") != 0 ||
-            strstr(dirEntry->d_name, "sr") != 0)
+        if (strlen(dirEntry->d_name) < 3 || (strncmp(dirEntry->d_name, "hd", 2) != 0 && strncmp(dirEntry->d_name, "sd", 2) != 0 && strncmp(dirEntry->d_name, "nvm", 3) != 0))
             continue;
 
+        snprintf(blockDevs[noBlockDevs++], PATH_MAX, "%s", dirEntry->d_name);
+    }
+    closedir(blockDir);
+
+    if (!noBlockDevs)
+        return result;
+
+    // Naturally sort the block device names before processing
+    qsort(blockDevs, noBlockDevs, sizeof(blockDevs[0]), natCmp);
+
+    // Get and verify the size of each block device, saving into our result
+    for (int i = 0; i < noBlockDevs; i++)
+    {
         char sizePath[PATH_MAX];
-        snprintf(sizePath, PATH_MAX, "/sys/block/%s/size", dirEntry->d_name);
+        snprintf(sizePath, PATH_MAX, "/sys/block/%s/size", blockDevs[i]);
 
         // Get size
         FILE *file = fopen(sizePath, "r");
@@ -76,13 +95,12 @@ DISKS *getDisks(void)
         }
 
         // Add to disks
-        snprintf(disks->disks[disks->count], DISK_LEN, "%s (%s)", sizeStr, dirEntry->d_name);
+        snprintf(result->disks[result->count], DISK_LEN, "%s (%s)", sizeStr, blockDevs[i]);
         free(sizeStr);
-        disks->count++;
+        result->count++;
     }
-    closedir(blockDir);
 
-    return disks;
+    return result;
 }
 
 /**
