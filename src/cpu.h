@@ -21,6 +21,8 @@
 
 // /proc/cpuinfo read buffer string length
 #define CPUINFO_BUFFER_LEN      4096
+// CPU_DATA.detectedAs string length
+#define DETECTED_AS_LEN         128
 // Flag value for PHYS_IDS.noUniquePhysIDs when PHYS_IDS.uniquePhysIDs is
 // unreliable and should be ignored
 #define IGNORE_UNIQUE_PHYS_IDS  -1
@@ -78,6 +80,8 @@ typedef struct {
     char *uarch;
     // Platform name (POWER)
     char *platform;
+    // Detected as result (POWER)
+    char *detectedAs;
 #endif
     // Vendor name (ARM, x86)
     char *vendor;

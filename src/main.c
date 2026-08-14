@@ -1129,6 +1129,7 @@ int main(int argc, char *argv[])
         free(cpu->processor);
         free(cpu->uarch);
         free(cpu->platform);
+        free(cpu->detectedAs);
 #endif
         free(cpu->vendor);
         free(cpu->name);

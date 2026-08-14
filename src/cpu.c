@@ -826,6 +826,20 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->platform[PLATFORM_LEN - 1] = '\0';
                 }
             }
+            // POWER: get detected as result name
+            else if (!result->detectedAs && strncasecmp(buffer, "detected as", 11) == 0)
+            {
+                char *extract = extractFromPoint(buffer, DETECTED_AS_LEN, ':');
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = POWER;
+
+                    result->detectedAs = malloc(DETECTED_AS_LEN);
+                    strncpy(result->detectedAs, extract, DETECTED_AS_LEN - 1);
+                    result->detectedAs[DETECTED_AS_LEN - 1] = '\0';
+                }
+            }
 #endif
         }
         fclose(fStream);
@@ -836,6 +850,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(result->processor);
         free(result->uarch);
         free(result->platform);
+        free(result->detectedAs);
 #endif
         free(result->vendor);
         free(result->name);
