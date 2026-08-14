@@ -155,7 +155,7 @@ void showHelp(void)
     free(colours->str);
     free(colours);
 
-    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, root, lip, clrs, --- (separator), single blank space (new line)\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, --- (separator), single blank space (new line)\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);
@@ -196,10 +196,10 @@ int main(int argc, char *argv[])
     TERM_SIZE = getTerminalSize();
 
     char bullet = '*';
-#ifndef NO_STR_CLEANING
-    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,root,lip, ,clrs, ");
+#ifndef EMBEDDED
+    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ");
 #else
-    char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,root, ");
+    char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,dsk,root, ");
 #endif
     int noEsc = 0;
     int noIP = 0;

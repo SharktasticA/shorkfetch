@@ -5,8 +5,12 @@ STRIP ?= strip
 
 CFLAGS += -I.
 
-ifdef NO_STR_CLEANING
+ifdef EMBEDDED
 	CFLAGS += -DNO_STR_CLEANING
+endif
+
+ifdef EMBEDDED
+	CFLAGS += -DEMBEDDED
 endif
 
 ifdef TESTS
