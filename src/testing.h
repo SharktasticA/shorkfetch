@@ -48,7 +48,8 @@ void testGetCPU(void)
         if (count == 500)
             break;
         const char *ext = strrchr(dirEntry->d_name, '.');
-        if (ext == NULL || strcmp(ext, ".cpuinfo") != 0) continue;
+        if (ext == NULL || strcmp(ext, ".cpuinfo") != 0)
+            continue;
         snprintf(cpuinfos[count++], PATH_MAX, "%s", dirEntry->d_name);
     }
     closedir(testingDir);

@@ -38,17 +38,20 @@
 
 /**
  * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
+ * TODO: add uarch variable to skip x86-specific corrections for other uarches
  * @param input Input string
  * @param inputSize Size to use when allocating the result string
  * @return String containing the result after cleaning
  */
 char *cleanCPUName(const char *input, size_t inputSize)
 {
-    if (!input || inputSize < 2) return strdup("");
+    if (!input || inputSize < 2)
+        return strdup("");
 
     // Prepare result string
     char *result = malloc(inputSize);
-    if (!result) return strdup("");
+    if (!result)
+        return strdup("");
     
     // Copy input string to result
     strncpy(result, input, inputSize - 1);
@@ -826,7 +829,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->platform[PLATFORM_LEN - 1] = '\0';
                 }
             }
-            // POWER: get detected as result name
+            // POWER: get "detected as" result name
             else if (!result->detectedAs && strncasecmp(buffer, "detected as", 11) == 0)
             {
                 char *extract = extractFromPoint(buffer, DETECTED_AS_LEN, ':');
@@ -982,7 +985,7 @@ char *interpretCPU(CPU_DATA *cpu)
 
 #ifndef X86_ONLY
 
-    // Run through out ARM-specific quirks, distinctions and manipulation
+    // ARM-specific quirk fixing and customisations
     if (cpu->arch == ARM)
     {
         // If we don't have a threads value already, see if can infer from the
@@ -1079,16 +1082,53 @@ char *interpretCPU(CPU_DATA *cpu)
         }
     }
 
-    // Run through out m68k-specific quirks, distinctions and manipulation
+    // m68k-specific quirk fixing and customisations
     if (cpu->arch == M68K)
     {
         // m68k is guaranteed to be single-core
         cpu->index = cpu->cores = cpu->threads = 1;
     }
 
+    // POWER-specific quirk fixing and customisations
+    if (cpu->arch == POWER)
+    {
+        // PowerMac-specific customisations
+        if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
+        {
+            const char *g = strstr(cpu->detectedAs, "PowerMac G") + strlen("PowerMac G");
+            // If the "detected as" result contains the Apple generation number,
+            // we can construct the proper "PowerPC Gx" name (including the
+            // IBM-specific model number in brackets)
+            if (isdigit(*g))
+            {
+                int gNo = atoi(g);
+                if (gNo >= 3 && gNo <= 5)
+                {
+                    // If the model name starts with "PPC", remove it, since
+                    // the final name will start with "PowerPC" anyway
+                    const char *ibmModel = cpu->name;
+                    if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
+                    {
+                        ibmModel += 3;
+                        while (isspace(*ibmModel))
+                            ibmModel++;
+                    }
+
+                    char *tmp = malloc(NAME_LEN);
+                    if (tmp)
+                    {
+                        snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gNo, ibmModel);
+                        free(cpu->name);
+                        cpu->name = tmp;
+                    }
+                }
+            }
+        }
+    }
+
 #endif
 
-    // Run through our x86-specific quirks, distinctions and manipulation
+    // x86-specific quirk fixing and customisations
     if (cpu->arch == X86 && cpu->vendor && cpu->name && (cpu->vendor[0] != '\0' || cpu->name[0] != '\0'))
     {
         // Physical IDs don't always seem to be sequential, so may defer to our

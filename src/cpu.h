@@ -80,7 +80,7 @@ typedef struct {
     char *uarch;
     // Platform name (POWER)
     char *platform;
-    // Detected as result (POWER)
+    // "detected as" result (POWER)
     char *detectedAs;
 #endif
     // Vendor name (ARM, x86)
