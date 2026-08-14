@@ -1128,6 +1128,7 @@ int main(int argc, char *argv[])
 #ifndef X86_ONLY
         free(cpu->processor);
         free(cpu->uarch);
+        free(cpu->platform);
 #endif
         free(cpu->vendor);
         free(cpu->name);

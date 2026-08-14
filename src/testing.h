@@ -124,6 +124,9 @@ void testGetCPU(void)
             printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
 #endif
             printf("    vendor:             %s\n", cpu->vendor ? cpu->vendor : "(null)");
+#ifndef X86_ONLY
+            printf("    platform:           %s\n", cpu->platform ? cpu->platform : "(null)");
+#endif
             printf("    name:               %s\n", cpu->name   ? cpu->name   : "(null)");
             printf("    family:             %d\n", cpu->family);
             printf("    model:              %d\n", cpu->model);
@@ -146,6 +149,7 @@ void testGetCPU(void)
 #ifndef X86_ONLY
         free(cpu->processor);
         free(cpu->uarch);
+        free(cpu->platform);
 #endif
         free(cpu->vendor);
         free(cpu->name);

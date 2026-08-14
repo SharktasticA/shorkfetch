@@ -353,10 +353,12 @@ char *cleanCPUName(const char *input, size_t inputSize)
  */
 CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 {
-    if (!cpuInfo) return NULL;
+    if (!cpuInfo)
+        return NULL;
 
     CPU_DATA *result = malloc(sizeof(CPU_DATA));
-    if (!result) return NULL;
+    if (!result)
+        return NULL;
 
     *result = (CPU_DATA) {
         .arch = UNKNOWN,
@@ -561,7 +563,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // RISC-V: get instruction set architecture (ISA)
             else if (!result->name && strncasecmp(buffer, "isa", 3) == 0)
             {
-                char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':');
+                char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract && extract[0] == 'r' && extract[1] == 'v')
                 {
                     if (result->arch == UNKNOWN)
@@ -783,7 +785,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // x86: get CPU flags
             else if (result->flags[0] == '\0' && strncasecmp(buffer, "flags", 5) == 0)
             {
-                char *extract = extractFromPoint(buffer, CPUINFO_BUFFER_LEN, ':');
+                char *extract = extractFromPoint(buffer, FLAGS_LEN, ':');
                 if (extract)
                 {
                     strncpy(result->flags, extract, FLAGS_LEN - 1);
@@ -809,6 +811,22 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
+#ifndef X86_ONLY
+            // POWER: get platform name
+            else if (!result->platform && strncasecmp(buffer, "platform", 8) == 0)
+            {
+                char *extract = extractFromPoint(buffer, PLATFORM_LEN, ':');
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = POWER;
+
+                    result->platform = malloc(PLATFORM_LEN);
+                    strncpy(result->platform, extract, PLATFORM_LEN - 1);
+                    result->platform[PLATFORM_LEN - 1] = '\0';
+                }
+            }
+#endif
         }
         fclose(fStream);
     }
@@ -817,6 +835,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 #ifndef X86_ONLY
         free(result->processor);
         free(result->uarch);
+        free(result->platform);
 #endif
         free(result->vendor);
         free(result->name);

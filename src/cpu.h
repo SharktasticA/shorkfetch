@@ -28,6 +28,8 @@
 #define FLAGS_LEN               1536
 // CPU_DATA.name string length
 #define NAME_LEN                128
+// CPU_DATA.platform string length
+#define PLATFORM_LEN            128
 // CPU_DATA.processor string length
 #define PROCESSOR_LEN           128
 // CPU_DATA.uarch string length
@@ -74,6 +76,8 @@ typedef struct {
     char *processor;
     // Micro architecture (ARM, RISC-V)
     char *uarch;
+    // Platform name (POWER)
+    char *platform;
 #endif
     // Vendor name (ARM, x86)
     char *vendor;
