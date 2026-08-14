@@ -38,20 +38,22 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char *cpuinfos[500];
+    char cpuinfos[500][PATH_MAX];
     int count = 0;
     int showRaw = 0;
 
     struct dirent *dirEntry;
     while ((dirEntry = readdir(testingDir)) != NULL)
     {
+        if (count == 500)
+            break;
         const char *ext = strrchr(dirEntry->d_name, '.');
         if (ext == NULL || strcmp(ext, ".cpuinfo") != 0) continue;
-        cpuinfos[count++] = strdup(dirEntry->d_name);
+        snprintf(cpuinfos[count++], PATH_MAX, "%s", dirEntry->d_name);
     }
     closedir(testingDir);
 
-    qsort(cpuinfos, count, sizeof(char *), natCmp);
+    qsort(cpuinfos, count, sizeof(cpuinfos[0]), natCmp);
     for (int i = 0; i < count; i++)
     {
         char cpuinfo[PATH_MAX];
