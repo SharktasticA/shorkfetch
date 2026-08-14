@@ -537,11 +537,13 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
                 }
             }
-            // POWER: get CPU type
+            // POWER: get CPU name
             else if (!result->name && strncasecmp(buffer, "cpu", 3) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
-                if (extract && extract[0] == 'P' && extract[4] == 'R')
+                if (extract &&
+                    (strlen(extract) > 5 && extract[0] == 'P' && extract[4] == 'R') ||
+                    strstr(extract, "altivec") != 0)
                 {
                     if (result->arch == UNKNOWN)
                         result->arch = POWER;
@@ -550,7 +552,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     strncpy(result->name, extract, NAME_LEN - 1);
                     free(extract);
 
-                    // In cases like "POWER9, altivec supported", we want to
+                    // In cases like "..., altivec supported", we want to
                     // remove the comma and everything after
                     char *comma = strchr(result->name, ',');
                     if (comma) *comma = '\0';

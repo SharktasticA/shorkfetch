@@ -106,7 +106,20 @@ void testGetCPU(void)
             else
                 printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
 
-            printf("    arch:               %d\n", cpu->arch);
+            if (cpu->arch == ARM)
+                printf("    arch:               ARM\n");
+            else if (cpu->arch == M68K)
+                printf("    arch:               M68K\n");
+            else if (cpu->arch == MIPS)
+                printf("    arch:               MIPS\n");
+            else if (cpu->arch == POWER)
+                printf("    arch:               POWER\n");
+            else if (cpu->arch == RISCV)
+                printf("    arch:               RISCV\n");
+            else if (cpu->arch == X86)
+                printf("    arch:               X86\n");
+            else
+                printf("    arch:               UNKNOWN\n");
 #ifndef X86_ONLY
             printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
 #endif
