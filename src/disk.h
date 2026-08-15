@@ -16,7 +16,7 @@
 #ifndef DISK
 #define DISK
 
-#define DISK_LEN    64
+#define DISK_LEN    259
 #define DISKS_LEN   10
 #define ROOT_LEN    64
 

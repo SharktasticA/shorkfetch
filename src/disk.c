@@ -46,7 +46,7 @@ DISKS *getDisks(void)
 
     // Read possible block devices beforehand
     int noBlockDevs = 0;
-    char blockDevs[DISKS_LEN][PATH_MAX];
+    char blockDevs[DISKS_LEN][256];
     struct dirent *dirEntry;
     while ((dirEntry = readdir(blockDir)) != NULL)
     {
@@ -59,7 +59,7 @@ DISKS *getDisks(void)
         if (strlen(dirEntry->d_name) < 3 || (strncmp(dirEntry->d_name, "hd", 2) != 0 && strncmp(dirEntry->d_name, "sd", 2) != 0 && strncmp(dirEntry->d_name, "nvm", 3) != 0))
             continue;
 
-        snprintf(blockDevs[noBlockDevs++], PATH_MAX, "%s", dirEntry->d_name);
+        snprintf(blockDevs[noBlockDevs++], 256, "%s", dirEntry->d_name);
     }
     closedir(blockDir);
 
