@@ -1092,6 +1092,17 @@ char *interpretCPU(CPU_DATA *cpu)
     // POWER-specific quirk fixing and customisations
     if (cpu->arch == POWER)
     {
+#ifndef NO_STR_CLEANING
+        // Remove any existing bracketed content like "(gs)", "(raw)",
+        // "(architected)", etc.
+        char *tmp = removeBrackets(cpu->name, NAME_LEN);
+        if (tmp)
+        {
+            free(cpu->name);
+            cpu->name = tmp;
+        }
+#endif
+
         // PowerMac-specific customisations
         if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
         {
