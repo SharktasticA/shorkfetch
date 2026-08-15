@@ -1114,6 +1114,19 @@ char *interpretCPU(CPU_DATA *cpu)
         }
 #endif
 
+        // IBM pSeries and PowerNV-specific customisations
+        if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
+            strstr(cpu->platform, "PowerNV")))
+        {
+            char *tmp = malloc(NAME_LEN);
+            if (tmp)
+            {
+                snprintf(tmp, NAME_LEN, "IBM %s", cpu->name);
+                free(cpu->name);
+                cpu->name = tmp;
+            }
+        }
+
         // PowerMac-specific customisations
         if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
         {
