@@ -543,12 +543,17 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get CPU name
-            else if (!result->name && strncasecmp(buffer, "cpu", 3) == 0)
+            else if (!result->name && strncmp(buffer, "cpu", 3) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
-                if (extract &&
-                    (strlen(extract) > 5 && extract[0] == 'P' && extract[4] == 'R') ||
-                    strstr(extract, "altivec") != 0)
+                // Strip the buffer of whitespace so we can double-check the
+                // field is actually "cpu:"
+                char stripped[NAME_LEN] = {0};
+                for (int i = 0, j = 0; buffer[i] && j < NAME_LEN - 1; i++)
+                    if (!isspace((unsigned char)buffer[i]))
+                        stripped[j++] = buffer[i];
+
+                if (extract && strncmp(stripped, "cpu:", 4) == 0)
                 {
                     if (result->arch == UNKNOWN)
                         result->arch = POWER;
@@ -560,7 +565,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     // In cases like "..., altivec supported", we want to
                     // remove the comma and everything after
                     char *comma = strchr(result->name, ',');
-                    if (comma) *comma = '\0';
+                    if (comma)
+                        *comma = '\0';
                 }
             }
             // RISC-V: get instruction set architecture (ISA)
