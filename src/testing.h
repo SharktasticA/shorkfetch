@@ -38,7 +38,7 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char cpuinfos[500][PATH_MAX];
+    char cpuinfos[500][256];
     int count = 0;
     int showRaw = 0;
 
@@ -50,15 +50,15 @@ void testGetCPU(void)
         const char *ext = strrchr(dirEntry->d_name, '.');
         if (ext == NULL || strcmp(ext, ".cpuinfo") != 0)
             continue;
-        snprintf(cpuinfos[count++], PATH_MAX, "%s", dirEntry->d_name);
+        snprintf(cpuinfos[count++], 256, "%s", dirEntry->d_name);
     }
     closedir(testingDir);
 
     qsort(cpuinfos, count, sizeof(cpuinfos[0]), natCmp);
     for (int i = 0; i < count; i++)
     {
-        char cpuinfo[PATH_MAX];
-        snprintf(cpuinfo, PATH_MAX, "cpuinfo-ds/%s", cpuinfos[i]);
+        char cpuinfo[267];
+        snprintf(cpuinfo, 267, "cpuinfo-ds/%s", cpuinfos[i]);
 
         char bName[256];
         strncpy(bName, cpuinfos[i], sizeof(bName) - 1);

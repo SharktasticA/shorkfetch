@@ -1096,12 +1096,12 @@ char *interpretCPU(CPU_DATA *cpu)
         if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
         {
             const char *g = strstr(cpu->detectedAs, "PowerMac G") + strlen("PowerMac G");
-            // If the "detected as" result contains the Apple generation number,
-            // we can construct the proper "PowerPC Gx" name (including the
-            // IBM-specific model number in brackets)
             if (isdigit(*g))
             {
                 int gNo = atoi(g);
+
+                // We can construct the proper "PowerPC Gx" name (including the
+                // IBM-specific model number in brackets)
                 if (gNo >= 3 && gNo <= 5)
                 {
                     // If the model name starts with "PPC", remove it, since
@@ -1121,6 +1121,19 @@ char *interpretCPU(CPU_DATA *cpu)
                         free(cpu->name);
                         cpu->name = tmp;
                     }
+                }
+
+                // We set the known core/thread counts for Gx so that multi-CPU
+                // detection later can work. G3 and G4 are always single-
+                // core; G5 970MP is dual-core, all other G5 are single-core.
+                if (gNo == 3 || gNo == 4)
+                    cpu->cores = cpu->threads = 1;
+                else if (gNo == 5)
+                {
+                    if (!strstr(cpu->name, "970MP"))
+                        cpu->cores = cpu->threads = 1;
+                    else
+                        cpu->cores = cpu->threads = 2;
                 }
             }
         }
