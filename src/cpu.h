@@ -174,8 +174,8 @@ static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) / sizeof(VENDOR_ALI
 
 
 
-char *cleanCPUName(const char *, size_t);
-CPU_DATA *getCPU(char *, char **);
+char *cleanCPUName(const CPU_ARCH, const char*, size_t);
+CPU_DATA *getCPU(char*, char**);
 int hasFlag(const CPU_DATA*, const char*);
 char *interpretCPU(CPU_DATA*);
 

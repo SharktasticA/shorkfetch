@@ -38,12 +38,12 @@
 
 /**
  * Cleans a CPU's name so it is less needlessly verbose and 'to the point'.
- * TODO: add uarch variable to skip x86-specific corrections for other uarches
+ * @param uarch CPU microarchitecture
  * @param input Input string
  * @param inputSize Size to use when allocating the result string
  * @return String containing the result after cleaning
  */
-char *cleanCPUName(const char *input, size_t inputSize)
+char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
 {
     if (!input || inputSize < 2)
         return strdup("");
@@ -123,152 +123,155 @@ char *cleanCPUName(const char *input, size_t inputSize)
             *at = '\0';
     }
 
-    // Shorten "Advanced Micro Devices" to "AMD"
-    if (strstr(result, "Advanced Micro Devices"))
+    if (arch == X86)
     {
-        char *tmp = findReplace(result, inputSize, "Advanced Micro Devices", "AMD");
-        strncpy(result, tmp, inputSize - 1);
-        result[inputSize - 1] = '\0';
-        free(tmp);
-    }
-
-    // Apply AMD-specific replacements
-    if (strstr(result, "AMD"))
-    {
-        int replaces = 0;
-        for (int i = 0; i < AMD_REPLACES_LEN; i++)
+        // Shorten "Advanced Micro Devices" to "AMD"
+        if (strstr(result, "Advanced Micro Devices"))
         {
-            if (AMD_REPLACES[i].standalone && replaces > 0) continue;
-            else if (strstr(result, AMD_REPLACES[i].match))
-            {
-                char *tmp = findReplace(result, inputSize, AMD_REPLACES[i].match, AMD_REPLACES[i].replacement);
-                strncpy(result, tmp, inputSize - 1);
-                result[inputSize - 1] = '\0';
-                free(tmp);
-                replaces++;
-            }
-        }
-
-        if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
-        {
-            // Dynamically generate substrings like "16-Core" or "16 Cores" to find
-            // and remove from AMD Ryzen or EPYC CPU names
-            int done = 0;
-            for (int i = 2; i <= 192; i += 2)
-            {
-                if (done == 1) break;
-
-                char *withDash = malloc(10);
-                char *withSpace = malloc(11);
-                if (!withDash || !withSpace) 
-                {
-                    free(withDash);
-                    free(withSpace);
-                    continue;
-                }
-                
-                snprintf(withDash, 10, " %d%s", i, "-Core");
-                snprintf(withSpace, 11, " %d%s", i, " Cores");
-
-                if (strstr(result, withDash))
-                {
-                    done = 1;
-                    char *tmp = findErase(result, inputSize, withDash);
-                    strncpy(result, tmp, inputSize - 1);
-                    result[inputSize - 1] = '\0';
-                    free(tmp);
-                }
-                else if (strstr(result, withSpace))
-                {
-                    done = 1;
-                    char *tmp = findErase(result, inputSize, withSpace);
-                    strncpy(result, tmp, inputSize - 1);
-                    result[inputSize - 1] = '\0';
-                    free(tmp);
-                }
-
-                free(withDash);
-                free(withSpace);
-            }
-        }
-        else if (strstr(result, "AMD [AMD/ATI]"))
-        {
-            char *tmp = findReplace(result, inputSize, "AMD [AMD/ATI]", "AMD/ATI");
+            char *tmp = findReplace(result, inputSize, "Advanced Micro Devices", "AMD");
             strncpy(result, tmp, inputSize - 1);
             result[inputSize - 1] = '\0';
             free(tmp);
         }
-    }
-    // Apply Intel-specific replacements
-    else if (strstr(result, "Intel"))
-    {
-        // Catch redundant "x Gen" in the name of late Intel Core CPUs
-        if (strstr(result, " Core ") && strstr(result, " Gen "))
-        {
-            char *needle = strstr(result, " Gen ");
-            if (needle)
-            {
-                if (needle - result >= 2)
-                {
-                    char *suffix = needle - 2;
-                    // Proceed if we find a "st", "nd", "rd" or "th" suffix
-                    if ((suffix[0] == 's' && suffix[1] == 't') || (suffix[0] == 'n' && suffix[1] == 'd') || (suffix[0] == 'r' && suffix[1] == 'd') || (suffix[0] == 't' && suffix[1] == 'h'))
-                    {
-                        // Walk back to find the ordinal
-                        char *digits = suffix - 1;
-                        while (digits >= result && *digits >= '0' && *digits <= '9')
-                            digits--;
-                        char *ordinal = digits + 1;
 
-                        // Make the deletion
-                        memmove(ordinal, needle + 5, strlen(needle + 5) + 1);
+        // Apply AMD-specific replacements
+        if (strstr(result, "AMD"))
+        {
+            int replaces = 0;
+            for (int i = 0; i < AMD_REPLACES_LEN; i++)
+            {
+                if (AMD_REPLACES[i].standalone && replaces > 0) continue;
+                else if (strstr(result, AMD_REPLACES[i].match))
+                {
+                    char *tmp = findReplace(result, inputSize, AMD_REPLACES[i].match, AMD_REPLACES[i].replacement);
+                    strncpy(result, tmp, inputSize - 1);
+                    result[inputSize - 1] = '\0';
+                    free(tmp);
+                    replaces++;
+                }
+            }
+
+            if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
+            {
+                // Dynamically generate substrings like "16-Core" or "16 Cores" to find
+                // and remove from AMD Ryzen or EPYC CPU names
+                int done = 0;
+                for (int i = 2; i <= 192; i += 2)
+                {
+                    if (done == 1) break;
+
+                    char *withDash = malloc(10);
+                    char *withSpace = malloc(11);
+                    if (!withDash || !withSpace) 
+                    {
+                        free(withDash);
+                        free(withSpace);
+                        continue;
+                    }
+                    
+                    snprintf(withDash, 10, " %d%s", i, "-Core");
+                    snprintf(withSpace, 11, " %d%s", i, " Cores");
+
+                    if (strstr(result, withDash))
+                    {
+                        done = 1;
+                        char *tmp = findErase(result, inputSize, withDash);
+                        strncpy(result, tmp, inputSize - 1);
+                        result[inputSize - 1] = '\0';
+                        free(tmp);
+                    }
+                    else if (strstr(result, withSpace))
+                    {
+                        done = 1;
+                        char *tmp = findErase(result, inputSize, withSpace);
+                        strncpy(result, tmp, inputSize - 1);
+                        result[inputSize - 1] = '\0';
+                        free(tmp);
+                    }
+
+                    free(withDash);
+                    free(withSpace);
+                }
+            }
+            else if (strstr(result, "AMD [AMD/ATI]"))
+            {
+                char *tmp = findReplace(result, inputSize, "AMD [AMD/ATI]", "AMD/ATI");
+                strncpy(result, tmp, inputSize - 1);
+                result[inputSize - 1] = '\0';
+                free(tmp);
+            }
+        }
+        // Apply Intel-specific replacements
+        else if (strstr(result, "Intel"))
+        {
+            // Catch redundant "x Gen" in the name of late Intel Core CPUs
+            if (strstr(result, " Core ") && strstr(result, " Gen "))
+            {
+                char *needle = strstr(result, " Gen ");
+                if (needle)
+                {
+                    if (needle - result >= 2)
+                    {
+                        char *suffix = needle - 2;
+                        // Proceed if we find a "st", "nd", "rd" or "th" suffix
+                        if ((suffix[0] == 's' && suffix[1] == 't') || (suffix[0] == 'n' && suffix[1] == 'd') || (suffix[0] == 'r' && suffix[1] == 'd') || (suffix[0] == 't' && suffix[1] == 'h'))
+                        {
+                            // Walk back to find the ordinal
+                            char *digits = suffix - 1;
+                            while (digits >= result && *digits >= '0' && *digits <= '9')
+                                digits--;
+                            char *ordinal = digits + 1;
+
+                            // Make the deletion
+                            memmove(ordinal, needle + 5, strlen(needle + 5) + 1);
+                        }
                     }
                 }
             }
-        }
 
-        int replaces = 0;
-        for (int i = 0; i < INTEL_REPLACES_LEN; i++)
-        {
-            if (INTEL_REPLACES[i].standalone && replaces > 0) continue;
-            else if (strstr(result, INTEL_REPLACES[i].match))
+            int replaces = 0;
+            for (int i = 0; i < INTEL_REPLACES_LEN; i++)
             {
-                char *tmp = findReplace(result, inputSize, INTEL_REPLACES[i].match, INTEL_REPLACES[i].replacement);
-                strncpy(result, tmp, inputSize - 1);
-                result[inputSize - 1] = '\0';
-                free(tmp);
+                if (INTEL_REPLACES[i].standalone && replaces > 0) continue;
+                else if (strstr(result, INTEL_REPLACES[i].match))
+                {
+                    char *tmp = findReplace(result, inputSize, INTEL_REPLACES[i].match, INTEL_REPLACES[i].replacement);
+                    strncpy(result, tmp, inputSize - 1);
+                    result[inputSize - 1] = '\0';
+                    free(tmp);
+                }
             }
         }
-    }
-    // Apply IDT/Centaur-specific replacements
-    else if (strstr(result, "IDT"))
-    {
-        int replaces = 0;
-        for (int i = 0; i < IDT_REPLACES_LEN; i++)
+        // Apply IDT/Centaur-specific replacements
+        else if (strstr(result, "IDT"))
         {
-            if (IDT_REPLACES[i].standalone && replaces > 0) continue;
-            else if (strstr(result, IDT_REPLACES[i].match))
+            int replaces = 0;
+            for (int i = 0; i < IDT_REPLACES_LEN; i++)
             {
-                char *tmp = findReplace(result, inputSize, IDT_REPLACES[i].match, IDT_REPLACES[i].replacement);
-                strncpy(result, tmp, inputSize - 1);
-                result[inputSize - 1] = '\0';
-                free(tmp);
+                if (IDT_REPLACES[i].standalone && replaces > 0) continue;
+                else if (strstr(result, IDT_REPLACES[i].match))
+                {
+                    char *tmp = findReplace(result, inputSize, IDT_REPLACES[i].match, IDT_REPLACES[i].replacement);
+                    strncpy(result, tmp, inputSize - 1);
+                    result[inputSize - 1] = '\0';
+                    free(tmp);
+                }
             }
         }
-    }
-    // Apply VIA-specific replacements
-    else if (strstr(result, "VIA"))
-    {
-        int replaces = 0;
-        for (int i = 0; i < VIA_REPLACES_LEN; i++)
+        // Apply VIA-specific replacements
+        else if (strstr(result, "VIA"))
         {
-            if (VIA_REPLACES[i].standalone && replaces > 0) continue;
-            else if (strstr(result, VIA_REPLACES[i].match))
+            int replaces = 0;
+            for (int i = 0; i < VIA_REPLACES_LEN; i++)
             {
-                char *tmp = findReplace(result, inputSize, VIA_REPLACES[i].match, VIA_REPLACES[i].replacement);
-                strncpy(result, tmp, inputSize - 1);
-                result[inputSize - 1] = '\0';
-                free(tmp);
+                if (VIA_REPLACES[i].standalone && replaces > 0) continue;
+                else if (strstr(result, VIA_REPLACES[i].match))
+                {
+                    char *tmp = findReplace(result, inputSize, VIA_REPLACES[i].match, VIA_REPLACES[i].replacement);
+                    strncpy(result, tmp, inputSize - 1);
+                    result[inputSize - 1] = '\0';
+                    free(tmp);
+                }
             }
         }
     }
@@ -314,13 +317,15 @@ char *cleanCPUName(const char *input, size_t inputSize)
 
 #else
 
-char *cleanCPUName(const char *input, size_t inputSize)
+char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
 {
-    if (!input || inputSize < 2) return strdup("");
+    if (!input || inputSize < 2)
+        return strdup("");
 
     // Prepare result string
     char *result = malloc(inputSize);
-    if (!result) return strdup("");
+    if (!result)
+        return strdup("");
     
     // Copy input string to result
     strncpy(result, input, inputSize - 1);
@@ -2287,7 +2292,7 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
     // Clean up the result string
-    char *cleanedResult = cleanCPUName(result, RESULT_LEN);
+    char *cleanedResult = cleanCPUName(cpu->arch, result, RESULT_LEN);
     strncpy(result, cleanedResult, RESULT_LEN-1);
     free(cleanedResult);
 
