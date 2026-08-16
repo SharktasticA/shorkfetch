@@ -21,19 +21,21 @@
 
 // /proc/cpuinfo read buffer string length
 #define CPUINFO_BUFFER_LEN      4096
-// CPU_DATA.detectedAs string length
-#define DETECTED_AS_LEN         128
 // Flag value for PHYS_IDS.noUniquePhysIDs when PHYS_IDS.uniquePhysIDs is
 // unreliable and should be ignored
 #define IGNORE_UNIQUE_PHYS_IDS  -1
 // CPU_DATA.flags string length
 #define FLAGS_LEN               1536
+// CPU_DATA.machine string length
+#define MACHINE_LEN             128
 // CPU_DATA.name string length
 #define NAME_LEN                128
 // CPU_DATA.platform string length
 #define PLATFORM_LEN            128
 // CPU_DATA.processor string length
 #define PROCESSOR_LEN           128
+// CPU_DATA.revisionStr string length
+#define REVISION_STR_LEN        128
 // CPU_DATA.uarch string length
 #define UARCH_LEN               128
 // PHYS_IDS.uniquePhysIDs array size
@@ -80,8 +82,8 @@ typedef struct {
     char *uarch;
     // Platform name (POWER)
     char *platform;
-    // "detected as" result (POWER)
-    char *detectedAs;
+    // Machine name (POWER)
+    char *machine;
 #endif
     // Vendor name (ARM, POWER, x86)
     char *vendor;
@@ -95,7 +97,9 @@ typedef struct {
     int stepping;
 #ifndef X86_ONLY
     // Revision number (ARM)
-    int revision;
+    int revisionNo;
+    // Revision string (POWER)
+    char *revisionStr;
 #endif
     // Clock frequency in MHz (m68k, POWER, some RISC-V, x86)
     float freq;

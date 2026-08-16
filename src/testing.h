@@ -127,14 +127,15 @@ void testGetCPU(void)
             printf("    vendor:             %s\n", cpu->vendor ? cpu->vendor : "(null)");
 #ifndef X86_ONLY
             printf("    platform:           %s\n", cpu->platform ? cpu->platform : "(null)");
-            printf("    detectedAs:         %s\n", cpu->detectedAs ? cpu->detectedAs : "(null)");
+            printf("    machine:            %s\n", cpu->machine ? cpu->machine : "(null)");
 #endif
             printf("    name:               %s\n", cpu->name   ? cpu->name   : "(null)");
             printf("    family:             %d\n", cpu->family);
             printf("    model:              %d\n", cpu->model);
             printf("    stepping:           %d\n", cpu->stepping);
 #ifndef X86_ONLY
-            printf("    revision:           %d\n", cpu->revision);
+            printf("    revisionNo:         %d\n", cpu->revisionNo);
+            printf("    revisionStr:        %s\n", cpu->revisionStr);
 #endif
             printf("    freq:               %.0f\n", cpu->freq);
             printf("    noUniquePhysIDs:    %d\n", cpu->physIDs.noUniquePhysIDs);
@@ -152,7 +153,7 @@ void testGetCPU(void)
         free(cpu->processor);
         free(cpu->uarch);
         free(cpu->platform);
-        free(cpu->detectedAs);
+        free(cpu->machine);
 #endif
         free(cpu->vendor);
         free(cpu->name);

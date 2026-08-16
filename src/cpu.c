@@ -374,7 +374,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         .model = -1,
         .stepping = -1,
 #ifndef X86_ONLY
-        .revision = -1,
+        .revisionNo = -1,
 #endif
         .freq = -1,
         .index = 0,
@@ -520,7 +520,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // ARM: get revision number
-            else if (result->revision == -1 && strncasecmp(buffer, "CPU revision", 12) == 0)
+            else if (result->revisionNo == -1 && strncasecmp(buffer, "CPU revision", 12) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
@@ -528,7 +528,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     if (result->arch == UNKNOWN)
                         result->arch = ARM;
 
-                    result->revision = atoi(extract);
+                    result->revisionNo = atoi(extract);
                     free(extract);
                 }
             }
@@ -840,18 +840,25 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->platform[PLATFORM_LEN - 1] = '\0';
                 }
             }
-            // POWER: get "detected as" result name
-            else if (!result->detectedAs && strncasecmp(buffer, "detected as", 11) == 0)
+            // POWER: get machine name
+            else if (!result->machine && strncasecmp(buffer, "machine", 7) == 0)
             {
-                char *extract = extractFromPoint(buffer, DETECTED_AS_LEN, ':');
-                if (extract)
+                char *extract = extractFromPoint(buffer, MACHINE_LEN, ':');
+                // Strip the buffer of whitespace so we can double-check the
+                // field is actually "machine:"
+                char stripped[MACHINE_LEN] = {0};
+                for (int i = 0, j = 0; buffer[i] && j < MACHINE_LEN - 1; i++)
+                    if (!isspace((unsigned char)buffer[i]))
+                        stripped[j++] = buffer[i];
+
+                if (extract && strncmp(stripped, "machine:", 8) == 0)
                 {
                     if (result->arch == UNKNOWN)
                         result->arch = POWER;
 
-                    result->detectedAs = malloc(DETECTED_AS_LEN);
-                    strncpy(result->detectedAs, extract, DETECTED_AS_LEN - 1);
-                    result->detectedAs[DETECTED_AS_LEN - 1] = '\0';
+                    result->machine = malloc(MACHINE_LEN);
+                    strncpy(result->machine, extract, MACHINE_LEN - 1);
+                    result->machine[MACHINE_LEN - 1] = '\0';
                 }
             }
             // POWER: get vendor name
@@ -860,19 +867,33 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 // Strip the buffer of whitespace so we can double-check the
                 // field is actually "vendor:"
-                char stripped[NAME_LEN] = {0};
-                for (int i = 0, j = 0; buffer[i] && j < NAME_LEN - 1; i++)
+                char stripped[VENDOR_LEN] = {0};
+                for (int i = 0, j = 0; buffer[i] && j < VENDOR_LEN - 1; i++)
                     if (!isspace((unsigned char)buffer[i]))
                         stripped[j++] = buffer[i];
 
-                if (extract && strncmp(stripped, "vendor:", 4) == 0)
+                if (extract && strncmp(stripped, "vendor:", 7) == 0)
                 {
                     if (result->arch == UNKNOWN)
                         result->arch = POWER;
 
-                    result->vendor = malloc(DETECTED_AS_LEN);
-                    strncpy(result->vendor, extract, DETECTED_AS_LEN - 1);
-                    result->vendor[DETECTED_AS_LEN - 1] = '\0';
+                    result->vendor = malloc(VENDOR_LEN);
+                    strncpy(result->vendor, extract, VENDOR_LEN - 1);
+                    result->vendor[VENDOR_LEN - 1] = '\0';
+                }
+            }
+            // POWER: get revision str
+            else if (!result->revisionStr && (strncasecmp(buffer, "revision", 6) == 0))
+            {
+                char *extract = extractFromPoint(buffer, REVISION_STR_LEN, ':');
+                if (extract)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = POWER;
+
+                    result->revisionStr = malloc(REVISION_STR_LEN);
+                    strncpy(result->revisionStr, extract, REVISION_STR_LEN - 1);
+                    result->revisionStr[REVISION_STR_LEN - 1] = '\0';
                 }
             }
 #endif
@@ -885,7 +906,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(result->processor);
         free(result->uarch);
         free(result->platform);
-        free(result->detectedAs);
+        free(result->machine);
 #endif
         free(result->vendor);
         free(result->name);
@@ -1092,10 +1113,10 @@ char *interpretCPU(CPU_DATA *cpu)
 #endif
 
             // If absent, add the revision number in
-            if (cpu->revision != -1 && !strstr(cpu->name, " rev "))
+            if (cpu->revisionNo != -1 && !strstr(cpu->name, " rev "))
             {
                 char *tmp = malloc(NAME_LEN);
-                snprintf(tmp, NAME_LEN, "%s rev %d", cpu->name, cpu->revision);
+                snprintf(tmp, NAME_LEN, "%s rev %d", cpu->name, cpu->revisionNo);
                 free(cpu->name);
                 cpu->name = tmp;
             }
@@ -1147,55 +1168,63 @@ char *interpretCPU(CPU_DATA *cpu)
                 cpu->name = tmp;
             }
         }
-        // Apple PowerMac-specific customisations
-        else if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
+        // Apple PowerPC (PowerMac, PowerBook, iBook, etc.) specific
+        // customisations
+        else if ((cpu->platform && strstr(cpu->platform, "PowerMac") != 0) ||
+            (cpu->machine && (strstr(cpu->machine, "Power Mac") != 0 ||
+            strstr(cpu->machine, "PowerMac") != 0 ||
+            strstr(cpu->machine, "PowerBook") != 0)))
         {
-            // Found out if the "detected as" report contains an Apple "Gx"
-            // generation number
-            char *gFound = strstr(cpu->detectedAs, "PowerMac G");
-            char *g = NULL;
-            if (gFound)
-                g = gFound + strlen("PowerMac G");
+            int gNo = -1;
 
-            if (g && isdigit(*g))
+            // Infer the Apple "Gx" generation number from the PVR (Processor
+            // Version register) value in the revision string
+            if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
             {
-                int gNo = atoi(g);
+                if (strstr(cpu->revisionStr, "pvr 0008") != 0)
+                    gNo = 3;
+                else if (strstr(cpu->revisionStr, "pvr 800") != 0 ||
+                    strstr(cpu->revisionStr, "pvr 000c") != 0)
+                    gNo = 4;
+                else if (strstr(cpu->revisionStr, "pvr 003") != 0 ||
+                    strstr(cpu->revisionStr, "pvr 004") != 0)
+                    gNo = 5;
+            }
 
-                // We can construct the proper "PowerPC Gx" name (including the
-                // IBM-specific model number in brackets)
-                if (gNo >= 3 && gNo <= 5)
+            // We can construct the proper "PowerPC Gx" name (including the
+            // IBM-specific model number in brackets)
+            if (gNo >= 3 && gNo <= 5)
+            {
+                // If the model name starts with "PPC", remove it, since
+                // the final name will start with "PowerPC" anyway
+                const char *ibmModel = cpu->name;
+                if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
                 {
-                    // If the model name starts with "PPC", remove it, since
-                    // the final name will start with "PowerPC" anyway
-                    const char *ibmModel = cpu->name;
-                    if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
-                    {
-                        ibmModel += 3;
-                        while (isspace(*ibmModel))
-                            ibmModel++;
-                    }
-
-                    char *tmp = malloc(NAME_LEN);
-                    if (tmp)
-                    {
-                        snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gNo, ibmModel);
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
+                    ibmModel += 3;
+                    while (isspace(*ibmModel))
+                        ibmModel++;
                 }
 
-                // We set the known core/thread counts for Gx so that multi-CPU
-                // detection later can work. G3 and G4 are always single-
-                // core; G5 970MP is dual-core, all other G5 are single-core.
-                if (gNo == 3 || gNo == 4)
+                char *tmp = malloc(NAME_LEN);
+                if (tmp)
+                {
+                    snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gNo, ibmModel);
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+            }
+
+            // We set the known core/thread counts for Gx so that multi-CPU
+            // detection later can work. G3 and G4 are always single-
+            // core; G5 970MP is dual-core, all other G5 are single-core.
+            if (gNo == 3 || gNo == 4)
+                cpu->cores = cpu->threads = 1;
+            else if (gNo == 5)
+            {
+                if (!strstr(cpu->name, "970MP"))
                     cpu->cores = cpu->threads = 1;
-                else if (gNo == 5)
-                {
-                    if (!strstr(cpu->name, "970MP"))
-                        cpu->cores = cpu->threads = 1;
-                    else
-                        cpu->cores = cpu->threads = 2;
-                }
+                else
+                    cpu->cores = cpu->threads = 2;
             }
         }
         // Motorola-specific customisations
