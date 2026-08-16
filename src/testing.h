@@ -38,29 +38,55 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char cpuinfos[500][256];
+    const int MAX_CPUINFOS = 500;
+    const int MAX_CPUINFO_PATH_LEN = 256;
+    char cpuinfos[MAX_CPUINFOS][MAX_CPUINFO_PATH_LEN];
     int count = 0;
     int showRaw = 0;
 
     struct dirent *dirEntry;
     while ((dirEntry = readdir(testingDir)) != NULL)
     {
-        if (count == 500)
+        if (count == MAX_CPUINFOS)
             break;
+
+        if (dirEntry->d_type == DT_DIR)
+        {
+            if (strcmp(dirEntry->d_name, ".") == 0 || strcmp(dirEntry->d_name, "..") == 0 ||
+                strcmp(dirEntry->d_name, "excluded") == 0)
+                continue;
+
+            char subPath[280];
+            snprintf(subPath, sizeof(subPath), "cpuinfo-ds/%s", dirEntry->d_name);
+            DIR *subDir = opendir(subPath);
+            if (!subDir) continue;
+
+            struct dirent *subEntry;
+            while ((subEntry = readdir(subDir)) != NULL && count < MAX_CPUINFOS)
+            {
+                const char *ext = strrchr(subEntry->d_name, '.');
+                if (ext == NULL || strcmp(ext, ".cpuinfo") != 0)
+                    continue;
+                snprintf(cpuinfos[count++], MAX_CPUINFO_PATH_LEN, "%s/%s", dirEntry->d_name, subEntry->d_name);
+            }
+            closedir(subDir);
+            continue;
+        }
+
         const char *ext = strrchr(dirEntry->d_name, '.');
         if (ext == NULL || strcmp(ext, ".cpuinfo") != 0)
             continue;
-        snprintf(cpuinfos[count++], 256, "%s", dirEntry->d_name);
+        snprintf(cpuinfos[count++], MAX_CPUINFO_PATH_LEN, "%s", dirEntry->d_name);
     }
     closedir(testingDir);
 
     qsort(cpuinfos, count, sizeof(cpuinfos[0]), natCmp);
     for (int i = 0; i < count; i++)
     {
-        char cpuinfo[267];
-        snprintf(cpuinfo, 267, "cpuinfo-ds/%s", cpuinfos[i]);
+        char cpuinfo[MAX_CPUINFO_PATH_LEN + 11];
+        snprintf(cpuinfo, MAX_CPUINFO_PATH_LEN + 11, "cpuinfo-ds/%s", cpuinfos[i]);
 
-        char bName[256];
+        char bName[MAX_CPUINFO_PATH_LEN];
         strncpy(bName, cpuinfos[i], sizeof(bName) - 1);
         bName[sizeof(bName) - 1] = '\0';
         char *dot = strrchr(bName, '.');
