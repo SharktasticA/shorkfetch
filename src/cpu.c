@@ -1256,6 +1256,32 @@ char *interpretCPU(CPU_DATA *cpu)
                 free(cpu->vendor);
                 cpu->vendor = tmp;
             }
+
+            // If the machine name contains an "MCP" model number, we can
+            // use it as the canonical model name
+            // See: Motorola MCP750
+            if (cpu->machine)
+            {
+                char *open = strchr(cpu->machine, '(');
+                char *close = strchr(cpu->machine, ')');
+                if (open && close && close > open)
+                {
+                    size_t len = close - open - 1;
+                    if (len >= NAME_LEN)
+                        len = NAME_LEN - 1;
+
+                    char potentialMCP[NAME_LEN];
+                    memcpy(potentialMCP, open + 1, len);
+                    potentialMCP[len] = '\0';
+
+                    if (len > 3 && potentialMCP[0] == 'M' &&
+                        potentialMCP[1] == 'C' && potentialMCP[2] == 'P')
+                    {
+                        memcpy(cpu->name, potentialMCP, len);
+                        cpu->name[len] = '\0';
+                    }
+                }
+            }
         }
 
         // Catch other model names that should contain "PowerPC" but don't
