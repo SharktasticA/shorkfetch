@@ -854,6 +854,27 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->detectedAs[DETECTED_AS_LEN - 1] = '\0';
                 }
             }
+            // POWER: get vendor name
+            else if (!result->vendor && (strncasecmp(buffer, "vendor", 6) == 0))
+            {
+                char *extract = extractFromPoint(buffer, 16, ':');
+                // Strip the buffer of whitespace so we can double-check the
+                // field is actually "vendor:"
+                char stripped[NAME_LEN] = {0};
+                for (int i = 0, j = 0; buffer[i] && j < NAME_LEN - 1; i++)
+                    if (!isspace((unsigned char)buffer[i]))
+                        stripped[j++] = buffer[i];
+
+                if (extract && strncmp(stripped, "vendor:", 4) == 0)
+                {
+                    if (result->arch == UNKNOWN)
+                        result->arch = POWER;
+
+                    result->vendor = malloc(DETECTED_AS_LEN);
+                    strncpy(result->vendor, extract, DETECTED_AS_LEN - 1);
+                    result->vendor[DETECTED_AS_LEN - 1] = '\0';
+                }
+            }
 #endif
         }
         fclose(fStream);
@@ -1126,9 +1147,8 @@ char *interpretCPU(CPU_DATA *cpu)
                 cpu->name = tmp;
             }
         }
-
-        // PowerMac-specific customisations
-        if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
+        // Apple PowerMac-specific customisations
+        else if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
         {
             const char *g = strstr(cpu->detectedAs, "PowerMac G") + strlen("PowerMac G");
             if (isdigit(*g))
@@ -1170,6 +1190,16 @@ char *interpretCPU(CPU_DATA *cpu)
                     else
                         cpu->cores = cpu->threads = 2;
                 }
+            }
+        }
+        // Motorola-specific customisations
+        else if (cpu->vendor && strstr(cpu->vendor, "Motorola") != 0)
+        {
+            char *tmp = findReplace(cpu->vendor, VENDOR_LEN, " MCG", "");
+            if (tmp)
+            {
+                free(cpu->vendor);
+                cpu->vendor = tmp;
             }
         }
     }

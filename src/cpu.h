@@ -83,7 +83,7 @@ typedef struct {
     // "detected as" result (POWER)
     char *detectedAs;
 #endif
-    // Vendor name (ARM, x86)
+    // Vendor name (ARM, POWER, x86)
     char *vendor;
     // Model or architecture name (all)
     char *name;

@@ -281,15 +281,18 @@ char *findErase(const char *input, const size_t inputSize, const char *needle)
  */
 char *findReplace(const char *input, const size_t inputSize, const char *needle, const char *replacement)
 {
-    if (!input || !needle || !replacement || inputSize < 2) return strdup("");
+    if (!input || !needle || !replacement || inputSize < 2) 
+        return strdup("");
 
     size_t needleLen = strlen(needle);
     size_t replacementLen = strlen(replacement);
-    if (needleLen == 0) return strdup("");
+    if (needleLen == 0)
+        return strdup("");
 
     // Prepare result string
     char *result = malloc(inputSize);
-    if (!result) return strdup("");
+    if (!result)
+        return strdup("");
 
     // Copy input string to result
     strncpy(result, input, inputSize);
@@ -306,7 +309,8 @@ char *findReplace(const char *input, const size_t inputSize, const char *needle,
             size_t currentLen = strlen(result);
             size_t newLen = currentLen + (replacementLen - needleLen) + 1;
             char *tmp = realloc(result, newLen);
-            if (!tmp) break;
+            if (!tmp)
+                break;
             pos = tmp + (pos - result);
             result = tmp;
         }
