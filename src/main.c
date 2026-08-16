@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 #ifndef EMBEDDED
     char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ");
 #else
-    char *fields = strdup("os,krn,upt,trm,sh,---,cpu,gpu,ram,swap,dsk,root, ");
+    char *fields = strdup("os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root, ");
 #endif
     int noEsc = 0;
     int noIP = 0;
