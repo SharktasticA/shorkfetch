@@ -89,7 +89,9 @@ void testGetCPU(void)
         char bName[MAX_CPUINFO_PATH_LEN];
         strncpy(bName, cpuinfos[i], sizeof(bName) - 1);
         bName[sizeof(bName) - 1] = '\0';
-        char *dot = strrchr(bName, '.');
+        char *slash = strrchr(bName, '/');
+        char *base = slash ? slash + 1 : bName;
+        char *dot = strrchr(base, '.');
         if (dot) *dot = '\0';
 
         char *gpuFromCPU = NULL;
@@ -120,7 +122,7 @@ void testGetCPU(void)
             else
                 snprintf(rightSide, sizeof(rightSide), "%s", cpuStr ? cpuStr : "");
 
-            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, bName, (i + 1) % numCols == 0 || i + 1 == count ? 0 : maxRight, rightSide);
+            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, base, (i + 1) % numCols == 0 || i + 1 == count ? 0 : maxRight, rightSide);
             if ((i + 1) % numCols == 0 || i + 1 == count)
                 printf("\n");
             else
@@ -129,9 +131,9 @@ void testGetCPU(void)
         else
         {
             if (gpuFromCPU)
-                printf("\033[31m%s:\033[0m \033[32m%s\033[0m \033[36m(%s)\033[0m\n", bName, cpuStr, gpuFromCPU);
+                printf("\033[31m%s:\033[0m \033[32m%s\033[0m \033[36m(%s)\033[0m\n", base, cpuStr, gpuFromCPU);
             else
-                printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
+                printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", base, cpuStr);
 
             if (cpu->arch == ARM)
                 printf("    arch:               ARM\n");
