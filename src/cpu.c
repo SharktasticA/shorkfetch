@@ -1156,7 +1156,26 @@ char *interpretCPU(CPU_DATA *cpu)
         }
 #endif
 
-        // IBM pSeries and PowerNV-specific customisations
+        // Generic early PowerPC customisations
+        if (cpu->name && (strncmp(cpu->name, "601", 3) == 0 ||
+            strncmp(cpu->name, "603", 3) == 0 ||
+            strncmp(cpu->name, "604", 3) == 0 ||
+            strncmp(cpu->name, "620", 3) == 0))
+        {
+            // Add missing "PowerPC" to its name
+            char *tmp = malloc(NAME_LEN);
+            if (tmp)
+            {
+                snprintf(tmp, NAME_LEN, "PowerPC %s", cpu->name);
+                free(cpu->name);
+                cpu->name = tmp;
+            }
+
+            // All 6xx is single-core, no SMT, so we set the core/thread counts
+            // so that multi-CPU detection later can work
+            cpu->cores = cpu->threads = 1;
+        }
+        // IBM pSeries and PowerNV customisations
         if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
             strstr(cpu->platform, "PowerNV")))
         {
@@ -1168,8 +1187,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 cpu->name = tmp;
             }
         }
-        // Apple PowerPC (PowerMac, PowerBook, iBook, etc.) specific
-        // customisations
+        // Apple PowerPC (PowerMac, PowerBook, iBook, etc.) customisations
         else if ((cpu->platform && strstr(cpu->platform, "PowerMac") != 0) ||
             (cpu->machine && (strstr(cpu->machine, "Power Mac") != 0 ||
             strstr(cpu->machine, "PowerMac") != 0 ||
@@ -1227,7 +1245,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->cores = cpu->threads = 2;
             }
         }
-        // Motorola-specific customisations
+        // Motorola customisations
         else if (cpu->vendor && strstr(cpu->vendor, "Motorola") != 0)
         {
             char *tmp = findReplace(cpu->vendor, VENDOR_LEN, " MCG", "");
