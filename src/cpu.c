@@ -1094,10 +1094,10 @@ char *interpretCPU(CPU_DATA *cpu)
             // If absent, add the revision number in
             if (cpu->revision != -1 && !strstr(cpu->name, " rev "))
             {
-                char tmp[NAME_LEN];
+                char *tmp = malloc(NAME_LEN);
                 snprintf(tmp, NAME_LEN, "%s rev %d", cpu->name, cpu->revision);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
+                free(cpu->name);
+                cpu->name = tmp;
             }
 
             // If the uarch name hasn't already been added, add it in brackets
@@ -1106,10 +1106,10 @@ char *interpretCPU(CPU_DATA *cpu)
                 !strstr(cpu->name, cpu->uarch) &&
                 cpu->uarch && cpu->uarch[0] != '\0')
             {
-                char tmp[NAME_LEN];
+                char *tmp = malloc(NAME_LEN);
                 snprintf(tmp, NAME_LEN, "%s (%s)", cpu->name, cpu->uarch);
-                strncpy(cpu->name, tmp, NAME_LEN-1);
-                cpu->name[NAME_LEN-1] = '\0';
+                free(cpu->name);
+                cpu->name = tmp;
             }
         }
     }
@@ -1238,10 +1238,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         snprintf(tmp, NAME_LEN, "%s %s", "Transmeta", cpu->name);
                     else
                         snprintf(tmp, NAME_LEN, "%s %s", cpu->vendor, cpu->name);
-                    
-                    strncpy(cpu->name, tmp, NAME_LEN);
-                    free(tmp);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
             }
         }
@@ -1255,19 +1253,19 @@ char *interpretCPU(CPU_DATA *cpu)
                 // the model name
                 if ((strstr(cpu->name, "Cx486DLC") || strstr(cpu->name, "Cx486DRx2")) && hasFlag(cpu, "fpu"))
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "%s + 387", cpu->name);
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
                 // If we have a Cx486S with FPU, make sure 487 is included in the
                 // model name
                 else if (strstr(cpu->name, "Cx486S") && hasFlag(cpu, "fpu"))
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "%s + 487", cpu->name);
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
             }
             else
@@ -1294,22 +1292,22 @@ char *interpretCPU(CPU_DATA *cpu)
                 // 6 or Model 7
                 if (cpu->model == 6)
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "AMD K6 (Model 6)");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
                 else if (cpu->model == 7)
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "AMD K6 (Model 7)");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
                 // Geode LX
                 else if (cpu->model == 10 && cpu->name[0] == 'G')
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     // LX 600 (366MHz)
                     if (cpu->freq >= 350 && cpu->freq <= 380)
                         snprintf(tmp, NAME_LEN, "AMD Geode LX 600");
@@ -1325,8 +1323,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     // Generic fallback
                     else
                         snprintf(tmp, NAME_LEN, "AMD Geode LX");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
                 // If we have a supposed K6-III, it may actually be a K6-2+ or
                 // K6-III+, and we may be able to tell from the stepping
@@ -1334,17 +1332,17 @@ char *interpretCPU(CPU_DATA *cpu)
                 {
                     if (cpu->stepping == 0)
                     {
-                        char tmp[NAME_LEN];
+                        char *tmp = malloc(NAME_LEN);
                         snprintf(tmp, NAME_LEN, "AMD K6-III+");
-                        strncpy(cpu->name, tmp, NAME_LEN-1);
-                        cpu->name[NAME_LEN-1] = '\0';
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                     else if (cpu->stepping == 4)
                     {
-                        char tmp[NAME_LEN];
+                        char *tmp = malloc(NAME_LEN);
                         snprintf(tmp, NAME_LEN, "AMD K6-2+");
-                        strncpy(cpu->name, tmp, NAME_LEN-1);
-                        cpu->name[NAME_LEN-1] = '\0';
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
             }
@@ -1355,26 +1353,26 @@ char *interpretCPU(CPU_DATA *cpu)
                 // OverDrive's 100+MHz clockspeeds to tell them apart
                 if (cpu->model == 1 && cpu->freq >= 100)
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P5)");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
                 else if (cpu->model == 2 && cpu->freq >= 100)
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P54C)");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
                 // The Pentium OverDrive for Socket 3 is guaranteed to be P54C, so
                 // let's report that to distinguish it from P5 OverDrives for Socket 4
                 else if (cpu->model == 3 && cpu->freq < 84)
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P54C)");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
             }
             else if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'e')
@@ -1383,10 +1381,10 @@ char *interpretCPU(CPU_DATA *cpu)
                 // if its a WinChip 2A from the stepping
                 if (cpu->model == 8 && cpu->stepping == 7)
                 {
-                    char tmp[NAME_LEN];
+                    char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "IDT WinChip 2A");
-                    strncpy(cpu->name, tmp, NAME_LEN-1);
-                    cpu->name[NAME_LEN-1] = '\0';
+                    free(cpu->name);
+                    cpu->name = tmp;
                 }
             }
         }
@@ -1402,9 +1400,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     char *tmp = findReplace(cpu->name, NAME_LEN, "mobile AMD", "AMD Mobile");
                     if (tmp)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
 
@@ -1418,9 +1415,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, "Athlon", "Duron");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1460,9 +1456,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
 
@@ -1524,10 +1519,10 @@ char *interpretCPU(CPU_DATA *cpu)
                     // despite reporting the same model as Klamath
                     if (cpu->stepping == 2)
                     {
-                        char tmp[NAME_LEN];
+                        char *tmp = malloc(NAME_LEN);
                         snprintf(tmp, NAME_LEN, "Intel Pentium II OverDrive (Deschutes)");
-                        strncpy(cpu->name, tmp, NAME_LEN-1);
-                        cpu->name[NAME_LEN-1] = '\0';
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
                 // Deschutes (non-OverDrive) & Covington
@@ -1540,10 +1535,10 @@ char *interpretCPU(CPU_DATA *cpu)
                     // 512KB Xeon cannot presently be distinguished, though...
                     if (cpu->cacheSize == 32)
                     {
-                        char tmp[NAME_LEN];
+                        char *tmp = malloc(NAME_LEN);
                         snprintf(tmp, NAME_LEN, "Intel Celeron (Covington)");
-                        strncpy(cpu->name, tmp, NAME_LEN-1);
-                        cpu->name[NAME_LEN-1] = '\0';
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                     else if (cpu->cacheSize == 512)
                     {
@@ -1552,10 +1547,10 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                     else if (cpu->cacheSize >= 1024)
                     {
-                        char tmp[NAME_LEN];
+                        char *tmp = malloc(NAME_LEN);
                         snprintf(tmp, NAME_LEN, "Intel Pentium II Xeon");
-                        strncpy(cpu->name, tmp, NAME_LEN-1);
-                        cpu->name[NAME_LEN-1] = '\0';
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
                 // Banias
@@ -1570,9 +1565,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Banias)");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1588,9 +1582,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, "M processor", "M (Dothan)");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1611,9 +1604,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                     // Some Yonah-based Celeron Ms only report as simply "Celeron",
@@ -1624,9 +1616,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, "Celeron(R) CPU", "Celeron M");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1644,9 +1635,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, "Dual  CPU", " ");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN-1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
                         }
                         // Mobile Core 2 Duo (Merom) may not have "Duo" in their name,
@@ -1657,9 +1647,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, "CPU         ", "Duo ");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN-1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
                         }
 
@@ -1673,9 +1662,8 @@ char *interpretCPU(CPU_DATA *cpu)
                                 char *tmp = findReplace(cpu->name, NAME_LEN, "Duo  ", "Duo E");
                                 if (tmp)
                                 {
-                                    strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                    cpu->name[NAME_LEN-1] = '\0';
-                                    free(tmp);
+                                    free(cpu->name);
+                                    cpu->name = tmp;
                                 }
                             }
                         }
@@ -1694,9 +1682,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, "(R) CPU           ", " Pentium S");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN-1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
                         }
                         // LV Core 2 Duo lacks the "S" in their model number
@@ -1706,9 +1693,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, "CPU     ", "S");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN-1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
                         }
                     }
@@ -1749,9 +1735,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, search, "-");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN - 1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
 
                             // Add the correct suffix and discard the clock speed
@@ -1771,9 +1756,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, " CPU         ", "-");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN - 1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
                         }
                     }
@@ -1804,9 +1788,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             char *tmp = findReplace(cpu->name, NAME_LEN, "E31", " E3-1");
                             if (tmp)
                             {
-                                strncpy(cpu->name, tmp, NAME_LEN - 1);
-                                cpu->name[NAME_LEN-1] = '\0';
-                                free(tmp);
+                                free(cpu->name);
+                                cpu->name = tmp;
                             }
                         }
                     }
@@ -1822,9 +1805,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, " 0 ", " ");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1839,9 +1821,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, "- ", "-");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1940,9 +1921,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         char *tmp = findReplace(cpu->name, NAME_LEN, "64 Dual Core", "64 X2");
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -1954,9 +1934,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     char *tmp = findReplace(cpu->name, NAME_LEN, "Mobile AMD Sempron", "AMD Mobile Sempron");
                     if (tmp)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
             }
@@ -1986,9 +1965,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
                     if (tmp)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
                 // Ditto for non-Extreme Pentium D
@@ -2010,9 +1988,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                     // There are so few 2C/4T Pentium Extreme Editions (really
@@ -2033,9 +2010,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
                         if (tmp)
                         {
-                            strncpy(cpu->name, tmp, NAME_LEN - 1);
-                            cpu->name[NAME_LEN-1] = '\0';
-                            free(tmp);
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -2048,9 +2024,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     if (strstr(cpu->name, "Intel(R) CPU"))
                     {
                         tmp = findReplace(cpu->name, NAME_LEN, "Intel(R) CPU", "Intel Xeon CPU");
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        free(cpu->name);
+                        cpu->name = tmp;
                         tmp = NULL;
                     }
 
@@ -2180,9 +2155,8 @@ char *interpretCPU(CPU_DATA *cpu)
 
                     if (tmp)
                     {
-                        strncpy(cpu->name, tmp, NAME_LEN - 1);
-                        cpu->name[NAME_LEN-1] = '\0';
-                        free(tmp);
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
             }

@@ -308,6 +308,8 @@ char *findReplace(const char *input, const size_t inputSize, const char *needle,
         {
             size_t currentLen = strlen(result);
             size_t newLen = currentLen + (replacementLen - needleLen) + 1;
+            if (newLen < inputSize)
+                newLen = inputSize;
             char *tmp = realloc(result, newLen);
             if (!tmp)
                 break;
