@@ -1150,8 +1150,14 @@ char *interpretCPU(CPU_DATA *cpu)
         // Apple PowerMac-specific customisations
         else if (cpu->detectedAs && strstr(cpu->detectedAs, "PowerMac") != 0)
         {
-            const char *g = strstr(cpu->detectedAs, "PowerMac G") + strlen("PowerMac G");
-            if (isdigit(*g))
+            // Found out if the "detected as" report contains an Apple "Gx"
+            // generation number
+            char *gFound = strstr(cpu->detectedAs, "PowerMac G");
+            char *g = NULL;
+            if (gFound)
+                g = gFound + strlen("PowerMac G");
+
+            if (g && isdigit(*g))
             {
                 int gNo = atoi(g);
 
