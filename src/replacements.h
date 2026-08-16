@@ -66,7 +66,9 @@ static const struct REPLACEMENT COMPACT_CPU_REPLACES[] = {
     { "Ryzen 5",                "R5",           0 },
     { "Ryzen 7",                "R7",           0 },
     { "Ryzen 9",                "R9",           0 },
-    { "rev ",                   "r",            0 }
+    { "rev ",                   "r",            0 },
+    { "Rev ",                   "r",            0 },
+    { "Rev. ",                  "r",            0 }
 };
 static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) / sizeof(COMPACT_CPU_REPLACES[0]);
 

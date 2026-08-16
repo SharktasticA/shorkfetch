@@ -1179,13 +1179,12 @@ char *interpretCPU(CPU_DATA *cpu)
         if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
             strstr(cpu->platform, "PowerNV")))
         {
-            char *tmp = malloc(NAME_LEN);
-            if (tmp)
-            {
-                snprintf(tmp, NAME_LEN, "IBM %s", cpu->name);
-                free(cpu->name);
-                cpu->name = tmp;
-            }
+            // Set/override the vendor name with the certain,
+            // appropriate one
+            free(cpu->vendor);
+            cpu->vendor = malloc(VENDOR_LEN);
+            if (cpu->vendor)
+                snprintf(cpu->vendor, VENDOR_LEN, "IBM");
         }
         // Apple PowerPC (PowerMac, PowerBook, iBook, etc.) customisations
         else if ((cpu->platform && strstr(cpu->platform, "PowerMac") != 0) ||
@@ -1245,6 +1244,45 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->cores = cpu->threads = 2;
             }
         }
+        // Sony-Toshiba-IBM Cell customisations
+        else if (cpu->name && strncmp(cpu->name, "Cell", 4) == 0)
+        {
+            // Set/override the vendor name with the certain,
+            // appropriate one
+            free(cpu->vendor);
+            cpu->vendor = malloc(VENDOR_LEN);
+            if (cpu->vendor)
+                snprintf(cpu->vendor, VENDOR_LEN, "STI");
+            
+            // Contract "Broadband Engine" to "/B.E." to save length
+            char *tmp = findReplace(cpu->name, NAME_LEN, " Broadband Engine", "/B.E.");
+            if (tmp)
+            {
+                free(cpu->name);
+                cpu->name = tmp;
+                tmp = NULL;
+            }
+
+            // See if we can add the a cue to what host this Cell is being
+            // used for (e.g., Sony PS3, IBM CHRP)
+            tmp = malloc(NAME_LEN);
+            if (tmp)
+            {
+                tmp[0] = '\0';
+                if (cpu->platform && strcmp(cpu->platform, "PS3") == 0)
+                    snprintf(tmp, NAME_LEN, "%s (Sony PS3)", cpu->name);
+                else if (cpu->machine && strncmp(cpu->machine, "CHRP IBM", 8) == 0)
+                    snprintf(tmp, NAME_LEN, "%s (IBM CHRP)", cpu->name);
+
+                if (tmp[0] != '\0')
+                {
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+                else
+                    free(tmp);
+            }
+        }
         // Motorola customisations
         else if (cpu->vendor && strstr(cpu->vendor, "Motorola") != 0)
         {
@@ -1300,7 +1338,13 @@ char *interpretCPU(CPU_DATA *cpu)
             }
             else if (cpu->name && strstr(cpu->name, "IBM 4"))
             {
-                char *tmp = findReplace(cpu->name, NAME_LEN, "IBM 4", "IBM PowerPC 4");
+                // Put the vendor name in the proper field
+                free(cpu->vendor);
+                cpu->vendor = malloc(VENDOR_LEN);
+                if (cpu->vendor)
+                    snprintf(cpu->vendor, VENDOR_LEN, "IBM");
+                
+                char *tmp = findReplace(cpu->name, NAME_LEN, "IBM 4", "PowerPC 4");
                 if (tmp)
                 {
                     free(cpu->name);
