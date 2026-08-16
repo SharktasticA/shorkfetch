@@ -1248,12 +1248,40 @@ char *interpretCPU(CPU_DATA *cpu)
         // Motorola customisations
         else if (cpu->vendor && strstr(cpu->vendor, "Motorola") != 0)
         {
-            char *tmp = findReplace(cpu->vendor, VENDOR_LEN, " MCG", "");
+            // Remove redundant "MCG" from vendor name if it already
+            // contains "Motorola"
+            char *tmp = findReplace(cpu->vendor, VENDOR_LEN, "Motorola MCG", "Motorola");
             if (tmp)
             {
                 free(cpu->vendor);
                 cpu->vendor = tmp;
             }
+        }
+
+        // Catch other model names that should contain "PowerPC" but don't
+        if (cpu->name && !strstr(cpu->name, "PowerPC") &&
+            !strstr(cpu->name, "PPC"))
+        {
+            if (cpu->machine && strstr(cpu->machine, "PPC"))
+            {
+                char *tmp = malloc(NAME_LEN);
+                if (tmp)
+                {
+                    snprintf(tmp, NAME_LEN, "PowerPC %s", cpu->name);
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+            }
+            else if (cpu->name && strstr(cpu->name, "IBM 4"))
+            {
+                char *tmp = findReplace(cpu->name, NAME_LEN, "IBM 4", "IBM PowerPC 4");
+                if (tmp)
+                {
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+            }
+
         }
     }
 
@@ -1798,7 +1826,8 @@ char *interpretCPU(CPU_DATA *cpu)
                             if (needle)
                             {
                                 char *p = needle - 1;
-                                while (p > cpu->name && *p == ' ') p--;
+                                while (p > cpu->name && *p == ' ')
+                                    p--;
                                 strcpy(p + 1, suffix);
                             }
                         }
@@ -1823,7 +1852,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         if (needle)
                         {
                             char *p = needle - 1;
-                            while (p > cpu->name && *p == ' ') p--;
+                            while (p > cpu->name && *p == ' ')
+                                p--;
                             strcpy(p + 1, " Extreme");
                         }
                     }
