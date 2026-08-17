@@ -1263,12 +1263,13 @@ char *interpretCPU(CPU_DATA *cpu)
         else if ((cpu->platform && strstr(cpu->platform, "PowerMac") != 0) ||
             (cpu->machine && (strstr(cpu->machine, "Power Mac") != 0 ||
             strstr(cpu->machine, "PowerMac") != 0 ||
-            strstr(cpu->machine, "PowerBook") != 0)))
+            strstr(cpu->machine, "PowerBook") != 0 ||
+            strstr(cpu->machine, "iMac") != 0)))
         {
             int gNo = -1;
 
-            // Infer the Apple "Gx" generation number from the PVR (Processor
-            // Version register) value in the revision string
+            // Infer the Apple "Gx" generation number from the PVR
+            // (Processor Version register) value in the revision string
             if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
             {
                 if (strstr(cpu->revisionStr, "pvr 0008") != 0)
@@ -1281,24 +1282,37 @@ char *interpretCPU(CPU_DATA *cpu)
                     gNo = 5;
             }
 
+            // Put aside the existing model name that should have the IBM
+            // nomenclature model name
+            const char *ibmModel = cpu->name;
+            if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
+            {
+                ibmModel += 3;
+                while (isspace(*ibmModel))
+                    ibmModel++;
+            }
+
             // We can construct the proper "PowerPC Gx" name (including the
             // IBM-specific model number in brackets)
             if (gNo >= 3 && gNo <= 5)
             {
-                // If the model name starts with "PPC", remove it, since
-                // the final name will start with "PowerPC" anyway
-                const char *ibmModel = cpu->name;
-                if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
-                {
-                    ibmModel += 3;
-                    while (isspace(*ibmModel))
-                        ibmModel++;
-                }
-
                 char *tmp = malloc(NAME_LEN);
                 if (tmp)
                 {
-                    snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gNo, ibmModel);
+                    snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gNo,
+                        ibmModel);
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+            }
+            // If we don't have a Gx number, we at least known this is
+            // PowerPC...
+            else
+            {
+                char *tmp = malloc(NAME_LEN);
+                if (tmp)
+                {
+                    snprintf(tmp, NAME_LEN, "PowerPC (%s)", ibmModel);
                     free(cpu->name);
                     cpu->name = tmp;
                 }
