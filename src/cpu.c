@@ -1282,8 +1282,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     gNo = 5;
             }
 
-            // Put aside the existing model name that should have the IBM
-            // nomenclature model name
+            // Put aside the existing model name that should have the IBM-
+            // nomenclature model number
             const char *ibmModel = cpu->name;
             if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
             {
@@ -1292,8 +1292,22 @@ char *interpretCPU(CPU_DATA *cpu)
                     ibmModel++;
             }
 
+            // If we don't have a Gx number, let's see if we can infer by
+            // the IBM model number
+            if (gNo == -1)
+            {
+                // G3
+                if (strcmp(ibmModel, "740") == 0 ||
+                    strcmp(ibmModel, "745") == 0 ||
+                    strcmp(ibmModel, "750") == 0 ||
+                    strcmp(ibmModel, "755") == 0 ||
+                    strcmp(ibmModel, "740/750") == 0 ||
+                    strcmp(ibmModel, "745/755") == 0)
+                    gNo = 3;
+            }
+
             // We can construct the proper "PowerPC Gx" name (including the
-            // IBM-specific model number in brackets)
+            // IBM model number in brackets)
             if (gNo >= 3 && gNo <= 5)
             {
                 char *tmp = malloc(NAME_LEN);
