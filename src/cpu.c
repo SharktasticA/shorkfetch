@@ -1353,13 +1353,14 @@ char *interpretCPU(CPU_DATA *cpu)
                     ibmModel++;
             }
 
-            // Infer the generation from the PVR (Processor Version
-            // register) value in the revision string
+            // Infer the generation from the PVR value in the revision
+            // string
             if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
             {
                 if (strstr(cpu->revisionStr, "pvr 0009") != 0)
                     gen = PPC_6XX;
-                else if (strstr(cpu->revisionStr, "pvr 0008") != 0)
+                else if (strstr(cpu->revisionStr, "pvr 0008") != 0 ||
+                    strstr(cpu->revisionStr, "pvr 7000") != 0)
                     gen = PPC_7XX;
                 else if (strstr(cpu->revisionStr, "pvr 800") != 0 ||
                     strstr(cpu->revisionStr, "pvr 000c") != 0)
@@ -1378,12 +1379,13 @@ char *interpretCPU(CPU_DATA *cpu)
                     strncmp(ibmModel, "604", 3) == 0 ||
                     strncmp(ibmModel, "620", 3) == 0)
                     gen = PPC_6XX;
-                else if (strcmp(ibmModel, "740") == 0 ||
-                    strcmp(ibmModel, "745") == 0 ||
-                    strcmp(ibmModel, "750") == 0 ||
-                    strcmp(ibmModel, "755") == 0 ||
-                    strcmp(ibmModel, "740/750") == 0 ||
-                    strcmp(ibmModel, "745/755") == 0)
+                else if ((strncmp(ibmModel, "7400", 4) !=0 &&
+                        strncmp(ibmModel, "740", 3) == 0) ||
+                    strncmp(ibmModel, "745", 3) == 0 ||
+                    strncmp(ibmModel, "750", 3) == 0 ||
+                    strncmp(ibmModel, "755", 3) == 0 ||
+                    strncmp(ibmModel, "740/750", 7) == 0 ||
+                    strncmp(ibmModel, "745/755", 7) == 0)
                     gen = PPC_7XX;
             }
 
