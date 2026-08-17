@@ -1340,7 +1340,9 @@ char *interpretCPU(CPU_DATA *cpu)
             // register) value in the revision string
             if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
             {
-                if (strstr(cpu->revisionStr, "pvr 0008") != 0)
+                if (strstr(cpu->revisionStr, "pvr 0009") != 0)
+                    gen = PPC_6XX;
+                else if (strstr(cpu->revisionStr, "pvr 0008") != 0)
                     gen = PPC_7XX;
                 else if (strstr(cpu->revisionStr, "pvr 800") != 0 ||
                     strstr(cpu->revisionStr, "pvr 000c") != 0)
