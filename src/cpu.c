@@ -1280,7 +1280,8 @@ char *interpretCPU(CPU_DATA *cpu)
             }
         }
         // Motorola customisations
-        else if (cpu->vendor && strstr(cpu->vendor, "Motorola") != 0)
+        else if ((cpu->vendor && strstr(cpu->vendor, "Motorola") != 0) ||
+            cpu->name && strcmp(cpu->name, "8xx") == 0)
         {
             // Remove redundant "MCG" from vendor name if it already
             // contains "Motorola"
@@ -1314,6 +1315,22 @@ char *interpretCPU(CPU_DATA *cpu)
                     {
                         memcpy(cpu->name, potentialMCP, len);
                         cpu->name[len] = '\0';
+                    }
+                }
+            }
+            else if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
+            {
+                // Test for PowerQUICC (MCP8xx) via the PVR value in the
+                // revision string
+                if (strstr(cpu->revisionStr, "pvr 0050") != 0)
+                {
+                    char *tmp = malloc(NAME_LEN);
+                    if (tmp)
+                    {
+                        snprintf(tmp, NAME_LEN,
+                            "Motorola PowerQUICC (MCP%s)", cpu->name);
+                        free(cpu->name);
+                        cpu->name = tmp;
                     }
                 }
             }
