@@ -39,7 +39,7 @@ void testGetCPU(void)
     printf("##################\n");
 
     const int MAX_CPUINFOS = 500;
-    const int MAX_CPUINFO_PATH_LEN = 256;
+    const int MAX_CPUINFO_PATH_LEN = 512;
     char cpuinfos[MAX_CPUINFOS][MAX_CPUINFO_PATH_LEN];
     int count = 0;
     int showRaw = 0;
