@@ -395,7 +395,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         return NULL;
 
     *result = (CPU_DATA) {
-        .arch = UNKNOWN,
+        .arch = CPU_ARCH_UNKNOWN,
         .family = -1,
         .model = -1,
         .stepping = -1,
@@ -432,7 +432,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, UARCH_LEN, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = RISCV;
 
                     result->uarch = malloc(UARCH_LEN);
@@ -451,7 +451,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, VENDOR_LEN, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->vendor = malloc(VENDOR_LEN);
@@ -469,7 +469,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = ARM;
 
                     // Try to resolve the implementer name from the received
@@ -509,7 +509,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = ARM;
 
                     result->uarch = malloc(NAME_LEN);
@@ -531,7 +531,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->family = atoi(extract);
@@ -546,7 +546,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = MIPS;
 
                     result->name = malloc(NAME_LEN);
@@ -562,7 +562,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = ARM;
 
                     result->revisionNo = atoi(extract);
@@ -575,7 +575,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = M68K;
 
                     result->name = malloc(NAME_LEN);
@@ -597,7 +597,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
                 if (extract && strncmp(stripped, "cpu:", 4) == 0)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = POWER;
 
                     result->name = malloc(NAME_LEN);
@@ -617,7 +617,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract && extract[0] == 'r' && extract[1] == 'v')
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = RISCV;
 
                     result->name = malloc(NAME_LEN);
@@ -633,7 +633,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->model = atoi(extract);
@@ -647,7 +647,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract && extract[0] != 'u')
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->stepping = atoi(extract);
@@ -661,7 +661,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->freq = atof(extract);
@@ -676,7 +676,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = M68K;
 
                     result->freq = atof(extract);
@@ -690,7 +690,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = POWER;
 
                     result->freq = atof(extract);
@@ -704,7 +704,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = RISCV;
 
                     // RISC-V CPU frequencies are in GHz but the rest of the
@@ -722,12 +722,12 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     ':');
                 if (extract)
                 {
-                    if (isNumeric(extract))
+                    if (isNumeric(extract, -1))
                         result->index = (atoi(extract) + 1);
 #ifndef X86_ONLY
                     else
                     {
-                        if (result->arch == UNKNOWN)
+                        if (result->arch == CPU_ARCH_UNKNOWN)
                             result->arch = ARM;
 
                         result->processor = malloc(PROCESSOR_LEN);
@@ -795,7 +795,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->cores = atoi(extract);
@@ -810,7 +810,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->threads = atoi(extract);
@@ -824,7 +824,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = RISCV;
 
                     result->threads = atoi(extract) + 1;
@@ -846,7 +846,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     result->cacheSize = atoi(extract);
@@ -873,7 +873,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 32, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = X86;
 
                     int phys, virt;
@@ -894,7 +894,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, PLATFORM_LEN, ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = POWER;
 
                     result->platform = malloc(PLATFORM_LEN);
@@ -917,7 +917,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
                 if (extract && strncmp(stripped, "machine:", 8) == 0)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = POWER;
 
                     result->machine = malloc(MACHINE_LEN);
@@ -939,7 +939,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
                 if (extract && strncmp(stripped, "vendor:", 7) == 0)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = POWER;
 
                     result->vendor = malloc(VENDOR_LEN);
@@ -955,7 +955,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     ':');
                 if (extract)
                 {
-                    if (result->arch == UNKNOWN)
+                    if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = POWER;
 
                     result->revisionStr = malloc(REVISION_STR_LEN);
@@ -1229,27 +1229,8 @@ char *interpretCPU(CPU_DATA *cpu)
         }
 #endif
 
-        // Generic early PowerPC customisations
-        if (cpu->name && (strncmp(cpu->name, "601", 3) == 0 ||
-            strncmp(cpu->name, "603", 3) == 0 ||
-            strncmp(cpu->name, "604", 3) == 0 ||
-            strncmp(cpu->name, "620", 3) == 0))
-        {
-            // Add missing "PowerPC" to its name
-            char *tmp = malloc(NAME_LEN);
-            if (tmp)
-            {
-                snprintf(tmp, NAME_LEN, "PowerPC %s", cpu->name);
-                free(cpu->name);
-                cpu->name = tmp;
-            }
-
-            // All 6xx is single-core, no SMT, so we set the core/thread counts
-            // so that multi-CPU detection later can work
-            cpu->cores = cpu->threads = 1;
-        }
         // IBM pSeries and PowerNV customisations
-        else if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
+        if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
             strstr(cpu->platform, "PowerNV")))
         {
             // Set/override the vendor name with the certain,
@@ -1258,92 +1239,6 @@ char *interpretCPU(CPU_DATA *cpu)
             cpu->vendor = malloc(VENDOR_LEN);
             if (cpu->vendor)
                 snprintf(cpu->vendor, VENDOR_LEN, "IBM");
-        }
-        // Apple PowerPC (PowerMac, PowerBook, iBook, etc.) customisations
-        else if ((cpu->platform && strstr(cpu->platform, "PowerMac") != 0) ||
-            (cpu->machine && (strstr(cpu->machine, "Power Mac") != 0 ||
-            strstr(cpu->machine, "PowerMac") != 0 ||
-            strstr(cpu->machine, "PowerBook") != 0 ||
-            strstr(cpu->machine, "iMac") != 0)))
-        {
-            int gNo = -1;
-
-            // Infer the Apple "Gx" generation number from the PVR
-            // (Processor Version register) value in the revision string
-            if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
-            {
-                if (strstr(cpu->revisionStr, "pvr 0008") != 0)
-                    gNo = 3;
-                else if (strstr(cpu->revisionStr, "pvr 800") != 0 ||
-                    strstr(cpu->revisionStr, "pvr 000c") != 0)
-                    gNo = 4;
-                else if (strstr(cpu->revisionStr, "pvr 003") != 0 ||
-                    strstr(cpu->revisionStr, "pvr 004") != 0)
-                    gNo = 5;
-            }
-
-            // Put aside the existing model name that should have the IBM-
-            // nomenclature model number
-            const char *ibmModel = cpu->name;
-            if (ibmModel && strncmp(ibmModel, "PPC", 3) == 0)
-            {
-                ibmModel += 3;
-                while (isspace(*ibmModel))
-                    ibmModel++;
-            }
-
-            // If we don't have a Gx number, let's see if we can infer by
-            // the IBM model number
-            if (gNo == -1)
-            {
-                // G3
-                if (strcmp(ibmModel, "740") == 0 ||
-                    strcmp(ibmModel, "745") == 0 ||
-                    strcmp(ibmModel, "750") == 0 ||
-                    strcmp(ibmModel, "755") == 0 ||
-                    strcmp(ibmModel, "740/750") == 0 ||
-                    strcmp(ibmModel, "745/755") == 0)
-                    gNo = 3;
-            }
-
-            // We can construct the proper "PowerPC Gx" name (including the
-            // IBM model number in brackets)
-            if (gNo >= 3 && gNo <= 5)
-            {
-                char *tmp = malloc(NAME_LEN);
-                if (tmp)
-                {
-                    snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gNo,
-                        ibmModel);
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
-            }
-            // If we don't have a Gx number, we at least known this is
-            // PowerPC...
-            else
-            {
-                char *tmp = malloc(NAME_LEN);
-                if (tmp)
-                {
-                    snprintf(tmp, NAME_LEN, "PowerPC (%s)", ibmModel);
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
-            }
-
-            // We set the known core/thread counts for Gx so that multi-CPU
-            // detection later can work. G3 and G4 are always single-
-            // core; G5 970MP is dual-core, all other G5 are single-core.
-            if (gNo == 3 || gNo == 4)
-                cpu->cores = cpu->threads = 1;
-            else if (gNo == 5)
-            {
-                if (!strstr(cpu->name, "970MP"))
-                    cpu->cores = cpu->threads = 1;
-                else
-                    cpu->cores = cpu->threads = 2;
-            }
         }
         // Sony-Toshiba-IBM Cell customisations
         else if (cpu->name && strncmp(cpu->name, "Cell", 4) == 0)
@@ -1389,7 +1284,8 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             // Remove redundant "MCG" from vendor name if it already
             // contains "Motorola"
-            char *tmp = findReplace(cpu->vendor, VENDOR_LEN, "Motorola MCG", "Motorola");
+            char *tmp = findReplace(cpu->vendor, VENDOR_LEN, "Motorola MCG",
+                "Motorola");
             if (tmp)
             {
                 free(cpu->vendor);
@@ -1422,22 +1318,73 @@ char *interpretCPU(CPU_DATA *cpu)
                 }
             }
         }
-
-        // Catch other model names that should contain "PowerPC" but don't
-        if (cpu->name && !strstr(cpu->name, "PowerPC") &&
-            !strstr(cpu->name, "PPC"))
+        // PowerPC customisations
+        else
         {
-            if (cpu->machine && strstr(cpu->machine, "PPC"))
+            PPC_GEN gen = PPC_GEN_UNKNOWN;
+
+            // Put aside the existing model name, which should have the IBM-
+            // nomenclature model number
+            const char *ibmModel = cpu->name;
+            if (ibmModel)
             {
-                char *tmp = malloc(NAME_LEN);
-                if (tmp)
-                {
-                    snprintf(tmp, NAME_LEN, "PowerPC %s", cpu->name);
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                if (strncmp(ibmModel, "PPC", 3) == 0)
+                    ibmModel += 3;
+                else if (strncmp(ibmModel, "PowerPC", 7) == 0)
+                    ibmModel += 7;
+                while (isspace(*ibmModel))
+                    ibmModel++;
             }
-            else if (cpu->name && strstr(cpu->name, "IBM 4"))
+
+            // Infer the generation from the PVR (Processor Version
+            // register) value in the revision string
+            if (cpu->revisionStr && cpu->revisionStr[0] != '\0')
+            {
+                if (strstr(cpu->revisionStr, "pvr 0008") != 0)
+                    gen = PPC_7XX;
+                else if (strstr(cpu->revisionStr, "pvr 800") != 0 ||
+                    strstr(cpu->revisionStr, "pvr 000c") != 0)
+                    gen = PPC_74XX;
+                else if (strstr(cpu->revisionStr, "pvr 003") != 0 ||
+                    strstr(cpu->revisionStr, "pvr 004") != 0)
+                    gen = PPC_9XX;
+            }
+
+            // If nothing from PVR, we will try to infer by IBM model number
+            // instead
+            if (gen == PPC_GEN_UNKNOWN)
+            {
+                if (strncmp(ibmModel, "601", 3) == 0 ||
+                    strncmp(ibmModel, "603", 3) == 0 ||
+                    strncmp(ibmModel, "604", 3) == 0 ||
+                    strncmp(ibmModel, "620", 3) == 0)
+                    gen = PPC_6XX;
+                else if (strcmp(ibmModel, "740") == 0 ||
+                    strcmp(ibmModel, "745") == 0 ||
+                    strcmp(ibmModel, "750") == 0 ||
+                    strcmp(ibmModel, "755") == 0 ||
+                    strcmp(ibmModel, "740/750") == 0 ||
+                    strcmp(ibmModel, "745/755") == 0)
+                    gen = PPC_7XX;
+            }
+
+            // We set the known core/thread counts so that multi-CPU
+            // detection later can work. We know only 9xx can be either
+            // single or dual-core, whereas everything else is single-core.
+            if (gen == PPC_9XX)
+            {
+                if (!strstr(cpu->name, "970MP"))
+                    cpu->cores = cpu->threads = 1;
+                else
+                    cpu->cores = cpu->threads = 2;
+            }
+            else if (gen != PPC_GEN_UNKNOWN)
+                cpu->cores = cpu->threads = 1;
+
+            // If we're dealing with an IBM CPU that should have "PowerPC"
+            // in its name but just contains "IBM" and a model number, we
+            // need to shuffle things around
+            if (cpu->name && strstr(cpu->name, "IBM 4"))
             {
                 // Put the vendor name in the proper field
                 free(cpu->vendor);
@@ -1445,14 +1392,44 @@ char *interpretCPU(CPU_DATA *cpu)
                 if (cpu->vendor)
                     snprintf(cpu->vendor, VENDOR_LEN, "IBM");
                 
-                char *tmp = findReplace(cpu->name, NAME_LEN, "IBM 4", "PowerPC 4");
+                char *tmp = findReplace(cpu->name, NAME_LEN, "IBM 4",
+                    "PowerPC 4");
                 if (tmp)
                 {
                     free(cpu->name);
                     cpu->name = tmp;
                 }
             }
-
+            // For Apple, if we know the CPU should be G3, G4 or G5, we
+            // should construct the model containing Gx and the IBM model
+            // number in brackets
+            else if (gen >= 3 && ((cpu->platform &&
+                    strstr(cpu->platform, "PowerMac") != 0) ||
+                (cpu->machine && (strstr(cpu->machine, "Power Mac") != 0 ||
+                    strstr(cpu->machine, "PowerMac") != 0 ||
+                    strstr(cpu->machine, "PowerBook") != 0 ||
+                    strstr(cpu->machine, "iMac") != 0))))
+            {
+                char *tmp = malloc(NAME_LEN);
+                if (tmp)
+                {
+                    snprintf(tmp, NAME_LEN, "PowerPC G%d (%s)", gen,
+                        ibmModel);
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+            }
+            // ...otherwise, just use the IBM model number standalone
+            else
+            {
+                char *tmp = malloc(NAME_LEN);
+                if (tmp)
+                {
+                    snprintf(tmp, NAME_LEN, "PowerPC %s", ibmModel);
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+            }
         }
     }
 

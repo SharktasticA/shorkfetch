@@ -148,7 +148,7 @@ void testGetCPU(void)
             else if (cpu->arch == X86)
                 printf("    arch:               X86\n");
             else
-                printf("    arch:               UNKNOWN\n");
+                printf("    arch:               CPU_ARCH_UNKNOWN\n");
 #ifndef X86_ONLY
             printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
 #endif

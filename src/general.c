@@ -446,17 +446,24 @@ int isFileExecutable(char *currPath, struct dirent *entry)
 /**
  * Checks if the given string is entirely numeric.
  * @param str Input string to test
+ * @param count Number of characters to test (-1 to test all)
  * @return 1 if numeric; 0 if not or empty string
  */
-int isNumeric(const char *str)
+int isNumeric(const char *str, const int count)
 {
+    if (!str)
+        return 0;
+
     int numeric = 0;
-    while (*str)
+    int i = 0;
+
+    while (*str && (count == -1 || i < count))
     {
         // Skip over any whitespace
         if (isspace((unsigned char)*str))
         {
             str++;
+            i++;
             continue;
         }
 
@@ -465,7 +472,11 @@ int isNumeric(const char *str)
 
         numeric = 1;
         str++;
+        i++;
     }
+
+    if (count != -1 && i < count)
+        return 0;
     return numeric;
 }
 

@@ -48,7 +48,7 @@
 // The CPU architectures supported by SHORKFETCH
 typedef enum
 {
-    UNKNOWN = 0,
+    CPU_ARCH_UNKNOWN,
 #ifndef X86_ONLY
     ARM,
     M68K,
@@ -58,6 +58,24 @@ typedef enum
 #endif
     X86
 } CPU_ARCH;
+
+#ifndef X86_ONLY
+
+// PowerPC generation
+typedef enum
+{
+    PPC_GEN_UNKNOWN = 0,
+    // PowerPC 6xx
+    PPC_6XX = 1,
+    // PowerPC 7xx/G3
+    PPC_7XX = 3,
+    // PowerPC 74xx/G4
+    PPC_74XX = 4,
+    // PowerPC 9xx/G5
+    PPC_9XX = 5
+} PPC_GEN;
+
+#endif
 
 
 

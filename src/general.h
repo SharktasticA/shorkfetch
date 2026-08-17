@@ -57,7 +57,7 @@ char *getBinDir(void);
 PROCESS getParentProcess(int);
 struct winsize getTerminalSize(void);
 int isFileExecutable(char*, struct dirent*);
-int isNumeric(const char*);
+int isNumeric(const char*, const int);
 int isProgramInstalled(char*, int);
 int iSqrt(int);
 void limitLines(char*, const int);
