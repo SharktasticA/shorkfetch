@@ -1249,7 +1249,7 @@ char *interpretCPU(CPU_DATA *cpu)
             cpu->cores = cpu->threads = 1;
         }
         // IBM pSeries and PowerNV customisations
-        if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
+        else if (cpu->platform && (strstr(cpu->platform, "pSeries") ||
             strstr(cpu->platform, "PowerNV")))
         {
             // Set/override the vendor name with the certain,
