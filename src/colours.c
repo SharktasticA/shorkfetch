@@ -33,7 +33,8 @@ ColourPalette getColourPalette(const int showShork)
     int size = 3;
     if (showShork)
     {
-        if ((COMPACT && TERM_SIZE.ws_col < 32) || (!COMPACT && TERM_SIZE.ws_col < 35))
+        if ((COMPACT && TERM_SIZE.ws_col < 32) ||
+            (!COMPACT && TERM_SIZE.ws_col < 35))
             size = 1;
         else if (COMPACT || (!COMPACT && TERM_SIZE.ws_col < 43))
             size = 2;
@@ -48,7 +49,8 @@ ColourPalette getColourPalette(const int showShork)
 
     if (size == 1)
     {
-        snprintf(palette.normalCols, 128, "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
+        snprintf(palette.normalCols, 128,
+            "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
             COL_BAK_BLACK,
             COL_BAK_RED,
             COL_BAK_GREEN,
@@ -58,7 +60,8 @@ ColourPalette getColourPalette(const int showShork)
             COL_BAK_CYAN,
             COL_BAK_WHITE,
             COL_RESET);
-        snprintf(palette.boldCols, 128, "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
+        snprintf(palette.boldCols, 128,
+            "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
             COL_BAK_BOLD_BLACK,
             COL_BAK_BOLD_RED,
             COL_BAK_BOLD_GREEN,
@@ -71,7 +74,8 @@ ColourPalette getColourPalette(const int showShork)
     }
     else if (size == 2)
     {
-        snprintf(palette.normalCols, 128, "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
+        snprintf(palette.normalCols, 128,
+            "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
             COL_BAK_BLACK,
             COL_BAK_RED,
             COL_BAK_GREEN,
@@ -81,7 +85,8 @@ ColourPalette getColourPalette(const int showShork)
             COL_BAK_CYAN,
             COL_BAK_WHITE,
             COL_RESET);
-        snprintf(palette.boldCols, 128, "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
+        snprintf(palette.boldCols, 128,
+            "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
             COL_BAK_BOLD_BLACK,
             COL_BAK_BOLD_RED,
             COL_BAK_BOLD_GREEN,
@@ -94,7 +99,8 @@ ColourPalette getColourPalette(const int showShork)
     }
     else
     {
-        snprintf(palette.normalCols, 128, "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
+        snprintf(palette.normalCols, 128,
+            "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
             COL_BAK_BLACK,
             COL_BAK_RED,
             COL_BAK_GREEN,
@@ -104,7 +110,8 @@ ColourPalette getColourPalette(const int showShork)
             COL_BAK_CYAN,
             COL_BAK_WHITE,
             COL_RESET);
-        snprintf(palette.boldCols, 128, "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
+        snprintf(palette.boldCols, 128,
+            "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
             COL_BAK_BOLD_BLACK,
             COL_BAK_BOLD_RED,
             COL_BAK_BOLD_GREEN,

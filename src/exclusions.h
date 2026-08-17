@@ -20,12 +20,13 @@
 static const int EXCLUDED_PCI_DIDS[] = {
     // Not presently used, but here if we need it...
 };
-static const int EXCLUDED_PCI_DIDS_LEN = sizeof(EXCLUDED_PCI_DIDS) / sizeof(EXCLUDED_PCI_DIDS[0]);
+static const int EXCLUDED_PCI_DIDS_LEN = sizeof(EXCLUDED_PCI_DIDS) /
+    sizeof(EXCLUDED_PCI_DIDS[0]);
 
 
 
-// Process names that should be excluded when looking for the host terminal's
-// name
+// Process names that should be excluded when looking for the host
+// terminal's name
 static const char *EXCLUDED_TERMINAL_PROCS[] = {
     // Shells
     "bash",
@@ -59,6 +60,7 @@ static const char *EXCLUDED_TERMINAL_PROCS[] = {
     "conmon",
     "systemd"
 };
-static const int EXCLUDED_TERMINAL_PROCS_LEN = sizeof(EXCLUDED_TERMINAL_PROCS) / sizeof(EXCLUDED_TERMINAL_PROCS[0]);
+static const int EXCLUDED_TERMINAL_PROCS_LEN = 
+    sizeof(EXCLUDED_TERMINAL_PROCS) / sizeof(EXCLUDED_TERMINAL_PROCS[0]);
 
 #endif

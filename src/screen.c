@@ -24,12 +24,14 @@
 
 
 /**
- * @param count Number of screens detected (intended to be used by reference)
+ * @param count Number of screens detected (intended to be used by
+ *              reference)
  * @return Pointer to Screen structs containing detected GPUs
  */
 Screen *getScreens(int *count)
 {
-    if (!count) return NULL;
+    if (!count)
+        return NULL;
 
     // If we don't think we're in a graphical environment, time to leave...
     if (!WAYLAND_PRESENT && !X11_PRESENT)
@@ -48,7 +50,8 @@ Screen *getScreens(int *count)
 
         while (fgets(buffer, 512, fStream))
         {
-            // Only process lines for things "connected" or inside a "connected"'s block
+            // Only process lines for things "connected" or inside a
+            // "connected"'s block
             char *isConnected = strstr(buffer, " connected");
             if (isConnected) 
             {
@@ -62,15 +65,18 @@ Screen *getScreens(int *count)
                 screens[*count].connector = strdup(pConnector);
 
                 // Replace "Virtual-" with "Virt-" if present
-                char *virtNeedle = strstr(screens[*count].connector, "Virtual-");
+                char *virtNeedle = strstr(screens[*count].connector,
+                    "Virtual-");
                 if (virtNeedle)
                 {
                     memcpy(virtNeedle, "Virt-", 5);
-                    memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
+                    memmove(virtNeedle + 5, virtNeedle + 8,
+                        strlen(virtNeedle + 8) + 1);
                 }
 
                 // Flag if connector is for primary screen
-                screens[*count].isPrimary = strstr(buffer, " primary ") != NULL;
+                screens[*count].isPrimary =
+                    strstr(buffer, " primary ") != NULL;
 
                 // Parse physical size
                 screens[*count].physX = 0.0;
@@ -93,13 +99,15 @@ Screen *getScreens(int *count)
                 // Parse resolution
                 needle = isConnected;
                 int pResX = 0, pResY = 0;
-                while (*needle && (*needle < '0' || *needle > '9')) needle++;
+                while (*needle && (*needle < '0' || *needle > '9'))
+                    needle++;
                 sscanf(needle, "%dx%d", &pResX, &pResY);
 
                 screens[*count].resX = pResX;
                 screens[*count].resY = pResY;
 
-                // Flag that we are in a block and thus should search for more info on other lines
+                // Flag that we are in a block and thus should search for
+                // more info on other lines
                 in = 1;
             }
             else if (strstr(buffer, "disconnected") || !in)
@@ -115,12 +123,14 @@ Screen *getScreens(int *count)
                 while (start > buffer)
                 {
                     char c = *(start - 1);
-                    if ((c >= '0' && c <= '9') || c == '.') start--;
+                    if ((c >= '0' && c <= '9') || c == '.')
+                        start--;
                     else break;
                 }
                 screens[*count].refresh = (int)(atof(start) + 0.5);
 
-                // At this point, we got everything we can for this screen, so let's go
+                // At this point, we got everything we can for this screen,
+                // so let's go
                 (*count)++;
                 in = 0;
                 continue;
@@ -132,7 +142,8 @@ Screen *getScreens(int *count)
         pclose(fStream);
     }
 
-    // If we still have nothing, we can try DRM as an X11/Wayland agnostic fallback
+    // If we still have nothing, we can try DRM as an X11/Wayland agnostic
+    // fallback
     if (!screens)
     {
         DIR *dirStream = opendir("/sys/class/drm");
@@ -148,10 +159,12 @@ Screen *getScreens(int *count)
 
                 // Prepare to test connector status
                 char path[PATH_MAX];
-                snprintf(path, PATH_MAX, "/sys/class/drm/%s/status", entry->d_name);
+                snprintf(path, PATH_MAX, "/sys/class/drm/%s/status",
+                    entry->d_name);
 
                 FILE *fileStream = fopen(path, "r");
-                if (!fileStream) continue;
+                if (!fileStream)
+                    continue;
 
                 // Check status
                 char status[64] = {0};
@@ -163,9 +176,11 @@ Screen *getScreens(int *count)
                     continue;
 
                 // Prepare to parse mode for resolution
-                snprintf(path, PATH_MAX, "/sys/class/drm/%s/modes", entry->d_name);
+                snprintf(path, PATH_MAX, "/sys/class/drm/%s/modes",
+                    entry->d_name);
                 fileStream = fopen(path, "r");
-                if (!fileStream) continue;
+                if (!fileStream)
+                    continue;
 
                 char mode[64] = {0};
                 fgets(mode, 64, fileStream);
@@ -176,7 +191,8 @@ Screen *getScreens(int *count)
                 sscanf(mode, "%dx%d", &pResX, &pResY);
 
                 // If we got nothing, no point of continuing...
-                if (pResX <= 0 || pResY <= 0) continue;
+                if (pResX <= 0 || pResY <= 0)
+                    continue;
 
                 // Reallocate screens array to take into account new screen
                 screens = realloc(screens, ((*count) + 1) * sizeof(Screen));
@@ -192,14 +208,18 @@ Screen *getScreens(int *count)
 
                 // Remove "cardX-" prefix if present
                 if (strncmp(screens[(*count)].connector, "card", 4) == 0)
-                    memmove(screens[(*count)].connector, screens[(*count)].connector + 6, strlen(screens[(*count)].connector + 6) + 1);
+                    memmove(screens[(*count)].connector,
+                        screens[(*count)].connector + 6,
+                        strlen(screens[(*count)].connector + 6) + 1);
 
                 // Replace "Virtual-" with "Virt-" if present
-                char *virtNeedle = strstr(screens[*count].connector, "Virtual-");
+                char *virtNeedle = strstr(screens[*count].connector,
+                    "Virtual-");
                 if (virtNeedle)
                 {
                     memcpy(virtNeedle, "Virt-", 5);
-                    memmove(virtNeedle + 5, virtNeedle + 8, strlen(virtNeedle + 8) + 1);
+                    memmove(virtNeedle + 5, virtNeedle + 8,
+                        strlen(virtNeedle + 8) + 1);
                 }
 
                 (*count)++;
@@ -264,9 +284,11 @@ char *interpretScreen(Screen *screen)
 
     // Assemble the string
     if (!COMPACT)
-        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s%s", screen->resX, screen->resY, refresh, connector);
+        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s%s", screen->resX,
+            screen->resY, refresh, connector);
     else
-        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s", screen->resX, screen->resY, refresh);
+        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s", screen->resX,
+            screen->resY, refresh);
 
     return screenStr;
 }

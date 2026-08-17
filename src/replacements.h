@@ -46,7 +46,8 @@ static const struct REPLACEMENT AMD_REPLACES[] = {
     { "Eight-Core ",            "",                 0 },    // See FX-8320
     { "RYZEN AI MAX",           "Ryzen AI Max",     0 }     // See Ryzen AI Max+ 395
 };
-static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) / sizeof(AMD_REPLACES[0]);
+static const int AMD_REPLACES_LEN = sizeof(AMD_REPLACES) /
+    sizeof(AMD_REPLACES[0]);
 
 
 
@@ -70,7 +71,8 @@ static const struct REPLACEMENT COMPACT_CPU_REPLACES[] = {
     { "Rev ",                   "r",            0 },
     { "Rev. ",                  "r",            0 }
 };
-static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) / sizeof(COMPACT_CPU_REPLACES[0]);
+static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) /
+    sizeof(COMPACT_CPU_REPLACES[0]);
 
 
 
@@ -92,7 +94,8 @@ static const struct REPLACEMENT COMPACT_GPU_REPLACES[] = {
     { " Radeon",                "",             0 },
     { "Vega/Vega",              "Vega",         0 }
 };
-static const int COMPACT_GPU_REPLACES_LEN = sizeof(COMPACT_GPU_REPLACES) / sizeof(COMPACT_GPU_REPLACES[0]);
+static const int COMPACT_GPU_REPLACES_LEN = sizeof(COMPACT_GPU_REPLACES) /
+    sizeof(COMPACT_GPU_REPLACES[0]);
 
 
 
@@ -101,7 +104,8 @@ static const struct REPLACEMENT COMPACT_OS_REPLACES[] = {
     { " INDEV",     "",     0 },
     { " Linux",     "",     0 }
 };
-static const int COMPACT_OS_REPLACES_LEN = sizeof(COMPACT_OS_REPLACES) / sizeof(COMPACT_OS_REPLACES[0]);
+static const int COMPACT_OS_REPLACES_LEN = sizeof(COMPACT_OS_REPLACES) /
+    sizeof(COMPACT_OS_REPLACES[0]);
 
 
 
@@ -117,7 +121,7 @@ static const char *DELETIONS[] =
     "(TM)",
     "™",
     " APU",
-    "-compatible",                     // For ARM
+    "-compatible",                      // For ARM
     " Controller",
     " Corporation",
     " CPU",
@@ -141,7 +145,8 @@ static const char *GPU_FROM_CPU_SUFFIXES[] =
     " Graphics",
     " Gfx"
 };
-static const int GPU_FROM_CPU_SUFFIXES_LEN = sizeof(GPU_FROM_CPU_SUFFIXES) / sizeof(GPU_FROM_CPU_SUFFIXES[0]);
+static const int GPU_FROM_CPU_SUFFIXES_LEN = sizeof(GPU_FROM_CPU_SUFFIXES) /
+    sizeof(GPU_FROM_CPU_SUFFIXES[0]);
 
 
 
@@ -159,7 +164,8 @@ static const struct REPLACEMENT INTEL_REPLACES[] = {
     { "Generation Core",        "Gen Core",             0 },
     { " Dual-Core",             "",                     0 }     // See Pentium E5300
 };
-static const int INTEL_REPLACES_LEN = sizeof(INTEL_REPLACES) / sizeof(INTEL_REPLACES[0]);
+static const int INTEL_REPLACES_LEN = sizeof(INTEL_REPLACES) /
+    sizeof(INTEL_REPLACES[0]);
 
 
 
@@ -167,13 +173,15 @@ static const struct REPLACEMENT IDT_REPLACES[] = {
     { " 05/04",         " WinChip",     0 },
     { "WinChip 2-3D",   "WinChip 2/3",  0 }
 };
-static const int IDT_REPLACES_LEN = sizeof(IDT_REPLACES) / sizeof(IDT_REPLACES[0]);
+static const int IDT_REPLACES_LEN = sizeof(IDT_REPLACES) /
+    sizeof(IDT_REPLACES[0]);
 
 
 
 static const struct REPLACEMENT VIA_REPLACES[] = {
     { "Samuel", "Cyrix III",    0 }
 };
-static const int VIA_REPLACES_LEN = sizeof(VIA_REPLACES) / sizeof(VIA_REPLACES[0]);
+static const int VIA_REPLACES_LEN = sizeof(VIA_REPLACES) /
+    sizeof(VIA_REPLACES[0]);
 
 #endif

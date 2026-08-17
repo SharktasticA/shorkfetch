@@ -40,7 +40,8 @@
  *                     from a CPU name
  * @return String containing the result after cleaning
  */
-char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCPU)
+char *cleanGPUName(const char *vendor, const char *device,
+    const int isGPUFromCPU)
 {
     if (!vendor || !device) return strdup("");
 
@@ -63,8 +64,8 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
         cleanedDevice = tmp;
     }
 
-    // If we find an opening square bracket, break up device name into "normal"
-    // and "bracket" strings
+    // If we find an opening square bracket, break up device name into
+    // "normal" and "bracket" strings
     const char *brac = strchr(cleanedDevice, '[');
     if (brac)
     {
@@ -95,35 +96,41 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 
     // Vendor-specific actions...
     // Advanced Micro Devices, Inc. [AMD/ATI]
-    if (vendor[0] == 'A' && (strncmp(vendor, "AMD", 3) == 0 || strncmp(vendor, "Advanced Micro", 14) == 0))
+    if (vendor[0] == 'A' && (strncmp(vendor, "AMD", 3) == 0 ||
+        strncmp(vendor, "Advanced Micro", 14) == 0))
     {
         // If we used amdgpu.ids, A deterimed "AMD" or "ATI" may be in the
         // device name and we should use that
         if (strncmp(cleanedDevice, "AMD ", 4) == 0)
         {
             cleanedVendor = strdup("AMD");
-            memmove(cleanedDevice, cleanedDevice + 4, strlen(cleanedDevice) - 3);
+            memmove(cleanedDevice, cleanedDevice + 4,
+                strlen(cleanedDevice) - 3);
         }
         else if (strncmp(cleanedDevice, "ATI ", 4) == 0)
         {
             cleanedVendor = strdup("ATI");
-            memmove(cleanedDevice, cleanedDevice + 4, strlen(cleanedDevice) - 3);
+            memmove(cleanedDevice, cleanedDevice + 4,
+                strlen(cleanedDevice) - 3);
         }
         else
             cleanedVendor = strdup("AMD/ATI");
 
-        // If we have bracketed info, we *may* discard the norm (usually just
-        // containing the codename)
+        // If we have bracketed info, we *may* discard the norm (usually
+        // just containing the codename)
         if (cleanedDeviceBrac)
         {
-            // If the info contains the "Graphics" (e.g., "Radeon R6 Graphics")
-            // or "Vega Series", we will permit the norm to help with
-            // distinguishing it
-            if (strstr(cleanedDeviceBrac, " Graphics") || strstr(cleanedDeviceBrac, " Vega Series"))
-                snprintf(cleanedDevice, GPU_NAME_LEN, "%s (%s)", cleanedDeviceBrac, cleanedDeviceNorm);
+            // If the info contains the "Graphics" (e.g., "Radeon R6
+            // Graphics") or "Vega Series", we will permit the norm to help
+            // with distinguishing it
+            if (strstr(cleanedDeviceBrac, " Graphics") ||
+                strstr(cleanedDeviceBrac, " Vega Series"))
+                snprintf(cleanedDevice, GPU_NAME_LEN, "%s (%s)",
+                    cleanedDeviceBrac, cleanedDeviceNorm);
             // Otherwise, we just use the bracketed info
             else
-                snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
+                snprintf(cleanedDevice, GPU_NAME_LEN, "%s",
+                    cleanedDeviceBrac);
         }
 
         // Begin testing for if there are multiple "Radeon"... Look for the
@@ -146,7 +153,8 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
         // Radeon Vega Mobile Series"
         if (strstr(cleanedDevice, " Series/Vega Mobile Series"))
         {
-            char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, " Series/Vega Mobile Series", "/Vega Mobile");
+            char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN,
+                " Series/Vega Mobile Series", "/Vega Mobile");
             free(cleanedDevice);
             cleanedDevice = tmp;
         }
@@ -178,7 +186,8 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 
         // Some Arc GPUs have "Intel" in the device name...
         if (strncmp(cleanedDevice, "Intel ", 6) == 0)
-            memmove(cleanedDevice, cleanedDevice + 6, strlen(cleanedDevice) - 5);
+            memmove(cleanedDevice, cleanedDevice + 6,
+                strlen(cleanedDevice) - 5);
     }
     // NVIDIA Corporation
     else if (vendor[0] == 'N' && strncmp(vendor, "NVIDIA", 6) == 0)
@@ -202,7 +211,8 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
         // E.g., Voodoo 4/Voodoo 5 -> Voodoo 4/5
         if (strstr(cleanedDevice, "/Voodoo "))
         {
-            char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, "/Voodoo ", "/");
+            char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, "/Voodoo ",
+                "/");
             free(cleanedDevice);
             cleanedDevice = tmp;
         }
@@ -224,12 +234,15 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 
             // Discard any bracketed info like "Alpine" 
             if (cleanedDeviceBrac)
-                snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceNorm);
+                snprintf(cleanedDevice, GPU_NAME_LEN, "%s",
+                    cleanedDeviceNorm);
 
             // Remove space between "GD" and model number
-            if (cleanedDevice[0] == 'G' && cleanedDevice[1] == 'D' && cleanedDevice[2] == ' ')
+            if (cleanedDevice[0] == 'G' && cleanedDevice[1] == 'D' &&
+                cleanedDevice[2] == ' ')
             {
-                char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, "GD ", "GD");
+                char *tmp = findReplace(cleanedDevice, GPU_NAME_LEN, "GD ",
+                    "GD");
                 free(cleanedDevice);
                 cleanedDevice = tmp;
             }
@@ -300,10 +313,13 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
         int replaces = 0;
         for (int i = 0; i < COMPACT_GPU_REPLACES_LEN; i++)
         {
-            if (COMPACT_GPU_REPLACES[i].standalone && replaces > 0) continue;
+            if (COMPACT_GPU_REPLACES[i].standalone && replaces > 0)
+                continue;
             else if (strstr(result, COMPACT_GPU_REPLACES[i].match))
             {
-                char *tmp = findReplace(result, RESULT_SIZE, COMPACT_GPU_REPLACES[i].match, COMPACT_GPU_REPLACES[i].replacement);
+                char *tmp = findReplace(result, RESULT_SIZE,
+                    COMPACT_GPU_REPLACES[i].match,
+                    COMPACT_GPU_REPLACES[i].replacement);
                 strncpy(result, tmp, RESULT_SIZE - 1);
                 result[RESULT_SIZE - 1] = '\0';
                 free(tmp);
@@ -322,9 +338,11 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 
 #else
 
-char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCPU)
+char *cleanGPUName(const char *vendor, const char *device,
+    const int isGPUFromCPU)
 {
-    if (!vendor || !device) return strdup("");
+    if (!vendor || !device)
+        return strdup("");
 
     // Prepare result strings
     const size_t RESULT_SIZE = (GPU_NAME_LEN * 2) + 1;
@@ -338,12 +356,15 @@ char *cleanGPUName(const char *vendor, const char *device, const int isGPUFromCP
 #endif
 
 /**
- * @param count Number of GPUs actually detected (intended to be used by reference)
- * @return Pointer to up to MAX_GPUS of GPU_IDS structs containing detected GPUs
+ * @param count Number of GPUs actually detected (intended to be used by
+ *              reference)
+ * @return Pointer to up to MAX_GPUS of GPU_IDS structs containing detected
+ *         GPUs
  */
 GPU_IDS* getGPUs(int *count)
 {
-    if (!count) return NULL;
+    if (!count)
+        return NULL;
 
     DIR *dir = opendir("/sys/bus/pci/devices");
     if (!dir)
@@ -362,20 +383,26 @@ GPU_IDS* getGPUs(int *count)
 
     while ((entry = readdir(dir)) != NULL)
     {
-        if (entry->d_name[0] == '.') continue;
+        if (entry->d_name[0] == '.')
+            continue;
 
         char classPath[PATH_MAX];
-        snprintf(classPath, sizeof(classPath), "%s/%s/class", "/sys/bus/pci/devices", entry->d_name);
+        snprintf(classPath, sizeof(classPath), "%s/%s/class",
+            "/sys/bus/pci/devices", entry->d_name);
         int class = readHexFile(classPath);
         class = (class >> 8) & 0xFFFF;
 
         // We only want class 0x30x...
         if ((class >> 8) == 0x03 && class != 0x0380)
         {
-            char vendorPath[PATH_MAX], devicePath[PATH_MAX], revisionPath[PATH_MAX];
-            snprintf(vendorPath, sizeof(vendorPath), "%s/%s/vendor", "/sys/bus/pci/devices", entry->d_name);
-            snprintf(devicePath, sizeof(devicePath), "%s/%s/device", "/sys/bus/pci/devices", entry->d_name);
-            snprintf(revisionPath, sizeof(revisionPath), "%s/%s/revision", "/sys/bus/pci/devices", entry->d_name);
+            char vendorPath[PATH_MAX], devicePath[PATH_MAX],
+                revisionPath[PATH_MAX];
+            snprintf(vendorPath, sizeof(vendorPath), "%s/%s/vendor",
+                "/sys/bus/pci/devices", entry->d_name);
+            snprintf(devicePath, sizeof(devicePath), "%s/%s/device",
+                "/sys/bus/pci/devices", entry->d_name);
+            snprintf(revisionPath, sizeof(revisionPath), "%s/%s/revision",
+                "/sys/bus/pci/devices", entry->d_name);
 
             int vendor = readHexFile(vendorPath);
             int device = readHexFile(devicePath);
@@ -392,7 +419,8 @@ GPU_IDS* getGPUs(int *count)
                         break;
                     }
                 }
-                if (excluded) continue;
+                if (excluded)
+                    continue;
             }
 
             gpus[*count].vendor = vendor;
@@ -400,7 +428,8 @@ GPU_IDS* getGPUs(int *count)
             gpus[*count].revision = revision;
             (*count)++;
 
-            if (*count == MAX_GPUS) break;
+            if (*count == MAX_GPUS)
+                break;
         }
     }
     closedir(dir);
@@ -412,13 +441,14 @@ GPU_IDS* getGPUs(int *count)
  * @param gpu GPU_IDS struct containing detected vendor and device IDs and
  *            revision number
  * @param os String containing the OS name (used for OS-specific checks)
- * @return String containing the GPU's assembled and cleaned full name; vendor
- *         and device IDs as hex if interpreting failed
+ * @return String containing the GPU's assembled and cleaned full name;
+ *         vendor nd device IDs as hex if interpreting failed
  */
 char *interpretGPU(GPU_IDS *gpu, const char *os)
 {
     char *gpuStr = malloc(GPU_NAME_LEN);
-    if (!gpuStr) return strdup("unknown");
+    if (!gpuStr)
+        return strdup("unknown");
     gpuStr[0] = '\0';
 
 
@@ -443,7 +473,8 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
     {
         // Possible paths to amdgpu.ids 
         char userAMDGPUIDs[PATH_MAX];
-        snprintf(userAMDGPUIDs, PATH_MAX, "%s/.local/share/libdrm/amdgpu.ids", HOME);
+        snprintf(userAMDGPUIDs, PATH_MAX,
+            "%s/.local/share/libdrm/amdgpu.ids", HOME);
         const char *amdGPUIDs[] = {
             "/usr/share/libdrm/amdgpu.ids",
             userAMDGPUIDs
@@ -457,12 +488,14 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
             char line[256];
             while (fgets(line, sizeof(line), fStream))
             {
-                if (line[0] == '#' || line[0] == '\n') continue;
+                if (line[0] == '#' || line[0] == '\n')
+                    continue;
 
                 int fileDID, fileRev;
                 char name[256];
                 // A line looks lile: 7480,	C1,	AMD Radeon RX 7700S
-                if (sscanf(line, "%x,\t%x,\t%255[^\n]", &fileDID, &fileRev, name) == 3)
+                if (sscanf(line, "%x,\t%x,\t%255[^\n]", &fileDID, &fileRev,
+                    name) == 3)
                 {
                     if (fileDID == gpu->device && fileRev == gpu->revision)
                     {
@@ -498,7 +531,8 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
             struct dirent *entry;
             while ((entry = readdir(store)) != NULL)
             {
-                snprintf(nixPciIds, PATH_MAX, "/nix/store/%s/share/hwdata/pci.ids", entry->d_name);
+                snprintf(nixPciIds, PATH_MAX,
+                    "/nix/store/%s/share/hwdata/pci.ids", entry->d_name);
                 if (access(nixPciIds, F_OK) == 0)
                 {
                     pciids = nixPciIds;
@@ -510,14 +544,16 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
     }
     else
     {
-        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor, gpu->device);
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor,
+            gpu->device);
         return gpuStr;
     }
 
     FILE *fStream = fopen(pciids, "r");
     if (!fStream)
     {
-        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor, gpu->device);
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor,
+            gpu->device);
         return gpuStr;
     }
 
@@ -531,13 +567,15 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), fStream))
     {
-        if (buffer[0] == '#' || buffer[0] == 'C' || buffer[0] == '\0') continue;
+        if (buffer[0] == '#' || buffer[0] == 'C' || buffer[0] == '\0')
+            continue;
         
         if (strncmp(buffer, vendorHex, 4) == 0)
         {
             char *start = buffer + 6;
             size_t len = strlen(start);
-            if (len > 0 && start[len - 1] == '\n') start[len - 1] = '\0';
+            if (len > 0 && start[len - 1] == '\n')
+                start[len - 1] = '\0';
             vendor = strdup(start);
         }
 
@@ -552,7 +590,8 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
                 {
                     char *start = buffer + tabs + 6;
                     size_t len = strlen(start);
-                    if (len > 0 && start[len - 1] == '\n') start[len - 1] = '\0';
+                    if (len > 0 && start[len - 1] == '\n')
+                        start[len - 1] = '\0';
                     device = strdup(start);
                     break;
                 }
@@ -562,12 +601,16 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
     fclose(fStream);
 
     if (!vendor || !device)
-        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor, gpu->device);
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor,
+        gpu->device);
     else
-        snprintf(gpuStr, GPU_NAME_LEN, "%s", cleanGPUName(vendor, device, 0));
+        snprintf(gpuStr, GPU_NAME_LEN, "%s", 
+            cleanGPUName(vendor, device, 0));
 
-    if (vendor) free(vendor);
-    if (device) free(device);
+    if (vendor)
+        free(vendor);
+    if (device)
+        free(device);
 
     return gpuStr;
 }

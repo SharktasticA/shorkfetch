@@ -50,7 +50,8 @@ int deleteConf(void)
  * @param noIP
  * @param showShork
  */
-void readConf(char *bullet, char **colour, int *compact, char **fields, VIEW_MODE *mode, int *noEsc, int *noIP, int *showShork)
+void readConf(char *bullet, char **colour, int *compact, char **fields,
+    VIEW_MODE *mode, int *noEsc, int *noIP, int *showShork)
 {
     char path[PATH_MAX];
     snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
@@ -108,12 +109,13 @@ void readConf(char *bullet, char **colour, int *compact, char **fields, VIEW_MOD
  * @param noIP
  * @param showShork
  */
-void writeConf(char bullet, char *colour, int compact, char *fields, VIEW_MODE mode, int noEsc, int noIP, int showShork)
+void writeConf(char bullet, char *colour, int compact, char *fields,
+    VIEW_MODE mode, int noEsc, int noIP, int showShork)
 {
     char path[PATH_MAX];
 
-    // Create directory to store the conf file - this is broken into parts in
-    // case the system does not have .config/
+    // Create directory to store the conf file - this is broken into parts
+    // in case the system does not have .config/
     snprintf(path, PATH_MAX, "%s/.config/", HOME);
     mkdir(path, 0755);
     strncat(path, "shorkutils/", PATH_MAX - strlen(path) - 1);

@@ -37,12 +37,18 @@ MemInfo getMemInfo(void)
         int parsed = 0;
         while (fgets(buffer, sizeof(buffer), fStream) && parsed < 6)
         {
-            if (sscanf(buffer, "MemTotal: %ld", &mi.memTotal) == 1) { parsed++; continue; }
-            else if (sscanf(buffer, "MemFree: %ld", &mi.memFree) == 1) { parsed++; continue; }
-            else if (sscanf(buffer, "Buffers: %ld", &mi.buffers) == 1) { parsed++; continue; }
-            else if (sscanf(buffer, "Cached: %ld", &mi.cached) == 1) { parsed++; continue; }
-            else if (sscanf(buffer, "SwapTotal: %ld", &mi.swapTotal) == 1) { parsed++; continue; }
-            else if (sscanf(buffer, "SwapFree: %ld", &mi.swapFree) == 1) { parsed++; continue; }
+            if (sscanf(buffer, "MemTotal: %ld", &mi.memTotal) == 1)
+                { parsed++; continue; }
+            else if (sscanf(buffer, "MemFree: %ld", &mi.memFree) == 1)
+                { parsed++; continue; }
+            else if (sscanf(buffer, "Buffers: %ld", &mi.buffers) == 1)
+                { parsed++; continue; }
+            else if (sscanf(buffer, "Cached: %ld", &mi.cached) == 1)
+                { parsed++; continue; }
+            else if (sscanf(buffer, "SwapTotal: %ld", &mi.swapTotal) == 1)
+                { parsed++; continue; }
+            else if (sscanf(buffer, "SwapFree: %ld", &mi.swapFree) == 1)
+                { parsed++; continue; }
         }
         fclose(fStream);
     }
@@ -52,13 +58,15 @@ MemInfo getMemInfo(void)
 
 /**
  * @param mi /proc/meminfo data
- * @return String containing the system memory used and total amounts both numerically and as a percentage
+ * @return String containing the system memory used and total amounts both
+ *         numerically and as a percentage
  */
 char *getRAM(MemInfo mi)
 {
     const int ramSize = 64;
     char *ram = malloc(ramSize);
-    if (!ram) return strdup("");
+    if (!ram)
+        return strdup("");
     ram[0] = '\0';
 
     long freeMem = mi.memFree + mi.buffers + mi.cached;
@@ -81,15 +89,18 @@ char *getRAM(MemInfo mi)
 
 /**
  * @param mi /proc/meminfo data
- * @return String containing the system swap used and total amounts both numerically and as a percentage
+ * @return String containing the system swap used and total amounts both
+ *         numerically and as a percentage
  */
 char *getSwap(MemInfo mi)
 {
-    if (mi.swapTotal == 0) return strdup("");
+    if (mi.swapTotal == 0)
+        return strdup("");
 
     const int swapSize = 64;
     char *swap = malloc(swapSize);
-    if (!swap) return strdup("");
+    if (!swap)
+        return strdup("");
     swap[0] = '\0';
 
     long used = mi.swapTotal - mi.swapFree;

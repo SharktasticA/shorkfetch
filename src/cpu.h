@@ -166,7 +166,8 @@ static const char *GPU_FROM_CPU_NEEDLES[] = {
     "w/ Radeon",
     " RADEON",
 };
-static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) / sizeof(GPU_FROM_CPU_NEEDLES[0]);
+static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) /
+    sizeof(GPU_FROM_CPU_NEEDLES[0]);
 
 #endif
 
@@ -174,7 +175,8 @@ static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) / sizeo
 static const VENDOR_ALIAS VENDOR_ALIASES[] = {
     { "HiSilicon",  "HUAWEI" }
 };
-static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) / sizeof(VENDOR_ALIASES[0]);
+static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) /
+    sizeof(VENDOR_ALIASES[0]);
 
 
 

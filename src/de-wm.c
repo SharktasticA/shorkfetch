@@ -23,7 +23,8 @@
 
 
 /**
- * @return String containing the active display environment's name; NULL if not found/applicable
+ * @return String containing the active display environment's name; NULL if
+ *         not found/applicable
  */
 char *getDE(void)
 {
@@ -75,7 +76,8 @@ char *getDE(void)
 
 /**
  * @param de Desktop enivornment's name
- * @return String containing the active window manager's name; NULL if not found/applicable
+ * @return String containing the active window manager's name; NULL if not
+ *         found/applicable
  */
 char *getWM(char **de)
 {
@@ -83,8 +85,8 @@ char *getWM(char **de)
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
 
-    // Cinnamon's WM (Muffin) is internal, we have to assume instead of look for
-    // the process
+    // Cinnamon's WM (Muffin) is internal, we have to assume instead of look
+    // for the process
     if (de && *de && strstr(*de, "Cinnamon") != NULL)
         return strdup("Muffin");
 
@@ -124,8 +126,8 @@ char *getWM(char **de)
         }
     }
 
-    // If we haven't found a WM but we have a DE, there's a good chance DE/WM
-    // are one and the same
+    // If we haven't found a WM but we have a DE, there's a good chance DE/
+    // WM are one and the same
     if (de && *de)
         return *de;
 

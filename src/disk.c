@@ -56,7 +56,10 @@ DISKS *getDisks(void)
         if (dirEntry->d_name[0] == '.')
             continue;
 
-        if (strlen(dirEntry->d_name) < 3 || (strncmp(dirEntry->d_name, "hd", 2) != 0 && strncmp(dirEntry->d_name, "sd", 2) != 0 && strncmp(dirEntry->d_name, "nvm", 3) != 0))
+        if (strlen(dirEntry->d_name) < 3 ||
+            (strncmp(dirEntry->d_name, "hd", 2) != 0 &&
+            strncmp(dirEntry->d_name, "sd", 2) != 0 &&
+            strncmp(dirEntry->d_name, "nvm", 3) != 0))
             continue;
 
         snprintf(blockDevs[noBlockDevs++], 256, "%s", dirEntry->d_name);
@@ -95,7 +98,8 @@ DISKS *getDisks(void)
         }
 
         // Add to disks
-        snprintf(result->disks[result->count], DISK_LEN, "%s (%s)", sizeStr, blockDevs[i]);
+        snprintf(result->disks[result->count], DISK_LEN, "%s (%s)", sizeStr,
+            blockDevs[i]);
         free(sizeStr);
         result->count++;
     }
@@ -104,7 +108,8 @@ DISKS *getDisks(void)
 }
 
 /**
- * @return String containing the root partition's used and total size amounts both numerically and as a percentage
+ * @return String containing the root partition's used and total size
+ *         amounts both numerically and as a percentage
  */
 char *getRoot(void)
 {

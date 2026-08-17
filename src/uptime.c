@@ -45,7 +45,8 @@ char *getUptime(void)
             if (!COMPACT)
             {
                 if (days > 0)
-                    snprintf(uptime, 128, "%dd, %dh, %dm", days, hours, minutes);
+                    snprintf(uptime, 128, "%dd, %dh, %dm", days, hours,
+                    minutes);
                 else if (hours > 0)
                     snprintf(uptime, 128, "%dh, %dm", hours, minutes);
                 else
@@ -54,7 +55,8 @@ char *getUptime(void)
             else
             {
                 if (days > 0)
-                    snprintf(uptime, 128, "%dd:%dh:%dm", days, hours, minutes);
+                    snprintf(uptime, 128, "%dd:%dh:%dm", days, hours,
+                    minutes);
                 else if (hours > 0)
                     snprintf(uptime, 128, "%dh:%dm", hours, minutes);
                 else

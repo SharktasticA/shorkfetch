@@ -40,8 +40,8 @@ typedef struct
 
 
 
-// What characters general functions like wordWrap can use as places to make a
-// soft wrap
+// What characters general functions like wordWrap can use as places to make
+// a soft wrap
 static const char BREAK_CHARS[BREAK_CHARS_LEN] = { " _-+,./\\" };
 
 

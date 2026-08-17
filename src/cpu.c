@@ -97,7 +97,8 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
     char *hz = strstr(result, "Hz");
     if (hz)
     {
-        // Walk back from "Hz" to find the beginning of the frequency substring
+        // Walk back from "Hz" to find the beginning of the frequency
+        // substring
         char *at = hz;
         if (at > result && isalpha(*(at-1)))
             at--;
@@ -128,7 +129,8 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
         // Shorten "Advanced Micro Devices" to "AMD"
         if (strstr(result, "Advanced Micro Devices"))
         {
-            char *tmp = findReplace(result, inputSize, "Advanced Micro Devices", "AMD");
+            char *tmp = findReplace(result, inputSize,
+                "Advanced Micro Devices", "AMD");
             strncpy(result, tmp, inputSize - 1);
             result[inputSize - 1] = '\0';
             free(tmp);
@@ -140,10 +142,12 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
             int replaces = 0;
             for (int i = 0; i < AMD_REPLACES_LEN; i++)
             {
-                if (AMD_REPLACES[i].standalone && replaces > 0) continue;
+                if (AMD_REPLACES[i].standalone && replaces > 0)
+                    continue;
                 else if (strstr(result, AMD_REPLACES[i].match))
                 {
-                    char *tmp = findReplace(result, inputSize, AMD_REPLACES[i].match, AMD_REPLACES[i].replacement);
+                    char *tmp = findReplace(result, inputSize,
+                        AMD_REPLACES[i].match, AMD_REPLACES[i].replacement);
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
@@ -153,12 +157,14 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
 
             if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
             {
-                // Dynamically generate substrings like "16-Core" or "16 Cores" to find
-                // and remove from AMD Ryzen or EPYC CPU names
+                // Dynamically generate substrings like "16-Core" or "16
+                // Cores" to find and remove from AMD Ryzen or EPYC CPU
+                // names
                 int done = 0;
                 for (int i = 2; i <= 192; i += 2)
                 {
-                    if (done == 1) break;
+                    if (done == 1)
+                        break;
 
                     char *withDash = malloc(10);
                     char *withSpace = malloc(11);
@@ -195,7 +201,8 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
             }
             else if (strstr(result, "AMD [AMD/ATI]"))
             {
-                char *tmp = findReplace(result, inputSize, "AMD [AMD/ATI]", "AMD/ATI");
+                char *tmp = findReplace(result, inputSize, "AMD [AMD/ATI]",
+                    "AMD/ATI");
                 strncpy(result, tmp, inputSize - 1);
                 result[inputSize - 1] = '\0';
                 free(tmp);
@@ -213,17 +220,23 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
                     if (needle - result >= 2)
                     {
                         char *suffix = needle - 2;
-                        // Proceed if we find a "st", "nd", "rd" or "th" suffix
-                        if ((suffix[0] == 's' && suffix[1] == 't') || (suffix[0] == 'n' && suffix[1] == 'd') || (suffix[0] == 'r' && suffix[1] == 'd') || (suffix[0] == 't' && suffix[1] == 'h'))
+                        // Proceed if we find a "st", "nd", "rd" or "th"
+                        // suffix
+                        if ((suffix[0] == 's' && suffix[1] == 't') ||
+                            (suffix[0] == 'n' && suffix[1] == 'd') ||
+                            (suffix[0] == 'r' && suffix[1] == 'd') ||
+                            (suffix[0] == 't' && suffix[1] == 'h'))
                         {
                             // Walk back to find the ordinal
                             char *digits = suffix - 1;
-                            while (digits >= result && *digits >= '0' && *digits <= '9')
+                            while (digits >= result && *digits >= '0' &&
+                                *digits <= '9')
                                 digits--;
                             char *ordinal = digits + 1;
 
                             // Make the deletion
-                            memmove(ordinal, needle + 5, strlen(needle + 5) + 1);
+                            memmove(ordinal, needle + 5, strlen(needle + 5)
+                                + 1);
                         }
                     }
                 }
@@ -232,10 +245,13 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
             int replaces = 0;
             for (int i = 0; i < INTEL_REPLACES_LEN; i++)
             {
-                if (INTEL_REPLACES[i].standalone && replaces > 0) continue;
+                if (INTEL_REPLACES[i].standalone && replaces > 0)
+                    continue;
                 else if (strstr(result, INTEL_REPLACES[i].match))
                 {
-                    char *tmp = findReplace(result, inputSize, INTEL_REPLACES[i].match, INTEL_REPLACES[i].replacement);
+                    char *tmp = findReplace(result, inputSize,
+                        INTEL_REPLACES[i].match,
+                        INTEL_REPLACES[i].replacement);
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
@@ -248,10 +264,12 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
             int replaces = 0;
             for (int i = 0; i < IDT_REPLACES_LEN; i++)
             {
-                if (IDT_REPLACES[i].standalone && replaces > 0) continue;
+                if (IDT_REPLACES[i].standalone && replaces > 0)
+                    continue;
                 else if (strstr(result, IDT_REPLACES[i].match))
                 {
-                    char *tmp = findReplace(result, inputSize, IDT_REPLACES[i].match, IDT_REPLACES[i].replacement);
+                    char *tmp = findReplace(result, inputSize,
+                        IDT_REPLACES[i].match, IDT_REPLACES[i].replacement);
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
@@ -264,10 +282,12 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
             int replaces = 0;
             for (int i = 0; i < VIA_REPLACES_LEN; i++)
             {
-                if (VIA_REPLACES[i].standalone && replaces > 0) continue;
+                if (VIA_REPLACES[i].standalone && replaces > 0)
+                    continue;
                 else if (strstr(result, VIA_REPLACES[i].match))
                 {
-                    char *tmp = findReplace(result, inputSize, VIA_REPLACES[i].match, VIA_REPLACES[i].replacement);
+                    char *tmp = findReplace(result, inputSize,
+                        VIA_REPLACES[i].match, VIA_REPLACES[i].replacement);
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
@@ -283,10 +303,13 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
         int replaces = 0;
         for (int i = 0; i < COMPACT_CPU_REPLACES_LEN; i++)
         {
-            if (COMPACT_CPU_REPLACES[i].standalone && replaces > 0) continue;
+            if (COMPACT_CPU_REPLACES[i].standalone && replaces > 0)
+                continue;
             else if (strstr(result, COMPACT_CPU_REPLACES[i].match))
             {
-                char *tmp = findReplace(result, inputSize, COMPACT_CPU_REPLACES[i].match, COMPACT_CPU_REPLACES[i].replacement);
+                char *tmp = findReplace(result, inputSize,
+                    COMPACT_CPU_REPLACES[i].match,
+                    COMPACT_CPU_REPLACES[i].replacement);
                 strncpy(result, tmp, inputSize - 1);
                 result[inputSize - 1] = '\0';
                 free(tmp);
@@ -296,9 +319,10 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
 
         strLen = strlen(result);
 
-        // Remove potential bracketed data at the end. Start by finding first
-        // non-null character...
-        while (strLen > 0 && result[strLen - 1] == ' ') strLen--;
+        // Remove potential bracketed data at the end. Start by finding
+        // first  non-null character...
+        while (strLen > 0 && result[strLen - 1] == ' ')
+            strLen--;
         if (strLen > 0 && result[strLen - 1] == ')')
         {
             for (int i = strLen - 1; i >= 0; i--)
@@ -353,11 +377,13 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
 #endif
 
 /**
- * Extracts CPU data from the given cpuinfo file and packs it into a CPU_DATA
- * struct for future processing and interpretation.
+ * Extracts CPU data from the given cpuinfo file and packs it into a
+ * CPU_DATA struct for future processing and interpretation.
  * @param cpuInfo A file path to a cpuinfo file to read
- * @param gpuFromCPU A pointer to a string for returning an extracted GPU name
- * @return A CPU_DATA struct containing CPU data; NULL if no info found/error
+ * @param gpuFromCPU A pointer to a string for returning an extracted GPU
+ *        name
+ * @return A CPU_DATA struct containing CPU data; NULL if no info found/
+ *         error
  */
 CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 {
@@ -416,7 +442,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get vendor ID
-            else if (!result->vendor && strncasecmp(buffer, "vendor_id", 9) == 0)
+            else if (!result->vendor &&
+                strncasecmp(buffer, "vendor_id", 9) == 0)
 #else
             if (!result->vendor && strncasecmp(buffer, "vendor_id", 9) == 0)
 #endif
@@ -435,7 +462,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #ifndef X86_ONLY
             // ARM: get CPU implementer name
-            else if (!result->vendor && (strncasecmp(buffer, "cpu implementer", 15) == 0 || strncasecmp(buffer, "cpu implementor", 15) == 0))
+            else if (!result->vendor &&
+                (strncasecmp(buffer, "cpu implementer", 15) == 0 ||
+                strncasecmp(buffer, "cpu implementor", 15) == 0))
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
@@ -447,10 +476,12 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     // hex value
                     char *end = NULL;
                     long val = strtol(extract, &end, 0);
-                    if (end != extract && val >= 0 && val <= 193 && ARM_IMPLEMENTERS[val])
+                    if (end != extract && val >= 0 && val <= 193 &&
+                        ARM_IMPLEMENTERS[val])
                     {
                         result->vendor = malloc(VENDOR_LEN);
-                        strncpy(result->vendor, ARM_IMPLEMENTERS[val], VENDOR_LEN - 1);
+                        strncpy(result->vendor, ARM_IMPLEMENTERS[val],
+                            VENDOR_LEN - 1);
                         result->vendor[VENDOR_LEN - 1] = '\0';
                         free(extract);
                     }
@@ -458,7 +489,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #endif
             // ARM/x86: get model name
-            else if (!result->name && strncasecmp(buffer, "model name", 10) == 0)
+            else if (!result->name &&
+                strncasecmp(buffer, "model name", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
@@ -471,7 +503,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #ifndef X86_ONLY
             // ARM: get CPU architecture
-            else if (!result->uarch && strncasecmp(buffer, "CPU architecture", 16) == 0)
+            else if (!result->uarch &&
+                strncasecmp(buffer, "CPU architecture", 16) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
@@ -482,7 +515,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->uarch = malloc(NAME_LEN);
                     // If likely ARM version number
                     if (extract[0] >= '0' && extract[0] <= '9')
-                        snprintf(result->uarch, NAME_LEN, "ARMv%s", extract);
+                        snprintf(result->uarch, NAME_LEN, "ARMv%s",
+                        extract);
                     // If "AArch64", etc.
                     else
                         snprintf(result->uarch, NAME_LEN, "%s", extract);
@@ -491,7 +525,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #endif
             // x86: get family number
-            else if (result->family == -1 && strncasecmp(buffer, "cpu family", 10) == 0)
+            else if (result->family == -1 &&
+                strncasecmp(buffer, "cpu family", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
@@ -505,7 +540,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #ifndef X86_ONLY
             // MIPS: get CPU model name
-            else if (!result->name && strncasecmp(buffer, "cpu model", 9) == 0)
+            else if (!result->name &&
+                strncasecmp(buffer, "cpu model", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 if (extract)
@@ -520,7 +556,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // ARM: get revision number
-            else if (result->revisionNo == -1 && strncasecmp(buffer, "CPU revision", 12) == 0)
+            else if (result->revisionNo == -1 &&
+                strncasecmp(buffer, "CPU revision", 12) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
@@ -590,7 +627,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #endif
             // x86: get model number
-            else if (result->model == -1 && strncasecmp(buffer, "model", 5) == 0)
+            else if (result->model == -1 &&
+                strncasecmp(buffer, "model", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract)
@@ -603,7 +641,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get stepping number
-            else if (result->stepping == -1 && strncasecmp(buffer, "stepping", 8) == 0)
+            else if (result->stepping == -1 &&
+                strncasecmp(buffer, "stepping", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, 4, ':');
                 if (extract && extract[0] != 'u')
@@ -616,7 +655,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get clock frequency in MHz
-            else if (result->freq < 0 && strncasecmp(buffer, "cpu mhz", 7) == 0)
+            else if (result->freq < 0 &&
+                strncasecmp(buffer, "cpu mhz", 7) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
@@ -630,7 +670,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #ifndef X86_ONLY
             // m68k: get clocking speed in MHz
-            else if (result->freq < 0 && strncasecmp(buffer, "clocking", 8) == 0)
+            else if (result->freq < 0 &&
+                strncasecmp(buffer, "clocking", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
@@ -643,7 +684,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get clock speed in MHz
-            else if (result->freq < 0 && strncasecmp(buffer, "clock", 5) == 0)
+            else if (result->freq < 0 &&
+                strncasecmp(buffer, "clock", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
@@ -656,7 +698,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // RISC-V: get clock speed in MHz
-            else if (result->freq < 0 && strncasecmp(buffer, "cpu-freq", 8) == 0)
+            else if (result->freq < 0 &&
+                strncasecmp(buffer, "cpu-freq", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
@@ -675,7 +718,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             // value) OR ARM: get processor name
             else if (strncasecmp(buffer, "processor", 9) == 0)
             {
-                char *extract = extractFromPoint(buffer, PROCESSOR_LEN, ':');
+                char *extract = extractFromPoint(buffer, PROCESSOR_LEN,
+                    ':');
                 if (extract)
                 {
                     if (isNumeric(extract))
@@ -687,7 +731,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                             result->arch = ARM;
 
                         result->processor = malloc(PROCESSOR_LEN);
-                        strncpy(result->processor, extract, PROCESSOR_LEN - 1);
+                        strncpy(result->processor, extract,
+                            PROCESSOR_LEN - 1);
                         result->processor[PROCESSOR_LEN - 1] = '\0';
                     }
 #endif
@@ -703,11 +748,13 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 {
                     int val = atoi(extract);
 
-                    if (result->physIDs.noUniquePhysIDs != IGNORE_UNIQUE_PHYS_IDS)
+                    if (result->physIDs.noUniquePhysIDs !=
+                        IGNORE_UNIQUE_PHYS_IDS)
                     {
                         // Check if we already recorded this ID before
                         int found = 0;
-                        for (int i = 0; i < result->physIDs.noUniquePhysIDs; i++)
+                        for (int i = 0; i < result->physIDs.noUniquePhysIDs;
+                            i++)
                         {
                             if (result->physIDs.uniquePhysIDs[i] == val)
                             {
@@ -719,16 +766,22 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         // Record said ID if it's new
                         if (!found)
                         {
-                            if (result->physIDs.noUniquePhysIDs < UNIQUE_PHYS_IDS_SIZE)
-                                result->physIDs.uniquePhysIDs[result->physIDs.noUniquePhysIDs++] = val;
-                            // If over the buffer size, mark this as unreliable
-                            // instead of silently under-reporting it
+                            if (result->physIDs.noUniquePhysIDs <
+                                UNIQUE_PHYS_IDS_SIZE)
+                                result->physIDs.uniquePhysIDs[
+                                    result->physIDs.noUniquePhysIDs++
+                                ] = val;
+                            // If over the buffer size, mark this as
+                            // unreliable instead of silently under-
+                            // reporting it
                             else
-                                result->physIDs.noUniquePhysIDs = IGNORE_UNIQUE_PHYS_IDS;
+                                result->physIDs.noUniquePhysIDs = 
+                                    IGNORE_UNIQUE_PHYS_IDS;
                         }
                     }
 
-                    // Find the highest recorded value (+1 so it starts at 1)
+                    // Find the highest recorded value (+1 so it starts at
+                    // 1)
                     if ((val + 1) > result->physIDs.maxPhysID)
                         result->physIDs.maxPhysID = (val + 1);
 
@@ -736,7 +789,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get physical core count
-            else if (result->cores == -1 && strncasecmp(buffer, "cpu cores", 9) == 0)
+            else if (result->cores == -1 &&
+                strncasecmp(buffer, "cpu cores", 9) == 0)
             {
                 char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
@@ -749,7 +803,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get logical thread count
-            else if (result->threads == -1 && (strncasecmp(buffer, "siblings", 8) == 0 || strncasecmp(buffer, "Number of siblings", 18) == 0))
+            else if (result->threads == -1 &&
+                (strncasecmp(buffer, "siblings", 8) == 0 ||
+                strncasecmp(buffer, "Number of siblings", 18) == 0))
             {
                 char *extract = extractFromPoint(buffer, 5, ':');
                 if (extract)
@@ -775,8 +831,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     free(extract);
 
                     // Whilst typically the exception and not the rule, some
-                    // CPUs like SiFive Freedom U540 start from 1 instead of 0.
-                    // If the hart count is more than 1 and is odd, we'll 
+                    // CPUs like SiFive Freedom U540 start from 1 instead of
+                    // 0. If the hart count is more than 1 and is odd, we'll
                     // decrement it.
                     if (result->threads > 1 && result->threads % 2 != 0)
                         result->threads--;
@@ -784,7 +840,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #endif
             // x86: get cache size in KB
-            else if (result->cacheSize == -1 && strncasecmp(buffer, "cache size", 10) == 0)
+            else if (result->cacheSize == -1 &&
+                strncasecmp(buffer, "cache size", 10) == 0)
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
@@ -797,7 +854,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get CPU flags
-            else if (result->flags[0] == '\0' && strncasecmp(buffer, "flags", 5) == 0)
+            else if (result->flags[0] == '\0' &&
+                strncasecmp(buffer, "flags", 5) == 0)
             {
                 char *extract = extractFromPoint(buffer, FLAGS_LEN, ':');
                 if (extract)
@@ -808,7 +866,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // x86: get physical and virtual address sizes
-            else if ((result->physAddrSize == -1 || result->virtAddrSize == -1) && strncasecmp(buffer, "address sizes", 13) == 0)
+            else if ((result->physAddrSize == -1 || 
+                result->virtAddrSize == -1) &&
+                strncasecmp(buffer, "address sizes", 13) == 0)
             {
                 char *extract = extractFromPoint(buffer, 32, ':');
                 if (extract)
@@ -817,7 +877,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         result->arch = X86;
 
                     int phys, virt;
-                    if (sscanf(extract, "%d bits physical, %d bits virtual", &phys, &virt) == 2)
+                    if (sscanf(extract, "%d bits physical, %d bits virtual",
+                        &phys, &virt) == 2)
                     {
                         result->physAddrSize = phys;
                         result->virtAddrSize = virt;
@@ -827,7 +888,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             }
 #ifndef X86_ONLY
             // POWER: get platform name
-            else if (!result->platform && strncasecmp(buffer, "platform", 8) == 0)
+            else if (!result->platform &&
+                strncasecmp(buffer, "platform", 8) == 0)
             {
                 char *extract = extractFromPoint(buffer, PLATFORM_LEN, ':');
                 if (extract)
@@ -841,13 +903,15 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get machine name
-            else if (!result->machine && strncasecmp(buffer, "machine", 7) == 0)
+            else if (!result->machine &&
+                strncasecmp(buffer, "machine", 7) == 0)
             {
                 char *extract = extractFromPoint(buffer, MACHINE_LEN, ':');
                 // Strip the buffer of whitespace so we can double-check the
                 // field is actually "machine:"
                 char stripped[MACHINE_LEN] = {0};
-                for (int i = 0, j = 0; buffer[i] && j < MACHINE_LEN - 1; i++)
+                for (int i = 0, j = 0; buffer[i] && j < MACHINE_LEN - 1;
+                    i++)
                     if (!isspace((unsigned char)buffer[i]))
                         stripped[j++] = buffer[i];
 
@@ -862,7 +926,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get vendor name
-            else if (!result->vendor && (strncasecmp(buffer, "vendor", 6) == 0))
+            else if (!result->vendor &&
+                (strncasecmp(buffer, "vendor", 6) == 0))
             {
                 char *extract = extractFromPoint(buffer, 16, ':');
                 // Strip the buffer of whitespace so we can double-check the
@@ -883,16 +948,19 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get revision str
-            else if (!result->revisionStr && (strncasecmp(buffer, "revision", 6) == 0))
+            else if (!result->revisionStr &&
+                (strncasecmp(buffer, "revision", 6) == 0))
             {
-                char *extract = extractFromPoint(buffer, REVISION_STR_LEN, ':');
+                char *extract = extractFromPoint(buffer, REVISION_STR_LEN,
+                    ':');
                 if (extract)
                 {
                     if (result->arch == UNKNOWN)
                         result->arch = POWER;
 
                     result->revisionStr = malloc(REVISION_STR_LEN);
-                    strncpy(result->revisionStr, extract, REVISION_STR_LEN - 1);
+                    strncpy(result->revisionStr, extract,
+                        REVISION_STR_LEN - 1);
                     result->revisionStr[REVISION_STR_LEN - 1] = '\0';
                 }
             }
@@ -920,9 +988,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
     if (result->arch == X86)
     {
-        // If the model name has GPU name in it, we will extract it and save if
-        // for later in case we need it as a fallback when GPU detection fails
-        // or produces no results
+        // If the model name has GPU name in it, we will extract it and save
+        // if for later in case we need it as a fallback when GPU detection
+        // fails or produces no results
         for (int i = 0; i < GPU_FROM_CPU_NEEDLES_LEN; i++)
         {
             char *found = strstr(result->name, GPU_FROM_CPU_NEEDLES[i]);
@@ -933,7 +1001,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 if (*gpuFromCPU)
                 {
                     const char *gpuVendor = "AMD";
-                    snprintf(*gpuFromCPU, GPU_NAME_LEN, "%s %s", gpuVendor, found + (strchr(GPU_FROM_CPU_NEEDLES[i], ' ') - GPU_FROM_CPU_NEEDLES[i]) + 1);
+                    snprintf(*gpuFromCPU, GPU_NAME_LEN, "%s %s", gpuVendor,
+                        found + (strchr(GPU_FROM_CPU_NEEDLES[i], ' ') -
+                        GPU_FROM_CPU_NEEDLES[i]) + 1);
 
                     // Discard comma and after if present
                     // See: AMD A4-9120e
@@ -947,7 +1017,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     {
                         size_t gpuLen = strlen(*gpuFromCPU);
                         size_t suffixLen = strlen(GPU_FROM_CPU_SUFFIXES[i]);
-                        if (gpuLen > suffixLen && strcmp(*gpuFromCPU + gpuLen - suffixLen, GPU_FROM_CPU_SUFFIXES[i]) == 0)
+                        if (gpuLen > suffixLen && 
+                            strcmp(*gpuFromCPU + gpuLen - suffixLen,
+                                GPU_FROM_CPU_SUFFIXES[i]) == 0)
                         {
                             (*gpuFromCPU)[gpuLen - suffixLen] = '\0';
                             break;
@@ -971,7 +1043,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
                 // Make sure there isn't any trailing nonsense left
                 char *end = found - 1;
-                while (end > result->name && (*end == ' ' || *end == ',' || *end == '-'))
+                while (end > result->name && (*end == ' ' || *end == ',' ||
+                    *end == '-'))
                     *end-- = '\0';
             }
         }

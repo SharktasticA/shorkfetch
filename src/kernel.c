@@ -2,8 +2,8 @@
     ######################################################
     ##            SHORK UTILITY - SHORKFETCH            ##
     ######################################################
-    ## Functions and data relating to handle the        ##
-    ## operating system's name                          ##
+    ## Functions and data relating to handle the Linux  ##
+    ## kernel version                                   ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -25,17 +25,20 @@
 /**
  * @param u Parsed uname data
  * @param uStatus The status returned from uname attempt
- * @return String containing the kernel version or "unknown" if undetermined/error
+ * @return String containing the kernel version or "unknown" if
+ *         undetermined/error
  */
 char *getKernel(struct utsname u, int uStatus)
 {
-    if (uStatus != 0) return strdup("unknown");
+    if (uStatus != 0)
+        return strdup("unknown");
     const char *src = u.release;
 
     if (!COMPACT)
     {
         char *release = malloc(strlen(src) + 1);
-        if (!release) return strdup("unknown");
+        if (!release)
+            return strdup("unknown");
         strcpy(release, u.release);
         return release; 
     }
@@ -46,12 +49,14 @@ char *getKernel(struct utsname u, int uStatus)
         while (src[i])
         {
             char c = src[i];
-            if (!((c >= '0' && c <= '9') || c == '.')) break;
+            if (!((c >= '0' && c <= '9') || c == '.'))
+                break;
             i++;
         }
 
         char *release = malloc(i + 1);
-        if (!release) return strdup("unknown");
+        if (!release)
+            return strdup("unknown");
         memcpy(release, src, i);
         release[i] = '\0';
         return release;

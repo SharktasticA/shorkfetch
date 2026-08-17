@@ -22,7 +22,8 @@
 
 
 /**
- * @return String containing the shell's name or "unknown" if undetermined/error
+ * @return String containing the shell's name or "unknown" if
+ *         undetermined/error
  */
 char *getShell(void)
 {

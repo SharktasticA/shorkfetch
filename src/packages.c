@@ -27,8 +27,8 @@
 
 
 /**
- * @return String containing counts of various packages including dpkg, pacman,
- * rpm, flatpak and snap.
+ * @return String containing counts of various packages including dpkg,
+ *         pacman, rpm, flatpak and snap.
  */
 char *getPackages(const char *os)
 {
@@ -66,7 +66,8 @@ char *getPackages(const char *os)
     {
         struct dirent *dirEntry;
         while ((dirEntry = readdir(pacmanLocal)) != NULL)
-            if (dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "ALPM_DB_VERSION") != 0)
+            if (dirEntry->d_name[0] != '.' &&
+                strcmp(dirEntry->d_name, "ALPM_DB_VERSION") != 0)
                 pCount++;
         closedir(pacmanLocal);
     }
@@ -88,10 +89,13 @@ char *getPackages(const char *os)
     {
         // Try quickly figuring the number out using the filesystem
         char userApp[PATH_MAX], userRuntime[PATH_MAX];
-        snprintf(userApp, PATH_MAX, "%s/.local/share/flatpak/app", HOME);
-        snprintf(userRuntime, PATH_MAX, "%s/.local/share/flatpak/runtime", HOME);
+        snprintf(userApp, PATH_MAX, "%s/.local/share/flatpak/app",
+            HOME);
+        snprintf(userRuntime, PATH_MAX, "%s/.local/share/flatpak/runtime",
+            HOME);
 
-        // The directories we need to check - system and user apps and runtimes
+        // The directories we need to check - system and user apps and
+        // runtimes
         const char *flatpakDirs[] = {
             "/var/lib/flatpak/app",
             "/var/lib/flatpak/runtime",
@@ -99,58 +103,74 @@ char *getPackages(const char *os)
             userRuntime
         };
 
-        // We are looking for "active" symbolic link files. The tree looks like:
+        // We are looking for "active" symbolic link files. The tree looks
+        // like:
         // flatpakDir[i]/org.kde.Platform/x86_64/6.9   /active
         //              /name            /arch  /branch/BINGO
         for (int i = 0; i < 4; i++)
         {
             DIR *flatpakDir = opendir(flatpakDirs[i]);
-            if (!flatpakDir) continue;
+            if (!flatpakDir)
+                continue;
             size_t currFlatpakDirLen = strlen(flatpakDirs[i]);
 
             // Enter arch
             struct dirent *nameEntry;
             while ((nameEntry = readdir(flatpakDir)) != NULL)
             {
-                if (nameEntry->d_name[0] == '.') continue;
+                if (nameEntry->d_name[0] == '.')
+                    continue;
 
                 char archPath[PATH_MAX];
-                int archPathLen = snprintf(archPath, PATH_MAX, "%s/%s", flatpakDirs[i], nameEntry->d_name);
-                if (archPathLen < 0 || archPathLen >= PATH_MAX - currFlatpakDirLen)
+                int archPathLen = snprintf(archPath, PATH_MAX, "%s/%s",
+                    flatpakDirs[i], nameEntry->d_name);
+                if (archPathLen < 0 ||
+                    archPathLen >= PATH_MAX - currFlatpakDirLen)
                     continue;
                 DIR *archDir = opendir(archPath);
-                if (!archDir) continue;
+                if (!archDir)
+                    continue;
 
                 // Enter branch
                 struct dirent *archEntry;
                 while ((archEntry = readdir(archDir)) != NULL)
                 {
-                    if (archEntry->d_name[0] == '.') continue;
+                    if (archEntry->d_name[0] == '.')
+                        continue;
 
                     char branchPath[PATH_MAX];
-                    int branchPathLen = snprintf(branchPath, PATH_MAX, "%s/%s", archPath, archEntry->d_name);
-                    if (branchPathLen < 0 || branchPathLen >= PATH_MAX - archPathLen)
+                    int branchPathLen = snprintf(branchPath, PATH_MAX,
+                        "%s/%s", archPath, archEntry->d_name);
+                    if (branchPathLen < 0 ||
+                        branchPathLen >= PATH_MAX - archPathLen)
                         continue;
                     DIR *branchDir = opendir(branchPath);
-                    if (!branchDir) continue;
+                    if (!branchDir)
+                        continue;
 
                     // Look for out crucial "active" file
                     struct dirent *branchEntry;
                     while ((branchEntry = readdir(branchDir)) != NULL)
                     {
-                        if (branchEntry->d_name[0] == '.') continue;
+                        if (branchEntry->d_name[0] == '.')
+                            continue;
 
                         char activePath[PATH_MAX];
-                        int activePathLen = snprintf(activePath, PATH_MAX, "%s/%s/active", branchPath, branchEntry->d_name);
-                        if (activePathLen < 0 || activePathLen >= PATH_MAX - branchPathLen)
+                        int activePathLen = snprintf(activePath, PATH_MAX,
+                            "%s/%s/active", branchPath,
+                            branchEntry->d_name);
+                        if (activePathLen < 0 ||
+                            activePathLen >= PATH_MAX - branchPathLen)
                             continue;
                         if (access(activePath, F_OK) != 0)
                             continue;
 
-                        // flatpak list seems to skip .Locale, so we do so to
-                        // match its output
+                        // flatpak list seems to skip .Locale, so we do so
+                        // to match its output
                         size_t nameLen = strlen(nameEntry->d_name);
-                        if (nameLen > 7 && strcmp(nameEntry->d_name + nameLen - 7, ".Locale") == 0)
+                        if (nameLen > 7 &&
+                            strcmp(nameEntry->d_name + nameLen - 7,
+                                ".Locale") == 0)
                             continue;
 
                         fCount++;
@@ -168,28 +188,35 @@ char *getPackages(const char *os)
     for (int i = 0; i < 2; i++)
     {
         DIR *snapDir = opendir(snapDirs[i]);
-        if (!snapDir) continue;
+        if (!snapDir)
+            continue;
 
         struct dirent *dirEntry;
         while ((dirEntry = readdir(snapDir)) != NULL)
-            if (dirEntry->d_type == DT_DIR && dirEntry->d_name[0] != '.' && strcmp(dirEntry->d_name, "bin") != 0)
+            if (dirEntry->d_type == DT_DIR && dirEntry->d_name[0] != '.' &&
+                strcmp(dirEntry->d_name, "bin") != 0)
                 sCount++;
         closedir(snapDir);
 
-        if (sCount > 0) break;
+        if (sCount > 0)
+            break;
     }
 
     // Build the result string
     if (dCount > 0)
         snprintf(pkgs, PKGS_SIZE, COMPACT ? "%d(D)" : "%d (dpkg)", dCount);
     if (pCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(P)" : ", %d (pacman)", pCount);
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
+        COMPACT ? ":%d(P)" : ", %d (pacman)", pCount);
     if (rCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(R)" : ", %d (rpm)", rCount);
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
+        COMPACT ? ":%d(R)" : ", %d (rpm)", rCount);
     if (fCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(F)" : ", %d (flat)", fCount);
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
+        COMPACT ? ":%d(F)" : ", %d (flat)", fCount);
     if (sCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs), COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
+        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
+        COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
 
     // Make sure we don't start with ", "...
     size_t pkgsLen = strlen(pkgs);

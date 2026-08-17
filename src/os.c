@@ -28,13 +28,15 @@
 /**
  * @param u Parsed uname data
  * @param uStatus The status returned from uname attempt
- * @return String containing the OS/Linux distro's name or "unknown" if undetermined/error
+ * @return String containing the OS/Linux distro's name or "unknown" if
+ *         undetermined/error
  */
 char *getOS(struct utsname u, int uStatus)
 {
     const int osSize = 128;
     char *os = malloc(osSize);
-    if (!os) return strdup("unknown");
+    if (!os)
+        return strdup("unknown");
     os[0] = '\0';
 
     // Try os-release
@@ -65,9 +67,11 @@ char *getOS(struct utsname u, int uStatus)
             if (fgets(buffer, sizeof(buffer), fStream))
             {
                 size_t len = strlen(buffer);
-                if (len > 0 && buffer[len - 1] == '\n') buffer[len - 1] = '\0';
+                if (len > 0 && buffer[len - 1] == '\n')
+                    buffer[len - 1] = '\0';
                 char *p = strchr(buffer, '\\');
-                if (p) *p = '\0';
+                if (p)
+                    *p = '\0';
                 strncpy(os, buffer, osSize - 1);
                 os[osSize - 1] = '\0';
             }
@@ -116,10 +120,13 @@ char *getOS(struct utsname u, int uStatus)
         int replaces = 0;
         for (int i = 0; i < COMPACT_OS_REPLACES_LEN; i++)
         {
-            if (COMPACT_OS_REPLACES[i].standalone && replaces > 0) continue;
+            if (COMPACT_OS_REPLACES[i].standalone && replaces > 0)
+                continue;
             else if (strstr(os, COMPACT_OS_REPLACES[i].match))
             {
-                char *tmp = findReplace(os, osSize, COMPACT_OS_REPLACES[i].match, COMPACT_OS_REPLACES[i].replacement);
+                char *tmp = findReplace(os, osSize,
+                    COMPACT_OS_REPLACES[i].match,
+                    COMPACT_OS_REPLACES[i].replacement);
                 strncpy(os, tmp, osSize - 1);
                 os[osSize - 1] = '\0';
                 free(tmp);

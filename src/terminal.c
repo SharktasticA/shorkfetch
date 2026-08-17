@@ -26,7 +26,8 @@
 
 
 /**
- * @return String containing the host terminal emulator's name; NULL if not found/applicable
+ * @return String containing the host terminal emulator's name; NULL if not
+ *         found/applicable
  */
 char *getTerminal(void)
 {
@@ -50,7 +51,8 @@ char *getTerminal(void)
             // Flags if we must not use this process as our terminal
             int notTerminal = 0;
 
-            // We must skip wrappers like doas, su or sudo, and possible shells
+            // We must skip wrappers like doas, su or sudo, and possible
+            // shells
             for (int i = 0; i < EXCLUDED_TERMINAL_PROCS_LEN; i++)
             {
                 if (strcmp(process.name, EXCLUDED_TERMINAL_PROCS[i]) == 0)
@@ -106,7 +108,8 @@ char *getTerminal(void)
             terminal[terminalLen - 1] = '\0';
 
         // Remove "agent" from "ptyxis-agent"
-        if (terminalLen > 6 && terminal[6] == '-' && strncmp(terminal, "ptyxis", 6) == 0)
+        if (terminalLen > 6 && terminal[6] == '-' &&
+            strncmp(terminal, "ptyxis", 6) == 0)
             terminal[6] = '\0';
     }
 

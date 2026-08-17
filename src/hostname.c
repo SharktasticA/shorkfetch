@@ -26,6 +26,7 @@
  */
 char *getHostname(struct utsname u, int uStatus)
 {
-    if (uStatus == 0) return strdup(u.nodename);
+    if (uStatus == 0)
+        return strdup(u.nodename);
     return strdup("unknown");
 }

@@ -53,7 +53,8 @@ static const char *POSSIBLE_FIELDS[] =
     "lip",  // Local IP address
     "clrs"  // ANSI escape code 16-colour palette
 };
-static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) / sizeof(POSSIBLE_FIELDS[0]);
+static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) /
+    sizeof(POSSIBLE_FIELDS[0]);
 
 extern char *COLOUR;
 extern int COMPACT;
