@@ -1379,9 +1379,10 @@ char *interpretCPU(CPU_DATA *cpu)
                     strncmp(ibmModel, "604", 3) == 0 ||
                     strncmp(ibmModel, "620", 3) == 0)
                     gen = PPC_6XX;
-                else if ((strncmp(ibmModel, "7400", 4) !=0 &&
-                        strncmp(ibmModel, "740", 3) == 0) ||
-                    strncmp(ibmModel, "745", 3) == 0 ||
+                else if ((strncmp(ibmModel, "740", 3) == 0 &&
+                        !isdigit((unsigned char)ibmModel[3])) ||
+                    (strncmp(ibmModel, "745", 3) == 0 &&
+                        !isdigit((unsigned char)ibmModel[3])) ||
                     strncmp(ibmModel, "750", 3) == 0 ||
                     strncmp(ibmModel, "755", 3) == 0 ||
                     strncmp(ibmModel, "740/750", 7) == 0 ||
