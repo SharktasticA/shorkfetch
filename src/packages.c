@@ -218,10 +218,15 @@ char *getPackages(const char *os)
         snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
         COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
 
-    // Make sure we don't start with ", "...
+    // Make sure we don't start with ", " or ":"...
     size_t pkgsLen = strlen(pkgs);
-    if (pkgsLen > 2 && pkgs[0] == ',' && pkgs[1] == ' ')
-        memmove(pkgs, pkgs + 2, pkgsLen - 1);
+    if (pkgsLen > 2)
+    {
+        if (COMPACT && pkgs[0] == ':')
+            memmove(pkgs, pkgs + 1, pkgsLen);
+        else if (pkgs[0] == ',' && pkgs[1] == ' ')
+            memmove(pkgs, pkgs + 2, pkgsLen - 1);
+    }
 
     return pkgs;
 }
