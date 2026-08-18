@@ -80,87 +80,119 @@ int printShorkLine(int stopOnceDone)
 
 void showHelp(void)
 {
-    WORD_WRAPPED *desc = wordWrap("A tool that displays basic system and environment information in a summarised format.\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *desc = wordWrap("A tool that displays basic system and "
+        "environment information in a summarised format.\n",
+        TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s\n", desc->str);
     free(desc->str);
     free(desc);
 
-    WORD_WRAPPED *usage = wordWrap("Usage: shorkfetch [OPTIONS]\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *usage = wordWrap("Usage: shorkfetch [OPTIONS]\n\n",
+        TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s", usage->str);
     free(usage->str);
     free(usage);
 
-    WORD_WRAPPED *options = wordWrap("Options:\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *options = wordWrap("Options:\n", TERM_SIZE.ws_col, NULL,
+        0, 0);
     printf("%s", options->str);
     free(options->str);
     free(options);
 
-    WORD_WRAPPED *bullet = wordWrap("-b, --bullet    Specifies a custom character to use with bullet-point mode; no assignment returns the current character\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *bullet = wordWrap("-b, --bullet    Specifies a custom "
+        "character to use with bullet-point mode; no assignment returns "
+        "the current character\n", TERM_SIZE.ws_col, "                ", 0,
+        0);
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);
 
-    WORD_WRAPPED *colour = wordWrap("-cl, --colour   Specifies a custom accent colour; no assignment returns the current colour\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *colour = wordWrap("-cl, --colour   Specifies a custom "
+        "accent colour; no assignment returns the current colour\n",
+        TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", colour->str);
     free(colour->str);
     free(colour);
 
-    WORD_WRAPPED *compact = wordWrap("-co, --compact  Compacts field names and field values\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *compact = wordWrap("-co, --compact  Compacts field names "
+        "and field values\n", TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", compact->str);
     free(compact->str);
     free(compact);
 
-    WORD_WRAPPED *help = wordWrap("-h, --help      Displays help information and exits\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *help = wordWrap("-h, --help      Displays help "
+        "information and exits\n", TERM_SIZE.ws_col, "                ",
+        0, 0);
     printf("%s", help->str);
     free(help->str);
     free(help);
 
-    WORD_WRAPPED *fields = wordWrap("-f, --fields    Specifies a custom fields list and order; no assignment returns list of current fields\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *fields = wordWrap("-f, --fields    Specifies a custom "
+        "fields list and order; no assignment returns list of current "
+        "fields\n", TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", fields->str);
     free(fields->str);
     free(fields);
 
-    WORD_WRAPPED *mode = wordWrap("-m, --mode      Select what view mode to use: [n]ormal, [b]ullets\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *mode = wordWrap("-m, --mode      Select what view mode "
+        "to use: [n]ormal, [b]ullets\n", TERM_SIZE.ws_col,
+        "                ", 0, 0);
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
 
-    WORD_WRAPPED *noArt = wordWrap("-na, --no-art   Disables the SHORK ASCII art\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *noArt = wordWrap("-na, --no-art   Disables the SHORK "
+        "ASCII art\n", TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", noArt->str);
     free(noArt->str);
     free(noArt);
 
-    WORD_WRAPPED *noEsc = wordWrap("-ne, --no-esc   Disables all ANSI espace codes and colour features\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *noEsc = wordWrap("-ne, --no-esc   Disables all ANSI "
+        "espace codes and colour features\n", TERM_SIZE.ws_col,
+        "                ", 0, 0);
     printf("%s", noEsc->str);
     free(noEsc->str);
     free(noEsc);
 
-    WORD_WRAPPED *reset = wordWrap("-r, --reset     Resets to default, deletes configuration file and exits\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *reset = wordWrap("-r, --reset     Resets to default, "
+        "deletes configuration file and exits\n", TERM_SIZE.ws_col,
+        "                ", 0, 0);
     printf("%s", reset->str);
     free(reset->str);
     free(reset);
 
-    WORD_WRAPPED *save = wordWrap("-s, --save      Saves chosen options to a configuration file\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *save = wordWrap("-s, --save      Saves chosen options to "
+        "a configuration file\n", TERM_SIZE.ws_col, "                ", 0,
+        0);
     printf("%s", save->str);
     free(save->str);
     free(save);
 
-    WORD_WRAPPED *version = wordWrap("-v, --version   Displays version number and exits\n\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *version = wordWrap("-v, --version   Displays version "
+        "number and exits\n\n", TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", version->str);
     free(version->str);
     free(version);
 
-    WORD_WRAPPED *colours = wordWrap("Colours: black, blue, bold_blue, bold_cyan, bold_green, bold_magenta, bold_red, bold_white, bold_yellow, cyan, green, grey, magenta, red, white, yellow, off\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *colours = wordWrap("Colours: black, blue, bold_blue, "
+        "bold_cyan, bold_green, bold_magenta, bold_red, bold_white, "
+        "bold_yellow, cyan, green, grey, magenta, red, white, yellow, "
+        "off\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s", colours->str); 
     free(colours->str);
     free(colours);
 
-    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, --- (separator), single blank space (new line)\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, "
+        "de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, --- "
+        "(separator), single blank space (new line)\n\n", TERM_SIZE.ws_col,
+        NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);
 
-    WORD_WRAPPED *notes = wordWrap("Note: by default, the SHORK ASCII art is disabled if the terminal's width is less than 62 columns or if less than 7 fields are present.\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *notes = wordWrap("Note: by default, the SHORK ASCII art "
+        "is disabled if the terminal's width is less than 62 columns or if "
+        "less than 7 fields are present.\n", TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s", notes->str);
     free(notes->str);
     free(notes);
@@ -171,7 +203,8 @@ void showHelp(void)
  * instead. It used with the writeOutput func* in main() to allow selecting
  * between this and real snprintf depending on no-escape-codes' status.
  */
-int snprintfStdout(char *__restrict __s, size_t __maxlen, const char *__restrict __format, ...)
+int snprintfStdout(char *__restrict __s, size_t __maxlen,
+    const char *__restrict __format, ...)
 {
     // Discard buffer and size since stdout doesn't need either
     (void)__s;
@@ -197,7 +230,8 @@ int main(int argc, char *argv[])
 
     char bullet = '*';
 #ifndef EMBEDDED
-    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ");
+    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,"
+        "swap,dsk,root,lip, ,clrs, ");
 #else
     char *fields = strdup("os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root, ");
 #endif
@@ -206,18 +240,21 @@ int main(int argc, char *argv[])
     int saveConf = 0;
     VIEW_MODE mode = NORMAL;
 
-    readConf(&bullet, &COLOUR, &COMPACT, &fields, &mode, &noEsc, &noIP, &SHOW_SHORK);
+    readConf(&bullet, &COLOUR, &COMPACT, &fields, &mode, &noEsc, &noIP, 
+        &SHOW_SHORK);
 
     for (int i = 1; i < argc; i++)
     {
-        if ((strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "--help") == 0))
+        if ((strcmp(argv[i], "-h") == 0) ||
+            (strcmp(argv[i], "--help") == 0))
         {
             showHelp();
             free(COLOUR);
             free(fields);
             return 0;
         }
-        else if (strncmp(argv[i], "-b", 2) == 0 || strncmp(argv[i], "--bullet", 8) == 0)
+        else if (strncmp(argv[i], "-b", 2) == 0 ||
+            strncmp(argv[i], "--bullet", 8) == 0)
         {
             char *bulletChar = NULL;
             if (strncmp(argv[i], "-b=", 3) == 0)
@@ -229,13 +266,15 @@ int main(int argc, char *argv[])
             {
                 if (bulletChar[0] == '\0')
                 {
-                    printf("ERROR: custom bullet point character not given\n");
+                    printf("ERROR: custom bullet point character not "
+                        "given\n");
                     free(fields);
                     return 1;
                 }
                 else if (bulletChar[1] != '\0')
                 {
-                    printf("ERROR: custom bullet point character can only be a single character\n");
+                    printf("ERROR: custom bullet point character can only "
+                        "be a single character\n");
                     free(fields);
                     return 1;
                 }
@@ -249,7 +288,8 @@ int main(int argc, char *argv[])
                 return 0;
             }
         }
-        else if (strncmp(argv[i], "-cl", 3) == 0 || strncmp(argv[i], "--colour", 8) == 0)
+        else if (strncmp(argv[i], "-cl", 3) == 0 ||
+            strncmp(argv[i], "--colour", 8) == 0)
         {
             // Find "=" as our needle
             char *equalsNeedle = strchr(argv[i], '=');
@@ -265,9 +305,11 @@ int main(int argc, char *argv[])
             equalsNeedle++;
             COLOUR = strdup(equalsNeedle);
         }
-        else if ((strcmp(argv[i], "-co") == 0) || (strcmp(argv[i], "--compact") == 0))
+        else if (strcmp(argv[i], "-co") == 0 ||
+            strcmp(argv[i], "--compact") == 0)
             COMPACT = 1;
-        else if (strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fields", 8) == 0)
+        else if (strncmp(argv[i], "-f", 2) == 0 ||
+            strncmp(argv[i], "--fields", 8) == 0)
         {
             // Find "=" as our needle
             char *equalsNeedle = strchr(argv[i], '=');
@@ -288,7 +330,8 @@ int main(int argc, char *argv[])
             if (len > 0 && fields[len - 1] == ',')
                 fields[len - 1] = '\0';
         }
-        else if (strncmp(argv[i], "-m", 2) == 0 || strncmp(argv[i], "--mode", 6) == 0)
+        else if (strncmp(argv[i], "-m", 2) == 0 ||
+            strncmp(argv[i], "--mode", 6) == 0)
         {
             char *modeVal = NULL;
             if (strncmp(argv[i], "-m=", 3) == 0)
@@ -305,9 +348,12 @@ int main(int argc, char *argv[])
                     free(COLOUR);
                     return 1;
                 }
-                else if (strcmp(modeVal, "n") == 0 || strcmp(modeVal, "normal") == 0)
+                else if (strcmp(modeVal, "n") == 0 ||
+                    strcmp(modeVal, "normal") == 0)
                     mode = NORMAL;
-                else if (strcmp(modeVal, "b") == 0 || strcmp(modeVal, "bullet") == 0 || strcmp(modeVal, "bullets") == 0)
+                else if (strcmp(modeVal, "b") == 0 ||
+                    strcmp(modeVal, "bullet") == 0 ||
+                    strcmp(modeVal, "bullets") == 0)
                     mode = BULLETS;
                 else
                 {
@@ -328,26 +374,33 @@ int main(int argc, char *argv[])
                 return 0;
             }
         }
-        else if ((strcmp(argv[i], "-na") == 0) || (strcmp(argv[i], "--no-art") == 0))
+        else if ((strcmp(argv[i], "-na") == 0) ||
+            (strcmp(argv[i], "--no-art") == 0))
             SHOW_SHORK = 0;
-        else if ((strcmp(argv[i], "-ne") == 0) || (strcmp(argv[i], "--no-esc") == 0))
+        else if ((strcmp(argv[i], "-ne") == 0) ||
+            (strcmp(argv[i], "--no-esc") == 0))
             noEsc = 1;
-        else if ((strcmp(argv[i], "-ni") == 0) || (strcmp(argv[i], "--no-ip") == 0))
+        else if ((strcmp(argv[i], "-ni") == 0) ||
+            (strcmp(argv[i], "--no-ip") == 0))
             noIP = 1;
-        else if ((strcmp(argv[i], "-r") == 0) || (strcmp(argv[i], "--reset") == 0))
+        else if ((strcmp(argv[i], "-r") == 0) ||
+            (strcmp(argv[i], "--reset") == 0))
         {
             int result = deleteConf();
             if (result)
                 printf("SHORKFETCH configuration reset\n");
             else
-                printf("WARNING: SHORKFETCH configuration already default\n");
+                printf("WARNING: SHORKFETCH configuration already "
+                "default\n");
             free(COLOUR);
             free(fields);
             return 0;
         }
-        else if ((strcmp(argv[i], "-s") == 0) || (strcmp(argv[i], "--save") == 0))
+        else if (strcmp(argv[i], "-s") == 0 ||
+            strcmp(argv[i], "--save") == 0)
             saveConf = 1;
-        else if ((strcmp(argv[i], "-v") == 0) || (strcmp(argv[i], "--version") == 0))
+        else if (strcmp(argv[i], "-v") == 0 ||
+            strcmp(argv[i], "--version") == 0)
         {
             printf("SHORKFETCH %s\n", VERSION);
             free(fields);
@@ -368,7 +421,8 @@ int main(int argc, char *argv[])
     // General colour reset escape sequence
     char *colReset = NULL;
     // Func* for selecting which *printf-style output backend to use
-    int (*writeOutput)(char *__restrict, size_t, const char *__restrict, ...);
+    int (*writeOutput)
+        (char *__restrict, size_t, const char *__restrict, ...);
 
     // Write to stdout and disable & disable colour output
     if (noEsc)
@@ -425,7 +479,8 @@ int main(int argc, char *argv[])
             {
                 if (noFields >= MAX_FIELDS)
                 {
-                    printf("ERROR: too many fields given (max %d)\n", MAX_FIELDS);
+                    printf("ERROR: too many fields given (max %d)\n",
+                        MAX_FIELDS);
                     free(COLOUR);
                     free(fields);
                     return 1;
@@ -447,9 +502,9 @@ int main(int argc, char *argv[])
             currTok = strtok(NULL, ",");
         }
 
-        // If no-escape-codes mode, we need to string out colour palette fields
-        // since they are not supported. For good measure, we also remove any
-        // blank space padding above them.
+        // If no-escape-codes mode, we need to string out colour palette
+        // fields since they are not supported. For good measure, we also
+        // remove any blank space padding above them.
         if (noEsc)
         {
             int write = 0;
@@ -525,15 +580,20 @@ int main(int argc, char *argv[])
     if (username[0] != '\0' && hostname[0] != '\0')
     {
         if (noEsc) printShorkLine(0);
-        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent, hostname, colReset);
+        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos,
+            "%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent,
+            hostname, colReset);
         headerWidth = strlen(username) + 1 + strlen(hostname);
         if (noEsc) printShorkLine(0);
         for (size_t i = 0; i < headerWidth; i++)
-            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "-");
-        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "\n");
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "-");
+        outputPos += writeOutput(output + outputPos,
+            OUTPUT_LEN - outputPos, "\n");
     }
 
-    // Some things are dependent on others, so we have to look them up regardless
+    // Some things are dependent on others, so we have to look them up
+    // regardless
     char *os = getOS(u, uStatus);
     char *de = getDE();
     char *wm = getWM(&de);
@@ -546,14 +606,17 @@ int main(int argc, char *argv[])
         if (strcmp(fieldsProcessed[i], " ") == 0)
         {
             if (noEsc) printShorkLine(0);
-            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "\n");
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "\n");
         }
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
             if (noEsc) printShorkLine(0);
             for (size_t i = 0; i < headerWidth; i++)
-                outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "-");
-            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "\n");
+                outputPos += writeOutput(output + outputPos,
+                    OUTPUT_LEN - outputPos, "-");
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "\n");
         }
         else if (strcmp(fieldsProcessed[i], "os") == 0)
         {
@@ -563,14 +626,20 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sOS:%s       %s\n", colAccent, colReset, os);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sOS:%s       %s\n",
+                            colAccent, colReset, os);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sOS:%s  %s\n", colAccent, colReset, os);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sOS:%s  %s\n",
+                            colAccent, colReset, os);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, os);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, os);
                 }
             }
         }
@@ -583,14 +652,20 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sKernel:%s   %s\n", colAccent, colReset, kernel);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sKernel:%s   %s\n",
+                            colAccent, colReset, kernel);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sKrn:%s %s\n", colAccent, colReset, kernel);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sKrn:%s %s\n",
+                            colAccent, colReset, kernel);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, kernel);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, kernel);
                 }
             }
             free(kernel);
@@ -604,14 +679,20 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sUptime:%s   %s\n", colAccent, colReset, uptime);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sUptime:%s   %s\n",
+                            colAccent, colReset, uptime);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sUp:%s  %s\n", colAccent, colReset, uptime);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sUp:%s  %s\n",
+                            colAccent, colReset, uptime);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, uptime);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, uptime);
                 }
             }
             free(uptime);
@@ -625,14 +706,20 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sPackages:%s %s\n", colAccent, colReset, pkgs);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sPackages:%s %s\n",
+                            colAccent, colReset, pkgs);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sPkg:%s %s\n", colAccent, colReset, pkgs);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sPkg:%s %s\n",
+                            colAccent, colReset, pkgs);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, pkgs);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, pkgs);
                 }
             }
             free(pkgs);
@@ -657,28 +744,52 @@ int main(int argc, char *argv[])
                             {
                                 // No compact - no bullet - single screen
                                 if (noScreens == 1)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScreen:%s   %s\n", colAccent, colReset, screen);
-                                // No compact - no bullet - multiple screens - first screen
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sScreen:%s   %s\n", colAccent,
+                                        colReset, screen);
+                                // No compact - no bullet - multiple screens
+                                // - first screen
                                 else if (!pastFirst)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScreens:%s  %s\n", colAccent, colReset, screen);
-                                // No compact - no bullet - multiple screens - subsequent screens
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sScreens:%s  %s\n", colAccent,
+                                        colReset, screen);
+                                // No compact - no bullet - multiple screens
+                                // - subsequent screens
                                 else 
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "          %s\n", screen);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "          %s\n", screen);
                             }
                             else
                             {
-                                // Compact - no bullet - single screen OR multiple screens - first screen
+                                // Compact - no bullet - single screen OR
+                                // multiple screens - first screen
                                 if (noScreens == 1 || !pastFirst)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sScn:%s %s\n", colAccent, colReset, screen);
-                                // Compact - no bullet - multiple screens - subsequent screens
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sScn:%s %s\n", colAccent,
+                                        colReset, screen);
+                                // Compact - no bullet - multiple screens -
+                                // subsequent screens
                                 else 
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", screen);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "     %s\n", screen);
                             }
                         }
                         else
                         {
                             char icon[10] = {bullet};
-                            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, screen);
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                                colAccent, icon, colReset, screen);
                         }
                     }
 
@@ -696,14 +807,20 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDE:%s       %s\n", colAccent, colReset, de);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sDE:%s       %s\n",
+                            colAccent, colReset, de);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDE:%s  %s\n", colAccent, colReset, de);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sDE:%s  %s\n",
+                            colAccent, colReset, de);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, de);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, de);
                 }
             }
         }
@@ -723,17 +840,25 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sWM:%s       %s%s\n", colAccent, colReset, wm, server);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sWM:%s       %s%s\n",
+                            colAccent, colReset, wm, server);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sWM:%s  %s\n", colAccent, colReset, wm);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sWM:%s  %s\n",
+                            colAccent, colReset, wm);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s%s\n", colAccent, icon, colReset, wm, server);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s%s\n",
+                            colAccent, icon, colReset, wm, server);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, wm);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                            colAccent, icon, colReset, wm);
                 }
             }
         }
@@ -746,38 +871,61 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sTerminal:%s %s (%dx%d)\n", colAccent, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos,
+                            "%sTerminal:%s %s (%dx%d)\n", colAccent,
+                            colReset, trm, TERM_SIZE.ws_col,
+                            TERM_SIZE.ws_row);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sTrm:%s %s\n", colAccent, colReset, trm);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sTrm:%s %s\n",
+                            colAccent, colReset, trm);
                 }
                 else
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (%dx%d)\n", colAccent, icon, colReset, trm, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s (%dx%d)\n",
+                            colAccent, icon, colReset, trm,
+                            TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, trm);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                            colAccent, icon, colReset, trm);
                 }
             }
-            // If we don't have a terminal name, we can at least still show the
-            // console size
+            // If we don't have a terminal name, we can at least still show
+            // the console size
             else
             {
                 if (noEsc) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sConsole:%s  %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sConsole:%s  %dx%d\n",
+                            colAccent, colReset, TERM_SIZE.ws_col,
+                            TERM_SIZE.ws_row);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sCon:%s %dx%d\n", colAccent, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sCon:%s %dx%d\n",
+                            colAccent, colReset, TERM_SIZE.ws_col,
+                            TERM_SIZE.ws_row);
                 }
                 else
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %dx%d console\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos,
+                            " %s%s%s %dx%d console\n", colAccent, icon,
+                            colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %dx%dch\n", colAccent, icon, colReset, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %dx%dch\n",
+                            colAccent, icon, colReset, TERM_SIZE.ws_col,
+                            TERM_SIZE.ws_row);
                 }
             }
             free(trm);
@@ -791,14 +939,20 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sShell:%s    %s\n", colAccent, colReset, shell);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sShell:%s    %s\n",
+                            colAccent, colReset, shell);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sSh:%s  %s\n", colAccent, colReset, shell);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sSh:%s  %s\n",
+                            colAccent, colReset, shell);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, shell);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, shell);
                 }
             }
             free(shell);
@@ -814,14 +968,21 @@ int main(int argc, char *argv[])
                     if (mode == NORMAL)
                     {
                         if (!COMPACT)
-                            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sCPU:%s      %s\n", colAccent, colReset, cpuStr);
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos,
+                                "%sCPU:%s      %s\n", colAccent, colReset,
+                                cpuStr);
                         else
-                            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sCPU:%s %s\n", colAccent, colReset, cpuStr);
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos, "%sCPU:%s %s\n",
+                                colAccent, colReset, cpuStr);
                     }
                     else
                     {
                         char icon[10] = {bullet};
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, cpuStr);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                            colAccent, icon, colReset, cpuStr);
                     }
                 }
                 free(cpuStr);
@@ -846,24 +1007,44 @@ int main(int argc, char *argv[])
                             if (!COMPACT)
                             {
                                 if (noGPUs == 1)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s      %s\n", colAccent, colReset, gpuStr);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sGPU:%s      %s\n", colAccent,
+                                        colReset, gpuStr);
                                 else if (!pastFirstGPU)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sGPUs:%s     %s\n", colAccent, colReset, gpuStr);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sGPUs:%s     %s\n", colAccent,
+                                        colReset, gpuStr);
                                 else
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "          %s\n", gpuStr);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "          %s\n", gpuStr);
                             }
                             else
                             {
                                 if (noGPUs == 1 || !pastFirstGPU)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s %s\n", colAccent, colReset, gpuStr);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sGPU:%s %s\n", colAccent,
+                                        colReset, gpuStr);
                                 else
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", gpuStr);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "     %s\n", gpuStr);
                             }
                         }
                         else
                         {
                             char icon[10] = {bullet};
-                            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, gpuStr);
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                                colAccent, icon, colReset, gpuStr);
                         }
                     }
 
@@ -871,22 +1052,28 @@ int main(int argc, char *argv[])
                     pastFirstGPU = 1;
                 }
             }
-            // If we found no GPUs the "traditional" way, at least check if we received
-            // a fallback found during CPU name processing
+            // If we found no GPUs the "traditional" way, at least check if
+            // we received a fallback found during CPU name processing
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
                 if (noEsc) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s      %s\n", colAccent, colReset, gpuFromCPU);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sGPU:%s      %s\n",
+                            colAccent, colReset, gpuFromCPU);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sGPU:%s %s\n", colAccent, colReset, gpuFromCPU);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sGPU:%s %s\n",
+                            colAccent, colReset, gpuFromCPU);
                 }
                 else
                 {
                     char icon[10] = {bullet};
-                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, gpuFromCPU);
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, gpuFromCPU);
                 }
             }
             free(gpus);
@@ -900,22 +1087,31 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sRAM:%s      %s\n", colAccent, colReset, ram);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sRAM:%s      %s\n",
+                            colAccent, colReset, ram);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sRAM:%s %s\n", colAccent, colReset, ram);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sRAM:%s %s\n",
+                            colAccent, colReset, ram);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s RAM\n", colAccent, icon, colReset, ram);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s RAM\n",
+                            colAccent, icon, colReset, ram);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (R)\n", colAccent, icon, colReset, ram);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s (R)\n",
+                            colAccent, icon, colReset, ram);
                 }
             }
             free(ram);
         }
-        else if (strcmp(fieldsProcessed[i], "swap") == 0 && mi.swapTotal > 0)
+        else if (strcmp(fieldsProcessed[i], "swap") == 0 &&
+            mi.swapTotal > 0)
         {
             char *swap = getSwap(mi);
             if (swap && swap[0] != '\0')
@@ -924,17 +1120,25 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sSwap:%s     %s\n", colAccent, colReset, swap);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sSwap:%s     %s\n",
+                            colAccent, colReset, swap);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sSwp:%s %s\n", colAccent, colReset, swap);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sSwp:%s %s\n",
+                            colAccent, colReset, swap);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s swap\n", colAccent, icon, colReset, swap);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s swap\n",
+                            colAccent, icon, colReset, swap);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (S)\n", colAccent, icon, colReset, swap);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s (S)\n",
+                            colAccent, icon, colReset, swap);
                 }
             }
             free(swap);
@@ -956,31 +1160,59 @@ int main(int argc, char *argv[])
                             {
                                 // No compact - no bullet - single disk
                                 if (disks->count == 1)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDisk:%s     %s\n", colAccent, colReset, disks->disks[i]);
-                                // No compact - no bullet - multiple disks - first disk
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sDisk:%s     %s\n", colAccent,
+                                        colReset, disks->disks[i]);
+                                // No compact - no bullet - multiple disks -
+                                // first disk
                                 else if (!pastFirst)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDisks:%s    %s\n", colAccent, colReset, disks->disks[i]);
-                                // No compact - no bullet - multiple disks - subsequent disks
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sDisks:%s    %s\n", colAccent,
+                                        colReset, disks->disks[i]);
+                                // No compact - no bullet - multiple disks -
+                                // subsequent disks
                                 else 
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "          %s\n", disks->disks[i]);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "          %s\n", disks->disks[i]);
                             }
                             else
                             {
-                                // Compact - no bullet - single disks OR multiple disks - first screen
+                                // Compact - no bullet - single disks OR
+                                // multiple disks - first screen
                                 if (disks->count == 1 || !pastFirst)
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sDsk:%s %s\n", colAccent, colReset, disks->disks[i]);
-                                // Compact - no bullet - multiple disks - subsequent disks
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos,
+                                        "%sDsk:%s %s\n", colAccent,
+                                        colReset, disks->disks[i]);
+                                // Compact - no bullet - multiple disks -
+                                // subsequent disks
                                 else 
-                                    outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "     %s\n", disks->disks[i]);
+                                    outputPos += writeOutput(
+                                        output + outputPos,
+                                        OUTPUT_LEN - outputPos, "     %s\n",
+                                        disks->disks[i]);
                             }
                         }
                         else
                         {
                             char icon[10] = {bullet};
                             if (!COMPACT)
-                                outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s disk\n", colAccent, icon, colReset, disks->disks[i]);
+                                outputPos += writeOutput(output + outputPos,
+                                    OUTPUT_LEN - outputPos,
+                                    " %s%s%s %s disk\n", colAccent, icon,
+                                    colReset, disks->disks[i]);
                             else
-                                outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent, icon, colReset, disks->disks[i]);
+                                outputPos += writeOutput(output + outputPos,
+                                    OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                                    colAccent, icon, colReset,
+                                    disks->disks[i]);
                         }
                     }
                     pastFirst = 1;
@@ -997,17 +1229,25 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sRoot:%s     %s\n", colAccent, colReset, root);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sRoot:%s     %s\n",
+                            colAccent, colReset, root);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%s/:%s   %s\n", colAccent, colReset, root);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%s/:%s   %s\n",
+                            colAccent, colReset, root);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s root\n", colAccent, icon, colReset, root);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s root\n",
+                            colAccent, icon, colReset, root);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (/)\n", colAccent, icon, colReset, root);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s (/)\n",
+                            colAccent, icon, colReset, root);
                 }
             }
             free(root);
@@ -1021,17 +1261,25 @@ int main(int argc, char *argv[])
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sLocal IP:%s %s\n", colAccent, colReset, localIP);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sLocal IP:%s %s\n",
+                            colAccent, colReset, localIP);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sLoc:%s %s\n", colAccent, colReset, localIP);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sLoc:%s %s\n",
+                            colAccent, colReset, localIP);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s local\n", colAccent, icon, colReset, localIP);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s local\n",
+                            colAccent, icon, colReset, localIP);
                     else
-                        outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, " %s%s%s %s (L)\n", colAccent, icon, colReset, localIP);
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, " %s%s%s %s (L)\n",
+                            colAccent, icon, colReset, localIP);
                 }
                 free(localIP);
             }
@@ -1039,8 +1287,10 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "clrs") == 0)
         {
             ColourPalette palette = getColourPalette(SHOW_SHORK);
-            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%s\n", palette.normalCols);
-            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%s\n", palette.boldCols);
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "%s\n", palette.normalCols);
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "%s\n", palette.boldCols);
         }
     }
 
@@ -1059,13 +1309,16 @@ int main(int argc, char *argv[])
 
         WORD_WRAPPED *data = NULL;
         if (mode == BULLETS)
-            data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth, "   ", 1, 0);
+            data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
+                "   ", 1, 0);
         else
         {
             if (COMPACT)
-                data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth, "     ", 1, 0);
+                data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
+                    "     ", 1, 0);
             else
-                data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth, "          ", 1, 0);
+                data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
+                    "          ", 1, 0);
         }
 
         if (data)
@@ -1112,7 +1365,8 @@ int main(int argc, char *argv[])
     }
 
     if (saveConf)
-        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, mode, noEsc, noIP, SHOW_SHORK);
+        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, mode, noEsc, noIP,
+            SHOW_SHORK);
 
     free(COLOUR);
     free(colAccent);
