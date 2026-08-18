@@ -1458,40 +1458,37 @@ char *interpretCPU(CPU_DATA *cpu)
 #endif
 
     // x86-specific quirk fixing and customisations
-    if (cpu->arch == X86 && cpu->vendor && cpu->name && (cpu->vendor[0] != '\0' || cpu->name[0] != '\0'))
+    if (cpu->arch == X86)
     {
-        // Physical IDs don't always seem to be sequential, so may defer to our
-        // count of now many unique IDs were recorded instead of the highest
-        // value recorded.
+        // Physical IDs don't always seem to be sequential, so may defer to
+        // our count of now many unique IDs were recorded instead of the
+        // highest value recorded.
         if(cpu->physIDs.noUniquePhysIDs > 1)
             cpu->physIDs.maxPhysID = cpu->physIDs.noUniquePhysIDs;
 
-        // Check if model name lacks the vendor name and if we need to try
-        // adding it in manually
-        if ((cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u') && (cpu->name[0] != '\0' && cpu->name[0] != 'u'))
+        // Set the vendor name to a sane canonical name found in
+        // VENDOR_ALIASES
+        if (cpu->vendor && cpu->vendor[0] != '\0')
         {
-            if (!strstr(cpu->name, "Intel") && !strstr(cpu->name, "AMD") && !strstr(cpu->name, "Cyrix") && !strstr(cpu->name, "IDT") && !strstr(cpu->name, "VIA") && !strstr(cpu->name, "Transmeta"))
+            for (int i = 0; i < VENDOR_ALIASES_LEN; i++)
             {
-                char *tmp = malloc(NAME_LEN);
-                if (tmp)
+                if (strcmp(cpu->vendor, VENDOR_ALIASES[i].alias) == 0)
                 {
-                    if (strstr(cpu->vendor, "Intel") || strstr(cpu->vendor, "Iotel"))
-                        snprintf(tmp, NAME_LEN, "%s %s", "Intel", cpu->name);
-                    else if (strstr(cpu->vendor, "AMD"))
-                        snprintf(tmp, NAME_LEN, "%s %s", "AMD", cpu->name);
-                    else if (strstr(cpu->vendor, "Cyrix"))
-                        snprintf(tmp, NAME_LEN, "%s %s", "Cyrix", cpu->name);
-                    else if (strstr(cpu->vendor, "Centaur"))
-                        snprintf(tmp, NAME_LEN, "%s %s", "IDT/Centaur", cpu->name);
-                    else if (strstr(cpu->vendor, "VIA"))
-                        snprintf(tmp, NAME_LEN, "%s %s", "VIA", cpu->name);
-                    else if (strstr(cpu->vendor, "Transmeta") || strstr(cpu->vendor, "TM"))
-                        snprintf(tmp, NAME_LEN, "%s %s", "Transmeta", cpu->name);
-                    else
-                        snprintf(tmp, NAME_LEN, "%s %s", cpu->vendor, cpu->name);
-                    free(cpu->name);
-                    cpu->name = tmp;
+                    strncpy(cpu->vendor, VENDOR_ALIASES[i].canonical,
+                        VENDOR_LEN - 1);
+                    cpu->vendor[VENDOR_LEN - 1] = '\0';
+                    break;
                 }
+            }
+        }
+        else
+        {
+            char *tmp = malloc(VENDOR_LEN);
+            if (tmp)
+            {
+                snprintf(tmp, VENDOR_LEN, "unknown");
+                free(cpu->vendor);
+                cpu->vendor = tmp;
             }
         }
 
@@ -1539,8 +1536,8 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'A')
             {
-                // If we have a K6, we will try to distinguish if it's a Model
-                // 6 or Model 7
+                // If we have a K6, we will try to distinguish if it's a
+                // Model 6 or Model 7
                 if (cpu->model == 6)
                 {
                     char *tmp = malloc(NAME_LEN);
@@ -1555,7 +1552,8 @@ char *interpretCPU(CPU_DATA *cpu)
                     free(cpu->name);
                     cpu->name = tmp;
                 }
-                // Geode LX
+                // If we have a Geode LX, we replace its long but unspecific
+                // name with the correct model based on frequency
                 else if (cpu->model == 10 && cpu->name[0] == 'G')
                 {
                     char *tmp = malloc(NAME_LEN);
@@ -1597,7 +1595,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
             }
-            else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
+            else if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n')
             {
                 // Pentium OverDrives for Sockets 4 and 5 do not distinguish themselves
                 // by name from their base P5 or P54C Pentiums, but we can use
@@ -1761,7 +1759,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 else if (cpu->model == 10)
                     strncat(cpu->name, " (Barton)", NAME_LEN - strlen(cpu->name) - 1);
             }
-            else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
+            else if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n')
             {
                 // Klamath & Deschutes (OverDrive)
                 if (cpu->model == 3)
@@ -2192,7 +2190,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     }
                 }
             }
-            else if (cpu->vendor[0] == 'G' && cpu->vendor[1] == 'e')
+            else if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n')
             {
                 // Early Pentium 4s generally don't have a model number, and
                 // the later ones that do *don't* report it, so we will
@@ -2398,11 +2396,8 @@ char *interpretCPU(CPU_DATA *cpu)
                         // Tusla
                         if (cpu->cacheSize > 2048)
                             tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Tulsa)");
-                        else
-                            tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Dempsey/Tulsa)");
-
                         // Generic fallback
-                        if (!tmp)
+                        else
                             tmp = findReplace(cpu->name, NAME_LEN, "CPU", "(Dempsey/Tulsa)");
                     }
 
@@ -2440,28 +2435,30 @@ char *interpretCPU(CPU_DATA *cpu)
 
 
 
-#ifndef X86_ONLY
-
-    // If we have a vendor name, add it to the start (not for x86 since that is
-    // handled above)
-    if (cpu->arch != X86 && cpu->vendor && cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u' && !strstr(result, cpu->vendor))
+    // If we have a vendor name, add it to the start
+    if (cpu->vendor && cpu->vendor[0] != '\0' && cpu->vendor[0] != 'u' &&
+        !strstr(result, cpu->vendor))
     {
         int proceed = 1;
         // If the current result already contains an alias to a known vendor,
         // we don't need to proceed with adding another such name
         for (int i = 0; i < VENDOR_ALIASES_LEN; i++)
         {
-            if (strstr(result, VENDOR_ALIASES[i].alias) && strstr(cpu->vendor, VENDOR_ALIASES[i].canonical))
+            if (strstr(result, VENDOR_ALIASES[i].alias) ||
+                strstr(result, VENDOR_ALIASES[i].canonical))
             {
                 proceed = 0;
                 break;
             }
         }
 
+#ifndef X86_ONLY
         // For ARM with "Arm" implementer ID and a generic "ARMv..." name, don't
         // bother adding the vendor name
-        if (cpu->arch == ARM && strcmp(cpu->vendor, "Arm") == 0 && strncmp(cpu->name, "ARMv", 4) == 0)
+        if (cpu->arch == ARM && strcmp(cpu->vendor, "Arm") == 0 &&
+            strncmp(cpu->name, "ARMv", 4) == 0)
             proceed = 0;
+#endif
 
         if (proceed)
         {
@@ -2471,8 +2468,6 @@ char *interpretCPU(CPU_DATA *cpu)
             free(tmp);
         }
     }
-
-#endif
 
 
 

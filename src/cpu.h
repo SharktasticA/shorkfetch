@@ -191,7 +191,19 @@ static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) /
 
 // Known CPU vendor canonical-alias name mappings
 static const VENDOR_ALIAS VENDOR_ALIASES[] = {
-    { "HiSilicon",  "HUAWEI" }
+    { "Intel",          "GenuineIntel" },
+    { "Intel",          "GenuineIotel" },
+    { "AMD",            "AuthenticAMD" },
+    { "Cyrix",          "CyrixInstead" },
+    { "Centaur/IDT",    "CentaurHauls" },
+    { "Centaur",        "CentaurHauls" },
+    { "IDT",            "CentaurHauls" },
+    { "VIA",            "CentaurHauls" },
+    { "Transmeta",      "GenuineTMx86" },
+    { "Transmeta",      "TransmetaCPU" },
+#ifndef X86_ONLY
+    { "HiSilicon",      "HUAWEI" }
+#endif
 };
 static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) /
     sizeof(VENDOR_ALIASES[0]);

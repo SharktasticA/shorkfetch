@@ -100,7 +100,7 @@ void testGetCPU(void)
 
         if (!showRaw)
         {
-            int maxLeft = 41;
+            int maxLeft = 40;
             int maxRight = 52;
             int colWidth = maxLeft + 1 + maxRight;
 
@@ -135,7 +135,10 @@ void testGetCPU(void)
             else
                 printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", base, cpuStr);
 
-            if (cpu->arch == ARM)
+            if (cpu->arch == X86)
+                printf("    arch:               X86\n");
+#ifndef X86_ONLY
+            else if (cpu->arch == ARM)
                 printf("    arch:               ARM\n");
             else if (cpu->arch == M68K)
                 printf("    arch:               M68K\n");
@@ -145,8 +148,7 @@ void testGetCPU(void)
                 printf("    arch:               POWER\n");
             else if (cpu->arch == RISCV)
                 printf("    arch:               RISCV\n");
-            else if (cpu->arch == X86)
-                printf("    arch:               X86\n");
+#endif
             else
                 printf("    arch:               CPU_ARCH_UNKNOWN\n");
 #ifndef X86_ONLY
