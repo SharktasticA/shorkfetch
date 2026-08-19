@@ -80,12 +80,12 @@ Usage: shorkfetch [OPTIONS]
 
 ### Colours
 
-Only one colour can be used at a time. "off" will use your system's/terminal emulator's text colour.
+Only one colour can be used at a time. "off" will use your system's/terminal emulator's typical text colour.
 
     black           blue            cyan            green  
     magenta         red             white           yellow
-    grey            bold_blue       bold_cyan       bold_green
-    bold_magenta    bold_red        bold_white      bold_yellow
+    grey            bright_blue     bright_cyan     bright_green
+    bright_magenta  bright_red      bright_white    bright_yellow
     off
 
 ### Fields
@@ -112,7 +112,9 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `dsk` | Disk sizes | 1-10 |
 | `root` | Root partition size | 1 |
 | `lip` | Local IP address | 1 |
-| `clrs` | ANSI escape code 16-colour palette | 2 |
+| `clrs` | ANSI escape code base & bright 16-colour palette | 2 |
+| `clba` | ANSI escape code base 8-colour palette | 1 |
+| `clbr` | ANSI escape code bright 8-colour palette | 1 |
 
 ### Configuration
 

@@ -101,15 +101,16 @@ void showHelp(void)
 
     WORD_WRAPPED *bullet = wordWrap("-b, --bullet    Specifies a custom "
         "character to use with bullet-point mode; no assignment returns "
-        "the current character\n", TERM_SIZE.ws_col, "                ", 0,
+        "the current character and exits\n", TERM_SIZE.ws_col,
+        "                ", 0,
         0);
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);
 
     WORD_WRAPPED *colour = wordWrap("-cl, --colour   Specifies a custom "
-        "accent colour; no assignment returns the current colour\n",
-        TERM_SIZE.ws_col, "                ", 0, 0);
+        "accent colour; no assignment returns the current colour and "
+        "exits\n", TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", colour->str);
     free(colour->str);
     free(colour);
@@ -129,7 +130,7 @@ void showHelp(void)
 
     WORD_WRAPPED *fields = wordWrap("-f, --fields    Specifies a custom "
         "fields list and order; no assignment returns list of current "
-        "fields\n", TERM_SIZE.ws_col, "                ", 0, 0);
+        "fields and exits\n", TERM_SIZE.ws_col, "                ", 0, 0);
     printf("%s", fields->str);
     free(fields->str);
     free(fields);
@@ -174,17 +175,18 @@ void showHelp(void)
     free(version->str);
     free(version);
 
-    WORD_WRAPPED *colours = wordWrap("Colours: black, blue, bold_blue, "
-        "bold_cyan, bold_green, bold_magenta, bold_red, bold_white, "
-        "bold_yellow, cyan, green, grey, magenta, red, white, yellow, "
-        "off\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+    WORD_WRAPPED *colours = wordWrap("Colours: black, blue, bright_blue, "
+        "bright_cyan, bright_green, bright_magenta, bright_red, "
+        "bright_white, bright_yellow, cyan, green, grey, magenta, red, "
+        "white, yellow, off\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s", colours->str); 
     free(colours->str);
     free(colours);
 
     WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, "
-        "de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, --- "
-        "(separator), single blank space (new line)\n\n", TERM_SIZE.ws_col,
+        "de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, clba, "
+        "clbr, --- (separator), single blank space (new line)\n\n",
+        TERM_SIZE.ws_col,
         NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
@@ -224,7 +226,7 @@ int snprintfStdout(char *__restrict __s, size_t __maxlen,
 
 int main(int argc, char *argv[])
 {
-    COLOUR = strdup("bold_cyan");
+    COLOUR = strdup("bright_cyan");
     HOME =  getenv("HOME");
     TERM_SIZE = getTerminalSize();
 
@@ -510,13 +512,16 @@ int main(int argc, char *argv[])
             int write = 0;
             for (int read = 0; read < noFields; read++)
             {
-                // Skip clrs
-                if (strcmp(fieldsProcessed[read], "clrs") == 0)
+                // Skip clrs, clba or clbr
+                if (strcmp(fieldsProcessed[read], "clrs") == 0 ||
+                    strcmp(fieldsProcessed[read], "clba") == 0 ||
+                    strcmp(fieldsProcessed[read], "clbr") == 0)
                     continue;
                 // Skip space if previous ele was clrs
-                if (strcmp(fieldsProcessed[read], " ") == 0 &&
-                    read > 0 &&
-                    strcmp(fieldsProcessed[read - 1], "clrs") == 0)
+                if (strcmp(fieldsProcessed[read], " ") == 0 && read > 0 &&
+                    (strcmp(fieldsProcessed[read - 1], "clrs") == 0 ||
+                    strcmp(fieldsProcessed[read - 1], "clba") == 0 ||
+                    strcmp(fieldsProcessed[read - 1], "clbr") == 0))
                     continue;
                 // Keep ele
                 if (write != read)
@@ -1288,9 +1293,21 @@ int main(int argc, char *argv[])
         {
             ColourPalette palette = getColourPalette(SHOW_SHORK);
             outputPos += writeOutput(output + outputPos,
-                OUTPUT_LEN - outputPos, "%s\n", palette.normalCols);
+                OUTPUT_LEN - outputPos, "%s\n", palette.baseCols);
             outputPos += writeOutput(output + outputPos,
-                OUTPUT_LEN - outputPos, "%s\n", palette.boldCols);
+                OUTPUT_LEN - outputPos, "%s\n", palette.brightCols);
+        }
+        else if (strcmp(fieldsProcessed[i], "clba") == 0)
+        {
+            ColourPalette palette = getColourPalette(SHOW_SHORK);
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "%s\n", palette.baseCols);
+        }
+        else if (strcmp(fieldsProcessed[i], "clbr") == 0)
+        {
+            ColourPalette palette = getColourPalette(SHOW_SHORK);
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, "%s\n", palette.brightCols);
         }
     }
 

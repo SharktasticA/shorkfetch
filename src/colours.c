@@ -49,8 +49,9 @@ ColourPalette getColourPalette(const int showShork)
 
     if (size == 1)
     {
-        snprintf(palette.normalCols, 128,
-            "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
+        snprintf(palette.baseCols, 128,
+            "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm "
+            "\033[%sm \033[%sm \033[%sm", 
             COL_BAK_BLACK,
             COL_BAK_RED,
             COL_BAK_GREEN,
@@ -60,22 +61,24 @@ ColourPalette getColourPalette(const int showShork)
             COL_BAK_CYAN,
             COL_BAK_WHITE,
             COL_RESET);
-        snprintf(palette.boldCols, 128,
-            "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm", 
-            COL_BAK_BOLD_BLACK,
-            COL_BAK_BOLD_RED,
-            COL_BAK_BOLD_GREEN,
-            COL_BAK_BOLD_YELLOW,
-            COL_BAK_BOLD_BLUE,
-            COL_BAK_BOLD_MAGENTA,
-            COL_BAK_BOLD_CYAN,
-            COL_BAK_BOLD_WHITE,
+        snprintf(palette.brightCols, 128,
+            "\033[%sm \033[%sm \033[%sm \033[%sm \033[%sm \033[%sm "
+            "\033[%sm \033[%sm \033[%sm", 
+            COL_BAK_BRIGHT_BLACK,
+            COL_BAK_BRIGHT_RED,
+            COL_BAK_BRIGHT_GREEN,
+            COL_BAK_BRIGHT_YELLOW,
+            COL_BAK_BRIGHT_BLUE,
+            COL_BAK_BRIGHT_MAGENTA,
+            COL_BAK_BRIGHT_CYAN,
+            COL_BAK_BRIGHT_WHITE,
             COL_RESET);
     }
     else if (size == 2)
     {
-        snprintf(palette.normalCols, 128,
-            "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
+        snprintf(palette.baseCols, 128,
+            "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  "
+            "\033[%sm  \033[%sm  \033[%sm", 
             COL_BAK_BLACK,
             COL_BAK_RED,
             COL_BAK_GREEN,
@@ -85,22 +88,24 @@ ColourPalette getColourPalette(const int showShork)
             COL_BAK_CYAN,
             COL_BAK_WHITE,
             COL_RESET);
-        snprintf(palette.boldCols, 128,
-            "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm", 
-            COL_BAK_BOLD_BLACK,
-            COL_BAK_BOLD_RED,
-            COL_BAK_BOLD_GREEN,
-            COL_BAK_BOLD_YELLOW,
-            COL_BAK_BOLD_BLUE,
-            COL_BAK_BOLD_MAGENTA,
-            COL_BAK_BOLD_CYAN,
-            COL_BAK_BOLD_WHITE,
+        snprintf(palette.brightCols, 128,
+            "\033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  \033[%sm  "
+            "\033[%sm  \033[%sm  \033[%sm", 
+            COL_BAK_BRIGHT_BLACK,
+            COL_BAK_BRIGHT_RED,
+            COL_BAK_BRIGHT_GREEN,
+            COL_BAK_BRIGHT_YELLOW,
+            COL_BAK_BRIGHT_BLUE,
+            COL_BAK_BRIGHT_MAGENTA,
+            COL_BAK_BRIGHT_CYAN,
+            COL_BAK_BRIGHT_WHITE,
             COL_RESET);
     }
     else
     {
-        snprintf(palette.normalCols, 128,
-            "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
+        snprintf(palette.baseCols, 128,
+            "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   "
+            "\033[%sm   \033[%sm   \033[%sm   \033[%sm", 
             COL_BAK_BLACK,
             COL_BAK_RED,
             COL_BAK_GREEN,
@@ -110,16 +115,17 @@ ColourPalette getColourPalette(const int showShork)
             COL_BAK_CYAN,
             COL_BAK_WHITE,
             COL_RESET);
-        snprintf(palette.boldCols, 128,
-            "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm", 
-            COL_BAK_BOLD_BLACK,
-            COL_BAK_BOLD_RED,
-            COL_BAK_BOLD_GREEN,
-            COL_BAK_BOLD_YELLOW,
-            COL_BAK_BOLD_BLUE,
-            COL_BAK_BOLD_MAGENTA,
-            COL_BAK_BOLD_CYAN,
-            COL_BAK_BOLD_WHITE,
+        snprintf(palette.brightCols, 128,
+            "\033[%sm   \033[%sm   \033[%sm   \033[%sm   \033[%sm   "
+            "\033[%sm   \033[%sm   \033[%sm   \033[%sm", 
+            COL_BAK_BRIGHT_BLACK,
+            COL_BAK_BRIGHT_RED,
+            COL_BAK_BRIGHT_GREEN,
+            COL_BAK_BRIGHT_YELLOW,
+            COL_BAK_BRIGHT_BLUE,
+            COL_BAK_BRIGHT_MAGENTA,
+            COL_BAK_BRIGHT_CYAN,
+            COL_BAK_BRIGHT_WHITE,
             COL_RESET);
     }
 
@@ -139,20 +145,20 @@ char *validateColour(char *input)
         colour = strdup("\033[" COL_FOR_BLACK "m");
     else if (strcmp(input, "blue") == 0)
         colour = strdup("\033[" COL_FOR_BLUE "m");
-    else if (strcmp(input, "bold_blue") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_BLUE "m");
-    else if (strcmp(input, "bold_cyan") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_CYAN "m");
-    else if (strcmp(input, "bold_green") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_GREEN "m");
-    else if (strcmp(input, "bold_magenta") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_MAGENTA "m");
-    else if (strcmp(input, "bold_red") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_RED "m");
-    else if (strcmp(input, "bold_white") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_WHITE "m");
-    else if (strcmp(input, "bold_yellow") == 0)
-        colour = strdup("\033[" COL_FOR_BOLD_YELLOW "m");
+    else if (strcmp(input, "bright_blue") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_BLUE "m");
+    else if (strcmp(input, "bright_cyan") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_CYAN "m");
+    else if (strcmp(input, "bright_green") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_GREEN "m");
+    else if (strcmp(input, "bright_magenta") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_MAGENTA "m");
+    else if (strcmp(input, "bright_red") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_RED "m");
+    else if (strcmp(input, "bright_white") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_WHITE "m");
+    else if (strcmp(input, "bright_yellow") == 0)
+        colour = strdup("\033[" COL_FOR_BRIGHT_YELLOW "m");
     else if (strcmp(input, "cyan") == 0)
         colour = strdup("\033[" COL_FOR_CYAN "m");
     else if (strcmp(input, "green") == 0)

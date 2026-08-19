@@ -51,7 +51,9 @@ static const char *POSSIBLE_FIELDS[] =
     "dsk",  // Disk sizes
     "root", // Root partition size
     "lip",  // Local IP address
-    "clrs"  // ANSI escape code 16-colour palette
+    "clrs", // ANSI escape code 16-colour palette
+    "clba", // ANSI escape code base 8-colour palette
+    "clbr"  // ANSI escape code bright 8-colour palette
 };
 static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) /
     sizeof(POSSIBLE_FIELDS[0]);
