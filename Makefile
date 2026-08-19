@@ -3,7 +3,7 @@ AR ?= ar
 RANLIB ?= ranlib
 STRIP ?= strip
 
-CFLAGS += -I.
+CFLAGS += -Wall -Wextra -D_GNU_SOURCE -std=gnu99 -I.
 
 ifdef EMBEDDED
 	CFLAGS += -DEMBEDDED
