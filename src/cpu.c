@@ -2261,7 +2261,8 @@ char *interpretCPU(CPU_DATA *cpu)
                 // Early Pentium 4s generally don't have a model number, and
                 // the later ones that do *don't* report it, so we will
                 // distinguish them via their core name
-                if (strstr(cpu->name, "Pentium(R) 4"))
+                if (strstr(cpu->name, "Pentium(R) 4") ||
+                    strstr(cpu->name, "Celeron"))
                 {
                     char *tmp = NULL;
                     // Willamette
