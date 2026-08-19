@@ -232,10 +232,11 @@ int main(int argc, char *argv[])
 
     char bullet = '*';
 #ifndef EMBEDDED
-    char *fields = strdup("os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,ram,"
-        "swap,dsk,root,lip, ,clrs, ");
+    char *fields = strdup("---,os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,"
+        "ram,swap,dsk,root,lip, ,clrs, ");
 #else
-    char *fields = strdup("os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root, ");
+    char *fields = strdup("---,os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root,"
+        " ");
 #endif
     int noEsc = 0;
     int noIP = 0;
@@ -589,12 +590,6 @@ int main(int argc, char *argv[])
             "%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent,
             hostname, colReset);
         headerWidth = strlen(username) + 1 + strlen(hostname);
-        if (noEsc) printShorkLine(0);
-        for (size_t i = 0; i < headerWidth; i++)
-            outputPos += writeOutput(output + outputPos,
-                OUTPUT_LEN - outputPos, "-");
-        outputPos += writeOutput(output + outputPos,
-            OUTPUT_LEN - outputPos, "\n");
     }
 
     // Some things are dependent on others, so we have to look them up
