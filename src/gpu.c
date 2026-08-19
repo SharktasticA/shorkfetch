@@ -774,7 +774,7 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 
 
     // Check the PCI IDs database
-    char *pciids;
+    char *pciids = NULL;
     if (access("/usr/share/misc/pci.ids", F_OK) == 0)
         pciids = "/usr/share/misc/pci.ids";
     else if (access("/usr/share/hwdata/pci.ids", F_OK) == 0)
@@ -800,6 +800,13 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
         }
     }
     else
+    {
+        snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor,
+            gpu->device);
+        return gpuStr;
+    }
+
+    if (!pciids)
     {
         snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor,
             gpu->device);
