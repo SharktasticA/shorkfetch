@@ -1850,6 +1850,36 @@ char *interpretCPU(CPU_DATA *cpu)
                         }
                     }
                 }
+                // Tualatin
+                else if (cpu->model == 11)
+                {
+                    // Make sure "Tualatin" is in the model name to
+                    // differentiate it from other IIIs
+                    if (!strstr(cpu->name, "Tualatin"))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "III",
+                            "III (Tualatin)");
+                        if (tmp)
+                        {
+                            free(cpu->name);
+                            cpu->name = tmp;
+                        }
+                    }
+
+                    // If the cache size is 512KB, this is actually a
+                    // Pentium III-S and should be differentiated
+                    if (cpu->cacheSize == 512 &&
+                        !strstr(cpu->name, "III-S"))
+                    {
+                        char *tmp = findReplace(cpu->name, NAME_LEN, "III",
+                            "III-S");
+                        if (tmp)
+                        {
+                            free(cpu->name);
+                            cpu->name = tmp;
+                        }
+                    }
+                }
                 // Dothan
                 else if (cpu->model == 13)
                 {

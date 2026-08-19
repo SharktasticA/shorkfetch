@@ -125,6 +125,7 @@ static const char *DELETIONS[] =
     " Controller",
     " Corporation",
     " CPU",
+    " family",
     " Family",
     "Genuine ",
     " Graphics Adapter",
