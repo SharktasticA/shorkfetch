@@ -1780,6 +1780,12 @@ char *interpretCPU(CPU_DATA *cpu)
             }
             else if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n')
             {
+                // If missing, we set the core/thread count to 1 for Dothan
+                // or older to ensure multi-CPU detection works
+                if (cpu->model <= 13 && cpu->cores == -1 &&
+                    cpu->threads == -1)
+                    cpu->cores = cpu->threads = 1;
+
                 // Klamath & Deschutes (OverDrive)
                 if (cpu->model == 3)
                 {
