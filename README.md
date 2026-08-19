@@ -1,10 +1,10 @@
 # SHORKFETCH
 
-A cute shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but can be faster, and provides cleaner output and word wrapping by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but it works on other modern Linux systems just fine.
+A cute, shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! SHORKFETCH is perhaps not as feature-rich as alternatives like neofetch and fastfetch, but instead focuses on being performant, providing cleaner output, and has text wrapping by default. It is the bundled fetch utility for SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but is available for Linux systems in general.
 
-SHORKFETCH also has a focus on providing clean and accurate CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus SHORKFETCH is designed to help address this.
+In terms of "cleaner output", SHORKFETCH has a comprehensive focus on providing clean and accurate CPU and GPU name reporting, especially for older hardware, non-x86 architectures, and Intel integrated graphics. It can override a generic, verbose or inaccurate name given by the Linux kernel and the hardware itself, in favour of a name closer to what you expect, even distinguishing generations if no model number that could do so is given. 
 
-<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/86box_shork-486.png"></p>
+<p align="center"><img alt="A screenshot of SHORKFETCH running on Debian 13" src="screenshots/sharktastica-desktop_debian-13.png"></p>
 
 
 
@@ -139,6 +139,8 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 <p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on Debian 13" src="screenshots/sharktastica-desktop_debian-13_tmux.png"></p>
 
 ### SHORKFETCH on 86Box + SHORK 486
+
+<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/86box_shork-486.png"></p>
 
 <p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on SHORK 486 running inside 86Box" src="screenshots/86box_shork-486_tmux.png"></p>
 
