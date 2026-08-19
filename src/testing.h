@@ -38,29 +38,60 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    char *cpuinfos[500];
+    const int MAX_CPUINFOS = 500;
+    const int MAX_CPUINFO_PATH_LEN = 512;
+    char cpuinfos[MAX_CPUINFOS][MAX_CPUINFO_PATH_LEN];
     int count = 0;
     int showRaw = 0;
 
     struct dirent *dirEntry;
     while ((dirEntry = readdir(testingDir)) != NULL)
     {
+        if (count == MAX_CPUINFOS)
+            break;
+
+        if (dirEntry->d_type == DT_DIR)
+        {
+            if (strcmp(dirEntry->d_name, ".") == 0 || strcmp(dirEntry->d_name, "..") == 0 ||
+                strcmp(dirEntry->d_name, "excluded") == 0)
+                continue;
+
+            char subPath[280];
+            snprintf(subPath, sizeof(subPath), "cpuinfo-ds/%s", dirEntry->d_name);
+            DIR *subDir = opendir(subPath);
+            if (!subDir) continue;
+
+            struct dirent *subEntry;
+            while ((subEntry = readdir(subDir)) != NULL && count < MAX_CPUINFOS)
+            {
+                const char *ext = strrchr(subEntry->d_name, '.');
+                if (ext == NULL || strcmp(ext, ".cpuinfo") != 0)
+                    continue;
+                snprintf(cpuinfos[count++], MAX_CPUINFO_PATH_LEN, "%s/%s", dirEntry->d_name, subEntry->d_name);
+            }
+            closedir(subDir);
+            continue;
+        }
+
         const char *ext = strrchr(dirEntry->d_name, '.');
-        if (ext == NULL || strcmp(ext, ".cpuinfo") != 0) continue;
-        cpuinfos[count++] = strdup(dirEntry->d_name);
+        if (ext == NULL || strcmp(ext, ".cpuinfo") != 0)
+            continue;
+        snprintf(cpuinfos[count++], MAX_CPUINFO_PATH_LEN, "%s", dirEntry->d_name);
     }
     closedir(testingDir);
 
-    qsort(cpuinfos, count, sizeof(char *), natCmp);
+    qsort(cpuinfos, count, sizeof(cpuinfos[0]), natCmp);
     for (int i = 0; i < count; i++)
     {
-        char cpuinfo[PATH_MAX];
-        snprintf(cpuinfo, PATH_MAX, "cpuinfo-ds/%s", cpuinfos[i]);
+        char cpuinfo[MAX_CPUINFO_PATH_LEN + 11];
+        snprintf(cpuinfo, MAX_CPUINFO_PATH_LEN + 11, "cpuinfo-ds/%s", cpuinfos[i]);
 
-        char bName[256];
+        char bName[MAX_CPUINFO_PATH_LEN];
         strncpy(bName, cpuinfos[i], sizeof(bName) - 1);
         bName[sizeof(bName) - 1] = '\0';
-        char *dot = strrchr(bName, '.');
+        char *slash = strrchr(bName, '/');
+        char *base = slash ? slash + 1 : bName;
+        char *dot = strrchr(base, '.');
         if (dot) *dot = '\0';
 
         char *gpuFromCPU = NULL;
@@ -69,7 +100,7 @@ void testGetCPU(void)
 
         if (!showRaw)
         {
-            int maxLeft = 41;
+            int maxLeft = 40;
             int maxRight = 52;
             int colWidth = maxLeft + 1 + maxRight;
 
@@ -91,7 +122,7 @@ void testGetCPU(void)
             else
                 snprintf(rightSide, sizeof(rightSide), "%s", cpuStr ? cpuStr : "");
 
-            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, bName, (i + 1) % numCols == 0 || i + 1 == count ? 0 : maxRight, rightSide);
+            printf("\033[31m%-*s\033[0m \033[32m%-*s\033[0m", maxLeft, base, (i + 1) % numCols == 0 || i + 1 == count ? 0 : maxRight, rightSide);
             if ((i + 1) % numCols == 0 || i + 1 == count)
                 printf("\n");
             else
@@ -100,19 +131,42 @@ void testGetCPU(void)
         else
         {
             if (gpuFromCPU)
-                printf("\033[31m%s:\033[0m \033[32m%s\033[0m \033[36m(%s)\033[0m\n", bName, cpuStr, gpuFromCPU);
+                printf("\033[31m%s:\033[0m \033[32m%s\033[0m \033[36m(%s)\033[0m\n", base, cpuStr, gpuFromCPU);
             else
-                printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", bName, cpuStr);
+                printf("\033[31m%s:\033[0m \033[32m%s\033[0m\n", base, cpuStr);
 
-            printf("    arch:               %d\n", cpu->arch);
+            if (cpu->arch == X86)
+                printf("    arch:               X86\n");
+#ifndef X86_ONLY
+            else if (cpu->arch == ARM)
+                printf("    arch:               ARM\n");
+            else if (cpu->arch == M68K)
+                printf("    arch:               M68K\n");
+            else if (cpu->arch == MIPS)
+                printf("    arch:               MIPS\n");
+            else if (cpu->arch == POWER)
+                printf("    arch:               POWER\n");
+            else if (cpu->arch == RISCV)
+                printf("    arch:               RISCV\n");
+#endif
+            else
+                printf("    arch:               CPU_ARCH_UNKNOWN\n");
 #ifndef X86_ONLY
             printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
 #endif
             printf("    vendor:             %s\n", cpu->vendor ? cpu->vendor : "(null)");
+#ifndef X86_ONLY
+            printf("    platform:           %s\n", cpu->platform ? cpu->platform : "(null)");
+            printf("    machine:            %s\n", cpu->machine ? cpu->machine : "(null)");
+#endif
             printf("    name:               %s\n", cpu->name   ? cpu->name   : "(null)");
             printf("    family:             %d\n", cpu->family);
             printf("    model:              %d\n", cpu->model);
             printf("    stepping:           %d\n", cpu->stepping);
+#ifndef X86_ONLY
+            printf("    revisionNo:         %d\n", cpu->revisionNo);
+            printf("    revisionStr:        %s\n", cpu->revisionStr);
+#endif
             printf("    freq:               %.0f\n", cpu->freq);
             printf("    noUniquePhysIDs:    %d\n", cpu->physIDs.noUniquePhysIDs);
             printf("    maxPhysID:          %d\n", cpu->physIDs.maxPhysID);
@@ -128,6 +182,8 @@ void testGetCPU(void)
 #ifndef X86_ONLY
         free(cpu->processor);
         free(cpu->uarch);
+        free(cpu->platform);
+        free(cpu->machine);
 #endif
         free(cpu->vendor);
         free(cpu->name);

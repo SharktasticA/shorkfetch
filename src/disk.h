@@ -16,6 +16,20 @@
 #ifndef DISK
 #define DISK
 
+#define DISK_LEN    259
+#define DISKS_LEN   10
+#define ROOT_LEN    64
+
+
+
+typedef struct {
+    char disks[DISKS_LEN][DISK_LEN];
+    int count;
+} DISKS;
+
+
+
+DISKS *getDisks(void);
 char *getRoot(void);
 
 #endif

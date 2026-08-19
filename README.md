@@ -1,10 +1,10 @@
 # SHORKFETCH
 
-A cute shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! It is similar to neofetch, fastfetch, etc., a little less comprehensive and less customisable, but can be faster and provides cleaner output by default. It is primarily written for use with SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but it works on other modern Linux systems just fine.
+A cute, shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! SHORKFETCH is perhaps not as feature-rich as alternatives like neofetch and fastfetch, but instead focuses on being performant, providing cleaner output, and has text wrapping by default. It is the bundled fetch utility for SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but is available for Linux systems in general.
 
-SHORKFETCH also has a focus on providing clean and accurate CPU and GPU name reporting, especially for vintage hardware and Intel integrated graphics. Data sources available for such *can* have too generic or 'messy' names, thus SHORKFETCH is designed to help address this.
+In terms of "cleaner output", SHORKFETCH has a comprehensive focus on providing clean and accurate CPU and GPU name reporting, especially for older hardware, non-x86 architectures, and Intel integrated graphics. It can override a generic, verbose or inaccurate name given by the Linux kernel and the hardware itself, in favour of a name closer to what you expect, even distinguishing generations if no model number that could do so is given. 
 
-<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/86box_shork-486.png"></p>
+<p align="center"><img alt="A screenshot of SHORKFETCH running on Debian 13" src="screenshots/sharktastica-desktop_debian-13.png"></p>
 
 
 
@@ -70,22 +70,22 @@ Usage: shorkfetch [OPTIONS]
 * `-cl`, `--colour`: Specifies a custom accent colour; no assignment returns the current colour
 * `-co`, `--compact`: Compacts field names and field values
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields
-* `-fa`, `--force-art`: Forces the SHORK ASCII art to display no matter the setting, number of fields or terminal size
 * `-h`, `--help`: Shows help information and exits
 * `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
 * `-na`, `--no-art`: Disables the SHORK ASCII art
+* `-ne`, `--no-esc`: Disables all ANSI espace codes and colour features
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-v`, `--version`: Displays version number and exits
 
 ### Colours
 
-Only one colour can be used at a time. "off" will use your system's/terminal emulator's text colour, and doesn't use ANSI escape codes (increasing compatibility with commands that change the output colour of another such as [gay](https://github.com/ms-jpq/gay)).
+Only one colour can be used at a time. "off" will use your system's/terminal emulator's typical text colour.
 
     black           blue            cyan            green  
     magenta         red             white           yellow
-    grey            bold_blue       bold_cyan       bold_green
-    bold_magenta    bold_red        bold_white      bold_yellow
+    grey            bright_blue     bright_cyan     bright_green
+    bright_magenta  bright_red      bright_white    bright_yellow
     off
 
 ### Fields
@@ -109,9 +109,12 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `gpu` | GPU(s) | 1-4 |
 | `ram` | System memory | 1 |
 | `swap` | Swap memory | 1 |
+| `dsk` | Disk sizes | 1-10 |
 | `root` | Root partition size | 1 |
 | `lip` | Local IP address | 1 |
-| `clrs` | ANSI escape code 16-colour palette | 2 |
+| `clrs` | ANSI escape code base & bright 16-colour palette | 2 |
+| `clba` | ANSI escape code base 8-colour palette | 1 |
+| `clbr` | ANSI escape code bright 8-colour palette | 1 |
 
 ### Configuration
 
@@ -123,7 +126,9 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 ### Notes
 
-* By default, the SHORK ASCII art is automatically disabled if the terminal's width is less than 62 columns or if less than 7 fields are present. The `--force-art` parameter can be used to override this.
+#### Using with gay
+
+[gay](https://github.com/ms-jpq/gay) can be used to change the colour of stdout piped into it to a random or chosen LGBTQ+ flag. If you use it with SHORKFETCH as-is, you may notice it does not handle the ANSI escape codes SHORKFETCH uses to position its fields and construct the 16-colour palette. You can use the `-ne`/`--no-esc` option to disable all ANSI escape codes to increase compatibility with `gay` and perhaps similar commands with the same issue, though note the aforementioned colour palette will be disabled.
 
 
 
@@ -134,6 +139,8 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 <p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on Debian 13" src="screenshots/sharktastica-desktop_debian-13_tmux.png"></p>
 
 ### SHORKFETCH on 86Box + SHORK 486
+
+<p align="center"><img alt="A screenshot of SHORKFETCH running on SHORK 486" src="screenshots/86box_shork-486.png"></p>
 
 <p align="center"><img alt="A screenshot of four different SHORKFETCH configurations running on SHORK 486 running inside 86Box" src="screenshots/86box_shork-486_tmux.png"></p>
 

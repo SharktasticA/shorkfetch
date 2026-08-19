@@ -38,10 +38,13 @@ char *getLocalIP(void)
     for (currIF = ifs; currIF != NULL; currIF = currIF->ifa_next) 
     {
         // Skip if null or not IPv4
-        if (!currIF->ifa_addr || currIF->ifa_addr->sa_family != AF_INET) continue;
+        if (!currIF->ifa_addr || currIF->ifa_addr->sa_family != AF_INET)
+            continue;
 
         // Skip if down, not running, or loopback device
-        if (!(currIF->ifa_flags & IFF_UP) || !(currIF->ifa_flags & IFF_RUNNING) || (currIF->ifa_flags & IFF_LOOPBACK))
+        if (!(currIF->ifa_flags & IFF_UP) ||
+            !(currIF->ifa_flags & IFF_RUNNING) ||
+            (currIF->ifa_flags & IFF_LOOPBACK))
             continue;
 
         // Make IP human readible and in our result string

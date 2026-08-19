@@ -3,7 +3,12 @@ AR ?= ar
 RANLIB ?= ranlib
 STRIP ?= strip
 
-CFLAGS += -I.
+CFLAGS += -Wall -Wextra -D_GNU_SOURCE -std=gnu99 -I. -O3 -fomit-frame-pointer -flto -fno-plt -fmerge-all-constants -DNDEBUG
+LDFLAGS += -flto
+
+ifdef EMBEDDED
+	CFLAGS += -DEMBEDDED
+endif
 
 ifdef NO_STR_CLEANING
 	CFLAGS += -DNO_STR_CLEANING

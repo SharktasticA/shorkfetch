@@ -69,7 +69,8 @@ static const WM WINDOW_MANAGERS[] = {
     { "wayfire",        "Wayfire",          1 },
     { "weston",         "Weston",           1 },
 };
-static const int WINDOW_MANAGERS_LEN = sizeof(WINDOW_MANAGERS) / sizeof(WINDOW_MANAGERS[0]);
+static const int WINDOW_MANAGERS_LEN = sizeof(WINDOW_MANAGERS) /
+    sizeof(WINDOW_MANAGERS[0]);
 
 
 

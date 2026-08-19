@@ -26,10 +26,16 @@
 #define IGNORE_UNIQUE_PHYS_IDS  -1
 // CPU_DATA.flags string length
 #define FLAGS_LEN               1536
+// CPU_DATA.machine string length
+#define MACHINE_LEN             128
 // CPU_DATA.name string length
 #define NAME_LEN                128
+// CPU_DATA.platform string length
+#define PLATFORM_LEN            128
 // CPU_DATA.processor string length
 #define PROCESSOR_LEN           128
+// CPU_DATA.revisionStr string length
+#define REVISION_STR_LEN        128
 // CPU_DATA.uarch string length
 #define UARCH_LEN               128
 // PHYS_IDS.uniquePhysIDs array size
@@ -42,7 +48,7 @@
 // The CPU architectures supported by SHORKFETCH
 typedef enum
 {
-    UNKNOWN = 0,
+    CPU_ARCH_UNKNOWN,
 #ifndef X86_ONLY
     ARM,
     M68K,
@@ -52,6 +58,24 @@ typedef enum
 #endif
     X86
 } CPU_ARCH;
+
+#ifndef X86_ONLY
+
+// PowerPC generation
+typedef enum
+{
+    PPC_GEN_UNKNOWN = 0,
+    // PowerPC 6xx
+    PPC_6XX = 1,
+    // PowerPC 7xx/G3
+    PPC_7XX = 3,
+    // PowerPC 74xx/G4
+    PPC_74XX = 4,
+    // PowerPC 9xx/G5
+    PPC_9XX = 5
+} PPC_GEN;
+
+#endif
 
 
 
@@ -74,8 +98,12 @@ typedef struct {
     char *processor;
     // Micro architecture (ARM, RISC-V)
     char *uarch;
+    // Platform name (POWER)
+    char *platform;
+    // Machine name (POWER)
+    char *machine;
 #endif
-    // Vendor name (ARM, x86)
+    // Vendor name (ARM, POWER, x86)
     char *vendor;
     // Model or architecture name (all)
     char *name;
@@ -85,6 +113,12 @@ typedef struct {
     int model;
     // Stepping number (x86)
     int stepping;
+#ifndef X86_ONLY
+    // Revision number (ARM)
+    int revisionNo;
+    // Revision string (POWER)
+    char *revisionStr;
+#endif
     // Clock frequency in MHz (m68k, POWER, some RISC-V, x86)
     float freq;
     // Processor index count (some ARM, POWER, some RISC-V, x86)
@@ -115,29 +149,7 @@ typedef struct {
 
 #ifndef X86_ONLY
 
-// Hardcoded ARM CPU implementer values to allow basic ARM CPU vendor
-// identification
-static const char *ARM_IMPLEMENTERS[193] = {
-    [0x00] = "Reserved",
-    [0x41] = "Arm",
-    [0x42] = "Broadcom",
-    [0x43] = "Cavium",
-    [0x44] = "DEC",
-    [0x46] = "Fujitsu",
-    [0x48] = "HiSilicon",
-    [0x49] = "Infineon",
-    [0x4D] = "Motorola/Freescale",
-    [0x4E] = "NVIDIA",
-    [0x50] = "AMCC/Ampere",
-    [0x51] = "Qualcomm",
-    [0x56] = "Marvell",
-    [0x61] = "Apple",
-    [0x66] = "Faraday",
-    [0x69] = "Intel",
-    [0x6D] = "Microsoft",
-    [0x70] = "Phytium",
-    [0xC0] = "Ampere"
-};
+extern const char *ARM_IMPLEMENTERS[];
 
 #endif
 
@@ -150,20 +162,34 @@ static const char *GPU_FROM_CPU_NEEDLES[] = {
     "w/ Radeon",
     " RADEON",
 };
-static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) / sizeof(GPU_FROM_CPU_NEEDLES[0]);
+static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) /
+    sizeof(GPU_FROM_CPU_NEEDLES[0]);
 
 #endif
 
 // Known CPU vendor canonical-alias name mappings
 static const VENDOR_ALIAS VENDOR_ALIASES[] = {
-    { "HiSilicon",  "HUAWEI" }
+    { "Intel",          "GenuineIntel" },
+    { "Intel",          "GenuineIotel" },
+    { "AMD",            "AuthenticAMD" },
+    { "Cyrix",          "CyrixInstead" },
+    { "Centaur/IDT",    "CentaurHauls" },
+    { "Centaur",        "CentaurHauls" },
+    { "IDT",            "CentaurHauls" },
+    { "VIA",            "CentaurHauls" },
+    { "Transmeta",      "GenuineTMx86" },
+    { "Transmeta",      "TransmetaCPU" },
+#ifndef X86_ONLY
+    { "HiSilicon",      "HUAWEI" }
+#endif
 };
-static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) / sizeof(VENDOR_ALIASES[0]);
+static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) /
+    sizeof(VENDOR_ALIASES[0]);
 
 
 
-char *cleanCPUName(const char *, size_t);
-CPU_DATA *getCPU(char *, char **);
+char *cleanCPUName(const CPU_ARCH, const char*, int);
+CPU_DATA *getCPU(char*, char**);
 int hasFlag(const CPU_DATA*, const char*);
 char *interpretCPU(CPU_DATA*);
 

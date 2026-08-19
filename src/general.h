@@ -24,24 +24,37 @@
 typedef struct {
     int pid;
     char name[256];
-} Process;
+} PROCESS;
+
+typedef struct
+{
+    char *str;
+    int len;
+    int lines;
+} WORD_WRAPPED;
 
 
 
+#define BREAK_CHARS_LEN     9
 #define TASK_COMM_LEN       24
 
 
 
+// What characters general functions like wordWrap can use as places to make
+// a soft wrap
+static const char BREAK_CHARS[BREAK_CHARS_LEN] = { " _-+,./\\" };
+
+
+
 char *bytesToReadable(const char *, const long long);
-char *captureProgramOutput(const char *, const size_t);
-char *extractFromPoint(char *, size_t, char, int);
+char *captureProgramOutput(const char *, const int);
+char *extractFromPoint(char *, int, char);
 int fileExists(const char*);
-char *findErase(const char *, const size_t, const char *);
-char *findReplace(const char *, const size_t, const char *, const char *);
-int formatNewLines(char *, int, char *, int);
+char *findErase(const char *, const int, const char *);
+char *findReplace(const char *, const int, const char *, const char *);
 float fSqrt(float);
 char *getBinDir(void);
-Process getParentProcess(int);
+PROCESS getParentProcess(int);
 struct winsize getTerminalSize(void);
 int isFileExecutable(char*, struct dirent*);
 int isNumeric(const char*, const int);
@@ -52,7 +65,8 @@ int loadCSVLine(char*, char *[], int);
 int natCmp(const void*, const void*);
 int procExists(const char*, const int);
 int readHexFile(const char*);
-char *removeBrackets(const char*, const size_t);
+char *removeBrackets(const char*, const int);
 void splitText(char*, char*[], int);
+WORD_WRAPPED *wordWrap(char*, int, char*, int, int);
 
 #endif

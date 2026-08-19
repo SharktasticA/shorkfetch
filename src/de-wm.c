@@ -23,7 +23,8 @@
 
 
 /**
- * @return String containing the active display environment's name; NULL if not found/applicable
+ * @return String containing the active display environment's name; NULL if
+ *         not found/applicable
  */
 char *getDE(void)
 {
@@ -75,7 +76,8 @@ char *getDE(void)
 
 /**
  * @param de Desktop enivornment's name
- * @return String containing the active window manager's name; NULL if not found/applicable
+ * @return String containing the active window manager's name; NULL if not
+ *         found/applicable
  */
 char *getWM(char **de)
 {
@@ -83,13 +85,13 @@ char *getWM(char **de)
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
 
-    // Cinnamon's WM (Muffin) is internal, we have to assume instead of look for
-    // the process
+    // Cinnamon's WM (Muffin) is internal, we have to assume instead of look
+    // for the process
     if (de && *de && strstr(*de, "Cinnamon") != NULL)
         return strdup("Muffin");
 
     // Run through our WM database
-    for (size_t i = 0; i < WINDOW_MANAGERS_LEN; i++)
+    for (int i = 0; i < WINDOW_MANAGERS_LEN; i++)
     {
         if (procExists(WINDOW_MANAGERS[i].cmd, 0))
         {
@@ -99,11 +101,11 @@ char *getWM(char **de)
                 // Convert both subjects to all caps for a case-insensitive 
                 // comparison
                 char *deCaps = strdup(*de);
-                    for (size_t j = 0; deCaps[j]; j++)
+                    for (int j = 0; deCaps[j]; j++)
                         if (deCaps[j] >= 'a' && deCaps[j] <= 'z')
                             deCaps[j] -= 32;
                 char *wmCaps = strdup(WINDOW_MANAGERS[i].name);
-                for (size_t j = 0; wmCaps[j]; j++)
+                for (int j = 0; wmCaps[j]; j++)
                     if (wmCaps[j] >= 'a' && wmCaps[j] <= 'z')
                         wmCaps[j] -= 32;
 
@@ -124,8 +126,8 @@ char *getWM(char **de)
         }
     }
 
-    // If we haven't found a WM but we have a DE, there's a good chance DE/WM
-    // are one and the same
+    // If we haven't found a WM but we have a DE, there's a good chance DE/
+    // WM are one and the same
     if (de && *de)
         return *de;
 

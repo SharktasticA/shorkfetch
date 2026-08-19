@@ -2,8 +2,8 @@
     ######################################################
     ##            SHORK UTILITY - SHORKFETCH            ##
     ######################################################
-    ## Functions and data relating to handle the        ##
-    ## operating system's name                          ##
+    ## Functions and data relating to handle the Linux  ##
+    ## kernel version                                   ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################

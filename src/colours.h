@@ -16,22 +16,22 @@
 #define COLOURS
 
 typedef struct {
-    char normalCols[128];
-    char boldCols[128];
+    char baseCols[128];
+    char brightCols[128];
 } ColourPalette;
 
 
 
 #define COL_BAK_BLACK           "40"
 #define COL_BAK_BLUE            "44"
-#define COL_BAK_BOLD_BLACK      "100"
-#define COL_BAK_BOLD_RED        "101"
-#define COL_BAK_BOLD_GREEN      "102"
-#define COL_BAK_BOLD_YELLOW     "103"
-#define COL_BAK_BOLD_BLUE       "104"
-#define COL_BAK_BOLD_MAGENTA    "105"
-#define COL_BAK_BOLD_CYAN       "106"
-#define COL_BAK_BOLD_WHITE      "107"
+#define COL_BAK_BRIGHT_BLACK    "100"
+#define COL_BAK_BRIGHT_RED      "101"
+#define COL_BAK_BRIGHT_GREEN    "102"
+#define COL_BAK_BRIGHT_YELLOW   "103"
+#define COL_BAK_BRIGHT_BLUE     "104"
+#define COL_BAK_BRIGHT_MAGENTA  "105"
+#define COL_BAK_BRIGHT_CYAN     "106"
+#define COL_BAK_BRIGHT_WHITE    "107"
 #define COL_BAK_CYAN            "46"
 #define COL_BAK_GREEN           "42"
 #define COL_BAK_GREY            "40"
@@ -42,13 +42,13 @@ typedef struct {
 
 #define COL_FOR_BLACK           "0;30"
 #define COL_FOR_BLUE            "0;34"
-#define COL_FOR_BOLD_BLUE       "1;34"
-#define COL_FOR_BOLD_CYAN       "1;36"
-#define COL_FOR_BOLD_GREEN      "1;32"
-#define COL_FOR_BOLD_MAGENTA    "1;35"
-#define COL_FOR_BOLD_RED        "1;31"
-#define COL_FOR_BOLD_WHITE      "1;37"
-#define COL_FOR_BOLD_YELLOW     "1;33"
+#define COL_FOR_BRIGHT_BLUE     "1;34"
+#define COL_FOR_BRIGHT_CYAN     "1;36"
+#define COL_FOR_BRIGHT_GREEN    "1;32"
+#define COL_FOR_BRIGHT_MAGENTA  "1;35"
+#define COL_FOR_BRIGHT_RED      "1;31"
+#define COL_FOR_BRIGHT_WHITE    "1;37"
+#define COL_FOR_BRIGHT_YELLOW   "1;33"
 #define COL_FOR_CYAN            "0;36"
 #define COL_FOR_GREEN           "0;32"
 #define COL_FOR_GREY            "1;30"
@@ -61,7 +61,7 @@ typedef struct {
 
 
 
-ColourPalette getColourPalette(void);
+ColourPalette getColourPalette(const int);
 char *validateColour(char*);
 
 #endif

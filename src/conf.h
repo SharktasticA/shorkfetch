@@ -13,11 +13,15 @@
 
 
 
-#ifndef SHORKCONF
-#define SHORKCONF
+#ifndef CONF
+#define CONF
+
+#include "globals.h"
+
+
 
 int deleteConf(void);
-void readConf(char*, char**, int*, char**, int*, VIEW_MODE*, int*, int*);
-void writeConf(char, char*, int, char*, int, VIEW_MODE, int, int);
+void readConf(char*, char**, int*, char**, VIEW_MODE*, int*, int*, int*);
+void writeConf(char, char*, int, char*, VIEW_MODE, int, int, int);
 
 #endif

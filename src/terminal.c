@@ -26,7 +26,8 @@
 
 
 /**
- * @return String containing the host terminal emulator's name; NULL if not found/applicable
+ * @return String containing the host terminal emulator's name; NULL if not
+ *         found/applicable
  */
 char *getTerminal(void)
 {
@@ -44,13 +45,14 @@ char *getTerminal(void)
     // Try looking through our parent processes to get the name
     if (!terminal)
     {
-        Process process = getParentProcess(getpid());
+        PROCESS process = getParentProcess(getpid());
         while (process.pid > 1)
         {
             // Flags if we must not use this process as our terminal
             int notTerminal = 0;
 
-            // We must skip wrappers like doas, su or sudo, and possible shells
+            // We must skip wrappers like doas, su or sudo, and possible
+            // shells
             for (int i = 0; i < EXCLUDED_TERMINAL_PROCS_LEN; i++)
             {
                 if (strcmp(process.name, EXCLUDED_TERMINAL_PROCS[i]) == 0)
@@ -63,7 +65,7 @@ char *getTerminal(void)
             // We must also skip shell script parents
             if (!notTerminal)
             {
-                size_t len = strlen(process.name);
+                int len = strlen(process.name);
                 if (len > 3 && strcmp(process.name + len - 3, ".sh") == 0)
                     notTerminal = 1;
             }
@@ -88,7 +90,7 @@ char *getTerminal(void)
             if (COMPACT) terminal = strdup(TERM);
             else
             {
-                size_t termLen = strlen(TERM) + 11 + 1;
+                int termLen = strlen(TERM) + 11 + 1;
                 terminal = malloc(termLen);
                 if (terminal)
                     snprintf(terminal, termLen, "%s compatible", TERM);
@@ -99,14 +101,15 @@ char *getTerminal(void)
     // Do some cleaning if needed
     if (terminal)
     {
-        size_t terminalLen = strlen(terminal);
+        int terminalLen = strlen(terminal);
 
         // Remove trailing hyphen from "gnome-terminal-" (etc.)
         if (terminalLen > 0 && terminal[terminalLen - 1] == '-')
             terminal[terminalLen - 1] = '\0';
 
         // Remove "agent" from "ptyxis-agent"
-        if (terminalLen > 6 && terminal[6] == '-' && strncmp(terminal, "ptyxis", 6) == 0)
+        if (terminalLen > 6 && terminal[6] == '-' &&
+            strncmp(terminal, "ptyxis", 6) == 0)
             terminal[6] = '\0';
     }
 
