@@ -52,7 +52,7 @@ char *getPackages(const char *os)
     if (dpkgStatus)
     {
         const char *needle = "Status: install ok installed";
-        size_t needleLen = strlen(needle);
+        int needleLen = strlen(needle);
         char buffer[512];
         while (fgets(buffer, 512, dpkgStatus))
             if (strncmp(buffer, needle, needleLen) == 0)
@@ -112,7 +112,7 @@ char *getPackages(const char *os)
             DIR *flatpakDir = opendir(flatpakDirs[i]);
             if (!flatpakDir)
                 continue;
-            size_t currFlatpakDirLen = strlen(flatpakDirs[i]);
+            int currFlatpakDirLen = strlen(flatpakDirs[i]);
 
             // Enter arch
             struct dirent *nameEntry;
@@ -167,7 +167,7 @@ char *getPackages(const char *os)
 
                         // flatpak list seems to skip .Locale, so we do so
                         // to match its output
-                        size_t nameLen = strlen(nameEntry->d_name);
+                        int nameLen = strlen(nameEntry->d_name);
                         if (nameLen > 7 &&
                             strcmp(nameEntry->d_name + nameLen - 7,
                                 ".Locale") == 0)
@@ -219,7 +219,7 @@ char *getPackages(const char *os)
         COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
 
     // Make sure we don't start with ", " or ":"...
-    size_t pkgsLen = strlen(pkgs);
+    int pkgsLen = strlen(pkgs);
     if (pkgsLen > 2)
     {
         if (COMPACT && pkgs[0] == ':')

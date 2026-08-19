@@ -149,29 +149,7 @@ typedef struct {
 
 #ifndef X86_ONLY
 
-// Hardcoded ARM CPU implementer values to allow basic ARM CPU vendor
-// identification
-static const char *ARM_IMPLEMENTERS[193] = {
-    [0x00] = "Reserved",
-    [0x41] = "Arm",
-    [0x42] = "Broadcom",
-    [0x43] = "Cavium",
-    [0x44] = "DEC",
-    [0x46] = "Fujitsu",
-    [0x48] = "HiSilicon",
-    [0x49] = "Infineon",
-    [0x4D] = "Motorola/Freescale",
-    [0x4E] = "NVIDIA",
-    [0x50] = "AMCC/Ampere",
-    [0x51] = "Qualcomm",
-    [0x56] = "Marvell",
-    [0x61] = "Apple",
-    [0x66] = "Faraday",
-    [0x69] = "Intel",
-    [0x6D] = "Microsoft",
-    [0x70] = "Phytium",
-    [0xC0] = "Ampere"
-};
+extern const char *ARM_IMPLEMENTERS[];
 
 #endif
 
@@ -210,7 +188,7 @@ static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) /
 
 
 
-char *cleanCPUName(const CPU_ARCH, const char*, size_t);
+char *cleanCPUName(const CPU_ARCH, const char*, int);
 CPU_DATA *getCPU(char*, char**);
 int hasFlag(const CPU_DATA*, const char*);
 char *interpretCPU(CPU_DATA*);

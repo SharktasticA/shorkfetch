@@ -91,7 +91,7 @@ char *getWM(char **de)
         return strdup("Muffin");
 
     // Run through our WM database
-    for (size_t i = 0; i < WINDOW_MANAGERS_LEN; i++)
+    for (int i = 0; i < WINDOW_MANAGERS_LEN; i++)
     {
         if (procExists(WINDOW_MANAGERS[i].cmd, 0))
         {
@@ -101,11 +101,11 @@ char *getWM(char **de)
                 // Convert both subjects to all caps for a case-insensitive 
                 // comparison
                 char *deCaps = strdup(*de);
-                    for (size_t j = 0; deCaps[j]; j++)
+                    for (int j = 0; deCaps[j]; j++)
                         if (deCaps[j] >= 'a' && deCaps[j] <= 'z')
                             deCaps[j] -= 32;
                 char *wmCaps = strdup(WINDOW_MANAGERS[i].name);
-                for (size_t j = 0; wmCaps[j]; j++)
+                for (int j = 0; wmCaps[j]; j++)
                     if (wmCaps[j] >= 'a' && wmCaps[j] <= 'z')
                         wmCaps[j] -= 32;
 

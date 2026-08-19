@@ -29,7 +29,7 @@ typedef struct {
 typedef struct
 {
     char *str;
-    size_t len;
+    int len;
     int lines;
 } WORD_WRAPPED;
 
@@ -47,11 +47,11 @@ static const char BREAK_CHARS[BREAK_CHARS_LEN] = { " _-+,./\\" };
 
 
 char *bytesToReadable(const char *, const long long);
-char *captureProgramOutput(const char *, const size_t);
-char *extractFromPoint(char *, size_t, char);
+char *captureProgramOutput(const char *, const int);
+char *extractFromPoint(char *, int, char);
 int fileExists(const char*);
-char *findErase(const char *, const size_t, const char *);
-char *findReplace(const char *, const size_t, const char *, const char *);
+char *findErase(const char *, const int, const char *);
+char *findReplace(const char *, const int, const char *, const char *);
 float fSqrt(float);
 char *getBinDir(void);
 PROCESS getParentProcess(int);
@@ -65,7 +65,7 @@ int loadCSVLine(char*, char *[], int);
 int natCmp(const void*, const void*);
 int procExists(const char*, const int);
 int readHexFile(const char*);
-char *removeBrackets(const char*, const size_t);
+char *removeBrackets(const char*, const int);
 void splitText(char*, char*[], int);
 WORD_WRAPPED *wordWrap(char*, int, char*, int, int);
 

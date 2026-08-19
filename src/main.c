@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
             fields = strdup(equalsNeedle);
 
             // Remove trailing comma if present
-            size_t len = strlen(fields);
+            int len = strlen(fields);
             if (len > 0 && fields[len - 1] == ',')
                 fields[len - 1] = '\0';
         }
@@ -577,12 +577,12 @@ int main(int argc, char *argv[])
 
     // Output buffer
     char output[OUTPUT_LEN];
-    size_t outputPos = 0;
+    int outputPos = 0;
 
     // Print header
     char *username = getUsername();
     char *hostname = getHostname(u, uStatus);
-    size_t headerWidth = 12;
+    int headerWidth = 12;
     if (username[0] != '\0' && hostname[0] != '\0')
     {
         if (noEsc) printShorkLine(0);
@@ -612,7 +612,7 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
             if (noEsc) printShorkLine(0);
-            for (size_t i = 0; i < headerWidth; i++)
+            for (int i = 0; i < headerWidth; i++)
                 outputPos += writeOutput(output + outputPos,
                     OUTPUT_LEN - outputPos, "-");
             outputPos += writeOutput(output + outputPos,
@@ -1341,7 +1341,7 @@ int main(int argc, char *argv[])
                 printf("\033[%dC", shorkWidth);
             }
 
-            for (size_t i = 0; i < data->len; i++)
+            for (int i = 0; i < data->len; i++)
             {
                 putchar(data->str[i]);
                 if (SHOW_SHORK)

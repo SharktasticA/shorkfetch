@@ -65,7 +65,7 @@ char *getTerminal(void)
             // We must also skip shell script parents
             if (!notTerminal)
             {
-                size_t len = strlen(process.name);
+                int len = strlen(process.name);
                 if (len > 3 && strcmp(process.name + len - 3, ".sh") == 0)
                     notTerminal = 1;
             }
@@ -90,7 +90,7 @@ char *getTerminal(void)
             if (COMPACT) terminal = strdup(TERM);
             else
             {
-                size_t termLen = strlen(TERM) + 11 + 1;
+                int termLen = strlen(TERM) + 11 + 1;
                 terminal = malloc(termLen);
                 if (terminal)
                     snprintf(terminal, termLen, "%s compatible", TERM);
@@ -101,7 +101,7 @@ char *getTerminal(void)
     // Do some cleaning if needed
     if (terminal)
     {
-        size_t terminalLen = strlen(terminal);
+        int terminalLen = strlen(terminal);
 
         // Remove trailing hyphen from "gnome-terminal-" (etc.)
         if (terminalLen > 0 && terminal[terminalLen - 1] == '-')

@@ -139,7 +139,7 @@ char *bytesToReadable(const char *from, const long long val)
  * @param bufferSize The maximum string size
  * @return char* Captured program output as string
  */
-char *captureProgramOutput(const char *command, const size_t bufferSize)
+char *captureProgramOutput(const char *command, const int bufferSize)
 {
     FILE* stream = popen(command, "r");
     if (!stream)
@@ -152,15 +152,15 @@ char *captureProgramOutput(const char *command, const size_t bufferSize)
         return NULL;
     }
 
-    size_t len = 0;
-    size_t chunkSize = 256;
+    int len = 0;
+    int chunkSize = 256;
     char tmp[256];
 
     while (len < bufferSize - 1)
     {
-        size_t toRead = (bufferSize - 1 - len < chunkSize) ? bufferSize - 1 - len : chunkSize;
+        int toRead = (bufferSize - 1 - len < chunkSize) ? bufferSize - 1 - len : chunkSize;
 
-        size_t bytesRead = fread(tmp, 1, toRead, stream);
+        int bytesRead = fread(tmp, 1, toRead, stream);
         if (bytesRead == 0)
             break;
 
@@ -183,7 +183,7 @@ char *captureProgramOutput(const char *command, const size_t bufferSize)
  * @param inputSize Size to use when allocating the result string
  * @return String containing what's left after separation and cleaning
  */
-char *extractFromPoint(char *input, size_t inputSize, char point)
+char *extractFromPoint(char *input, int inputSize, char point)
 {
     if (!input || inputSize < 2) return strdup("");
 
@@ -207,7 +207,7 @@ char *extractFromPoint(char *input, size_t inputSize, char point)
     // Copy everything after the start position into our result
     strncpy(result, start, inputSize - 1);
     result[inputSize - 1] = '\0';
-    size_t len = strlen(result);
+    int len = strlen(result);
 
     // Trim potential trailing newline 
     if (len > 0 && result[len - 1] == '\n')
@@ -243,11 +243,11 @@ int fileExists(const char *file)
  * @param needle Substring to find and erase
  * @return String containing what's left after erasing
  */
-char *findErase(const char *input, const size_t inputSize, const char *needle)
+char *findErase(const char *input, const int inputSize, const char *needle)
 {
     if (!input || !needle || inputSize < 2) return strdup("");
 
-    size_t needleLen = strlen(needle);
+    int needleLen = strlen(needle);
     if (needleLen == 0) return strdup("");
 
     // Prepare result string
@@ -263,7 +263,7 @@ char *findErase(const char *input, const size_t inputSize, const char *needle)
     char *pos = result;
     while ((pos = strstr(pos, needle)) != NULL)
     {
-        size_t tailLen = strlen(pos + needleLen);
+        int tailLen = strlen(pos + needleLen);
         memmove(pos, pos + needleLen, tailLen + 1);
     }
 
@@ -279,13 +279,13 @@ char *findErase(const char *input, const size_t inputSize, const char *needle)
  * @param replacement New string to insert
  * @return String after term replacement
  */
-char *findReplace(const char *input, const size_t inputSize, const char *needle, const char *replacement)
+char *findReplace(const char *input, const int inputSize, const char *needle, const char *replacement)
 {
     if (!input || !needle || !replacement || inputSize < 2) 
         return strdup("");
 
-    size_t needleLen = strlen(needle);
-    size_t replacementLen = strlen(replacement);
+    int needleLen = strlen(needle);
+    int replacementLen = strlen(replacement);
     if (needleLen == 0)
         return strdup("");
 
@@ -301,24 +301,24 @@ char *findReplace(const char *input, const size_t inputSize, const char *needle,
     char *pos = result;
     while ((pos = strstr(pos, needle)) != NULL)
     {
-        size_t tailLen = strlen(pos + needleLen);
+        int tailLen = strlen(pos + needleLen);
 
-        // If replacement is larger than our needle, realloc memory to avoid overflowing
         if (replacementLen > needleLen)
         {
-            size_t currentLen = strlen(result);
-            size_t newLen = currentLen + (replacementLen - needleLen) + 1;
+            int currentLen = strlen(result);
+            int newLen = currentLen + (replacementLen - needleLen) + 1;
             if (newLen < inputSize)
                 newLen = inputSize;
+            int offset = pos - result;
             char *tmp = realloc(result, newLen);
             if (!tmp)
                 break;
-            pos = tmp + (pos - result);
             result = tmp;
+            pos = result + offset;
         }
 
-        // Move the trailing text to accomodate the new size and paste our replacement into
-        // the 'gap'
+        // Move the trailing text to accomodate the new size and paste our
+        // replacement into the 'gap'
         memmove(pos + replacementLen, pos + needleLen, tailLen + 1);
         memcpy(pos, replacement, replacementLen);
         pos += replacementLen;
@@ -364,7 +364,7 @@ char *getBinDir(void)
 {
     // Get binary's full path
     static char binDir[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", binDir, sizeof(binDir) - 1);
+    int len = readlink("/proc/self/exe", binDir, sizeof(binDir) - 1);
     if (len <= 0) return NULL;
     binDir[len] = '\0';
 
@@ -734,16 +734,16 @@ int readHexFile(const char *path)
  * @param inputSize Size to use when allocating the result string
  * @return Result string after operation
  */
-char *removeBrackets(const char *input, const size_t inputSize)
+char *removeBrackets(const char *input, const int inputSize)
 {
     if (!input)
         return NULL;
 
     // In case the input size happens to be too small...
-    size_t inputLen = strlen(input);
+    int inputLen = strlen(input);
     if (inputLen == 0)
         return NULL;
-    size_t allocSize = inputSize;
+    int allocSize = inputSize;
     if (allocSize < inputLen + 1)
         allocSize = inputLen + 1;
 
@@ -823,8 +823,8 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
         return NULL;
     
     // Initialse variables that help us track progress
-    size_t inputStrLen = strlen(input);
-    size_t indentLen = indent ? strlen(indent) : 0;
+    int inputStrLen = strlen(input);
+    int indentLen = indent ? strlen(indent) : 0;
     // Count of lines found in the ouptu
     int lines = 1;
     // Index of the most recent breakable character
@@ -835,7 +835,7 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
     int widthCount = 1;
 
     // Allocate a buffer for the result string that we can grow if needed
-    size_t capacity = inputStrLen + 1;
+    int capacity = inputStrLen + 1;
     char *result = malloc(capacity);
     if (!result)
         return NULL;
@@ -903,10 +903,10 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
                     int insertAt = (lastBreakPos != -1) ? lastBreakPos + 1 : i;
 
                     // Make sure there is room for new newline char
-                    size_t needed = inputStrLen + 1 + 1;
+                    int needed = inputStrLen + 1 + 1;
                     if (needed > capacity)
                     {
-                        size_t newCapacity = capacity ? capacity * 2 : 16;
+                        int newCapacity = capacity ? capacity * 2 : 16;
                         while (newCapacity < needed)
                             newCapacity *= 2;
 
@@ -928,12 +928,12 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
                 // If indent is desired, time to add that to the start of the line
                 if (indent && indentLen > 0)
                 {
-                    size_t needed2 = inputStrLen + indentLen + 1;
+                    int needed2 = inputStrLen + indentLen + 1;
                     if (needed2 > capacity)
                     {
                         // Make sure there is room for the extra length needed for
                         // inserting an indent
-                        size_t newCapacity = capacity ? capacity * 2 : 16;
+                        int newCapacity = capacity ? capacity * 2 : 16;
                         while (newCapacity < needed2)
                             newCapacity *= 2;
 

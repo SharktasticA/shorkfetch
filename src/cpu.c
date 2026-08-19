@@ -34,6 +34,36 @@
 
 
 
+#ifndef X86_ONLY
+
+// Hardcoded ARM CPU implementer values to allow basic ARM CPU vendor
+// identification
+const char *ARM_IMPLEMENTERS[193] = {
+    [0x00] = "Reserved",
+    [0x41] = "Arm",
+    [0x42] = "Broadcom",
+    [0x43] = "Cavium",
+    [0x44] = "DEC",
+    [0x46] = "Fujitsu",
+    [0x48] = "HiSilicon",
+    [0x49] = "Infineon",
+    [0x4D] = "Motorola/Freescale",
+    [0x4E] = "NVIDIA",
+    [0x50] = "AMCC/Ampere",
+    [0x51] = "Qualcomm",
+    [0x56] = "Marvell",
+    [0x61] = "Apple",
+    [0x66] = "Faraday",
+    [0x69] = "Intel",
+    [0x6D] = "Microsoft",
+    [0x70] = "Phytium",
+    [0xC0] = "Ampere"
+};
+
+#endif
+
+
+
 #ifndef NO_STR_CLEANING
 
 /**
@@ -43,7 +73,7 @@
  * @param inputSize Size to use when allocating the result string
  * @return String containing the result after cleaning
  */
-char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
+char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
 {
     if (!input || inputSize < 2)
         return strdup("");
@@ -56,7 +86,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
     // Copy input string to result
     strncpy(result, input, inputSize - 1);
     result[inputSize - 1] = '\0';
-    size_t strLen  = strlen(result);
+    int strLen  = strlen(result);
 
     // Collapse multiple contiguous spaces or tabs
     char *src = result, *dst = result;
@@ -84,7 +114,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
     }
 
     // Apply generic deletions
-    for (size_t i = 0; i < DELETIONS_LEN; i++)
+    for (int i = 0; i < DELETIONS_LEN; i++)
     {
         const char *pattern = DELETIONS[i];
         char *tmp = findErase(result, inputSize, pattern);
@@ -341,7 +371,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
 
 #else
 
-char *cleanCPUName(const CPU_ARCH arch, const char *input, size_t inputSize)
+char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
 {
     if (!input || inputSize < 2)
         return strdup("");
@@ -1015,8 +1045,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     // present
                     for (int i = 0; i < GPU_FROM_CPU_SUFFIXES_LEN; i++)
                     {
-                        size_t gpuLen = strlen(*gpuFromCPU);
-                        size_t suffixLen = strlen(GPU_FROM_CPU_SUFFIXES[i]);
+                        int gpuLen = strlen(*gpuFromCPU);
+                        int suffixLen = strlen(GPU_FROM_CPU_SUFFIXES[i]);
                         if (gpuLen > suffixLen && 
                             strcmp(*gpuFromCPU + gpuLen - suffixLen,
                                 GPU_FROM_CPU_SUFFIXES[i]) == 0)
@@ -1071,7 +1101,7 @@ int hasFlag(const CPU_DATA *cpu, const char *flag)
         return 0;
 
     const char *needle = cpu->flags;
-    size_t flagLen = strlen(flag);
+    int flagLen = strlen(flag);
 
     while ((needle = strstr(needle, flag)))
     {
@@ -1292,7 +1322,7 @@ char *interpretCPU(CPU_DATA *cpu)
         }
         // Motorola customisations
         else if ((cpu->vendor && strstr(cpu->vendor, "Motorola") != 0) ||
-            cpu->name && strcmp(cpu->name, "8xx") == 0)
+            (cpu->name && strcmp(cpu->name, "8xx") == 0))
         {
             // Remove redundant "MCG" from vendor name if it already
             // contains "Motorola"
@@ -1313,7 +1343,7 @@ char *interpretCPU(CPU_DATA *cpu)
                 char *close = strchr(cpu->machine, ')');
                 if (open && close && close > open)
                 {
-                    size_t len = close - open - 1;
+                    int len = close - open - 1;
                     if (len >= NAME_LEN)
                         len = NAME_LEN - 1;
 

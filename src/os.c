@@ -66,7 +66,7 @@ char *getOS(struct utsname u, int uStatus)
             char buffer[osSize];
             if (fgets(buffer, sizeof(buffer), fStream))
             {
-                size_t len = strlen(buffer);
+                int len = strlen(buffer);
                 if (len > 0 && buffer[len - 1] == '\n')
                     buffer[len - 1] = '\0';
                 char *p = strchr(buffer, '\\');
@@ -91,7 +91,7 @@ char *getOS(struct utsname u, int uStatus)
     // If the name is wrapped in apostrophes, remove them
     if (os[0] == '\'')
     {
-        size_t osLen = strlen(os);
+        int osLen = strlen(os);
         if (osLen >= 2 && os[osLen - 1] == '\'')
         {
             memmove(os, os + 1, osLen - 2);
@@ -102,7 +102,7 @@ char *getOS(struct utsname u, int uStatus)
     if (COMPACT)
     {
         // Remove trailing bracketed substring if present
-        size_t osLen = strlen(os);
+        int osLen = strlen(os);
         if (osLen > 0 && os[osLen - 1] == ')')
         {
             for (int i = osLen - 1; i > 0; i--)
