@@ -185,19 +185,12 @@ void showHelp(void)
 
     WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, "
         "de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, clba, "
-        "clbr, --- (separator), single blank space (new line)\n\n",
+        "clbr, --- (separator), single blank space (new line)\n",
         TERM_SIZE.ws_col,
         NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);
-
-    WORD_WRAPPED *notes = wordWrap("Note: by default, the SHORK ASCII art "
-        "is disabled if the terminal's width is less than 62 columns or if "
-        "less than 7 fields are present.\n", TERM_SIZE.ws_col, NULL, 0, 0);
-    printf("%s", notes->str);
-    free(notes->str);
-    free(notes);
 }
 
 /**
