@@ -21,10 +21,12 @@
 #include <sys/ioctl.h>
 #include <linux/limits.h>
 #include <sys/stat.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 
 
@@ -171,6 +173,100 @@ char *captureProgramOutput(const char *command, const int bufferSize)
 
     buffer[len] = '\0';
     return buffer;
+}
+
+/**
+ * Counts how many times the given substring is found in the given string.
+ * @param str String to search
+ * @param sub Substring to find
+ * @return Number of sub occurrences in str
+ */
+int countSubstrs(const char *str, const char *sub)
+{
+    size_t len = strlen(sub);
+    if (len == 0)
+        return 0;
+
+    int count = 0;
+    const char *p = str;
+    while ((p = strstr(p, sub)) != NULL)
+    {
+        count++;
+        p += len;
+    }
+
+    return count;
+}
+
+/**
+ * Appends a given item string to the given comma-separated buffer.
+ * @param buffer Buffer containing the CSV string to operate on
+ * @param bufferSize Buffer size
+ * @param item Item to add
+ * @return 1 if successfully added; 0 if present or no space
+ */
+int csvAppend(char *buffer, int bufferSize, const char *item)
+{
+    size_t itemLen = strlen(item);
+    size_t currLen = strlen(buffer);
+    const char *p = buffer;
+
+    while ((p = strstr(p, item)) != NULL)
+    {
+        int startOk = (p == buffer) || (*(p - 1) == ',');
+        int endOk = (p[itemLen] == '\0') || (p[itemLen] == ',');
+        if (startOk && endOk)
+            // Already present
+            return 0;
+        p += itemLen;
+    }
+
+    size_t sepLen = (currLen > 0) ? 1 : 0;
+    if (currLen + sepLen + itemLen + 1 > bufferSize)
+        // No space
+        return 0;
+
+    if (sepLen)
+        strcat(buffer, ",");
+    strcat(buffer, item);
+
+    return 1;
+}
+
+/**
+ * Removes a given item string to the given comma-separated buffer.
+ * @param buffer Buffer containing the CSV string to operate on
+ * @param item Item to remove
+ * @return 1 if successfully removed; 0 if not found
+ */
+int csvRemove(char *buffer, const char *item)
+{
+    size_t itemLen = strlen(item);
+    char *p = buffer;
+
+    while ((p = strstr(p, item)) != NULL)
+    {
+        int startOk = (p == buffer) || (*(p - 1) == ',');
+        int endOk = (p[itemLen] == '\0') || (p[itemLen] == ',');
+
+        if (startOk && endOk)
+        {
+            char *removeStart = p;
+            char *removeEnd = p + itemLen;
+            if (*removeEnd == ',')
+                removeEnd++;
+            else if (removeStart != buffer)
+                removeStart--;
+            memmove(removeStart, removeEnd, strlen(removeEnd) + 1);
+            // Found and removed
+            return 1;
+        }
+
+        p += itemLen;
+    }
+
+    // Not found
+    return 0;
 }
 
 /**
@@ -325,6 +421,83 @@ char *findReplace(const char *input, const int inputSize, const char *needle, co
     }
 
     return result;
+}
+
+/**
+ * DEPRECATED: Use wordWrap() instead!
+ * Adds new lines to a given string based on the requested line width.
+ * @param input Input string
+ * @param width Characters per line
+ * @param indent Indent to include after newly inserted new line
+ * @param trim Flags that any trailing newlines should be removed
+ * @return Number of lines in the string
+ */
+int formatNewLines(char *input, int width, char *indent, int trim)
+{
+    if (!input || width < 1) return 0;
+
+    // Initialse variables that help us track progress
+    size_t inputStrLen = strlen(input);
+    size_t indentLen = indent ? strlen(indent) : 0;
+    int lines = 1;
+    int lastSpace = -1;
+    int widthCount = 1;
+
+    // Iterate through the input string to find line breaks or places to add new ones
+    for (int i = 0; i < inputStrLen; i++)
+    {
+        if (input[i] == '\033')
+        {
+            while (i < inputStrLen && input[i] != 'm') i++;
+            if (i >= inputStrLen) break;
+            continue; 
+        }
+        
+        // Track where the last space was in case so we can go back for a future word wrap
+        if (input[i] == ' ') lastSpace = i;
+        // Reset tracking and take into account if we find an existing new line
+        else if (input[i] == '\n')
+        {
+            lines++;
+            widthCount = 0;
+            continue;
+        }
+
+        // Begin word wrapping once the line width is saturated
+        if (widthCount == width)
+        {
+            if (lastSpace != -1)
+            {
+                input[lastSpace] = '\n';
+                lines++;
+
+                if (indent && indentLen > 0)
+                {
+                    memmove(input + lastSpace + 1 + indentLen, input + lastSpace + 1, inputStrLen - lastSpace);
+                    memcpy(input + lastSpace + 1, indent, indentLen);
+                    inputStrLen += indentLen;
+                    if (lastSpace <= i) i += indentLen;
+                }
+            }
+            widthCount = i - lastSpace;
+        }
+
+        widthCount++;
+    }
+
+    // If desired, strip possible trailing new line
+    if (trim)
+    {
+        int end = strlen(input) - 1;
+        while (end >= 0 && input[end] == '\n')
+        {
+            input[end] = '\0';
+            end--;
+            lines--;
+        }
+    }
+
+    return lines;
 }
 
 /**
@@ -779,6 +952,62 @@ char *removeBrackets(const char *input, const int inputSize)
 }
 
 /**
+ * Runs an external command.
+ * @param cmd Command name or path
+ * @param ... 0 or more const char* arguments to use with cmd (MUST NULL
+ *            TERMINATE)
+ * @return >= 0 if command ran and exited normally; -1 if not or result
+ *         indetermined
+ */
+int runCmd(const char *cmd, ...)
+{
+    const char *argv[MAX_CMD_ARGS];
+    int argc = 0;
+
+    // First ele is always the cmd itself
+    argv[argc++] = cmd;
+
+    // Gather variadic arguments into argv
+    va_list args;
+    va_start(args, cmd);
+    const char *arg;
+    while ((arg = va_arg(args, const char *)) != NULL &&
+        argc < MAX_CMD_ARGS - 1)
+        argv[argc++] = arg;
+    va_end(args);
+
+    // execvp needs argv NULL-terminated 
+    argv[argc] = NULL;
+
+    // Child
+    pid_t pid = fork();
+    if (pid < 0)
+        // Fork failed
+        return -1;
+
+    if (pid == 0)
+    {
+        execvp(cmd, (char *const *)argv);
+        // Only reached in execvp() failed, so exit 127 for "command not
+        // found"
+        _exit(127);
+    }
+
+    // Param
+    int status;
+    if (waitpid(pid, &status, 0) < 0)
+        // waitpid() failed
+        return -1;
+
+    if (WIFEXITED(status))
+        // Child exited normally, so return its exit status
+        return WEXITSTATUS(status);
+
+    // Child probably terminated abnormally
+    return -1;
+}
+
+/**
  * Splits a given string via any newline escape sequences into an array of strings.
  * @param text Text to split
  * @param textLines Text once split
@@ -815,7 +1044,6 @@ void splitText(char *text, char *textLines[], int totalLines)
  * @param trim Flags that any trailing newlines should be removed
  * @return Malloc'd WORD_WRAPPED struct containing the result string, how long
  *         it is & how many lines it has
- * TODO: soft-wrapping should also include breaking after '.', ',', '-' or '_'
  */
 WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int trim)
 {
