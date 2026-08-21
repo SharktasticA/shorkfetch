@@ -5,6 +5,8 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
+    ## Revision B                                       ##
+    ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
     ## Kali (links.sharktastica.co.uk)                  ##
@@ -207,8 +209,8 @@ int countSubstrs(const char *str, const char *sub)
  */
 int csvAppend(char *buffer, int bufferSize, const char *item)
 {
-    size_t itemLen = strlen(item);
-    size_t currLen = strlen(buffer);
+    int itemLen = strlen(item);
+    int currLen = strlen(buffer);
     const char *p = buffer;
 
     while ((p = strstr(p, item)) != NULL)
@@ -221,7 +223,7 @@ int csvAppend(char *buffer, int bufferSize, const char *item)
         p += itemLen;
     }
 
-    size_t sepLen = (currLen > 0) ? 1 : 0;
+    int sepLen = (currLen > 0) ? 1 : 0;
     if (currLen + sepLen + itemLen + 1 > bufferSize)
         // No space
         return 0;
@@ -437,8 +439,8 @@ int formatNewLines(char *input, int width, char *indent, int trim)
     if (!input || width < 1) return 0;
 
     // Initialse variables that help us track progress
-    size_t inputStrLen = strlen(input);
-    size_t indentLen = indent ? strlen(indent) : 0;
+    int inputStrLen = strlen(input);
+    int indentLen = indent ? strlen(indent) : 0;
     int lines = 1;
     int lastSpace = -1;
     int widthCount = 1;

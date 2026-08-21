@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision A                                       ##
+    ## Revision B                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
