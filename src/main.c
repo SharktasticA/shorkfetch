@@ -858,7 +858,7 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "trm") == 0)
         {
             char *trm = getTerminal();
-            if (trm && trm[0] != '\0')
+            if (trm)
             {
                 if (noEsc) printShorkLine(0);
                 if (mode == NORMAL)
@@ -866,9 +866,8 @@ int main(int argc, char *argv[])
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos,
-                            "%sTerminal:%s %s (%dx%d)\n", colAccent,
-                            colReset, trm, TERM_SIZE.ws_col,
-                            TERM_SIZE.ws_row);
+                            "%sTerminal:%s %s\n", colAccent,
+                            colReset, trm);
                     else
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos, "%sTrm:%s %s\n",
@@ -879,9 +878,8 @@ int main(int argc, char *argv[])
                     char icon[10] = {bullet};
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
-                            OUTPUT_LEN - outputPos, " %s%s%s %s (%dx%d)\n",
-                            colAccent, icon, colReset, trm,
-                            TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                            OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                            colAccent, icon, colReset, trm);
                     else
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos, " %s%s%s %s\n",
