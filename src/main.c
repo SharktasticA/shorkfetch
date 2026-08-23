@@ -40,7 +40,7 @@
 
 
 
-#define VERSION     "0.6.1-wip"
+#define VERSION     "0.6.1"
 
 
 
