@@ -26,7 +26,8 @@
 
 
 /**
- * @return String containing the host terminal emulator's name; NULL if not
+ * Gets the host terminal emulator name and console size.
+ * @return String containing the the result name and size; NULL if not
  *         found/applicable
  */
 char *getTerminal(void)
@@ -35,15 +36,25 @@ char *getTerminal(void)
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
 
-    char *terminal = NULL;
+    char *result = malloc(TERMINAL_LEN);
+    if (!result)
+        return NULL;
+    result[0] = '\0';
 
+    const char *termProgramEnv = getenv("TERM_PROGRAM");
     // Try the easy way ($TERM_PROGRAM) first
-    char *termProgram = getenv("TERM_PROGRAM");
-    if (termProgram && termProgram[0] != '\0')
-        terminal = strdup(termProgram);
+    char *termProgram = strdup(termProgramEnv ? termProgramEnv : "");
+    if (!termProgram)
+        return NULL;
 
-    // Try looking through our parent processes to get the name
-    if (!terminal)
+    // Flags if GNU Screen was detected. This is needed because a prior
+    // Screen session can leave $TERM stale and thus not a reliable
+    // indicator of whether we're actually in Screen or not.
+    int inScreen = 0;
+
+    // If nothing from $TERM_PROGRAM, try looking through our parent
+    // processes to get the name
+    if (termProgram[0] == '\0')
     {
         PROCESS process = getParentProcess(getpid());
         while (process.pid > 1)
@@ -55,8 +66,12 @@ char *getTerminal(void)
             // shells
             for (int i = 0; i < EXCLUDED_TERMINAL_PROCS_LEN; i++)
             {
-                if (strcmp(process.name, EXCLUDED_TERMINAL_PROCS[i]) == 0)
+                if (strstr(process.name, EXCLUDED_TERMINAL_PROCS[i]))
                 {
+                    // If we found that we're in GNU Screen, mark that down
+                    // for later
+                    if (strcmp(process.name, "screen") == 0)
+                        inScreen = 1;
                     notTerminal = 1;
                     break;
                 }
@@ -70,9 +85,14 @@ char *getTerminal(void)
                     notTerminal = 1;
             }
 
+            // Found our terminal name?
             if (!notTerminal)
             {
-                terminal = strdup(process.name);
+                char *dup = strdup(process.name);
+                if (!dup)
+                    break;
+                free(termProgram);
+                termProgram = dup;
                 break;
             }
 
@@ -80,38 +100,66 @@ char *getTerminal(void)
         }
     }
 
-    // As a fallback, we can also try $TERM to get the terminal's basic 
-    // capabilities like "xterm-256color"
-    if (!terminal)
-    {
-        const char *TERM = getenv("TERM");
-        if (TERM && TERM[0] != '\0')
-        {
-            if (COMPACT) terminal = strdup(TERM);
-            else
-            {
-                int termLen = strlen(TERM) + 11 + 1;
-                terminal = malloc(termLen);
-                if (terminal)
-                    snprintf(terminal, termLen, "%s compatible", TERM);
-            }
-        }
-    }
+    // Get $TERM as a possible fallback or supplement because it can inform
+    // basic, generic capabilities like "xterm-256color" 
+    const char *term = getenv("TERM");
 
-    // Do some cleaning if needed
-    if (terminal)
+#ifndef NO_STR_CLEANING
+    // Do some cleaning to $TERM_PROGRAM or process name
+    if (termProgram && termProgram[0] != '\0')
     {
-        int terminalLen = strlen(terminal);
+        int termProgramLen = strlen(termProgram);
 
         // Remove trailing hyphen from "gnome-terminal-" (etc.)
-        if (terminalLen > 0 && terminal[terminalLen - 1] == '-')
-            terminal[terminalLen - 1] = '\0';
+        if (termProgramLen > 0 && termProgram[termProgramLen - 1] == '-')
+            termProgram[termProgramLen - 1] = '\0';
 
         // Remove "agent" from "ptyxis-agent"
-        if (terminalLen > 6 && terminal[6] == '-' &&
-            strncmp(terminal, "ptyxis", 6) == 0)
-            terminal[6] = '\0';
+        if (termProgramLen > 6 && termProgram[6] == '-' &&
+            strncmp(termProgram, "ptyxis", 6) == 0)
+            termProgram[6] = '\0';
     }
+#endif
 
-    return terminal;
+    // Prefer to use $TERM_PROGRAM or process name
+    if (termProgram[0] != '\0')
+    {
+        // tmux is not a terminal emulator, so we create a distinction with
+        // also including $TERM if available
+        if(strcmp(termProgram, "tmux") == 0 && term && term[0] != '\0')
+        {
+            if (COMPACT)
+                snprintf(result, TERMINAL_LEN, "%s (%dx%d)", term,
+                    TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+            else
+                snprintf(result, TERMINAL_LEN, "%s (%s, %dx%d)",
+                    termProgram, term, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+        }
+        // Ditto for GNU Screen
+        else if(inScreen && term && strncmp(term, "screen", 5) == 0)
+        {
+            if (COMPACT)
+                snprintf(result, TERMINAL_LEN, "%s (%dx%d)",
+                    termProgram, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+            else
+                snprintf(result, TERMINAL_LEN, "screen (%s, %dx%d)",
+                    termProgram, TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+        }
+        else
+            snprintf(result, TERMINAL_LEN, "%s (%dx%d)", termProgram,
+                TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+    }
+    // As a fallback, just use $TERM 
+    else if (term && term[0] != '\0')
+        snprintf(result, TERMINAL_LEN, "%s (%dx%d)", term, TERM_SIZE.ws_col,
+            TERM_SIZE.ws_row);
+
+    free(termProgram);
+    if (result[0] == '\0')
+    {
+        free(result);
+        return NULL;
+    }
+    else
+        return result;
 }

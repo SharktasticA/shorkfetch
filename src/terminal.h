@@ -16,6 +16,10 @@
 #ifndef TERMINAL
 #define TERMINAL
 
+#define TERMINAL_LEN    48
+
+
+
 char *getTerminal(void);
 
 #endif

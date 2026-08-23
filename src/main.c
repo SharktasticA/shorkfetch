@@ -40,7 +40,7 @@
 
 
 
-#define VERSION     "0.6.0"
+#define VERSION     "0.6.1"
 
 
 
@@ -185,19 +185,12 @@ void showHelp(void)
 
     WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, "
         "de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, clba, "
-        "clbr, --- (separator), single blank space (new line)\n\n",
+        "clbr, --- (separator), single blank space (new line)\n",
         TERM_SIZE.ws_col,
         NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);
-
-    WORD_WRAPPED *notes = wordWrap("Note: by default, the SHORK ASCII art "
-        "is disabled if the terminal's width is less than 62 columns or if "
-        "less than 7 fields are present.\n", TERM_SIZE.ws_col, NULL, 0, 0);
-    printf("%s", notes->str);
-    free(notes->str);
-    free(notes);
 }
 
 /**
@@ -865,7 +858,7 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "trm") == 0)
         {
             char *trm = getTerminal();
-            if (trm && trm[0] != '\0')
+            if (trm)
             {
                 if (noEsc) printShorkLine(0);
                 if (mode == NORMAL)
@@ -873,9 +866,8 @@ int main(int argc, char *argv[])
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos,
-                            "%sTerminal:%s %s (%dx%d)\n", colAccent,
-                            colReset, trm, TERM_SIZE.ws_col,
-                            TERM_SIZE.ws_row);
+                            "%sTerminal:%s %s\n", colAccent,
+                            colReset, trm);
                     else
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos, "%sTrm:%s %s\n",
@@ -886,9 +878,8 @@ int main(int argc, char *argv[])
                     char icon[10] = {bullet};
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
-                            OUTPUT_LEN - outputPos, " %s%s%s %s (%dx%d)\n",
-                            colAccent, icon, colReset, trm,
-                            TERM_SIZE.ws_col, TERM_SIZE.ws_row);
+                            OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                            colAccent, icon, colReset, trm);
                     else
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos, " %s%s%s %s\n",
@@ -1203,16 +1194,9 @@ int main(int argc, char *argv[])
                         else
                         {
                             char icon[10] = {bullet};
-                            if (!COMPACT)
-                                outputPos += writeOutput(output + outputPos,
-                                    OUTPUT_LEN - outputPos,
-                                    " %s%s%s %s disk\n", colAccent, icon,
-                                    colReset, disks->disks[i]);
-                            else
-                                outputPos += writeOutput(output + outputPos,
-                                    OUTPUT_LEN - outputPos, " %s%s%s %s\n",
-                                    colAccent, icon, colReset,
-                                    disks->disks[i]);
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                                colAccent, icon, colReset, disks->disks[i]);
                         }
                     }
                     pastFirst = 1;
