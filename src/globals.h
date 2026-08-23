@@ -48,7 +48,7 @@ static const char *POSSIBLE_FIELDS[] =
     "gpu",  // GPU(s)
     "ram",  // System memory
     "swap", // Swap memory
-    "dsk",  // Disk sizes
+    "dsk",  // Disk size(s)
     "root", // Root partition size
     "lip",  // Local IP address
     "clrs", // ANSI escape code 16-colour palette

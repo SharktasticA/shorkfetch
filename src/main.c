@@ -1194,16 +1194,9 @@ int main(int argc, char *argv[])
                         else
                         {
                             char icon[10] = {bullet};
-                            if (!COMPACT)
-                                outputPos += writeOutput(output + outputPos,
-                                    OUTPUT_LEN - outputPos,
-                                    " %s%s%s %s disk\n", colAccent, icon,
-                                    colReset, disks->disks[i]);
-                            else
-                                outputPos += writeOutput(output + outputPos,
-                                    OUTPUT_LEN - outputPos, " %s%s%s %s\n",
-                                    colAccent, icon, colReset,
-                                    disks->disks[i]);
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos, " %s%s%s %s\n",
+                                colAccent, icon, colReset, disks->disks[i]);
                         }
                     }
                     pastFirst = 1;

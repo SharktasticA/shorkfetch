@@ -109,7 +109,7 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `gpu` | GPU(s) | 1-4 |
 | `ram` | System memory | 1 |
 | `swap` | Swap memory | 1 |
-| `dsk` | Disk sizes | 1-10 |
+| `dsk` | Disk size(s) | 1-10 |
 | `root` | Root partition size | 1 |
 | `lip` | Local IP address | 1 |
 | `clrs` | ANSI escape code base & bright 16-colour palette | 2 |

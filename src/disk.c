@@ -98,8 +98,8 @@ DISKS *getDisks(void)
         }
 
         // Add to disks
-        snprintf(result->disks[result->count], DISK_LEN, "%s (%s)", sizeStr,
-            blockDevs[i]);
+        snprintf(result->disks[result->count], DISK_LEN, "%s (%s)", 
+            blockDevs[i], sizeStr);
         free(sizeStr);
         result->count++;
     }
