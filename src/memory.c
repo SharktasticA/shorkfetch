@@ -41,6 +41,9 @@ MemInfo getMemInfo(void)
                 { parsed++; continue; }
             else if (sscanf(buffer, "MemFree: %ld", &mi.memFree) == 1)
                 { parsed++; continue; }
+            else if (sscanf(buffer, "MemAvailable: %ld",
+                &mi.memAvailable) == 1)
+                { parsed++; continue; }
             else if (sscanf(buffer, "Buffers: %ld", &mi.buffers) == 1)
                 { parsed++; continue; }
             else if (sscanf(buffer, "Cached: %ld", &mi.cached) == 1)
@@ -66,11 +69,10 @@ char *getRAM(MemInfo mi)
     const int ramSize = 64;
     char *ram = malloc(ramSize);
     if (!ram)
-        return strdup("");
+        return NULL;
     ram[0] = '\0';
 
-    long freeMem = mi.memFree + mi.buffers + mi.cached;
-    long used = mi.memTotal - freeMem;
+    long used = mi.memTotal - mi.memAvailable;
     char *usedStr = bytesToReadable("KiB", used);
     char *totalStr = bytesToReadable("KiB", mi.memTotal);
 
@@ -79,7 +81,8 @@ char *getRAM(MemInfo mi)
         int pct = mi.memTotal ? (int)((used * 100) / mi.memTotal) : 0;
         snprintf(ram, ramSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
     }
-    else snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
+    else
+        snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
     
     free(usedStr);
     free(totalStr);
