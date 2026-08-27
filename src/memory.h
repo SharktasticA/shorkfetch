@@ -19,6 +19,7 @@
 typedef struct {
     long memTotal;
     long memFree;
+    long memAvailable;
     long buffers;
     long cached;
     long swapTotal;

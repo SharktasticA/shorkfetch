@@ -40,7 +40,7 @@
 
 
 
-#define VERSION     "0.6.1"
+#define VERSION     "0.6.2"
 
 
 
@@ -1072,7 +1072,7 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "ram") == 0 && mi.memTotal > 0)
         {
             char *ram = getRAM(mi);
-            if (ram && ram[0] != '\0')
+            if (ram)
             {
                 if (noEsc) printShorkLine(0);
                 if (mode == NORMAL)
