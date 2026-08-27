@@ -13,14 +13,19 @@
 
 
 #include "globals.h"
+#include "colours.h"
 
 #include <string.h>
 
 
 
-char *COLOUR = NULL;
+char *COL_ACCENT = NULL;
+char *COL_PCT_HIGH = NULL;
+char *COL_PCT_LOW = NULL;
+char *COL_PCT_MED = NULL;
 int COMPACT = 0;
 char* HOME;
+int NO_ESC = 0;
 int SHORK_LINE = 0;
 int SHOW_SHORK = 1;
 struct winsize TERM_SIZE;

@@ -13,6 +13,7 @@
 
 
 
+#include "colours.h"
 #include "general.h"
 #include "globals.h"
 #include "memory.h"
@@ -64,7 +65,8 @@ MemInfo getMemInfo(void)
  * @return String containing the system memory used and total amounts both
  *         numerically and as a percentage
  */
-char *getRAM(MemInfo mi)
+char *getRAM(MemInfo mi, char *colPctLow, char *colPctMed, char *colPctHigh,
+    const char *colReset)
 {
     const int ramSize = 64;
     char *ram = malloc(ramSize);
@@ -79,7 +81,13 @@ char *getRAM(MemInfo mi)
     if (!COMPACT)
     {
         int pct = mi.memTotal ? (int)((used * 100) / mi.memTotal) : 0;
-        snprintf(ram, ramSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
+        char *col = colPctLow;
+        if (pct >= 80)
+            col = colPctHigh;
+        else if (pct >= 50)
+            col = colPctMed;
+        snprintf(ram, ramSize, "%s / %s (%s%d%%%s)", usedStr, totalStr, col,
+            pct, colReset);
     }
     else
         snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
@@ -95,7 +103,8 @@ char *getRAM(MemInfo mi)
  * @return String containing the system swap used and total amounts both
  *         numerically and as a percentage
  */
-char *getSwap(MemInfo mi)
+char *getSwap(MemInfo mi, char *colPctLow, char *colPctMed,
+    char *colPctHigh, const char *colReset)
 {
     if (mi.swapTotal == 0)
         return strdup("");
@@ -113,7 +122,13 @@ char *getSwap(MemInfo mi)
     if (!COMPACT)
     {
         int pct = mi.swapTotal ? (int)((used * 100) / mi.swapTotal) : 0;
-        snprintf(swap, swapSize, "%s / %s (%d%%)", usedStr, totalStr, pct);
+        char *col = colPctLow;
+        if (pct >= 80)
+            col = colPctHigh;
+        else if (pct >= 50)
+            col = colPctMed;
+        snprintf(swap, swapSize, "%s / %s (%s%d%%%s)", usedStr, totalStr,
+            col, pct, colReset);
     }
     else snprintf(swap, swapSize, "%s / %s", usedStr, totalStr);
 

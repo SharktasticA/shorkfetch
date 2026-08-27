@@ -59,9 +59,13 @@ static const char *POSSIBLE_FIELDS[] =
 static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) /
     sizeof(POSSIBLE_FIELDS[0]);
 
-extern char *COLOUR;
+extern char *COL_ACCENT;
+extern char *COL_PCT_HIGH;
+extern char *COL_PCT_LOW;
+extern char *COL_PCT_MED;
 extern int COMPACT;
 extern char *HOME;
+extern int NO_ESC;
 extern int SHORK_LINE;
 extern int SHOW_SHORK;
 extern struct winsize TERM_SIZE;

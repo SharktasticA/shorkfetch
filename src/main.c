@@ -45,6 +45,14 @@
 
 
 
+void freeGlobals(void)
+{
+    free(COL_ACCENT);
+    free(COL_PCT_LOW);
+    free(COL_PCT_MED);
+    free(COL_PCT_HIGH);
+}
+
 /**
  * Prints a single line of the SHORK ASCII art. It is intended to be used
  * during the "assemble output" loop when in no-escape-codes mode.
@@ -81,8 +89,8 @@ int printShorkLine(int stopOnceDone)
 
 void showHelp(void)
 {
-    WORD_WRAPPED *desc = wordWrap("A tool that displays basic system and "
-        "environment information in a summarised format.\n",
+    WORD_WRAPPED *desc = wordWrap("A tool that displays system, hardware "
+        "and environment information in a summarised format.\n",
         TERM_SIZE.ws_col, NULL, 0, 0);
     printf("%s\n", desc->str);
     free(desc->str);
@@ -100,51 +108,74 @@ void showHelp(void)
     free(options->str);
     free(options);
 
-    WORD_WRAPPED *bullet = wordWrap("-b, --bullet    Specifies a custom "
+    WORD_WRAPPED *bullet = wordWrap("-b, --bullet       Specifies a custom "
         "character to use with bullet-point mode; no assignment returns "
         "the current character and exits\n", TERM_SIZE.ws_col,
-        "                ", 0,
+        "                   ", 0,
         0);
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);
 
-    WORD_WRAPPED *colour = wordWrap("-cl, --colour   Specifies a custom "
-        "accent colour; no assignment returns the current colour and "
-        "exits\n", TERM_SIZE.ws_col, "                ", 0, 0);
-    printf("%s", colour->str);
-    free(colour->str);
-    free(colour);
+    WORD_WRAPPED *accentCol = wordWrap("-ac, --accent-col  Specifies a "
+        "custom accent colour; no assignment returns the current colour "
+        "and exits\n", TERM_SIZE.ws_col, "                   ", 0, 0);
+    printf("%s", accentCol->str);
+    free(accentCol->str);
+    free(accentCol);
 
-    WORD_WRAPPED *compact = wordWrap("-co, --compact  Compacts field names "
-        "and field values\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *compact = wordWrap("-co, --compact     Compacts field names "
+        "and field values\n", TERM_SIZE.ws_col, "                   ", 0, 0);
     printf("%s", compact->str);
     free(compact->str);
     free(compact);
 
-    WORD_WRAPPED *help = wordWrap("-h, --help      Displays help "
-        "information and exits\n", TERM_SIZE.ws_col, "                ",
+    WORD_WRAPPED *fields = wordWrap("-f, --fields       Specifies a custom "
+        "fields list and order; no assignment returns list of current "
+        "fields and exits\n", TERM_SIZE.ws_col, "                   ", 0, 0);
+    printf("%s", fields->str);
+    free(fields->str);
+    free(fields);
+
+    WORD_WRAPPED *help = wordWrap("-h, --help         Displays help "
+        "information and exits\n", TERM_SIZE.ws_col, "                   ",
         0, 0);
     printf("%s", help->str);
     free(help->str);
     free(help);
 
-    WORD_WRAPPED *fields = wordWrap("-f, --fields    Specifies a custom "
-        "fields list and order; no assignment returns list of current "
-        "fields and exits\n", TERM_SIZE.ws_col, "                ", 0, 0);
-    printf("%s", fields->str);
-    free(fields->str);
-    free(fields);
+    WORD_WRAPPED *highCol = wordWrap("-hc, --high-col    Specifies a "
+        "custom high percentage colour; no assignment returns the current "
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", 0,
+        0);
+    printf("%s", highCol->str);
+    free(highCol->str);
+    free(highCol);
 
-    WORD_WRAPPED *mode = wordWrap("-m, --mode      Select what view mode "
+    WORD_WRAPPED *lowCol = wordWrap("-lc, --low-col     Specifies a custom "
+        "low percentage colour; no assignment returns the current colour "
+        "and exits\n", TERM_SIZE.ws_col, "                   ", 0, 0);
+    printf("%s", lowCol->str);
+    free(lowCol->str);
+    free(lowCol);
+
+    WORD_WRAPPED *medCol = wordWrap("-mc, --med-col     Specifies a custom "
+        "medium percentage colour; no assignment returns the current "
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", 0,
+        0);
+    printf("%s", medCol->str);
+    free(medCol->str);
+    free(medCol);
+
+    WORD_WRAPPED *mode = wordWrap("-m, --mode         Select what view mode "
         "to use: [n]ormal, [b]ullets\n", TERM_SIZE.ws_col,
-        "                ", 0, 0);
+        "                   ", 0, 0);
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
 
-    WORD_WRAPPED *noArt = wordWrap("-na, --no-art   Disables the SHORK "
-        "ASCII art\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *noArt = wordWrap("-na, --no-art      Disables the SHORK "
+        "ASCII art\n", TERM_SIZE.ws_col, "                   ", 0, 0);
     printf("%s", noArt->str);
     free(noArt->str);
     free(noArt);
@@ -156,22 +187,22 @@ void showHelp(void)
     free(noEsc->str);
     free(noEsc);
 
-    WORD_WRAPPED *reset = wordWrap("-r, --reset     Resets to default, "
+    WORD_WRAPPED *reset = wordWrap("-r, --reset        Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
-        "                ", 0, 0);
+        "                   ", 0, 0);
     printf("%s", reset->str);
     free(reset->str);
     free(reset);
 
-    WORD_WRAPPED *save = wordWrap("-s, --save      Saves chosen options to "
-        "a configuration file\n", TERM_SIZE.ws_col, "                ", 0,
+    WORD_WRAPPED *save = wordWrap("-s, --save         Saves chosen options to "
+        "a configuration file\n", TERM_SIZE.ws_col, "                   ", 0,
         0);
     printf("%s", save->str);
     free(save->str);
     free(save);
 
-    WORD_WRAPPED *version = wordWrap("-v, --version   Displays version "
-        "number and exits\n\n", TERM_SIZE.ws_col, "                ", 0, 0);
+    WORD_WRAPPED *version = wordWrap("-v, --version      Displays version "
+        "number and exits\n\n", TERM_SIZE.ws_col, "                   ", 0, 0);
     printf("%s", version->str);
     free(version->str);
     free(version);
@@ -220,7 +251,10 @@ int snprintfStdout(char *__restrict __s, size_t __maxlen,
 
 int main(int argc, char *argv[])
 {
-    COLOUR = strdup("bright_cyan");
+    COL_ACCENT = strdup("bright_cyan");
+    COL_PCT_LOW = strdup("green");
+    COL_PCT_MED = strdup("yellow");
+    COL_PCT_HIGH = strdup("red");
     HOME =  getenv("HOME");
     TERM_SIZE = getTerminalSize();
 
@@ -232,13 +266,12 @@ int main(int argc, char *argv[])
     char *fields = strdup("---,os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root,"
         " ");
 #endif
-    int noEsc = 0;
     int noIP = 0;
     int saveConf = 0;
     VIEW_MODE mode = NORMAL;
 
-    readConf(&bullet, &COLOUR, &COMPACT, &fields, &mode, &noEsc, &noIP, 
-        &SHOW_SHORK);
+    readConf(&COL_ACCENT, &COL_PCT_HIGH, &COL_PCT_LOW, &COL_PCT_MED,
+        &bullet, &COMPACT, &fields, &mode, &NO_ESC, &noIP, &SHOW_SHORK);
 
     for (int i = 1; i < argc; i++)
     {
@@ -246,7 +279,7 @@ int main(int argc, char *argv[])
             (strcmp(argv[i], "--help") == 0))
         {
             showHelp();
-            free(COLOUR);
+            freeGlobals();
             free(fields);
             return 0;
         }
@@ -280,27 +313,78 @@ int main(int argc, char *argv[])
             else
             {
                 printf("\"%c\"\n", bullet);
-                free(COLOUR);
+                freeGlobals();
                 free(fields);
                 return 0;
             }
         }
-        else if (strncmp(argv[i], "-cl", 3) == 0 ||
-            strncmp(argv[i], "--colour", 8) == 0)
+        else if (strncmp(argv[i], "-ac", 3) == 0 ||
+            strncmp(argv[i], "--accent-col", 12) == 0)
         {
             // Find "=" as our needle
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("%s\n", COLOUR);
-                free(COLOUR);
+                printf("%s\n", COL_ACCENT);
+                freeGlobals();
                 free(fields);
                 return 1;
             }
 
-            free(COLOUR);
+            free(COL_ACCENT);
             equalsNeedle++;
-            COLOUR = strdup(equalsNeedle);
+            COL_ACCENT = strdup(equalsNeedle);
+        }
+        else if (strncmp(argv[i], "-lc", 3) == 0 ||
+            strncmp(argv[i], "--low-col", 9) == 0)
+        {
+            // Find "=" as our needle
+            char *equalsNeedle = strchr(argv[i], '=');
+            if (!equalsNeedle) 
+            {
+                printf("%s\n", COL_PCT_LOW);
+                freeGlobals();
+                free(fields);
+                return 1;
+            }
+
+            free(COL_PCT_LOW);
+            equalsNeedle++;
+            COL_PCT_LOW = strdup(equalsNeedle);
+        }
+        else if (strncmp(argv[i], "-mc", 3) == 0 ||
+            strncmp(argv[i], "--med-col", 9) == 0)
+        {
+            // Find "=" as our needle
+            char *equalsNeedle = strchr(argv[i], '=');
+            if (!equalsNeedle) 
+            {
+                printf("%s\n", COL_PCT_MED);
+                freeGlobals();
+                free(fields);
+                return 1;
+            }
+
+            free(COL_PCT_MED);
+            equalsNeedle++;
+            COL_PCT_MED = strdup(equalsNeedle);
+        }
+        else if (strncmp(argv[i], "-hc", 3) == 0 ||
+            strncmp(argv[i], "--high-col", 10) == 0)
+        {
+            // Find "=" as our needle
+            char *equalsNeedle = strchr(argv[i], '=');
+            if (!equalsNeedle) 
+            {
+                printf("%s\n", COL_PCT_HIGH);
+                freeGlobals();
+                free(fields);
+                return 1;
+            }
+
+            free(COL_PCT_HIGH);
+            equalsNeedle++;
+            COL_PCT_HIGH = strdup(equalsNeedle);
         }
         else if (strcmp(argv[i], "-co") == 0 ||
             strcmp(argv[i], "--compact") == 0)
@@ -313,7 +397,7 @@ int main(int argc, char *argv[])
             if (!equalsNeedle) 
             {
                 printf("\"%s\"\n", fields);
-                free(COLOUR);
+                freeGlobals();
                 free(fields);
                 return 0;
             }
@@ -342,7 +426,7 @@ int main(int argc, char *argv[])
                 {
                     printf("ERROR: no mode given\n");
                     free(fields);
-                    free(COLOUR);
+                    freeGlobals();
                     return 1;
                 }
                 else if (strcmp(modeVal, "n") == 0 ||
@@ -356,7 +440,7 @@ int main(int argc, char *argv[])
                 {
                     printf("ERROR: unrecognised mode \"%s\"\n", modeVal);
                     free(fields);
-                    free(COLOUR);
+                    freeGlobals();
                     return 1;
                 }
             }
@@ -366,7 +450,7 @@ int main(int argc, char *argv[])
                     printf("\"normal\"\n");
                 else if (mode == BULLETS)
                     printf("\"bullets\"\n");
-                free(COLOUR);
+                freeGlobals();
                 free(fields);
                 return 0;
             }
@@ -376,7 +460,7 @@ int main(int argc, char *argv[])
             SHOW_SHORK = 0;
         else if ((strcmp(argv[i], "-ne") == 0) ||
             (strcmp(argv[i], "--no-esc") == 0))
-            noEsc = 1;
+            NO_ESC = 1;
         else if ((strcmp(argv[i], "-ni") == 0) ||
             (strcmp(argv[i], "--no-ip") == 0))
             noIP = 1;
@@ -389,7 +473,7 @@ int main(int argc, char *argv[])
             else
                 printf("WARNING: SHORKFETCH configuration already "
                 "default\n");
-            free(COLOUR);
+            freeGlobals();
             free(fields);
             return 0;
         }
@@ -401,20 +485,26 @@ int main(int argc, char *argv[])
         {
             printf("SHORKFETCH %s\n", VERSION);
             free(fields);
-            free(COLOUR);
+            freeGlobals();
             return 0;
         }
         else
         {
             printf("ERROR: unrecognised option \"%s\"\n", argv[i]);
             free(fields);
-            free(COLOUR);
+            freeGlobals();
             return 1;
         }
     }
 
     // Field name accent colour escape sequence
     char *colAccent = NULL;
+    // Colour escape sequence for percentages >= 0 and < 50
+    char *colPctLow = NULL;
+    // Colour escape sequence for percentages >= 50 and < 80
+    char *colPctMed = NULL;
+    // Colour escape sequence for percentages >= 80
+    char *colPctHigh = NULL;
     // General colour reset escape sequence
     char *colReset = NULL;
     // Func* for selecting which *printf-style output backend to use
@@ -422,21 +512,48 @@ int main(int argc, char *argv[])
         (char *__restrict, size_t, const char *__restrict, ...);
 
     // Write to stdout and disable & disable colour output
-    if (noEsc)
+    if (NO_ESC)
     {
         writeOutput = snprintfStdout;
         colAccent = strdup("");
+        colPctLow = strdup("");
+        colPctMed = strdup("");
+        colPctHigh = strdup("");
         colReset = "";
     }
-    // Write to OUTPUT buffer & permit colour output
+    // Write to output buffer & permit colour output
     else
     {
         writeOutput = snprintf;
-        colAccent = validateColour(COLOUR);
+        colAccent = validateColour(COL_ACCENT);
         if (!colAccent)
         {
-            printf("ERROR: unrecognised colour \"%s\"\n", COLOUR);
-            free(COLOUR);
+            printf("ERROR: unrecognised colour \"%s\"\n", COL_ACCENT);
+            freeGlobals();
+            free(fields);
+            return 1;
+        }
+        colPctLow = validateColour(COL_PCT_LOW);
+        if (!colPctLow)
+        {
+            printf("ERROR: unrecognised colour \"%s\"\n", COL_PCT_LOW);
+            freeGlobals();
+            free(fields);
+            return 1;
+        }
+        colPctMed = validateColour(COL_PCT_MED);
+        if (!colPctMed)
+        {
+            printf("ERROR: unrecognised colour \"%s\"\n", COL_PCT_MED);
+            freeGlobals();
+            free(fields);
+            return 1;
+        }
+        colPctHigh = validateColour(COL_PCT_HIGH);
+        if (!colPctHigh)
+        {
+            printf("ERROR: unrecognised colour \"%s\"\n", COL_PCT_HIGH);
+            freeGlobals();
             free(fields);
             return 1;
         }
@@ -478,7 +595,7 @@ int main(int argc, char *argv[])
                 {
                     printf("ERROR: too many fields given (max %d)\n",
                         MAX_FIELDS);
-                    free(COLOUR);
+                    freeGlobals();
                     free(fields);
                     return 1;
                 }
@@ -491,7 +608,7 @@ int main(int argc, char *argv[])
             else
             {
                 printf("ERROR: unrecognised field name \"%s\"\n", currTok);
-                free(COLOUR);
+                freeGlobals();
                 free(fields);
                 return 1;
             }
@@ -502,7 +619,7 @@ int main(int argc, char *argv[])
         // If no-escape-codes mode, we need to string out colour palette
         // fields since they are not supported. For good measure, we also
         // remove any blank space padding above them.
-        if (noEsc)
+        if (NO_ESC)
         {
             int write = 0;
             for (int read = 0; read < noFields; read++)
@@ -529,7 +646,7 @@ int main(int argc, char *argv[])
     else
     {
         printf("ERROR: no field names were given to display\n");
-        free(COLOUR);
+        freeGlobals();
         free(fields);
         return 1;
     }
@@ -551,7 +668,7 @@ int main(int argc, char *argv[])
 
 
     // Print SHORK (if needed)
-    if (SHOW_SHORK && !noEsc)
+    if (SHOW_SHORK && !NO_ESC)
     {
         printf("%s", colAccent);
         if (COMPACT)
@@ -579,7 +696,7 @@ int main(int argc, char *argv[])
     int headerWidth = 12;
     if (username[0] != '\0' && hostname[0] != '\0')
     {
-        if (noEsc) printShorkLine(0);
+        if (NO_ESC) printShorkLine(0);
         outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos,
             "%s%s%s@%s%s%s\n", colAccent, username, colReset, colAccent,
             hostname, colReset);
@@ -599,13 +716,13 @@ int main(int argc, char *argv[])
     {
         if (strcmp(fieldsProcessed[i], " ") == 0)
         {
-            if (noEsc) printShorkLine(0);
+            if (NO_ESC) printShorkLine(0);
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "\n");
         }
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
-            if (noEsc) printShorkLine(0);
+            if (NO_ESC) printShorkLine(0);
             for (int i = 0; i < headerWidth; i++)
                 outputPos += writeOutput(output + outputPos,
                     OUTPUT_LEN - outputPos, "-");
@@ -616,7 +733,7 @@ int main(int argc, char *argv[])
         {
             if (os && os[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -642,7 +759,7 @@ int main(int argc, char *argv[])
             char *kernel = getKernel(u, uStatus);
             if (kernel && kernel[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -669,7 +786,7 @@ int main(int argc, char *argv[])
             char *uptime = getUptime();
             if (uptime && uptime[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -696,7 +813,7 @@ int main(int argc, char *argv[])
             char *pkgs = getPackages(os);
             if (pkgs && pkgs[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -723,7 +840,7 @@ int main(int argc, char *argv[])
             char *locale = getLocale();
             if (locale)
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -758,7 +875,7 @@ int main(int argc, char *argv[])
 
                     if (screen && screen[0] != '\0')
                     {
-                        if (noEsc) printShorkLine(0);
+                        if (NO_ESC) printShorkLine(0);
                         if (mode == NORMAL)
                         {
                             if (!COMPACT)
@@ -824,7 +941,7 @@ int main(int argc, char *argv[])
         {
             if (de && de != wm && de[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -849,7 +966,7 @@ int main(int argc, char *argv[])
         {
             if (wm && wm[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 char server[32] = "";
                 if (!COMPACT)
                 {
@@ -888,7 +1005,7 @@ int main(int argc, char *argv[])
             char *trm = getTerminal();
             if (trm)
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -918,7 +1035,7 @@ int main(int argc, char *argv[])
             // the console size
             else
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -954,7 +1071,7 @@ int main(int argc, char *argv[])
             char *shell = getShell();
             if (shell && shell[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -983,7 +1100,7 @@ int main(int argc, char *argv[])
                 char *cpuStr = interpretCPU(cpu);
                 if (cpuStr && cpuStr[0] != '\0')
                 {
-                    if (noEsc) printShorkLine(0);
+                    if (NO_ESC) printShorkLine(0);
                     if (mode == NORMAL)
                     {
                         if (!COMPACT)
@@ -1020,7 +1137,7 @@ int main(int argc, char *argv[])
 
                     if (gpuStr && gpuStr[0] != '\0')
                     {
-                        if (noEsc) printShorkLine(0);
+                        if (NO_ESC) printShorkLine(0);
                         if (mode == NORMAL)
                         {
                             if (!COMPACT)
@@ -1075,7 +1192,7 @@ int main(int argc, char *argv[])
             // we received a fallback found during CPU name processing
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1099,10 +1216,10 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "ram") == 0 && mi.memTotal > 0)
         {
-            char *ram = getRAM(mi);
+            char *ram = getRAM(mi, colPctLow, colPctMed, colPctHigh, colReset);
             if (ram)
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1132,10 +1249,10 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "swap") == 0 &&
             mi.swapTotal > 0)
         {
-            char *swap = getSwap(mi);
+            char *swap = getSwap(mi, colPctLow, colPctMed, colPctHigh, colReset);
             if (swap && swap[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1172,7 +1289,7 @@ int main(int argc, char *argv[])
                 {
                     if (disks->disks[i][0] != '\0')
                     {
-                        if (noEsc) printShorkLine(0);
+                        if (NO_ESC) printShorkLine(0);
                         if (mode == NORMAL)
                         {
                             if (!COMPACT)
@@ -1234,10 +1351,10 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "root") == 0)
         {
-            char *root = getRoot();
+            char *root = getRoot(colPctLow, colPctMed, colPctHigh, colReset);
             if (root && root[0] != '\0')
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1269,7 +1386,7 @@ int main(int argc, char *argv[])
             char *localIP = getLocalIP();
             if (localIP)
             {
-                if (noEsc) printShorkLine(0);
+                if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1319,7 +1436,7 @@ int main(int argc, char *argv[])
     }
 
     // Print buffered output
-    if (!noEsc)
+    if (!NO_ESC)
     {
         int shorkWidth = SHORK_NORM_WIDTH;
         int shorkHeight = SHORK_NORM_HEIGHT;
@@ -1389,10 +1506,10 @@ int main(int argc, char *argv[])
     }
 
     if (saveConf)
-        writeConf(bullet, COLOUR, COMPACT, fieldsOrig, mode, noEsc, noIP,
-            SHOW_SHORK);
+        writeConf(COL_ACCENT, COL_PCT_HIGH, COL_PCT_LOW, COL_PCT_MED,
+            bullet, COMPACT, fieldsOrig, mode, NO_ESC, noIP, SHOW_SHORK);
 
-    free(COLOUR);
+    freeGlobals();
     free(colAccent);
     free(fieldsOrig);
     free(fields);

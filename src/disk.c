@@ -13,6 +13,7 @@
 
 
 
+#include "colours.h"
 #include "general.h"
 #include "globals.h"
 #include "disk.h"
@@ -112,7 +113,8 @@ DISKS *getDisks(void)
  * @return String containing the root partition's used and total size
  *         amounts both numerically and as a percentage
  */
-char *getRoot(void)
+char *getRoot(char *colPctLow, char *colPctMed, char *colPctHigh,
+    const char*colReset)
 {
     char *root = malloc(ROOT_LEN);
     if (!root)
@@ -138,9 +140,16 @@ char *getRoot(void)
     if (!COMPACT)
     {
         int pct = total ? (int)((used * 100) / total) : 0;
-        snprintf(root, ROOT_LEN, "%s / %s (%d%%)", usedStr, totalStr, pct);
+        char *col = colPctLow;
+        if (pct >= 80)
+            col = colPctHigh;
+        else if (pct >= 50)
+            col = colPctMed;
+        snprintf(root, ROOT_LEN, "%s / %s (%s%d%%%s)", usedStr, totalStr,
+            col, pct, colReset);
     }
-    else snprintf(root, ROOT_LEN, "%s / %s", usedStr, totalStr);
+    else
+        snprintf(root, ROOT_LEN, "%s / %s", usedStr, totalStr);
 
     free(usedStr);
     free(totalStr);

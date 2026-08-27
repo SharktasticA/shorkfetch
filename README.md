@@ -66,11 +66,14 @@ Usage: shorkfetch [OPTIONS]
 
 ### Options
 
+* `-ac`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour
 * `-b`, `--bullet`: Specifies a custom character to use with bullet-point mode; no assignment returns the current character
-* `-cl`, `--colour`: Specifies a custom accent colour; no assignment returns the current colour
 * `-co`, `--compact`: Compacts field names and field values
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields
 * `-h`, `--help`: Shows help information and exits
+* `-hc`, `--high-col`: Specifies a custom high percentage colour; no assignment returns the current colour and exits
+* `-lc`, `--low-col`: Specifies a custom low percentage colour; no assignment returns the current colour and exits
+* `-mc`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
 * `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
 * `-na`, `--no-art`: Disables the SHORK ASCII art
 * `-ne`, `--no-esc`: Disables all ANSI espace codes and colour features

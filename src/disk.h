@@ -30,6 +30,6 @@ typedef struct {
 
 
 DISKS *getDisks(void);
-char *getRoot(void);
+char *getRoot(char*, char*, char*, const char*);
 
 #endif

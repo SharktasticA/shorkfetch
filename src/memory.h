@@ -29,7 +29,7 @@ typedef struct {
 
 
 MemInfo getMemInfo(void);
-char *getRAM(MemInfo mi);
-char *getSwap(MemInfo mi);
+char *getRAM(MemInfo mi, char*, char*, char*, const char*);
+char *getSwap(MemInfo mi, char*, char*, char*, const char*);
 
 #endif
