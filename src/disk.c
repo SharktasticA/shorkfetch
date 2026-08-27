@@ -30,7 +30,8 @@
 
 /**
  * Gets a list of valid block device names and their total size.
- * @return DISKS pointer countaining the list and entry count
+ * @return DISKS pointer countaining the list and entry count; NULL if no
+ *         disks found or invalid
  */
 DISKS *getDisks(void)
 {

@@ -100,6 +100,7 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `krn` | Kernel | 1 |
 | `upt` | Uptime | 1 |
 | `pkgs` | Packages | 1 |
+| `loc` | Locale | 1 |
 | `scn` | Screen(s) | 1-∞ |
 | `de` | Desktop environment | 1 |
 | `wm` | Window manager and/or Wayland compositor | 1 |

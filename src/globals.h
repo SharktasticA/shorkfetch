@@ -39,6 +39,7 @@ static const char *POSSIBLE_FIELDS[] =
     "krn",  // Kernel
     "upt",  // Uptime
     "pkgs", // Packages
+    "loc",  // Locale
     "scn",  // Screen(s)
     "de",   // Desktop environment
     "wm",   // Window manager and/or Wayland compositor

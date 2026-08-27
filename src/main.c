@@ -26,6 +26,7 @@
 #include "hostname.h"
 #include "ip.h"
 #include "kernel.h"
+#include "locale.h"
 #include "memory.h"
 #include "os.h"
 #include "packages.h"
@@ -40,7 +41,7 @@
 
 
 
-#define VERSION     "0.6.2"
+#define VERSION     "0.7-wip"
 
 
 
@@ -183,9 +184,9 @@ void showHelp(void)
     free(colours->str);
     free(colours);
 
-    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, scn, "
-        "de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, clba, "
-        "clbr, --- (separator), single blank space (new line)\n",
+    WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, loc, "
+        "scn, de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, "
+        "clba, clbr, --- (separator), single blank space (new line)\n",
         TERM_SIZE.ws_col,
         NULL, 0, 0);
     printf("%s", fieldNames->str);
@@ -225,8 +226,8 @@ int main(int argc, char *argv[])
 
     char bullet = '*';
 #ifndef EMBEDDED
-    char *fields = strdup("---,os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,"
-        "ram,swap,dsk,root,lip, ,clrs, ");
+    char *fields = strdup("---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,"
+        "gpu,ram,swap,dsk,root,lip, ,clrs, ");
 #else
     char *fields = strdup("---,os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root,"
         " ");
@@ -716,6 +717,33 @@ int main(int argc, char *argv[])
                 }
             }
             free(pkgs);
+        }
+        else if (strcmp(fieldsProcessed[i], "loc") == 0)
+        {
+            char *locale = getLocale();
+            if (locale)
+            {
+                if (noEsc) printShorkLine(0);
+                if (mode == NORMAL)
+                {
+                    if (!COMPACT)
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sLocale:%s   %s\n",
+                            colAccent, colReset, locale);
+                    else
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sLoc:%s %s\n",
+                            colAccent, colReset, locale);
+                }
+                else 
+                {
+                    char icon[10] = {bullet};
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
+                        icon, colReset, locale);
+                }
+                free(locale);
+            }
         }
         else if (strcmp(fieldsProcessed[i], "scn") == 0)
         {
@@ -1250,7 +1278,7 @@ int main(int argc, char *argv[])
                             colAccent, colReset, localIP);
                     else
                         outputPos += writeOutput(output + outputPos,
-                            OUTPUT_LEN - outputPos, "%sLoc:%s %s\n",
+                            OUTPUT_LEN - outputPos, "%sLIP:%s %s\n",
                             colAccent, colReset, localIP);
                 }
                 else 
