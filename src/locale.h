@@ -16,6 +16,16 @@
 #ifndef LOCALE
 #define LOCALE
 
-char *getLocale(void);
+#define LOCALES_LEN     128
+
+typedef struct
+{
+    char *locales;
+    int count;
+} LOCALES;
+
+
+
+LOCALES *getLocales(void);
 
 #endif

@@ -837,29 +837,33 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "loc") == 0)
         {
-            char *locale = getLocale();
-            if (locale)
+            LOCALES *locales = getLocales();
+            if (locales->locales)
             {
                 if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
                 {
                     if (!COMPACT)
-                        outputPos += writeOutput(output + outputPos,
-                            OUTPUT_LEN - outputPos, "%sLocale:%s   %s\n",
-                            colAccent, colReset, locale);
+                    {
+                        if (locales->count == 1)
+                            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sLocale:%s   %s\n", colAccent, colReset, locales->locales);
+                        else
+                            outputPos += writeOutput(output + outputPos, OUTPUT_LEN - outputPos, "%sLocales:%s  %s\n", colAccent, colReset, locales->locales);
+                    }
                     else
                         outputPos += writeOutput(output + outputPos,
                             OUTPUT_LEN - outputPos, "%sLoc:%s %s\n",
-                            colAccent, colReset, locale);
+                            colAccent, colReset, locales->locales);
                 }
                 else 
                 {
                     char icon[10] = {bullet};
                     outputPos += writeOutput(output + outputPos,
                         OUTPUT_LEN - outputPos, " %s%s%s %s\n", colAccent,
-                        icon, colReset, locale);
+                        icon, colReset, locales->locales);
                 }
-                free(locale);
+                free(locales->locales);
+                free(locales);
             }
         }
         else if (strcmp(fieldsProcessed[i], "scn") == 0)

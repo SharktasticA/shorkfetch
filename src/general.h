@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision B                                       ##
+    ## Revision C                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -51,6 +51,7 @@ static const char BREAK_CHARS[BREAK_CHARS_LEN] = { " _-+,./\\" };
 
 char *bytesToReadable(const char *, const long long);
 char *captureProgramOutput(const char *, const int);
+char *colourWrap(const char*, const char*, const char*);
 int countSubstrs(const char *, const char *);
 int csvAppend(char*, int, const char*);
 int csvRemove(char*, const char*);

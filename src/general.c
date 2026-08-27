@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision B                                       ##
+    ## Revision C                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -175,6 +175,110 @@ char *captureProgramOutput(const char *command, const int bufferSize)
 
     buffer[len] = '\0';
     return buffer;
+}
+
+/**
+ * Wraps each of the given input string's lines in ANSI escape codes for a 
+ * given background and/or foreground colour.
+ * @param input Input string
+ * @param backCol Background ANSI escape colour code (can be NULL)
+ * @param forCol Foreground ANSI escape colour code (must be provided)
+ * @return Input string with ANSI escape colour codes wrapping each line;
+ *         NULL if error or invalid input arguments
+ */
+char *colourWrap(const char *input, const char *backCol, const char *forCol)
+{
+    if (!input || input[0] == '\0' || !forCol || forCol[0] == '\0')
+        return NULL;
+    int inputStrLen = (int)strlen(input);
+
+
+
+    // Create substrings for the start (colour) and end (reset) ANSI escape
+    // codes
+    char *startSubstr = NULL;
+    if (backCol)
+    {
+        // "\033[" + backCol + ";" + forCol + "m" + '\0'
+        int len = 2 + strlen(backCol) + 1 + strlen(forCol) + 1 + 1;
+        startSubstr = malloc(len);
+        if (!startSubstr)
+            return NULL;
+        snprintf(startSubstr, len, "\033[%s;%sm", backCol, forCol);
+    }
+    else
+    {
+        // "\033[" + forCol + "m" + '\0'
+        int len = 2 + strlen(forCol) + 1 + 1;
+        startSubstr = malloc(len);
+        if (!startSubstr)
+            return NULL;
+        snprintf(startSubstr, len, "\033[%sm", forCol);
+    }
+    int startSubstrLen = (int)strlen(startSubstr);
+
+    const char *resetCode = "\033[0m";
+    char *endSubstr = malloc(strlen(resetCode) + 1);
+    if (!endSubstr)
+    {
+        free(startSubstr);
+        return NULL;
+    }
+    strcpy(endSubstr, resetCode);
+    int endSubstrLen = (int)strlen(endSubstr);
+
+
+
+    // Count how many newlines are in the input string so we know how big
+    // the result string needs to be to accomodate the added escape codes
+    int lineCount = 1;
+    for (const char *p = input; *p; p++)
+    {
+        if (*p == '\n')
+            lineCount++;
+    }
+
+    // Allocate a buffer for the result string that we can grow if needed
+    int capacity = inputStrLen + lineCount * (startSubstrLen + endSubstrLen)
+        + 1;
+    char *result = malloc(capacity);
+    if (!result)
+    {
+        free(startSubstr);
+        free(endSubstr);
+        return NULL;
+    }
+    result[0] = '\0';
+
+
+
+    // Walk through input and wrap each line with start/end substrings
+    const char *lineStart = input;
+    const char *p = input;
+    while (1)
+    {
+        if (*p == '\n' || *p == '\0')
+        {
+            int lineLen = p - lineStart;
+
+            strcat(result, startSubstr);
+            strncat(result, lineStart, lineLen);
+            strcat(result, endSubstr);
+
+            if (*p == '\n')
+                strcat(result, "\n");
+            else
+                break;
+
+            lineStart = p + 1;
+        }
+        p++;
+    }
+
+    free(startSubstr);
+    free(endSubstr);
+
+    return result;
 }
 
 /**
