@@ -76,7 +76,7 @@ Usage: shorkfetch [OPTIONS]
 * `-mc`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
 * `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
 * `-na`, `--no-art`: Disables the SHORK ASCII art
-* `-ne`, `--no-esc`: Disables all ANSI espace codes and colour features
+* `-ne`, `--no-esc`: Disables all ANSI escape codes and colour features
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-v`, `--version`: Displays version number and exits

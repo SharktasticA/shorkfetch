@@ -180,9 +180,9 @@ void showHelp(void)
     free(noArt->str);
     free(noArt);
 
-    WORD_WRAPPED *noEsc = wordWrap("-ne, --no-esc   Disables all ANSI "
-        "espace codes and colour features\n", TERM_SIZE.ws_col,
-        "                ", 0, 0);
+    WORD_WRAPPED *noEsc = wordWrap("-ne, --no-esc      Disables all ANSI "
+        "escape codes and colour features\n", TERM_SIZE.ws_col,
+        "                   ", 0, 0);
     printf("%s", noEsc->str);
     free(noEsc->str);
     free(noEsc);
