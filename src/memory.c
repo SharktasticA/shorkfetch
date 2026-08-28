@@ -35,7 +35,7 @@ MemInfo getMemInfo(void)
     {
         char buffer[128];
         int parsed = 0;
-        while (fgets(buffer, sizeof(buffer), fStream) && parsed < 6)
+        while (fgets(buffer, sizeof(buffer), fStream) && parsed < 7)
         {
             if (sscanf(buffer, "MemTotal: %ld", &mi.memTotal) == 1)
                 { parsed++; continue; }
