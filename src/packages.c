@@ -27,8 +27,9 @@
 
 
 /**
- * @return String containing counts of various packages including dpkg,
- *         pacman, rpm, flatpak and snap.
+ * Gets a count of various Linux package standards including dpkg, pacman,
+ * pkgtool, rpm, flat and snap.
+ * @return String containing all of the found/applicable package counts
  */
 char *getPackages(const char *os)
 {
@@ -36,16 +37,17 @@ char *getPackages(const char *os)
     if (os && strncmp(os, "SHORK", 5) == 0)
         return NULL;
 
-    const int PKGS_SIZE = 256;
-    char *pkgs = malloc(PKGS_SIZE);
-    if (!pkgs) return NULL;
+    char *pkgs = malloc(PACKAGES_LEN);
+    if (!pkgs)
+        return NULL;
     pkgs[0] = '\0';
 
-    int dCount = 0;
-    int pCount = 0;
-    int rCount = 0;
-    int fCount = 0;
-    int sCount = 0;
+    int dpkgCount = 0;
+    int pacmanCount = 0;
+    int pkgtoolCount = 0;
+    int rpmCount = 0;
+    int flatCount = 0;
+    int snapCount = 0;
 
     // Get Debian-style packages by counting inside /var/lib/dpkg/status
     FILE *dpkgStatus = fopen("/var/lib/dpkg/status", "r");
@@ -53,10 +55,10 @@ char *getPackages(const char *os)
     {
         const char *needle = "Status: install ok installed";
         int needleLen = strlen(needle);
-        char buffer[512];
-        while (fgets(buffer, 512, dpkgStatus))
+        char buffer[32];
+        while (fgets(buffer, 32, dpkgStatus))
             if (strncmp(buffer, needle, needleLen) == 0)
-                dCount++;
+                dpkgCount++;
         fclose(dpkgStatus);
     }
 
@@ -68,8 +70,30 @@ char *getPackages(const char *os)
         while ((dirEntry = readdir(pacmanLocal)) != NULL)
             if (dirEntry->d_name[0] != '.' &&
                 strcmp(dirEntry->d_name, "ALPM_DB_VERSION") != 0)
-                pCount++;
+                pacmanCount++;
         closedir(pacmanLocal);
+    }
+
+    // Get Slackware-style packages by counting inside
+    // /var/lib/pkgtools/packages or /var/log/packages
+    const char *pkgtoolDirs[] = {
+        "/var/lib/pkgtools/packages",
+        "/var/log/packages"
+    };
+    for (int i = 0; i < 2; i++)
+    {
+        DIR *pkgtoolDir = opendir(pkgtoolDirs[i]);
+        if (!pkgtoolDir)
+            continue;
+
+        struct dirent *dirEntry;
+        while ((dirEntry = readdir(pkgtoolDir)) != NULL)
+            if (dirEntry->d_name[0] != '.' && dirEntry->d_type != DT_DIR)
+                pkgtoolCount++;
+        closedir(pkgtoolDir);
+
+        if (pkgtoolCount > 0)
+            break;
     }
 
     // Get Fedora-style packages
@@ -79,7 +103,7 @@ char *getPackages(const char *os)
         FILE *fStream = popen("rpm -qa 2>/dev/null | wc -l", "r");
         if (fStream)
         {
-            fscanf(fStream, "%d", &rCount);
+            fscanf(fStream, "%d", &rpmCount);
             pclose(fStream);
         }
     }
@@ -173,7 +197,7 @@ char *getPackages(const char *os)
                                 ".Locale") == 0)
                             continue;
 
-                        fCount++;
+                        flatCount++;
                     }
                     closedir(branchDir);
                 }
@@ -195,28 +219,32 @@ char *getPackages(const char *os)
         while ((dirEntry = readdir(snapDir)) != NULL)
             if (dirEntry->d_type == DT_DIR && dirEntry->d_name[0] != '.' &&
                 strcmp(dirEntry->d_name, "bin") != 0)
-                sCount++;
+                snapCount++;
         closedir(snapDir);
 
-        if (sCount > 0)
+        if (snapCount > 0)
             break;
     }
 
     // Build the result string
-    if (dCount > 0)
-        snprintf(pkgs, PKGS_SIZE, COMPACT ? "%d(D)" : "%d (dpkg)", dCount);
-    if (pCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
-        COMPACT ? ":%d(P)" : ", %d (pacman)", pCount);
-    if (rCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
-        COMPACT ? ":%d(R)" : ", %d (rpm)", rCount);
-    if (fCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
-        COMPACT ? ":%d(F)" : ", %d (flat)", fCount);
-    if (sCount > 0)
-        snprintf(pkgs + strlen(pkgs), PKGS_SIZE - strlen(pkgs),
-        COMPACT ? ":%d(S)" : ", %d (snap)", sCount);
+    if (dpkgCount > 0)
+        snprintf(pkgs, PACKAGES_LEN, COMPACT ? "%d(D)" : "%d (dpkg)",
+            dpkgCount);
+    if (pacmanCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+        COMPACT ? ":%d(Pm)" : ", %d (pacman)", pacmanCount);
+    if (pkgtoolCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+        COMPACT ? ":%d(Pt)" : ", %d (pkgtool)", pkgtoolCount);
+    if (rpmCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+        COMPACT ? ":%d(R)" : ", %d (rpm)", rpmCount);
+    if (flatCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+        COMPACT ? ":%d(F)" : ", %d (flat)", flatCount);
+    if (snapCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+        COMPACT ? ":%d(S)" : ", %d (snap)", snapCount);
 
     // Make sure we don't start with ", " or ":"...
     int pkgsLen = strlen(pkgs);

@@ -1220,7 +1220,8 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "ram") == 0 && mi.memTotal > 0)
         {
-            char *ram = getRAM(mi, colPctLow, colPctMed, colPctHigh, colReset);
+            char *ram = getRAM(mi, colPctLow, colPctMed, colPctHigh,
+                colReset);
             if (ram)
             {
                 if (NO_ESC) printShorkLine(0);
@@ -1253,7 +1254,8 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "swap") == 0 &&
             mi.swapTotal > 0)
         {
-            char *swap = getSwap(mi, colPctLow, colPctMed, colPctHigh, colReset);
+            char *swap = getSwap(mi, colPctLow, colPctMed, colPctHigh,
+                colReset);
             if (swap && swap[0] != '\0')
             {
                 if (NO_ESC) printShorkLine(0);
@@ -1355,7 +1357,8 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "root") == 0)
         {
-            char *root = getRoot(colPctLow, colPctMed, colPctHigh, colReset);
+            char *root = getRoot(colPctLow, colPctMed, colPctHigh,
+                colReset);
             if (root && root[0] != '\0')
             {
                 if (NO_ESC) printShorkLine(0);

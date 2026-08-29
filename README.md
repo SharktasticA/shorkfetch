@@ -102,7 +102,7 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `os` | Operating system | 1 |
 | `krn` | Kernel | 1 |
 | `upt` | Uptime | 1 |
-| `pkgs` | Packages | 1 |
+| `pkgs` | Packages (dpkg, pacman, pkgtool, rpm, flat & snap) | 1 |
 | `loc` | Locale | 1 |
 | `scn` | Screen(s) | 1-∞ |
 | `de` | Desktop environment | 1 |

@@ -16,6 +16,10 @@
 #ifndef PACKAGES
 #define PACKAGES
 
+#define PACKAGES_LEN    256
+
+
+
 char *getPackages(const char*);
 
 #endif
