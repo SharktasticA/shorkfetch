@@ -41,11 +41,12 @@ int deleteConf(void)
 
 /**
  * Reads shorkfetch.conf.
+ * @param charBullet
  * @param colAccent
+ * @param colBullet
  * @param colPctHigh
  * @param colPctLow
  * @param colPctMed
- * @param bullet
  * @param compact
  * @param fields
  * @param mode
@@ -53,9 +54,9 @@ int deleteConf(void)
  * @param noIP
  * @param showShork
  */
-void readConf(char **colAccent, char **colPctHigh, char **colPctLow,
-    char **colPctMed, char *bullet, int *compact, char **fields,
-    VIEW_MODE *mode, int *noEsc, int *noIP, int *showShork)
+void readConf(char *charBullet, char **colAccent, char **colBullet, 
+    char **colPctHigh, char **colPctLow, char **colPctMed, int *compact, 
+    char **fields, VIEW_MODE *mode, int *noEsc, int *noIP, int *showShork)
 {
     char path[PATH_MAX];
     snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
@@ -76,10 +77,17 @@ void readConf(char **colAccent, char **colPctHigh, char **colPctLow,
             char *key = line;
             char *value = eq + 1;
 
+            if (strcmp(key, "charBullet") == 0)
+                *charBullet = value[0];
             if (strcmp(key, "colAccent") == 0)
             {
                 free(*colAccent);
                 *colAccent = strdup(value);
+            }
+            if (strcmp(key, "colBullet") == 0)
+            {
+                free(*colBullet);
+                *colBullet = strdup(value);
             }
             else if (strcmp(key, "colPctHigh") == 0)
             {
@@ -96,8 +104,6 @@ void readConf(char **colAccent, char **colPctHigh, char **colPctLow,
                 free(*colPctMed);
                 *colPctMed = strdup(value);
             }
-            else if (strcmp(key, "bullet") == 0)
-                *bullet = value[0];
             else if (strcmp(key, "compact") == 0)
                 *compact = atoi(value);
             else if (strcmp(key, "fields") == 0)
@@ -120,20 +126,21 @@ void readConf(char **colAccent, char **colPctHigh, char **colPctLow,
 
 /**
  * Writes shorkfetch.conf.
+ * @param charBullet
  * @param colAccent
+ * @param colBullet
  * @param colPctHigh
  * @param colPctLow
  * @param colPctMed
- * @param bullet
  * @param compact
  * @param fields
  * @param mode
  * @param noIP
  * @param showShork
  */
-void writeConf(char *colAccent, char *colPctHigh, char *colPctLow,
-    char *colPctMed, char bullet, int compact, char *fields, VIEW_MODE mode,
-    int noEsc, int noIP, int showShork)
+void writeConf(char charBullet, char *colAccent, char *colBullet, 
+    char *colPctHigh, char *colPctLow, char *colPctMed, int compact, 
+    char *fields, VIEW_MODE mode, int noEsc, int noIP, int showShork)
 {
     char path[PATH_MAX];
 
@@ -148,11 +155,12 @@ void writeConf(char *colAccent, char *colPctHigh, char *colPctLow,
     FILE *conf = fopen(path, "w");
     if (conf)
     {
+        fprintf(conf, "charBullet=%c\n", charBullet);
         fprintf(conf, "colAccent=%s\n", colAccent);
+        fprintf(conf, "colBullet=%s\n", colBullet);
         fprintf(conf, "colPctHigh=%s\n", colPctHigh);
         fprintf(conf, "colPctLow=%s\n", colPctLow);
         fprintf(conf, "colPctMed=%s\n", colPctMed);
-        fprintf(conf, "bullet=%c\n", bullet);
         fprintf(conf, "compact=%d\n", compact);
         fprintf(conf, "fields=%s\n", fields);
         fprintf(conf, "mode=%d\n", mode);
