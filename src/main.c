@@ -95,26 +95,26 @@ void showHelp(void)
 {
     WORD_WRAPPED *desc = wordWrap("A tool that displays system, hardware "
         "and environment information in a summarised format.\n",
-        TERM_SIZE.ws_col, NULL, 0, 0);
+        TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s\n", desc->str);
     free(desc->str);
     free(desc);
 
     WORD_WRAPPED *usage = wordWrap("Usage: shorkfetch [OPTIONS]\n\n",
-        TERM_SIZE.ws_col, NULL, 0, 0);
+        TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", usage->str);
     free(usage->str);
     free(usage);
 
     WORD_WRAPPED *options = wordWrap("Options:\n", TERM_SIZE.ws_col, NULL,
-        0, 0);
+        NULL, 0, 0);
     printf("%s", options->str);
     free(options->str);
     free(options);
 
     WORD_WRAPPED *accentCol = wordWrap("-ac, --accent-col  Specifies a "
         "custom accent colour; no assignment returns the current colour "
-        "and exits\n", TERM_SIZE.ws_col, "                   ", 0, 0);
+        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", accentCol->str);
     free(accentCol->str);
     free(accentCol);
@@ -122,102 +122,101 @@ void showHelp(void)
     WORD_WRAPPED *bullet = wordWrap("-b, --bullet       Specifies a custom "
         "character to use with bullet-point mode; no assignment returns "
         "the current character and exits\n", TERM_SIZE.ws_col,
-        "                   ", 0,
-        0);
+        "                   ", NULL, 0, 0);
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);
 
     WORD_WRAPPED *bulletCol = wordWrap("-bc, --bullet-col  Specifies a "
         "custom bullet-point colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                   ", 0,
-        0);
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        0, 0);
     printf("%s", bulletCol->str);
     free(bulletCol->str);
     free(bulletCol);
 
     WORD_WRAPPED *compact = wordWrap("-co, --compact     Compacts field "
         "names and field values\n", TERM_SIZE.ws_col, "                   ",
-        0, 0);
+        NULL, 0, 0);
     printf("%s", compact->str);
     free(compact->str);
     free(compact);
 
     WORD_WRAPPED *fields = wordWrap("-f, --fields       Specifies a custom "
         "fields list and order; no assignment returns list of current "
-        "fields and exits\n", TERM_SIZE.ws_col, "                   ", 0,
-        0);
+        "fields and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        0, 0);
     printf("%s", fields->str);
     free(fields->str);
     free(fields);
 
     WORD_WRAPPED *help = wordWrap("-h, --help         Displays help "
         "information and exits\n", TERM_SIZE.ws_col, "                   ",
-        0, 0);
+        NULL, 0, 0);
     printf("%s", help->str);
     free(help->str);
     free(help);
 
     WORD_WRAPPED *highCol = wordWrap("-hc, --high-col    Specifies a "
         "custom high percentage colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                   ", 0,
-        0);
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        0, 0);
     printf("%s", highCol->str);
     free(highCol->str);
     free(highCol);
 
     WORD_WRAPPED *lowCol = wordWrap("-lc, --low-col     Specifies a custom "
         "low percentage colour; no assignment returns the current colour "
-        "and exits\n", TERM_SIZE.ws_col, "                   ", 0, 0);
+        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", lowCol->str);
     free(lowCol->str);
     free(lowCol);
 
     WORD_WRAPPED *medCol = wordWrap("-mc, --med-col     Specifies a custom "
         "medium percentage colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                   ", 0,
-        0);
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        0, 0);
     printf("%s", medCol->str);
     free(medCol->str);
     free(medCol);
 
     WORD_WRAPPED *mode = wordWrap("-m, --mode         Select what view "
         "mode to use: [n]ormal, [b]ullets\n", TERM_SIZE.ws_col,
-        "                   ", 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
 
     WORD_WRAPPED *noArt = wordWrap("-na, --no-art      Disables the SHORK "
-        "ASCII art\n", TERM_SIZE.ws_col, "                   ", 0, 0);
+        "ASCII art\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", noArt->str);
     free(noArt->str);
     free(noArt);
 
     WORD_WRAPPED *noEsc = wordWrap("-ne, --no-esc      Disables all ANSI "
         "escape codes and colour features\n", TERM_SIZE.ws_col,
-        "                   ", 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", noEsc->str);
     free(noEsc->str);
     free(noEsc);
 
     WORD_WRAPPED *reset = wordWrap("-r, --reset        Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
-        "                   ", 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", reset->str);
     free(reset->str);
     free(reset);
 
     WORD_WRAPPED *save = wordWrap("-s, --save         Saves chosen options "
         "to a configuration file\n", TERM_SIZE.ws_col,
-        "                   ", 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", save->str);
     free(save->str);
     free(save);
 
     WORD_WRAPPED *version = wordWrap("-v, --version      Displays version "
-        "number and exits\n\n", TERM_SIZE.ws_col, "                   ", 0,
-        0);
+        "number and exits\n\n", TERM_SIZE.ws_col, "                   ",
+        NULL, 0, 0);
     printf("%s", version->str);
     free(version->str);
     free(version);
@@ -225,7 +224,7 @@ void showHelp(void)
     WORD_WRAPPED *colours = wordWrap("Colours: black, blue, bright_blue, "
         "bright_cyan, bright_green, bright_magenta, bright_red, "
         "bright_white, bright_yellow, cyan, green, grey, magenta, red, "
-        "white, yellow, off\n\n", TERM_SIZE.ws_col, NULL, 0, 0);
+        "white, yellow, off\n\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", colours->str); 
     free(colours->str);
     free(colours);
@@ -233,8 +232,7 @@ void showHelp(void)
     WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, loc, "
         "scn, de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, "
         "clba, clbr, --- (separator), single blank space (new line)\n",
-        TERM_SIZE.ws_col,
-        NULL, 0, 0);
+        TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);
@@ -267,7 +265,7 @@ int snprintfStdout(char *__restrict __s, size_t __maxlen,
 int main(int argc, char *argv[])
 {
     COL_ACCENT = strdup("bright_cyan");
-    COL_BULLET = strdup("bright_cyan");
+    COL_BULLET = strdup("cyan");
     COL_PCT_LOW = strdup("green");
     COL_PCT_MED = strdup("yellow");
     COL_PCT_HIGH = strdup("red");
@@ -1519,15 +1517,23 @@ int main(int argc, char *argv[])
         WORD_WRAPPED *data = NULL;
         if (mode == BULLETS)
             data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
-                "   ", 1, 0);
+                "   ", NULL, 1, 0);
         else
         {
             if (COMPACT)
                 data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
-                    "     ", 1, 0);
+                    "     ", NULL, 1, 0);
             else
+            {
+                const int prefixStrLen = 2 + strlen(colBullet) +
+                    strlen(colReset);
+                char *prefixStr = malloc(prefixStrLen);
+                snprintf(prefixStr, prefixStrLen, " %s%c%s ", colBullet,
+                    CHAR_BULLET, colReset);
                 data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
-                    "          ", 1, 0);
+                    "          ", prefixStr, 1, 0);
+                free(prefixStr);
+            }
         }
 
         if (data)

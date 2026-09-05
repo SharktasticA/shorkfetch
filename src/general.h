@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision C                                       ##
+    ## Revision D                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -76,6 +76,6 @@ int readHexFile(const char*);
 char *removeBrackets(const char*, const int);
 int runCmd(const char*, ...);
 void splitText(char*, char*[], int);
-WORD_WRAPPED *wordWrap(char*, int, char*, int, int);
+WORD_WRAPPED *wordWrap(char*, int, char*, char*, int, int);
 
 #endif

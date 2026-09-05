@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision C                                       ##
+    ## Revision D                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -1141,17 +1141,20 @@ void splitText(char *text, char *textLines[], int totalLines)
 }
 
 /**
- * Word-wraps a given string based on the requested width, optionalling adding
+ * Word-wraps a given string based on the requested width, optionally adding
  * indents to the start of each newly-made line.
  * @param input Input string
  * @param width Number of characters per line
- * @param indent Indent to include after a wrap
+ * @param indent Indent to include after a wrap (NULL to disable)
+ * @param prefix Prefixing substring to also take into account when wrapping
+ *               (NULL to disable feature)
  * @param hardBreak Flags if the function should hard-break words if needed
  * @param trim Flags that any trailing newlines should be removed
- * @return Malloc'd WORD_WRAPPED struct containing the result string, how long
- *         it is & how many lines it has
+ * @return Malloc'd WORD_WRAPPED struct containing the result string, how
+ *         long it is & how many lines it has
  */
-WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int trim)
+WORD_WRAPPED *wordWrap(char *input, int width, char *indent, char *prefix,
+    int hardBreak, int trim)
 {
     if (!input || width < 1)
         return NULL;
@@ -1159,6 +1162,34 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
     // Initialse variables that help us track progress
     int inputStrLen = strlen(input);
     int indentLen = indent ? strlen(indent) : 0;
+    int prefixLen = 0;
+    if (prefix)
+    {
+        char *p = prefix;
+        while (*p)
+        {
+            // prefix may contain ANSI colour escape codes, so we want to
+            // calculate prefixLen excluding them
+            if (*p == '\x1b' && p[1] == '[')
+            {
+                // Skip ESC and '['
+                p += 2;
+                // Skip parameters
+                while (*p && *p != 'm')
+                    p++;
+                // Skip final 'm'
+                if (*p == 'm')
+                    p++;
+            }
+            else
+            {
+                // Count visible character
+                prefixLen++;
+                p++;
+            }
+        }
+    }
+
     // Count of lines found in the ouptu
     int lines = 1;
     // Index of the most recent breakable character
@@ -1168,6 +1199,13 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
     // The current size of the line being processed 
     int widthCount = 1;
 
+    // Flags if the line being processed contains the prefix
+    int hasPrefix = 0;
+    // Flags if prefix is at the start of the line
+    int prefixAtStart = (prefixLen == 0);
+    // Flags if prefix is after an indent
+    int prefixAtIndent = (prefixLen == 0);
+
     // Allocate a buffer for the result string that we can grow if needed
     int capacity = inputStrLen + 1;
     char *result = malloc(capacity);
@@ -1175,7 +1213,8 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
         return NULL;
     memcpy(result, input, inputStrLen + 1);
 
-    // Iterate through the input string to find line breaks or places to add new ones
+    // Iterate through the input string to find line breaks or places to add
+    // new ones
     for (int i = 0; i < inputStrLen; i++)
     {
         // Skip counting ANSI escape sequences
@@ -1188,15 +1227,38 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
             continue;
         }
 
-        // If a newline is already in the string, handle it and advance to next
-        // iteration
+        // If a newline is already in the string, handle it and advance to
+        // next iteration
         if (result[i] == '\n')
         {
             lines++;
             widthCount = 0;
             lastBreakPos = -1;
             lastBreakChar = '\0';
+            hasPrefix = 0;
+            prefixAtStart = (prefixLen == 0);
+            prefixAtIndent = (prefixLen == 0);
             continue;
+        }
+
+        // Test for prefix at the start of the line
+        if (!prefixAtStart && widthCount == 0)
+        {
+            prefixAtStart = 1;
+            if (prefixLen > 0 && i + prefixLen <= inputStrLen &&
+                strncmp(result + i, prefix, prefixLen) == 0)
+                hasPrefix = 1;
+        }
+        // Test for prefix after the indent
+        else if (!prefixAtIndent && indentLen > 0 &&
+            widthCount == indentLen)
+        {
+            prefixAtIndent = 1;
+            if (!hasPrefix && prefixLen > 0 && i + prefixLen <= inputStrLen
+                && strncmp(result + i, prefix, prefixLen) == 0)
+            {
+                hasPrefix = 1;
+            }
         }
 
         // If we have an indent, add some grace in case it's being used to
@@ -1258,15 +1320,19 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
                 }
 
                 lines++;
+                // Indent length taking into account the possible prefix
+                int actualIndentLen = indentLen +
+                    (hasPrefix ? prefixLen : 0);
 
-                // If indent is desired, time to add that to the start of the line
-                if (indent && indentLen > 0)
+                // If indent and/or prefix is desired, time to add that to
+                // the start of the line
+                if (actualIndentLen > 0)
                 {
-                    int needed2 = inputStrLen + indentLen + 1;
+                    int needed2 = inputStrLen + actualIndentLen + 1;
                     if (needed2 > capacity)
                     {
-                        // Make sure there is room for the extra length needed for
-                        // inserting an indent
+                        // Make sure there is room for the extra length
+                        // needed for inserting an indent
                         int newCapacity = capacity ? capacity * 2 : 16;
                         while (newCapacity < needed2)
                             newCapacity *= 2;
@@ -1281,11 +1347,16 @@ WORD_WRAPPED *wordWrap(char *input, int width, char *indent, int hardBreak, int 
                         capacity = newCapacity;
                     }
 
-                    memmove(result + breakPos + 1 + indentLen, result + breakPos + 1, inputStrLen - breakPos);
-                    memcpy(result + breakPos + 1, indent, indentLen);
-                    inputStrLen += indentLen;
+                    memmove(result + breakPos + 1 + actualIndentLen,
+                        result + breakPos + 1, inputStrLen - breakPos);
+                    if (indentLen > 0)
+                        memcpy(result + breakPos + 1, indent, indentLen);
+                    if (hasPrefix && prefixLen > 0)
+                        memset(result + breakPos + 1 + indentLen, ' ',
+                            prefixLen);
+                    inputStrLen += actualIndentLen;
                     if (breakPos <= i)
-                        i += indentLen;
+                        i += actualIndentLen;
                 }
 
                 widthCount = i - breakPos;
