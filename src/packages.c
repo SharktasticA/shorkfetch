@@ -27,8 +27,8 @@
 
 
 /**
- * Gets a count of various Linux package standards including dpkg, pacman,
- * pkgtool, rpm, flat and snap.
+ * Gets a count of various Linux package standards including dpkg, emerge,
+ * pacman, pkgtool, rpm, flat and snap.
  * @return String containing all of the found/applicable package counts
  */
 char *getPackages(const char *os)
@@ -43,6 +43,7 @@ char *getPackages(const char *os)
     pkgs[0] = '\0';
 
     int dpkgCount = 0;
+    int emergeCount = 0;
     int pacmanCount = 0;
     int pkgtoolCount = 0;
     int rpmCount = 0;
@@ -60,6 +61,36 @@ char *getPackages(const char *os)
             if (strncmp(buffer, needle, needleLen) == 0)
                 dpkgCount++;
         fclose(dpkgStatus);
+    }
+
+    // Get Gentoo packages by counting inside /var/db/pkg/<category>/
+    DIR *dbPkg = opendir("/var/db/pkg");
+    if (dbPkg)
+    {
+        struct dirent *catEntry;
+        while ((catEntry = readdir(dbPkg)) != NULL)
+        {
+            if (catEntry->d_name[0] == '.')
+                continue;
+
+            char catPath[PATH_MAX];
+            int catPathLen = snprintf(catPath, PATH_MAX,
+                "/var/db/pkg/%s", catEntry->d_name);
+            if (catPathLen < 0 || catPathLen >= PATH_MAX)
+                continue;
+
+            DIR *catDir = opendir(catPath);
+            if (!catDir)
+                continue;
+
+            struct dirent *pkgEntry;
+            while ((pkgEntry = readdir(catDir)) != NULL)
+                if (pkgEntry->d_name[0] != '.' &&
+                    pkgEntry->d_type == DT_DIR)
+                    emergeCount++;
+            closedir(catDir);
+        }
+        closedir(dbPkg);
     }
 
     // Get Arch-style packages by counting inside /var/lib/pacman/local
@@ -230,21 +261,24 @@ char *getPackages(const char *os)
     if (dpkgCount > 0)
         snprintf(pkgs, PACKAGES_LEN, COMPACT ? "%d(D)" : "%d (dpkg)",
             dpkgCount);
+    if (emergeCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+            COMPACT ? ":%d(E)" : ", %d (emerge)", emergeCount);
     if (pacmanCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
-        COMPACT ? ":%d(Pm)" : ", %d (pacman)", pacmanCount);
+            COMPACT ? ":%d(Pm)" : ", %d (pacman)", pacmanCount);
     if (pkgtoolCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
-        COMPACT ? ":%d(Pt)" : ", %d (pkgtool)", pkgtoolCount);
+            COMPACT ? ":%d(Pt)" : ", %d (pkgtool)", pkgtoolCount);
     if (rpmCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
-        COMPACT ? ":%d(R)" : ", %d (rpm)", rpmCount);
+            COMPACT ? ":%d(R)" : ", %d (rpm)", rpmCount);
     if (flatCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
-        COMPACT ? ":%d(F)" : ", %d (flat)", flatCount);
+            COMPACT ? ":%d(F)" : ", %d (flat)", flatCount);
     if (snapCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
-        COMPACT ? ":%d(S)" : ", %d (snap)", snapCount);
+            COMPACT ? ":%d(S)" : ", %d (snap)", snapCount);
 
     // Make sure we don't start with ", " or ":"...
     int pkgsLen = strlen(pkgs);
