@@ -231,7 +231,7 @@ void showHelp(void)
 
     WORD_WRAPPED *fieldNames = wordWrap("Fields: os, krn, upt, pkgs, loc, "
         "scn, de, wm, trm, sh, cpu, gpu, ram, swap, dsk, root, lip, clrs, "
-        "clba, clbr, --- (separator), single blank space (new line)\n",
+        "clba, clbr, --- (separator), single blank space (blank line)\n",
         TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);

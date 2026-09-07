@@ -95,30 +95,30 @@ Only one colour can be used at a time. "off" will use your system's/terminal emu
 
 These are possible field names you can use with the `--fields` argument. You enter then as a comma-separated list in double quotes. You can use any more than once and in any order, though there is a maximum of 50 fields.
 
-| Field | Description | Lines |
-| ----- | ----------- | ----- |
-| (single blank space) | New line | 1 |
-| `---` | Separator | 1 |
-| `os` | Operating system | 1 |
-| `krn` | Kernel | 1 |
-| `upt` | Uptime | 1 |
-| `pkgs` | Packages (dpkg, pacman, pkgtool, rpm, flat & snap) | 1 |
-| `loc` | Locale | 1 |
-| `scn` | Screen(s) | 1-∞ |
-| `de` | Desktop environment | 1 |
-| `wm` | Window manager and/or Wayland compositor | 1 |
-| `trm` | Terminal emulator/console size | 1 |
-| `sh` | Shell | 1 |
-| `cpu` | CPU | 1 |
-| `gpu` | GPU(s) | 1-4 |
-| `ram` | System memory | 1 |
-| `swap` | Swap memory | 1 |
-| `dsk` | Disk size(s) | 1-10 |
-| `root` | Root partition size | 1 |
-| `lip` | Local IP address | 1 |
-| `clrs` | ANSI escape code base & bright 16-colour palette | 2 |
-| `clba` | ANSI escape code base 8-colour palette | 1 |
-| `clbr` | ANSI escape code bright 8-colour palette | 1 |
+| Field | Description | Lines | Used by default |
+| ----- | ----------- | ----- | --------------- |
+| (single blank space) | Blank line | 1 | ✓ |
+| `---` | Separator | 1 | ✓ |
+| `os` | Operating system | 1 | ✓ |
+| `krn` | Kernel | 1 | ✓ |
+| `upt` | Uptime | 1 | ✓ |
+| `pkgs` | Packages (dpkg, emerge, pacman, pkgtool, rpm, flat & snap) | 1 | ✓ |
+| `loc` | Locale(s) | 1 | ✓|
+| `scn` | Screen(s) | 1-∞ | ✓ |
+| `de` | Desktop environment | 1 | ✓ |
+| `wm` | Window manager and/or Wayland compositor | 1 | ✓ |
+| `trm` | Terminal emulator/console size | 1 | ✓ |
+| `sh` | Shell | 1 | ✓ |
+| `cpu` | CPU | 1 | ✓ |
+| `gpu` | GPU(s) | 1-4 | ✓ |
+| `ram` | Physical memory | 1 | ✓ |
+| `swap` | Swap memory | 1 | ✓ |
+| `dsk` | Disk size(s) | 1-10 | ✓ |
+| `root` | Root partition size | 1 | ✓ |
+| `lip` | Local IP address | 1 | ✓ |
+| `clrs` | ANSI escape code base & bright 16-colour palette | 2 | ✓ |
+| `clba` | ANSI escape code base 8-colour palette | 1 | |
+| `clbr` | ANSI escape code bright 8-colour palette | 1 | |
 
 ### Configuration
 
@@ -132,7 +132,7 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 #### Using with gay
 
-[gay](https://github.com/ms-jpq/gay) can be used to change the colour of stdout piped into it to a random or chosen LGBTQ+ flag. If you use it with SHORKFETCH as-is, you may notice it does not handle the ANSI escape codes SHORKFETCH uses to position its fields and construct the 16-colour palette. You can use the `-ne`/`--no-esc` option to disable all ANSI escape codes to increase compatibility with `gay` and perhaps similar commands with the same issue, though note the aforementioned colour palette will be disabled.
+[gay](https://github.com/ms-jpq/gay) can be used to change the colour of stdout piped into it to a random or chosen LGBTQ+ flag. If you use it with SHORKFETCH as-is, you may notice it does not handle the ANSI escape codes SHORKFETCH uses to position its fields and construct colour palettes. You can use the `-ne`/`--no-esc` option to disable all ANSI escape codes to increase compatibility with `gay` and perhaps similar commands with the same issue, though note the aforementioned colour palettes will be disabled.
 
 
 
