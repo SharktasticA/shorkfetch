@@ -180,12 +180,20 @@ void showHelp(void)
     free(medCol->str);
     free(medCol);
 
-    WORD_WRAPPED *mode = wordWrap("-m, --mode         Select what view "
-        "mode to use: [n]ormal, [b]ullets\n", TERM_SIZE.ws_col,
+    WORD_WRAPPED *mode = wordWrap("-mo, --mode        Specifies which view "
+        "mode to use: [n]ormal (default), [b]ullets\n", TERM_SIZE.ws_col,
         "                   ", NULL, 0, 0);
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
+
+    WORD_WRAPPED *maxUnit = wordWrap("-mu, --max-unit    Specifies the "
+        "largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, "
+        "[g]ibi, [t]ebi, [p]ebi (default)\n", TERM_SIZE.ws_col,
+        "                   ", NULL, 0, 0);
+    printf("%s", maxUnit->str);
+    free(maxUnit->str);
+    free(maxUnit);
 
     WORD_WRAPPED *noArt = wordWrap("-na, --no-art      Disables the SHORK "
         "ASCII art\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
@@ -284,8 +292,8 @@ int main(int argc, char *argv[])
     VIEW_MODE mode = NORMAL;
 
     readConf(&CHAR_BULLET, &COL_ACCENT, &COL_BULLET, &COL_PCT_HIGH,
-        &COL_PCT_LOW, &COL_PCT_MED, &COMPACT, &fields, &mode, &NO_ESC,
-        &noIP, &SHOW_SHORK);
+        &COL_PCT_LOW, &COL_PCT_MED, &COMPACT, &fields, &MAX_UNIT, &mode,
+        &NO_ESC, &noIP, &SHOW_SHORK);
 
     for (int i = 1; i < argc; i++)
     {
@@ -442,12 +450,12 @@ int main(int argc, char *argv[])
             if (len > 0 && fields[len - 1] == ',')
                 fields[len - 1] = '\0';
         }
-        else if (strncmp(argv[i], "-m", 2) == 0 ||
+        else if (strncmp(argv[i], "-mo", 3) == 0 ||
             strncmp(argv[i], "--mode", 6) == 0)
         {
             char *modeVal = NULL;
-            if (strncmp(argv[i], "-m=", 3) == 0)
-                modeVal = &argv[i][3];
+            if (strncmp(argv[i], "-mo=", 4) == 0)
+                modeVal = &argv[i][4];
             else if (strncmp(argv[i], "--mode=", 7) == 0)
                 modeVal = &argv[i][7];
 
@@ -461,9 +469,11 @@ int main(int argc, char *argv[])
                     return 1;
                 }
                 else if (strcmp(modeVal, "n") == 0 ||
+                    strcmp(modeVal, "N") == 0 ||
                     strcmp(modeVal, "normal") == 0)
                     mode = NORMAL;
                 else if (strcmp(modeVal, "b") == 0 ||
+                    strcmp(modeVal, "B") == 0 ||
                     strcmp(modeVal, "bullet") == 0 ||
                     strcmp(modeVal, "bullets") == 0)
                     mode = BULLETS;
@@ -481,6 +491,69 @@ int main(int argc, char *argv[])
                     printf("\"normal\"\n");
                 else if (mode == BULLETS)
                     printf("\"bullets\"\n");
+                freeGlobals();
+                free(fields);
+                return 0;
+            }
+        }
+        else if (strncmp(argv[i], "-mu", 3) == 0 ||
+            strncmp(argv[i], "--max-unit", 10) == 0)
+        {
+            char *modeVal = NULL;
+            if (strncmp(argv[i], "-mu=", 4) == 0)
+                modeVal = &argv[i][4];
+            else if (strncmp(argv[i], "--max-unit=", 11) == 0)
+                modeVal = &argv[i][11];
+
+            if (modeVal)
+            {
+                if (modeVal[0] == '\0')
+                {
+                    printf("ERROR: no unit given\n");
+                    free(fields);
+                    freeGlobals();
+                    return 1;
+                }
+                else if (strcmp(modeVal, "b") == 0 ||
+                    strcmp(modeVal, "B") == 0 ||
+                    strcmp(modeVal, "byte") == 0)
+                    MAX_UNIT = 'b';
+                else if (strcmp(modeVal, "k") == 0 ||
+                    strcmp(modeVal, "K") == 0 ||
+                    strcmp(modeVal, "kibi") == 0 ||
+                    strcmp(modeVal, "Kibi") == 0)
+                    MAX_UNIT = 'k';
+                else if (strcmp(modeVal, "m") == 0 ||
+                    strcmp(modeVal, "M") == 0 ||
+                    strcmp(modeVal, "mebi") == 0 ||
+                    strcmp(modeVal, "Mebi") == 0)
+                    MAX_UNIT = 'm';
+                else if (strcmp(modeVal, "g") == 0 ||
+                    strcmp(modeVal, "G") == 0 ||
+                    strcmp(modeVal, "gibi") == 0 ||
+                    strcmp(modeVal, "Gibi") == 0)
+                    MAX_UNIT = 'g';
+                else if (strcmp(modeVal, "t") == 0 ||
+                    strcmp(modeVal, "T") == 0 ||
+                    strcmp(modeVal, "tebi") == 0 ||
+                    strcmp(modeVal, "Tebi") == 0)
+                    MAX_UNIT = 't';
+                else if (strcmp(modeVal, "p") == 0 ||
+                    strcmp(modeVal, "P") == 0 ||
+                    strcmp(modeVal, "pebi") == 0 ||
+                    strcmp(modeVal, "Pebi") == 0)
+                    MAX_UNIT = 'p';
+                else
+                {
+                    printf("ERROR: unrecognised unit \"%s\"\n", modeVal);
+                    free(fields);
+                    freeGlobals();
+                    return 1;
+                }
+            }
+            else
+            {
+                printf("'%c'\n", MAX_UNIT);
                 freeGlobals();
                 free(fields);
                 return 0;
@@ -1581,8 +1654,8 @@ int main(int argc, char *argv[])
 
     if (saveConf)
         writeConf(CHAR_BULLET, COL_ACCENT, COL_BULLET, COL_PCT_HIGH,
-            COL_PCT_LOW, COL_PCT_MED, COMPACT, fieldsOrig, mode, NO_ESC,
-            noIP, SHOW_SHORK);
+            COL_PCT_LOW, COL_PCT_MED, COMPACT, fieldsOrig, MAX_UNIT, mode,
+            NO_ESC, noIP, SHOW_SHORK);
 
     freeGlobals();
     free(colAccent);

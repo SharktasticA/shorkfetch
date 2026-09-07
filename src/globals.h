@@ -67,6 +67,7 @@ extern char *COL_PCT_LOW;
 extern char *COL_PCT_MED;
 extern int COMPACT;
 extern char *HOME;
+extern char MAX_UNIT;
 extern int NO_ESC;
 extern int SHORK_LINE;
 extern int SHOW_SHORK;

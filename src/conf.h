@@ -22,8 +22,8 @@
 
 int deleteConf(void);
 void readConf(char*, char**, char**, char**, char**, char**, int*, char**,
-    VIEW_MODE*, int*, int*, int*);
+    char*, VIEW_MODE*, int*, int*, int*);
 void writeConf(char, char*, char*, char*, char*, char*, int, char*,
-    VIEW_MODE, int, int, int);
+    char, VIEW_MODE, int, int, int);
 
 #endif

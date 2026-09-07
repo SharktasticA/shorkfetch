@@ -74,7 +74,8 @@ Usage: shorkfetch [OPTIONS]
 * `-hc`, `--high-col`: Specifies a custom high percentage colour; no assignment returns the current colour and exits
 * `-lc`, `--low-col`: Specifies a custom low percentage colour; no assignment returns the current colour and exits
 * `-mc`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
-* `-m`, `--mode` : Select which view mode to use: [n]ormal, [b]ullets
+* `-mo`, `--mode`: Select which view mode to use: [n]ormal (default), [b]ullets
+* `-mu`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default)
 * `-na`, `--no-art`: Disables the SHORK ASCII art
 * `-ne`, `--no-esc`: Disables all ANSI escape codes and colour features
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits

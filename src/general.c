@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision D                                       ##
+    ## Revision E                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -33,13 +33,16 @@
 
 
 /**
- * Converts a data value into a string formatted into a unit that makes sense for
- * its magnitude with its new unit added to the end.
+ * Converts a data value into a string formatted into a unit that makes
+ * sense for its magnitude with its new unit added to the end.
  * @param from Unit the input value is in (e.g., "B", "KiB")
  * @param val Input value to convert
- * @return String containing the converted value and its new unit (e.g., "1.5MiB")
+ * @param maxUnit Largest unit to use (e.g., 'M' to allow just B, KiB and
+ *                MiB)
+ * @return String containing the converted value and its new unit (e.g.,
+ *         "1.5MiB")
  */
-char *bytesToReadable(const char *from, const long long val)
+char *bytesToReadable(const char *from, const long long val, char maxUnit)
 {
     long long bytes = val;
     if (strcmp(from, "KiB") == 0)
@@ -50,7 +53,10 @@ char *bytesToReadable(const char *from, const long long val)
         bytes *= 1024LL * 1024 * 1024;
     else if (strcmp(from, "TiB") == 0)
         bytes *= 1024LL * 1024 * 1024 * 1024;
+    else if (strcmp(from, "PiB") == 0)
+        bytes *= 1024LL * 1024 * 1024 * 1024 * 1024;
 
+    const long long PiB = 1024LL * 1024 * 1024 * 1024 * 1024;
     const long long TiB = 1024LL * 1024 * 1024 * 1024;
     const long long GiB = 1024LL * 1024 * 1024;
     const long long MiB = 1024LL * 1024;
@@ -62,7 +68,54 @@ char *bytesToReadable(const char *from, const long long val)
     long long whole, remainder;
     int decimal;
 
-    if (bytes >= TiB)
+    int unitRank = 0;
+    switch (maxUnit)
+    {
+        case 'b':
+        case 'B':
+            unitRank = 0;
+            break;
+        case 'k':
+        case 'K':
+            unitRank = 1;
+            break;
+        case 'm':
+        case 'M':
+            unitRank = 2;
+            break;
+        case 'g':
+        case 'G':
+            unitRank = 3;
+            break;
+        case 't':
+        case 'T':
+            unitRank = 4;
+            break;
+        case 'p':
+        case 'P':
+        default:
+            unitRank = 5;
+            break;
+    }
+
+    if (bytes >= PiB && unitRank >= 5)
+    {
+        whole = bytes / PiB;
+        remainder = bytes % PiB;
+
+        if (COMPACT)
+        {
+            if (remainder > 0) whole++;
+            snprintf(result, resultSize, "%lldP", whole);
+            return result;
+        }
+
+        decimal = (int)((remainder * 10 + PiB / 2) / PiB);
+        if (decimal == 10) { whole++; decimal = 0; }
+        if (decimal == 0) snprintf(result, resultSize, "%lldPiB", whole);
+        else snprintf(result, resultSize, "%lld.%dPiB", whole, decimal);
+    }
+    else if (bytes >= TiB && unitRank >= 4)
     {
         whole = bytes / TiB;
         remainder = bytes % TiB;
@@ -79,7 +132,7 @@ char *bytesToReadable(const char *from, const long long val)
         if (decimal == 0) snprintf(result, resultSize, "%lldTiB", whole);
         else snprintf(result, resultSize, "%lld.%dTiB", whole, decimal);
     }
-    else if (bytes >= GiB)
+    else if (bytes >= GiB && unitRank >= 3)
     {
         whole = bytes / GiB;
         remainder = bytes % GiB;
@@ -96,7 +149,7 @@ char *bytesToReadable(const char *from, const long long val)
         if (decimal == 0) snprintf(result, resultSize, "%lldGiB", whole);
         else snprintf(result, resultSize, "%lld.%dGiB", whole, decimal);
     }
-    else if (bytes >= MiB)
+    else if (bytes >= MiB && unitRank >= 2)
     {
         whole = bytes / MiB;
         remainder = bytes % MiB;
@@ -113,7 +166,7 @@ char *bytesToReadable(const char *from, const long long val)
         if (decimal == 0) snprintf(result, resultSize, "%lldMiB", whole);
         else snprintf(result, resultSize, "%lld.%dMiB", whole, decimal);
     }
-    else if (bytes >= KiB)
+    else if (bytes >= KiB && unitRank >= 1)
     {
         whole = bytes / KiB;
         remainder = bytes % KiB;

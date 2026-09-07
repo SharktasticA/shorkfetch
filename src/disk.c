@@ -92,7 +92,7 @@ DISKS *getDisks(void)
         unsigned long long size = sectors * 512ULL;
 
         // Convert size to str with appropriate unit
-        char *sizeStr = bytesToReadable("B", size);
+        char *sizeStr = bytesToReadable("B", size, MAX_UNIT);
         if (!sizeStr || sizeStr[0] == '\0')
         {
             free(sizeStr);
@@ -134,8 +134,8 @@ char *getRoot(char *colPctLow, char *colPctMed, char *colPctHigh,
     long long freeRoot  = (long long)fs.f_bfree * fs.f_frsize;
     long long used  = total - freeRoot;
 
-    char *usedStr = bytesToReadable("B", used);
-    char *totalStr = bytesToReadable("B", total);
+    char *usedStr = bytesToReadable("B", used, MAX_UNIT);
+    char *totalStr = bytesToReadable("B", total, MAX_UNIT);
 
     if (!COMPACT)
     {

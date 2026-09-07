@@ -27,6 +27,7 @@ char *COL_PCT_LOW = NULL;
 char *COL_PCT_MED = NULL;
 int COMPACT = 0;
 char *HOME;
+char MAX_UNIT = 'p';
 int NO_ESC = 0;
 int SHORK_LINE = 0;
 int SHOW_SHORK = 1;
