@@ -56,21 +56,28 @@ LOCALES *getLocales(void)
         }
 
         char *prevPos;
-        char *semiToken = strtok_r(localesRaw, ";", &prevPos);
-        while (semiToken)
+        char *semiTok = strtok_r(localesRaw, ";", &prevPos);
+        while (semiTok)
         {
-            char *equalsToken = strchr(semiToken, '=');
-            if (equalsToken)
+            char *equalsTok = strchr(semiTok, '=');
+            if (equalsTok)
             {
+                // Skip LC_COLLATE so we don't get "C" as a locale
+                if (strncmp(semiTok, "LC_COLLATE=", 11) == 0)
+                {
+                    semiTok = strtok_r(NULL, ";", &prevPos);
+                    continue;
+                }
+
                 char needle[128];
-                snprintf(needle, sizeof(needle), "%s, ", equalsToken + 1);
+                snprintf(needle, sizeof(needle), "%s, ", equalsTok + 1);
                 if (strstr(result->locales, needle) == NULL)
                 {
                     strcat(result->locales, needle);
                     result->count++;
                 }
             }
-            semiToken = strtok_r(NULL, ";", &prevPos);
+            semiTok = strtok_r(NULL, ";", &prevPos);
         }
 
         size_t len = strlen(result->locales);
