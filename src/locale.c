@@ -32,6 +32,7 @@ LOCALES *getLocales(void)
     LOCALES *result = malloc(sizeof(LOCALES));
     if (!result)
         return NULL;
+    result->locales = NULL;
     result->count = 0;
 
     // Get raw locales value from setlocale
@@ -43,6 +44,11 @@ LOCALES *getLocales(void)
         return NULL;
     }
     char *localesRaw = strdup(slRet);
+    if (!localesRaw)
+    {
+        free(result);
+        return NULL;
+    }
 
     // If localesRaw contains '=' or ';', it likely contains multiple
     // locales
@@ -91,12 +97,13 @@ LOCALES *getLocales(void)
             result->locales = localesRaw;
             result->count = 1;
         }
+        else
+            free(localesRaw);
     }
 
     if (result->count == 0)
     {
-        if (result->locales)
-            free(result->locales);
+        free(result->locales);
         free(result);
         return NULL;
     }

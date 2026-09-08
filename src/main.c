@@ -953,7 +953,7 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "loc") == 0)
         {
             LOCALES *locales = getLocales();
-            if (locales->locales)
+            if (locales && locales->locales)
             {
                 if (NO_ESC) printShorkLine(0);
                 if (mode == NORMAL)
