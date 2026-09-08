@@ -62,19 +62,16 @@ LOCALES *getLocales(void)
             char *equalsTok = strchr(semiTok, '=');
             if (equalsTok)
             {
-                // Skip LC_COLLATE so we don't get "C" as a locale
-                if (strncmp(semiTok, "LC_COLLATE=", 11) == 0)
+                const char *val = equalsTok + 1;
+                if (strcmp(val, "C") != 0)
                 {
-                    semiTok = strtok_r(NULL, ";", &prevPos);
-                    continue;
-                }
-
-                char needle[128];
-                snprintf(needle, sizeof(needle), "%s, ", equalsTok + 1);
-                if (strstr(result->locales, needle) == NULL)
-                {
-                    strcat(result->locales, needle);
-                    result->count++;
+                    char needle[128];
+                    snprintf(needle, sizeof(needle), "%s, ", val);
+                    if (strstr(result->locales, needle) == NULL)
+                    {
+                        strcat(result->locales, needle);
+                        result->count++;
+                    }
                 }
             }
             semiTok = strtok_r(NULL, ";", &prevPos);
@@ -89,13 +86,17 @@ LOCALES *getLocales(void)
     // ...if not, it should only contain one locale
     else
     {
-        result->locales = localesRaw;
-        result->count = 1;
+        if (strcmp(localesRaw, "C") != 0)
+        {
+            result->locales = localesRaw;
+            result->count = 1;
+        }
     }
 
     if (result->count == 0)
     {
-        free(result->locales);
+        if (result->locales)
+            free(result->locales);
         free(result);
         return NULL;
     }
