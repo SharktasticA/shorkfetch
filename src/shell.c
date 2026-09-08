@@ -22,14 +22,13 @@
 
 
 /**
- * @return String containing the shell's name or "unknown" if
- *         undetermined/error
+ * @return String containing the shell's name; NULL if undetermined/error
  */
 char *getShell(void)
 {
     char *shell = getenv("SHELL");
     if (!shell || shell[0] == '\0') 
-        shell = strdup("unknown");
+        shell = NULL;
     else
         shell = strdup(basename(shell));
     return shell;
