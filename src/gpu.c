@@ -612,6 +612,8 @@ char *cleanGPUName(const char *vendor, const char *device,
 
 #endif
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @param count Number of GPUs actually detected (intended to be used by
  *              reference)
@@ -868,7 +870,7 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
         snprintf(gpuStr, GPU_NAME_LEN, "%04x:%04x", gpu->vendor,
         gpu->device);
     else
-        snprintf(gpuStr, GPU_NAME_LEN, "%s", 
+        snprintf(gpuStr, GPU_NAME_LEN, "%s",
             cleanGPUName(vendor, device, 0));
 
     if (vendor)
@@ -878,3 +880,10 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 
     return gpuStr;
 }
+
+#else
+
+GPU_IDS* getGPUs(int *count) { return NULL; }
+char *interpretGPU(GPU_IDS *gpu, const char *os) { return NULL; }
+
+#endif

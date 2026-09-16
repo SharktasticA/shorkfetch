@@ -25,6 +25,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * Gets the host terminal emulator name and console size.
  * @return String containing the the result name and size; NULL if not
@@ -163,3 +165,9 @@ char *getTerminal(void)
     else
         return result;
 }
+
+#else
+
+char *getTerminal(void) { return NULL; }
+
+#endif

@@ -26,6 +26,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @return String containing counts of various packages including dpkg,
  *         pacman, rpm, flatpak and snap.
@@ -230,3 +232,9 @@ char *getPackages(const char *os)
 
     return pkgs;
 }
+
+#else
+
+char *getPackages(const char *os) { return NULL; }
+
+#endif

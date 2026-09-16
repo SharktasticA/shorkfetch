@@ -22,6 +22,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @return String containing the active display environment's name; NULL if
  *         not found/applicable
@@ -133,3 +135,10 @@ char *getWM(char **de)
 
     return NULL;
 }
+
+#else
+
+char *getDE(void) { return NULL; }
+char *getWM(char **de)  { return NULL; }
+
+#endif

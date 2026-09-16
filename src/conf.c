@@ -24,6 +24,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * Deletes shorkfetch.conf.
  * @return 1 if deleted successfully; 0 if not
@@ -136,3 +138,15 @@ void writeConf(char bullet, char *colour, int compact, char *fields,
         fclose(conf);
     }
 }
+
+#else
+
+int deleteConf(void) { return NULL; }
+void readConf(char *bullet, char **colour, int *compact, char **fields,
+    VIEW_MODE *mode, int *noEsc, int *noIP, int *showShork)
+    { return NULL; }
+void writeConf(char bullet, char *colour, int compact, char *fields,
+    VIEW_MODE mode, int noEsc, int noIP, int showShork)
+    { return NULL; }
+
+#endif

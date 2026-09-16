@@ -90,6 +90,8 @@ char *getRAM(MemInfo mi)
     return ram;
 }
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @param mi /proc/meminfo data
  * @return String containing the system swap used and total amounts both
@@ -122,3 +124,9 @@ char *getSwap(MemInfo mi)
 
     return swap;
 }
+
+#else
+
+char *getSwap(MemInfo mi) { return NULL; }
+
+#endif

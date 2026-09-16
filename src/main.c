@@ -40,7 +40,7 @@
 
 
 
-#define VERSION     "0.6.3"
+#define VERSION     "0.6.4"
 
 
 
@@ -77,6 +77,8 @@ int printShorkLine(int stopOnceDone)
 
     return 0;
 }
+
+#ifndef SHORK_DISKETTE
 
 void showHelp(void)
 {
@@ -193,6 +195,8 @@ void showHelp(void)
     free(fieldNames);
 }
 
+#endif
+
 /**
  * A signature-compatible replacement for snprintf that outputs to stdout
  * instead. It used with the writeOutput func* in main() to allow selecting
@@ -224,13 +228,8 @@ int main(int argc, char *argv[])
     TERM_SIZE = getTerminalSize();
 
     char bullet = '*';
-#ifndef EMBEDDED
     char *fields = strdup("---,os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,gpu,"
         "ram,swap,dsk,root,lip, ,clrs, ");
-#else
-    char *fields = strdup("---,os,krn,upt,trm,sh,cpu,gpu,ram,swap,dsk,root,"
-        " ");
-#endif
     int noEsc = 0;
     int noIP = 0;
     int saveConf = 0;
@@ -241,6 +240,7 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; i++)
     {
+#ifndef SHORK_DISKETTE
         if ((strcmp(argv[i], "-h") == 0) ||
             (strcmp(argv[i], "--help") == 0))
         {
@@ -251,6 +251,10 @@ int main(int argc, char *argv[])
         }
         else if (strncmp(argv[i], "-b", 2) == 0 ||
             strncmp(argv[i], "--bullet", 8) == 0)
+#else
+        if (strncmp(argv[i], "-b", 2) == 0 ||
+        strncmp(argv[i], "--bullet", 8) == 0)
+#endif
         {
             char *bulletChar = NULL;
             if (strncmp(argv[i], "-b=", 3) == 0)
@@ -376,6 +380,7 @@ int main(int argc, char *argv[])
         else if ((strcmp(argv[i], "-ne") == 0) ||
             (strcmp(argv[i], "--no-esc") == 0))
             noEsc = 1;
+#ifndef SHORK_DISKETTE
         else if ((strcmp(argv[i], "-ni") == 0) ||
             (strcmp(argv[i], "--no-ip") == 0))
             noIP = 1;
@@ -395,6 +400,7 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "-s") == 0 ||
             strcmp(argv[i], "--save") == 0)
             saveConf = 1;
+#endif
         else if (strcmp(argv[i], "-v") == 0 ||
             strcmp(argv[i], "--version") == 0)
         {
