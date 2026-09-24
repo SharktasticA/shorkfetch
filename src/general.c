@@ -864,19 +864,15 @@ int findProcs(const struct trie* procNames)
         if (error)
             continue;
         
-        // Strip trailing newline
-        commVal[strcspn(commVal, "\n")] = '\0';
-        
-        
         /* Search the argument in the trie and detect a type of it.  */
-        ssize_t res = trie_search( procNames, commVal, strlen(commVal) );
+        int match = trie_search( procNames, commVal, strlen(commVal) );
         
         // no match
-        if (res == ELEMENT_NOT_FOUND)
+        if (match == ELEMENT_NOT_FOUND)
             continue;
         
         closedir(proc);
-        return res;
+        return match;
     }
     
     closedir(proc);
