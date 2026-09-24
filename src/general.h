@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision E                                       ##
+    ## Revision F                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -58,6 +58,7 @@ int csvRemove(char*, const char*);
 char *extractFromPoint(char *, int, char);
 int fileExists(const char*);
 char *findErase(const char *, const int, const char *);
+int findProcs(const char* const[]);
 char *findReplace(const char *, const int, const char *, const char *);
 int formatNewLines(char *, int, char *, int);
 float fSqrt(float);
@@ -71,7 +72,7 @@ int iSqrt(int);
 void limitLines(char*, const int);
 int loadCSVLine(char*, char *[], int);
 int natCmp(const void*, const void*);
-int findProcs(const char* const procNames[]);
+int procExists(const char*, const int);
 int readHexFile(const char*);
 char *removeBrackets(const char*, const int);
 int runCmd(const char*, ...);

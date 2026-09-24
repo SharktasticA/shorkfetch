@@ -35,6 +35,7 @@ static const char *POSSIBLE_FIELDS[] =
 {
     " ",    // Blank line
     "---",  // Separator
+    "head", // user@host header
     "os",   // Operating system
     "krn",  // Kernel
     "upt",  // Uptime

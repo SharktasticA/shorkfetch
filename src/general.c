@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision E                                       ##
+    ## Revision F                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -583,6 +583,55 @@ char *findReplace(const char *input, const int inputSize, const char *needle, co
 }
 
 /**
+ * Finds first match from list among running processes names via /proc.
+ * @param procNames List of process names to find
+ * @return index of match if found; -1 if not found or error
+ */
+int findProcs(const char* const procNames[])
+{
+    // Run through our WM database
+    DIR *proc = opendir("/proc");
+    if (!proc) return 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(proc)) != NULL)
+    {
+        // Skip non-numeric (not PID) entries
+        if (entry->d_name[0] < '0' || entry->d_name[0] > '9')
+            continue;
+
+        // Build path to process' comm (command) file
+        char path[PATH_MAX];
+        snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
+
+        FILE *commFile = fopen(path, "r");
+        if (!commFile) continue;
+
+        char commVal[TASK_COMM_LEN];
+        
+        int error = fgets(commVal, TASK_COMM_LEN, commFile) == NULL;
+        fclose(commFile);
+        if (error)
+            continue;
+
+        // Strip trailing newline
+        commVal[strcspn(commVal, "\n")] = '\0';
+
+        for (int i = 0; procNames[i]; i++)
+        {
+            if ( strstr(commVal, procNames[i]) != NULL )
+            {
+                closedir(proc);
+                return i;
+            }
+        }
+    }
+    
+    closedir(proc);
+    return -1;
+}
+
+/**
  * DEPRECATED: Use wordWrap() instead!
  * Adds new lines to a given string based on the requested line width.
  * @param input Input string
@@ -991,50 +1040,58 @@ int natCmp(const void *a, const void *b)
 }
 
 /**
- * Finds first match from list among running processes names via /proc.
- * @param procNames List of process names to find
- * @return index of match if found; -1 if not found or error
+ * Checks if a given process name is presently running and via the /proc 
+ * filesystem.
+ * @param name The process name to find
+ * @param strict Flags if we are looking for an exact match (1) or not (0)
+ * @return 1 if found; 0 if not found or error
  */
-int findProcs(const char* const procNames[])
+int procExists(const char *name, const int strict)
 {
-    // Run through our WM database
     DIR *proc = opendir("/proc");
     if (!proc) return 0;
-    
+
     struct dirent *entry;
     while ((entry = readdir(proc)) != NULL)
     {
         // Skip non-numeric (not PID) entries
         if (entry->d_name[0] < '0' || entry->d_name[0] > '9')
             continue;
-        
+
         // Build path to process' comm (command) file
         char path[PATH_MAX];
         snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
-        
+
         FILE *commFile = fopen(path, "r");
         if (!commFile) continue;
-        
+
         char commVal[TASK_COMM_LEN];
-        
-        int error = fgets(commVal, TASK_COMM_LEN, commFile) == NULL;
+        int found = 0;
+
+        if (fgets(commVal, TASK_COMM_LEN, commFile))
+        {
+            // Strip trailing newline
+            commVal[strcspn(commVal, "\n")] = '\0';
+
+            // If strict, we look for an exact match
+            if (strict)
+                found = strcmp(commVal, name) == 0;
+            // If not, we look for a substring
+            else
+                found = strstr(commVal, name) != NULL;
+        }
+
         fclose(commFile);
-        if (error)
-            continue;
-        
-        // Strip trailing newline
-        commVal[strcspn(commVal, "\n")] = '\0';
-        
-        for (int i = 0; procNames[i]; i++) {
-            if ( strstr(commVal, procNames[i]) != NULL ) {
-                closedir(proc);
-                return i;
-            }
+
+        if (found)
+        {
+            closedir(proc);
+            return 1;
         }
     }
-    
+
     closedir(proc);
-    return -1;
+    return 0;
 }
 
 /**

@@ -86,35 +86,34 @@ char *getWM(char **de)
     // If we don't think we're in a graphical environment, time to leave...
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
-    
+
     // Cinnamon's WM (Muffin) is internal, we have to assume instead of look
     // for the process
     if (de && *de && strstr(*de, "Cinnamon") != NULL)
         return strdup("Muffin");
-    
-    // assemble WM proc names from database into list and search for match
+
+    // Assemble WM proc names from database into list and search for match
     const char* procNames[WINDOW_MANAGERS_LEN+1];
     for (int i = 0; i < WINDOW_MANAGERS_LEN; i++)
         procNames[i] = WINDOW_MANAGERS[i].cmd;
     procNames[WINDOW_MANAGERS_LEN] = NULL;
-    
+
     int wmID = findProcs(procNames);
-    
-    // if no match
-    if (wmID == -1) {
+    // If no match...
+    if (wmID == -1)
+    {
         // If we have a DE but no WM, they're probably one and the same
         if (de && *de)
             return *de;
-        
         return NULL;
     }
-    
+
     WM wm = WINDOW_MANAGERS[wmID];
-    
-    // if de not known, no extra work needed
+
+    // If DE not known, no extra work needed
     if (!de || !*de)
         return strdup(wm.name);
-    
+
     // Check if DE == WM, in which case we treat this as just a WM
     // Convert both strings to all caps for a case-insensitive check
     char *deCaps = strdup(*de);
@@ -125,14 +124,13 @@ char *getWM(char **de)
     for (int j = 0; wmCaps[j]; j++)
         if (wmCaps[j] >= 'a' && wmCaps[j] <= 'z')
             wmCaps[j] -= 32;
-    
-    int DEeqWM = strstr(deCaps, wmCaps) != NULL;
+
+    int deEqWM = strstr(deCaps, wmCaps) != NULL;
     free(deCaps);
     free(wmCaps);
-    
-    if (DEeqWM)
+
+    if (deEqWM)
         return *de = strdup(wm.name);
-    
     return strdup(wm.name);
 }
 
