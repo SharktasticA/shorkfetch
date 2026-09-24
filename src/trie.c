@@ -156,7 +156,9 @@ trie_free (struct trie *  trie)
 ssize_t trie_search(const struct trie *  trie, const char *  word, size_t length) {
 	struct child* child;
 
-	assert (length > 0);
+	if (length <= 0)
+		return ELEMENT_NOT_FOUND;
+	
 	if (trie == NULL)
 		return ELEMENT_NOT_FOUND;
 
