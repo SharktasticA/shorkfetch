@@ -23,6 +23,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @param count Number of screens detected (intended to be used by
  *              reference)
@@ -292,3 +294,10 @@ char *interpretScreen(Screen *screen)
 
     return screenStr;
 }
+
+#else
+
+Screen *getScreens(int *count) { return NULL; }
+char *interpretScreen(Screen *screen) { return NULL; }
+
+#endif

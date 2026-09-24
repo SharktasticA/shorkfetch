@@ -22,6 +22,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @return String containing this computer's local IP address
  */
@@ -60,3 +62,9 @@ char *getLocalIP(void)
     freeifaddrs(ifs);
     return result;
 }
+
+#else
+
+char *getLocalIP(void) { return NULL; }
+
+#endif

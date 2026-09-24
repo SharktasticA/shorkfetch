@@ -25,6 +25,8 @@ static const int EXCLUDED_PCI_DIDS_LEN = sizeof(EXCLUDED_PCI_DIDS) /
 
 
 
+#ifndef SHORK_DISKETTE
+
 // Process names that should be excluded when looking for the host
 // terminal's name
 static const char *EXCLUDED_TERMINAL_PROCS[] = {
@@ -68,5 +70,7 @@ static const char *EXCLUDED_TERMINAL_PROCS[] = {
 };
 static const int EXCLUDED_TERMINAL_PROCS_LEN = 
     sizeof(EXCLUDED_TERMINAL_PROCS) / sizeof(EXCLUDED_TERMINAL_PROCS[0]);
+
+#endif
 
 #endif

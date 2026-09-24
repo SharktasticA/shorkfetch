@@ -22,6 +22,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * @return String containing the active display environment's name; NULL if
  *         not found/applicable
@@ -84,52 +86,59 @@ char *getWM(char **de)
     // If we don't think we're in a graphical environment, time to leave...
     if (!WAYLAND_PRESENT && !X11_PRESENT)
         return NULL;
-
+    
     // Cinnamon's WM (Muffin) is internal, we have to assume instead of look
     // for the process
     if (de && *de && strstr(*de, "Cinnamon") != NULL)
         return strdup("Muffin");
-
-    // Run through our WM database
+    
+    // assemble WM proc names from database into list and search for match
+    const char* procNames[WINDOW_MANAGERS_LEN+1];
     for (int i = 0; i < WINDOW_MANAGERS_LEN; i++)
-    {
-        if (procExists(WINDOW_MANAGERS[i].cmd, 0))
-        {
-            // If DE == WM, we may treat this as just a WM
-            if (de && *de)
-            {
-                // Convert both subjects to all caps for a case-insensitive 
-                // comparison
-                char *deCaps = strdup(*de);
-                    for (int j = 0; deCaps[j]; j++)
-                        if (deCaps[j] >= 'a' && deCaps[j] <= 'z')
-                            deCaps[j] -= 32;
-                char *wmCaps = strdup(WINDOW_MANAGERS[i].name);
-                for (int j = 0; wmCaps[j]; j++)
-                    if (wmCaps[j] >= 'a' && wmCaps[j] <= 'z')
-                        wmCaps[j] -= 32;
-
-                if (strstr(deCaps, wmCaps) != NULL)
-                {
-                    free(deCaps);
-                    free(wmCaps);
-                    char *wm = strdup(WINDOW_MANAGERS[i].name);
-                    *de = wm;
-                    return wm;
-                }
-
-                free(deCaps);
-                free(wmCaps);
-            }
-
-            return strdup(WINDOW_MANAGERS[i].name);
-        }
+        procNames[i] = WINDOW_MANAGERS[i].cmd;
+    procNames[WINDOW_MANAGERS_LEN] = NULL;
+    
+    int wmID = findProcs(procNames);
+    
+    // if no match
+    if (wmID == -1) {
+        // If we have a DE but no WM, they're probably one and the same
+        if (de && *de)
+            return *de;
+        
+        return NULL;
     }
-
-    // If we haven't found a WM but we have a DE, there's a good chance DE/
-    // WM are one and the same
-    if (de && *de)
-        return *de;
-
-    return NULL;
+    
+    WM wm = WINDOW_MANAGERS[wmID];
+    
+    // if de not known, no extra work needed
+    if (!de || !*de)
+        return strdup(wm.name);
+    
+    // Check if DE == WM, in which case we treat this as just a WM
+    // Convert both strings to all caps for a case-insensitive check
+    char *deCaps = strdup(*de);
+        for (int j = 0; deCaps[j]; j++)
+            if (deCaps[j] >= 'a' && deCaps[j] <= 'z')
+                deCaps[j] -= 32;
+    char *wmCaps = strdup(wm.name);
+    for (int j = 0; wmCaps[j]; j++)
+        if (wmCaps[j] >= 'a' && wmCaps[j] <= 'z')
+            wmCaps[j] -= 32;
+    
+    int DEeqWM = strstr(deCaps, wmCaps) != NULL;
+    free(deCaps);
+    free(wmCaps);
+    
+    if (DEeqWM)
+        return *de = strdup(wm.name);
+    
+    return strdup(wm.name);
 }
+
+#else
+
+char *getDE(void) { return NULL; }
+char *getWM(char **de)  { return NULL; }
+
+#endif

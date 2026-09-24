@@ -26,6 +26,8 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
 /**
  * Gets a count of various Linux package standards including dpkg, emerge,
  * pacman, pkgtool, rpm, flat and snap.
@@ -292,3 +294,9 @@ char *getPackages(const char *os)
 
     return pkgs;
 }
+
+#else
+
+char *getPackages(const char *os) { return NULL; }
+
+#endif

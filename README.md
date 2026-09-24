@@ -56,7 +56,7 @@ Below are some optional parameters you can include when running `make` or `make 
 
 * `NO_STR_CLEANING=1`: Configures SHORKFETCH to exclude most code relating to string replacement and cleaning to reduce the binary size by ~1MB and speed up processing time. It is useful for embedded systems and/or systems severely space constrained. It is presently used for SHORK DISKETTE's version of SHORKFETCH.
 
-* `X86_ONLY=1`: Configures SHORKFETCH to exclude any code relating to CPU architectures other than x86 to reduce the binary size by ~10KB and speed up processing time. This option is presently used for SHORK 486's and SHORK DISC's version of SHORKFETCH.
+* `X86_ONLY=1`: Configures SHORKFETCH to exclude any code relating to CPU architectures other than x86 to reduce the binary size by ~10KB and speed up processing time. This option is presently used for SHORK 486's, SHORK DISC's and SHORK DISKETTE's version of SHORKFETCH.
 
 
 
