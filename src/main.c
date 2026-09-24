@@ -285,8 +285,8 @@ int main(int argc, char *argv[])
     HOME =  getenv("HOME");
     TERM_SIZE = getTerminalSize();
 
-    char *fields = strdup("head,---,os,krn,upt,pkgs,scn,de,wm,trm,sh,cpu,"
-        "gpu,ram,swap,dsk,root,lip, ,clrs, ");
+    char *fields = strdup("head,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,"
+        "cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ");
     int noIP = 0;
     int saveConf = 0;
     VIEW_MODE mode = NORMAL;
