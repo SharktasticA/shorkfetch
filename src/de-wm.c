@@ -93,7 +93,7 @@ char *getWM(char **de)
     if (de && *de && strstr(*de, "Cinnamon") != NULL)
         return strdup("Muffin");
     
-    // assemble WM proc names from database into list and search for match
+    // assemble WM proc names from database into radix-trie and search for match
     struct trie* procNames = trie_new();
     for (int i = 0; i < WINDOW_MANAGERS_LEN; i++)
         trie_add_word( procNames, WINDOW_MANAGERS[i].cmd, strlen(WINDOW_MANAGERS[i].cmd), i );

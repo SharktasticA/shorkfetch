@@ -864,7 +864,7 @@ int findProcs(const struct trie* procNames)
         if (error)
             continue;
         
-        /* Search the argument in the trie and detect a type of it.  */
+        // search in radix-trie. Finds id of prefix if one matches the start of commVal
         int match = trie_search( procNames, commVal, strlen(commVal) );
         
         // no match
