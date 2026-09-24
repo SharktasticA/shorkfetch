@@ -70,7 +70,7 @@ int iSqrt(int);
 void limitLines(char*, const int);
 int loadCSVLine(char*, char *[], int);
 int natCmp(const void*, const void*);
-int procExists(const char*, const int);
+int findProcs(const char* const procNames[]);
 int readHexFile(const char*);
 char *removeBrackets(const char*, const int);
 int runCmd(const char*, ...);
