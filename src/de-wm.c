@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "trie.h"
 
 
 #ifndef SHORK_DISKETTE
@@ -93,12 +94,11 @@ char *getWM(char **de)
         return strdup("Muffin");
     
     // assemble WM proc names from database into list and search for match
-    const char* procNames[WINDOW_MANAGERS_LEN+1];
+    struct trie* procNames = trie_new();
     for (int i = 0; i < WINDOW_MANAGERS_LEN; i++)
-        procNames[i] = WINDOW_MANAGERS[i].cmd;
-    procNames[WINDOW_MANAGERS_LEN] = NULL;
-    
+        trie_add_word( procNames, WINDOW_MANAGERS[i].cmd, strlen(WINDOW_MANAGERS[i].cmd), i );
     int wmID = findProcs(procNames);
+    trie_free(procNames);
     
     // if no match
     if (wmID == -1) {
