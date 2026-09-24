@@ -3,7 +3,7 @@ AR ?= ar
 RANLIB ?= ranlib
 STRIP ?= strip
 
-CFLAGS += -Wall -Wextra -D_GNU_SOURCE -std=gnu99 -I. -O3 -fomit-frame-pointer -flto -fno-plt -fmerge-all-constants -DNDEBUG
+CFLAGS += -Wall -Wextra -D_GNU_SOURCE -std=gnu99 -I. -O3 -flto -fno-plt -fmerge-all-constants -DNDEBUG
 LDFLAGS += -flto
 
 ifdef SHORK_DISKETTE
