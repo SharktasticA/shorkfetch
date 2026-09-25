@@ -21,6 +21,8 @@
 #include <dirent.h>
 #include <stdio.h>
 
+#include "trie.h"
+
 
 
 typedef struct {
@@ -70,7 +72,7 @@ int iSqrt(int);
 void limitLines(char*, const int);
 int loadCSVLine(char*, char *[], int);
 int natCmp(const void*, const void*);
-int findProcs(const char* const procNames[]);
+int findProcs(const struct trie* procNames);
 int readHexFile(const char*);
 char *removeBrackets(const char*, const int);
 int runCmd(const char*, ...);

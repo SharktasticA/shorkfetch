@@ -31,7 +31,6 @@
 #include <sys/wait.h>
 
 
-
 /**
  * Converts a data value into a string formatted into a unit that makes sense for
  * its magnitude with its new unit added to the end.
@@ -835,10 +834,10 @@ int natCmp(const void *a, const void *b)
 
 /**
  * Finds first match from list among running processes names via /proc.
- * @param procNames List of process names to find
+ * @param procNames Radix-Trie of process names to find
  * @return index of match if found; -1 if not found or error
  */
-int findProcs(const char* const procNames[])
+int findProcs(const struct trie* procNames)
 {
     // Run through our WM database
     DIR *proc = opendir("/proc");
@@ -865,15 +864,15 @@ int findProcs(const char* const procNames[])
         if (error)
             continue;
         
-        // Strip trailing newline
-        commVal[strcspn(commVal, "\n")] = '\0';
+        // search in radix-trie. Finds id of prefix if one matches the start of commVal
+        int match = trie_search( procNames, commVal, strlen(commVal) );
         
-        for (int i = 0; procNames[i]; i++) {
-            if ( strstr(commVal, procNames[i]) != NULL ) {
-                closedir(proc);
-                return i;
-            }
-        }
+        // no match
+        if (match == ELEMENT_NOT_FOUND)
+            continue;
+        
+        closedir(proc);
+        return match;
     }
     
     closedir(proc);
