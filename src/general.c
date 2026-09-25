@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision F                                       ##
+    ## Revision G                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -362,9 +362,11 @@ int countSubstrs(const char *str, const char *sub)
  * @param buffer Buffer containing the CSV string to operate on
  * @param bufferSize Buffer size
  * @param item Item to add
+ * @param toStart Flags if the item should be added to the beginning
  * @return 1 if successfully added; 0 if present or no space
  */
-int csvAppend(char *buffer, int bufferSize, const char *item)
+int csvAppend(char *buffer, const int bufferSize, const char *item,
+    const int toStart)
 {
     int itemLen = strlen(item);
     int currLen = strlen(buffer);
@@ -385,9 +387,21 @@ int csvAppend(char *buffer, int bufferSize, const char *item)
         // No space
         return 0;
 
-    if (sepLen)
-        strcat(buffer, ",");
-    strcat(buffer, item);
+    if (toStart)
+    {
+        // Shift existing content right
+        memmove(buffer + itemLen + sepLen, buffer, currLen + 1);
+        // Copy item into free space after shifting
+        memcpy(buffer, item, itemLen);
+        if (sepLen)
+            buffer[itemLen] = ',';
+    }
+    else
+    {
+        if (sepLen)
+            strcat(buffer, ",");
+        strcat(buffer, item);
+    }
 
     return 1;
 }
@@ -589,9 +603,9 @@ char *findReplace(const char *input, const int inputSize, const char *needle, co
  */
 int findProcs(const char* const procNames[])
 {
-    // Run through our WM database
     DIR *proc = opendir("/proc");
-    if (!proc) return 0;
+    if (!proc)
+        return 0;
 
     struct dirent *entry;
     while ((entry = readdir(proc)) != NULL)
@@ -605,7 +619,8 @@ int findProcs(const char* const procNames[])
         snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
 
         FILE *commFile = fopen(path, "r");
-        if (!commFile) continue;
+        if (!commFile)
+            continue;
 
         char commVal[TASK_COMM_LEN];
         
@@ -941,6 +956,59 @@ int iSqrt(int x)
     }
 
     return result;
+}
+
+/**
+ * Sends SIGTERM to all processes that match the given name.
+ * @param name Process name to find
+ * @return Number of processes SIGTERM'd; -1 if failed
+ */
+int killProc(const char *name)
+{
+    DIR *proc = opendir("/proc");
+    if (!proc)
+        return -1;
+
+    int kills = 0;
+    pid_t self = getpid();
+    struct dirent *entry;
+    while ((entry = readdir(proc)) != NULL)
+    {
+        // Skip non-numeric (not PID) entries
+        if (entry->d_name[0] < '0' || entry->d_name[0] > '9')
+            continue;
+
+        // If self, skip
+        pid_t pid = (pid_t)strtol(entry->d_name, NULL, 10);
+        if (pid == self)
+            continue;
+    
+        // Build path to process' comm (command) file
+        char path[PATH_MAX];
+        snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
+
+        char commPath[PATH_MAX];
+        snprintf(commPath, sizeof(commPath), "/proc/%d/comm", pid);
+
+        FILE *commFile = fopen(path, "r");
+        if (!commFile) continue;
+
+        char commVal[TASK_COMM_LEN];
+        
+        int error = fgets(commVal, TASK_COMM_LEN, commFile) == NULL;
+        fclose(commFile);
+        if (error)
+            continue;
+
+        // Strip trailing newline
+        commVal[strcspn(commVal, "\n")] = '\0';
+
+        if (strcmp(commVal, name) == 0 && kill(pid, SIGTERM) == 0)
+            kills++;
+    }
+    closedir(proc);
+
+    return kills;
 }
 
 /**

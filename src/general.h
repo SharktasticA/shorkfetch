@@ -5,7 +5,7 @@
     ## General, utility functions for SHORK Utilities & ##
     ## SHORK ENTERTAINMENT                              ##
     ######################################################
-    ## Revision F                                       ##
+    ## Revision G                                       ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -53,7 +53,7 @@ char *bytesToReadable(const char *, const long long, char);
 char *captureProgramOutput(const char *, const int);
 char *colourWrap(const char*, const char*, const char*);
 int countSubstrs(const char *, const char *);
-int csvAppend(char*, int, const char*);
+int csvAppend(char*, const int, const char*, const int);
 int csvRemove(char*, const char*);
 char *extractFromPoint(char *, int, char);
 int fileExists(const char*);
@@ -69,6 +69,7 @@ int isFileExecutable(char*, struct dirent*);
 int isNumeric(const char*, const int);
 int isProgramInstalled(char*, int);
 int iSqrt(int);
+int killProc(const char*);
 void limitLines(char*, const int);
 int loadCSVLine(char*, char *[], int);
 int natCmp(const void*, const void*);
