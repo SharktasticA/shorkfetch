@@ -57,5 +57,8 @@ dkms.conf
 # Nix/NixOS
 /result
 
+# Testing directories
+fakesys
+
 # shorkfetch specific
 shorkfetch

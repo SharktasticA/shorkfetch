@@ -28,6 +28,8 @@
 #define FLAGS_LEN               1536
 // CPU_DATA.machine string length
 #define MACHINE_LEN             128
+// Highest processor index no. to try processing
+#define MAX_INDEX               1024
 // CPU_DATA.name string length
 #define NAME_LEN                128
 // CPU_DATA.platform string length
@@ -127,6 +129,12 @@ typedef struct {
     PHYS_IDS physIDs;
     // Physical core count (x86)
     int cores;
+    // Physical low-power Efficient-core count (x86)
+    int lpeCores;
+    // Physical Efficient-core count (x86)
+    int eCores;
+    // Physical Performance-core count (x86)
+    int pCores;
     // Logical thread count (RISC-V, x86)
     int threads;
     // Cache size in KB (x86)
@@ -190,6 +198,7 @@ static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) /
 
 char *cleanCPUName(const CPU_ARCH, const char*, int);
 CPU_DATA *getCPU(char*, char**);
+int getIntelHybridCPU(CPU_DATA*);
 int hasFlag(const CPU_DATA*, const char*);
 char *interpretCPU(CPU_DATA*);
 

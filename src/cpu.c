@@ -29,6 +29,8 @@
 #endif
 
 #include <ctype.h>
+#include <glob.h>
+#include <linux/limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -1012,6 +1014,9 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         return NULL;
     }
 
+    if (result->arch == X86)
+        getIntelHybridCPU(result);
+
 
 
 #ifndef NO_STR_CLEANING
@@ -1082,9 +1087,205 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 #endif
 
-
-
     return result;
+}
+
+/**
+ * Gets Intel Hybrid Architecture-specific CPU data such as LPE-, E- and
+ * P-core counts.
+ * @param cpu Initialised CPU_DATA struct to potentially add new data to
+ * @return 1 if CPU is Intel Hybrid Architecture; 0 if not; -1 if error
+ */
+int getIntelHybridCPU(CPU_DATA *cpu)
+{
+    if (!fileExists("/sys/devices/system/cpu/cpufreq/policy0/"
+            "base_frequency") ||
+        !fileExists("/sys/devices/cpu_atom/cpus") ||
+        !fileExists("/sys/devices/cpu_core/cpus"))
+        return 0;
+
+    // Count of each type of thread: 0=LPE, 1=E, 2=P
+    int count[3] = {0};
+    // The cpu index numbers for each thread found for each thread type.
+    // Again, 0=LPE, 1=E, 2=P.
+    int indices[3][MAX_INDEX];
+
+    glob_t g;
+    // Primary: Count how many /sys/devices/systemd/cpu/cpufreq/policyX
+    // exists and how many unique base_frequency values there are. If we
+    // find 2 uniques, we have E and P. If 3, we have LPE, E and P!
+    if (glob("/sys/devices/system/cpu/cpufreq/policy*", 0, NULL, &g) == 0)
+    {
+        cpu->threads = cpu->index = g.gl_pathc;
+
+        const int bufferSize = 9;
+        // The frequency for each thread type
+        char freq[3][bufferSize];
+        memset(freq, 0, sizeof(freq));
+
+        for (int i = 0; i < cpu->threads; i++)
+        {
+            char baseFreqPath[PATH_MAX];
+            snprintf(baseFreqPath, PATH_MAX,
+                "/sys/devices/system/cpu/cpufreq/policy%d/base_frequency",
+                i);
+
+            FILE *fStream = fopen(baseFreqPath, "r");
+            if (!fStream)
+                return -1;
+            char buffer[bufferSize];
+            if (!fgets(buffer, bufferSize, fStream))
+            {
+                fclose(fStream);
+                return -1;
+            }
+            fclose(fStream);
+
+            for (int j = 0; j < 3; j++)
+            {
+                // Empty freq slot: claim
+                if (freq[j][0] == '\0')
+                {
+                    snprintf(freq[j], bufferSize, "%s", buffer);
+                    indices[j][count[j]++] = i;
+                    break;
+                }
+                // Not empty: test if the same
+                else if (!strcmp(freq[j], buffer))
+                {
+                    indices[j][count[j]++] = i;
+                    break;
+                }
+            }
+        }
+
+        // We want count and indices to be sorted by ascending type
+        // (LPE->E->P), yet sysfs almost certainly wasn't ordered...
+        for (int a = 0; a < 2; a++)
+        {
+            for (int b = a + 1; b < 3; b++)
+            {
+                // Skip if b >= a (empty for no LPE will naturally fall to
+                // 0)
+                if (atoi(freq[b]) >= atoi(freq[a]))
+                    continue;
+
+                int tmpIndices[MAX_INDEX];
+                char tmpRange[bufferSize];
+                int tmpCount = count[a];
+
+                // A into tmp
+                memcpy(tmpIndices, indices[a], sizeof(tmpIndices));
+                memcpy(tmpRange, freq[a], bufferSize);
+
+                // B into A
+                memcpy(indices[a], indices[b], sizeof(tmpIndices));
+                memcpy(freq[a], freq[b], bufferSize);
+                count[a] = count[b];
+
+                // tmp into B
+                memcpy(indices[b], tmpIndices, sizeof(tmpIndices));
+                memcpy(freq[b], tmpRange, bufferSize);
+                count[b] = tmpCount;
+            }
+        }
+    }
+    // Fallback: Get the E and P from /sys/devices/cpu_atom/cpus and
+    // /sys/devices/cpu_core/cpus, respectively. Potential LPE will be
+    // counted as E though, hence this is not main.
+    else
+    {
+        const char *paths[2] = {
+            "/sys/devices/cpu_atom/cpus",
+            "/sys/devices/cpu_core/cpus",
+        };
+
+        for (int i = 0; i < 2; i++)
+        {
+            char buffer[256];
+            FILE *fStream = fopen(paths[i], "r");
+            if (!fStream)
+                return -1;
+            if (!fgets(buffer, 256, fStream))
+            {
+                fclose(fStream);
+                return -1;
+            }
+            fclose(fStream);
+
+            // Normally, there should only be one range, but just in case
+            // the ranges get broken up if cpus are offline (mayhaps?), we
+            // look for multiple...
+            int noRanges = 1;
+            for (const char *p = buffer; *p; p++)
+                if (*p == ',')
+                    noRanges++;
+            char *ranges[noRanges];
+            if (loadCSVLine(buffer, ranges, noRanges) != noRanges)
+                return -1;
+
+            // For each range found, we find out how many cpus is in it.
+            int threads = 0;
+            for (int j = 0; j < noRanges; j++)
+            {
+                int a, b;
+                int got = sscanf(ranges[j], "%d-%d", &a, &b);
+                if (got == 1)
+                    b = a;
+                else if (got != 2)
+                    return -1;
+
+                for (int c = a; c <= b && threads < MAX_INDEX; c++)
+                    indices[i+1][threads++] = c;
+            }
+            count[i+1] = threads;
+        }
+
+        cpu->threads = cpu->index = count[1] + count[2];
+    }
+
+    // Cross-reference our saved cpu indices with
+    // /sys/devices/system/cpu/cpuX/topology/thread_siblings_list to find
+    // real cores
+    for (int i = 0; i < 3; i++)
+    {
+        // In case we found no LPEs previously
+        if (count[i] == 0)
+            continue;
+
+        int cores = 0;
+        for (int j = 0; j < count[i]; j++)
+        {
+            char tslPath[PATH_MAX], buffer[64];
+            snprintf(tslPath, PATH_MAX, "/sys/devices/system/cpu/cpu%d/"
+                "topology/thread_siblings_list", indices[i][j]);
+
+            FILE *fStream = fopen(tslPath, "r");
+            if (!fStream)
+                return -1;
+            if (!fgets(buffer, 64, fStream))
+            {
+                fclose(fStream);
+                return -1;
+            }
+            fclose(fStream);
+
+            int first;
+            if (sscanf(buffer, "%d", &first) != 1)
+                return -1;
+            if (first == indices[i][j])
+                cores++;
+        }
+
+        if (i == 0)
+            cpu->lpeCores = cores;
+        if (i == 1)
+            cpu->eCores = cores;
+        else
+            cpu->pCores = cores;
+    }
+
+    return 1;
 }
 
 /**
@@ -2658,6 +2859,17 @@ char *interpretCPU(CPU_DATA *cpu)
         // counted are real cores
         else if (cpu->cores > 0 && cpu->threads <= 0)
             snprintf(coresAndThreads, 16, "%dT", cpu->cores);
+        // If we any Intel Hybrid Architecture-specific counts, show each
+        // found core type and threads
+        else if (cpu->lpeCores > 0 || cpu->eCores > 0 || cpu->pCores > 0)
+        {
+            if (cpu->lpeCores > 0)
+                snprintf(coresAndThreads, 16, "%dL/%dE/%dP/%dT",
+                    cpu->lpeCores, cpu->eCores, cpu->pCores, cpu->threads);
+            else
+                snprintf(coresAndThreads, 16, "%dE/%dP/%dT", cpu->eCores,
+                    cpu->pCores, cpu->threads);
+        }
         // If we have cores and threads, and they are the same value, just
         // show cores
         else if (cpu->cores > 0 && cpu->cores == cpu->threads)
