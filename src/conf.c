@@ -54,13 +54,14 @@ int deleteConf(void)
  * @param maxUnit
  * @param mode
  * @param noEsc
+ * @param noIHA
  * @param noIP
  * @param showShork
  */
 void readConf(char *charBullet, char **colAccent, char **colBullet, 
     char **colPctHigh, char **colPctLow, char **colPctMed, int *compact, 
-    char **fields, char *maxUnit, VIEW_MODE *mode, int *noEsc, int *noIP,
-    int *showShork)
+    char **fields, char *maxUnit, VIEW_MODE *mode, int *noEsc, int *noIHA,
+    int *noIP, int *showShork)
 {
     char path[PATH_MAX];
     snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
@@ -121,6 +122,8 @@ void readConf(char *charBullet, char **colAccent, char **colBullet,
                 *mode = atoi(value);
             else if (strcmp(key, "noEsc") == 0)
                 *noEsc = atoi(value);
+            else if (strcmp(key, "noIHA") == 0)
+                *noIHA = atoi(value);
             else if (strcmp(key, "noIP") == 0)
                 *noIP = atoi(value);
             else if (strcmp(key, "showShork") == 0)
@@ -142,13 +145,15 @@ void readConf(char *charBullet, char **colAccent, char **colBullet,
  * @param fields
  * @param maxUnit
  * @param mode
+ * @param noEsc
+ * @param noIHA
  * @param noIP
  * @param showShork
  */
 void writeConf(char charBullet, char *colAccent, char *colBullet, 
     char *colPctHigh, char *colPctLow, char *colPctMed, int compact, 
-    char *fields, char maxUnit, VIEW_MODE mode, int noEsc, int noIP,
-    int showShork)
+    char *fields, char maxUnit, VIEW_MODE mode, int noEsc, int noIHA,
+    int noIP, int showShork)
 {
     char path[PATH_MAX];
 
@@ -174,6 +179,7 @@ void writeConf(char charBullet, char *colAccent, char *colBullet,
         fprintf(conf, "maxUnit=%c\n", maxUnit);
         fprintf(conf, "mode=%d\n", mode);
         fprintf(conf, "noEsc=%d\n", noEsc);
+        fprintf(conf, "noIHA=%d\n", noIHA);
         fprintf(conf, "noIP=%d\n", noIP);
         fprintf(conf, "showShork=%d\n", showShork);
         fclose(conf);

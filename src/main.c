@@ -211,6 +211,13 @@ void showHelp(void)
     free(noEsc->str);
     free(noEsc);
 
+    WORD_WRAPPED *noIha = wordWrap("-nh, --no-iha      Disables Intel "
+        "Hybrid Architecture-specific CPU core counting\n",
+        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
+    printf("%s", noIha->str);
+    free(noIha->str);
+    free(noIha);
+
     WORD_WRAPPED *reset = wordWrap("-r, --reset        Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
         "                   ", NULL, 0, 0);
@@ -293,7 +300,7 @@ int main(int argc, char *argv[])
 
     readConf(&CHAR_BULLET, &COL_ACCENT, &COL_BULLET, &COL_PCT_HIGH,
         &COL_PCT_LOW, &COL_PCT_MED, &COMPACT, &fields, &MAX_UNIT, &mode,
-        &NO_ESC, &noIP, &SHOW_SHORK);
+        &NO_ESC, &NO_IHA, &noIP, &SHOW_SHORK);
 
     for (int i = 1; i < argc; i++)
     {
@@ -564,6 +571,9 @@ int main(int argc, char *argv[])
             (strcmp(argv[i], "--no-esc") == 0))
             NO_ESC = 1;
 #ifndef SHORK_DISKETTE
+        else if ((strcmp(argv[i], "-nh") == 0) ||
+            (strcmp(argv[i], "--no-iha") == 0))
+            NO_IHA = 1;
         else if ((strcmp(argv[i], "-ni") == 0) ||
             (strcmp(argv[i], "--no-ip") == 0))
             noIP = 1;
@@ -1642,7 +1652,7 @@ int main(int argc, char *argv[])
     if (saveConf)
         writeConf(CHAR_BULLET, COL_ACCENT, COL_BULLET, COL_PCT_HIGH,
             COL_PCT_LOW, COL_PCT_MED, COMPACT, fieldsOrig, MAX_UNIT, mode,
-            NO_ESC, noIP, SHOW_SHORK);
+            NO_ESC, NO_IHA, noIP, SHOW_SHORK);
 
     freeGlobals();
     free(colAccent);

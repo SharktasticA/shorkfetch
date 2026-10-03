@@ -13,7 +13,6 @@
 
 
 #include "globals.h"
-#include "colours.h"
 
 #include <string.h>
 
@@ -29,6 +28,7 @@ int COMPACT = 0;
 char *HOME;
 char MAX_UNIT = 'p';
 int NO_ESC = 0;
+int NO_IHA = 0;
 int SHORK_LINE = 0;
 int SHOW_SHORK = 1;
 struct winsize TERM_SIZE;

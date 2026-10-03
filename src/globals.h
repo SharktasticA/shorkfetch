@@ -70,6 +70,7 @@ extern int COMPACT;
 extern char *HOME;
 extern char MAX_UNIT;
 extern int NO_ESC;
+extern int NO_IHA;
 extern int SHORK_LINE;
 extern int SHOW_SHORK;
 extern struct winsize TERM_SIZE;

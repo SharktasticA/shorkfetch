@@ -78,6 +78,8 @@ Usage: shorkfetch [OPTIONS]
 * `-mu`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default)
 * `-na`, `--no-art`: Disables the SHORK ASCII art
 * `-ne`, `--no-esc`: Disables all ANSI escape codes and colour features
+* `-nh`, `--no-iha`: Disables Intel Hybrid Architecture-specific CPU core counting
+    * For example, instead of `2L/8E/6P/22T` for Intel Core Ultra 7 155H, you will get `16C/22T`
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-v`, `--version`: Displays version number and exits

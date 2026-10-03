@@ -1014,7 +1014,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         return NULL;
     }
 
-    if (result->arch == X86)
+    if (!NO_IHA && result->arch == X86)
         getIntelHybridCPU(result);
 
 
