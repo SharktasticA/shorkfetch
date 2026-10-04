@@ -13,23 +13,28 @@
 
 
 #include "globals.h"
-
-#include <string.h>
-
+#include "conf.h"
 
 
-char CHAR_BULLET = '*';
-char *COL_ACCENT = NULL;
-char *COL_BULLET = NULL;
-char *COL_PCT_HIGH = NULL;
-char *COL_PCT_LOW = NULL;
-char *COL_PCT_MED = NULL;
+
+Config CONFIG = {
+    '*',
+    "bright_cyan",
+    "cyan",
+    "red",
+    "green",
+    "yellow",
+    0,
+    "head,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
+    'p',
+    NORMAL,
+    0,
+    0,
+    0,
+    0
+};
 char *HOME;
-char MAX_UNIT = 'p';
-int NO_ESC = 0;
-int NO_IHA = 0;
 int SHORK_LINE = 0;
-int SHOW_SHORK = 1;
 int WAYLAND_PRESENT;
 int X11_PRESENT;
 char *XDG_CURRENT_DESKTOP;

@@ -45,18 +45,6 @@
 
 
 /**
- * Frees any malloc'd global variables.
- */
-void freeGlobals(void)
-{
-    free(COL_ACCENT);
-    free(COL_BULLET);
-    free(COL_PCT_LOW);
-    free(COL_PCT_MED);
-    free(COL_PCT_HIGH);
-}
-
-/**
  * Prints a single line of the SHORK ASCII art. It is intended to be used
  * during the "assemble output" loop when in no-escape-codes mode.
  * @param stopOnceDone Flags if this function should stop once the SHORK is
@@ -65,7 +53,7 @@ void freeGlobals(void)
  */
 int printShorkLine(int stopOnceDone)
 {
-    if (!SHOW_SHORK)
+    if (CONFIG.noArt)
         return 1;
 
     if (COMPACT)
@@ -283,23 +271,12 @@ int snprintfStdout(char *__restrict __s, size_t __maxlen,
 
 int main(int argc, char *argv[])
 {
-    COL_ACCENT = strdup("bright_cyan");
-    COL_BULLET = strdup("cyan");
-    COL_PCT_LOW = strdup("green");
-    COL_PCT_MED = strdup("yellow");
-    COL_PCT_HIGH = strdup("red");
-    HOME =  getenv("HOME");
+    HOME = getenv("HOME");
     TERM_SIZE = getTerminalSize();
 
-    char *fields = strdup("head,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,"
-        "cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ");
-    int noIP = 0;
     int saveConf = 0;
-    VIEW_MODE mode = NORMAL;
 
-    readConf(&CHAR_BULLET, &COL_ACCENT, &COL_BULLET, &COL_PCT_HIGH,
-        &COL_PCT_LOW, &COL_PCT_MED, &COMPACT, &fields, &MAX_UNIT, &mode,
-        &NO_ESC, &NO_IHA, &noIP, &SHOW_SHORK);
+    readConf(&CONFIG);
 
     for (int i = 1; i < argc; i++)
     {
@@ -308,8 +285,6 @@ int main(int argc, char *argv[])
             (strcmp(argv[i], "--help") == 0))
         {
             showHelp();
-            freeGlobals();
-            free(fields);
             return 0;
         }
         else if (strncmp(argv[i], "-ac", 3) == 0 ||
@@ -319,15 +294,12 @@ int main(int argc, char *argv[])
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("%s\n", COL_ACCENT);
-                freeGlobals();
-                free(fields);
+                printf("%s\n", CONFIG.colAccent);
                 return 1;
             }
 
-            free(COL_ACCENT);
             equalsNeedle++;
-            COL_ACCENT = strdup(equalsNeedle);
+            snprintf(CONFIG.colAccent, CONF_COL_LEN, "%s", equalsNeedle);
         }
         else if (strncmp(argv[i], "-bc", 3) == 0 ||
             strncmp(argv[i], "--bullet-col", 12) == 0)
@@ -336,15 +308,12 @@ int main(int argc, char *argv[])
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("%s\n", COL_BULLET);
-                freeGlobals();
-                free(fields);
+                printf("%s\n", CONFIG.colBullet);
                 return 1;
             }
 
-            free(COL_BULLET);
             equalsNeedle++;
-            COL_BULLET = strdup(equalsNeedle);
+            snprintf(CONFIG.colBullet, CONF_COL_LEN, "%s", equalsNeedle);
         }
         else if (strncmp(argv[i], "-b", 2) == 0 ||
             strncmp(argv[i], "--bullet", 8) == 0)
@@ -365,16 +334,13 @@ int main(int argc, char *argv[])
                 {
                     printf("ERROR: custom bullet point character can only "
                         "be a single character\n");
-                    free(fields);
                     return 1;
                 }
-                CHAR_BULLET = bulletChar[0];
+                CONFIG.charBullet = bulletChar[0];
             }
             else
             {
-                printf("\"%c\"\n", CHAR_BULLET);
-                freeGlobals();
-                free(fields);
+                printf("\"%c\"\n", CONFIG.charBullet);
                 return 0;
             }
         }
@@ -385,15 +351,12 @@ int main(int argc, char *argv[])
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("%s\n", COL_PCT_LOW);
-                freeGlobals();
-                free(fields);
+                printf("%s\n", CONFIG.colPctLow);
                 return 1;
             }
 
-            free(COL_PCT_LOW);
             equalsNeedle++;
-            COL_PCT_LOW = strdup(equalsNeedle);
+            snprintf(CONFIG.colPctLow, CONF_COL_LEN, "%s", equalsNeedle);
         }
         else if (strncmp(argv[i], "-mc", 3) == 0 ||
             strncmp(argv[i], "--med-col", 9) == 0)
@@ -402,15 +365,12 @@ int main(int argc, char *argv[])
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("%s\n", COL_PCT_MED);
-                freeGlobals();
-                free(fields);
+                printf("%s\n", CONFIG.colPctMed);
                 return 1;
             }
 
-            free(COL_PCT_MED);
             equalsNeedle++;
-            COL_PCT_MED = strdup(equalsNeedle);
+            snprintf(CONFIG.colPctMed, CONF_COL_LEN, "%s", equalsNeedle);
         }
         else if (strncmp(argv[i], "-hc", 3) == 0 ||
             strncmp(argv[i], "--high-col", 10) == 0)
@@ -419,26 +379,19 @@ int main(int argc, char *argv[])
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("%s\n", COL_PCT_HIGH);
-                freeGlobals();
-                free(fields);
+                printf("%s\n", CONFIG.colPctHigh);
                 return 1;
             }
 
-            free(COL_PCT_HIGH);
             equalsNeedle++;
-            COL_PCT_HIGH = strdup(equalsNeedle);
+            snprintf(CONFIG.colPctHigh, CONF_COL_LEN, "%s", equalsNeedle);
         }
         else if (strcmp(argv[i], "-co") == 0 ||
             strcmp(argv[i], "--compact") == 0)
             COMPACT = 1;
         else if (strcmp(argv[i], "-cf") == 0 ||
             strcmp(argv[i], "--conf") == 0)
-        {
-            free(fields);
-            freeGlobals();
             return launchConf();
-        }
         else if (strncmp(argv[i], "-f", 2) == 0 ||
             strncmp(argv[i], "--fields", 8) == 0)
         {
@@ -446,20 +399,17 @@ int main(int argc, char *argv[])
             char *equalsNeedle = strchr(argv[i], '=');
             if (!equalsNeedle) 
             {
-                printf("\"%s\"\n", fields);
-                freeGlobals();
-                free(fields);
+                printf("\"%s\"\n", CONFIG.fields);
                 return 0;
             }
 
             equalsNeedle++;
-            free(fields);
-            fields = strdup(equalsNeedle);
+            snprintf(CONFIG.fields, CONF_FIELDS_LEN, "%s", equalsNeedle);
 
             // Remove trailing comma if present
-            int len = strlen(fields);
-            if (len > 0 && fields[len - 1] == ',')
-                fields[len - 1] = '\0';
+            int len = strlen(CONFIG.fields);
+            if (len > 0 && CONFIG.fields[len - 1] == ',')
+                CONFIG.fields[len - 1] = '\0';
         }
         else if (strncmp(argv[i], "-mo", 3) == 0 ||
             strncmp(argv[i], "--mode", 6) == 0)
@@ -475,35 +425,29 @@ int main(int argc, char *argv[])
                 if (modeVal[0] == '\0')
                 {
                     printf("ERROR: no mode given\n");
-                    free(fields);
-                    freeGlobals();
                     return 1;
                 }
                 else if (strcmp(modeVal, "n") == 0 ||
                     strcmp(modeVal, "N") == 0 ||
                     strcmp(modeVal, "normal") == 0)
-                    mode = NORMAL;
+                    CONFIG.mode = NORMAL;
                 else if (strcmp(modeVal, "b") == 0 ||
                     strcmp(modeVal, "B") == 0 ||
                     strcmp(modeVal, "bullet") == 0 ||
                     strcmp(modeVal, "bullets") == 0)
-                    mode = BULLETS;
+                    CONFIG.mode = BULLETS;
                 else
                 {
                     printf("ERROR: unrecognised mode \"%s\"\n", modeVal);
-                    free(fields);
-                    freeGlobals();
                     return 1;
                 }
             }
             else
             {
-                if (mode == NORMAL)
+                if (CONFIG.mode == NORMAL)
                     printf("\"normal\"\n");
-                else if (mode == BULLETS)
+                else if (CONFIG.mode == BULLETS)
                     printf("\"bullets\"\n");
-                freeGlobals();
-                free(fields);
                 return 0;
             }
         }
@@ -521,68 +465,62 @@ int main(int argc, char *argv[])
                 if (modeVal[0] == '\0')
                 {
                     printf("ERROR: no unit given\n");
-                    free(fields);
-                    freeGlobals();
                     return 1;
                 }
                 else if (strcmp(modeVal, "b") == 0 ||
                     strcmp(modeVal, "B") == 0 ||
                     strcmp(modeVal, "byte") == 0)
-                    MAX_UNIT = 'b';
+                    CONFIG.maxUnit = 'b';
                 else if (strcmp(modeVal, "k") == 0 ||
                     strcmp(modeVal, "K") == 0 ||
                     strcmp(modeVal, "kibi") == 0 ||
                     strcmp(modeVal, "Kibi") == 0)
-                    MAX_UNIT = 'k';
+                    CONFIG.maxUnit = 'k';
                 else if (strcmp(modeVal, "m") == 0 ||
                     strcmp(modeVal, "M") == 0 ||
                     strcmp(modeVal, "mebi") == 0 ||
                     strcmp(modeVal, "Mebi") == 0)
-                    MAX_UNIT = 'm';
+                    CONFIG.maxUnit = 'm';
                 else if (strcmp(modeVal, "g") == 0 ||
                     strcmp(modeVal, "G") == 0 ||
                     strcmp(modeVal, "gibi") == 0 ||
                     strcmp(modeVal, "Gibi") == 0)
-                    MAX_UNIT = 'g';
+                    CONFIG.maxUnit = 'g';
                 else if (strcmp(modeVal, "t") == 0 ||
                     strcmp(modeVal, "T") == 0 ||
                     strcmp(modeVal, "tebi") == 0 ||
                     strcmp(modeVal, "Tebi") == 0)
-                    MAX_UNIT = 't';
+                    CONFIG.maxUnit = 't';
                 else if (strcmp(modeVal, "p") == 0 ||
                     strcmp(modeVal, "P") == 0 ||
                     strcmp(modeVal, "pebi") == 0 ||
                     strcmp(modeVal, "Pebi") == 0)
-                    MAX_UNIT = 'p';
+                    CONFIG.maxUnit = 'p';
                 else
                 {
                     printf("ERROR: unrecognised unit \"%s\"\n", modeVal);
-                    free(fields);
-                    freeGlobals();
                     return 1;
                 }
             }
             else
             {
-                printf("'%c'\n", MAX_UNIT);
-                freeGlobals();
-                free(fields);
+                printf("'%c'\n", CONFIG.maxUnit);
                 return 0;
             }
         }
         else if ((strcmp(argv[i], "-na") == 0) ||
             (strcmp(argv[i], "--no-art") == 0))
-            SHOW_SHORK = 0;
+            CONFIG.noArt = 1;
         else if ((strcmp(argv[i], "-ne") == 0) ||
             (strcmp(argv[i], "--no-esc") == 0))
-            NO_ESC = 1;
+            CONFIG.noEsc = 1;
 #ifndef SHORK_DISKETTE
         else if ((strcmp(argv[i], "-nh") == 0) ||
             (strcmp(argv[i], "--no-iha") == 0))
-            NO_IHA = 1;
+            CONFIG.noIHA = 1;
         else if ((strcmp(argv[i], "-ni") == 0) ||
             (strcmp(argv[i], "--no-ip") == 0))
-            noIP = 1;
+            CONFIG.noIP = 1;
         else if ((strcmp(argv[i], "-r") == 0) ||
             (strcmp(argv[i], "--reset") == 0))
         {
@@ -592,8 +530,6 @@ int main(int argc, char *argv[])
             else
                 printf("WARNING: SHORKFETCH configuration already "
                 "default\n");
-            freeGlobals();
-            free(fields);
             return 0;
         }
         else if (strcmp(argv[i], "-s") == 0 ||
@@ -604,15 +540,11 @@ int main(int argc, char *argv[])
             strcmp(argv[i], "--version") == 0)
         {
             printf("SHORKFETCH %s\n", VERSION);
-            free(fields);
-            freeGlobals();
             return 0;
         }
         else
         {
             printf("ERROR: unrecognised option \"%s\"\n", argv[i]);
-            free(fields);
-            freeGlobals();
             return 1;
         }
     }
@@ -634,7 +566,7 @@ int main(int argc, char *argv[])
         (char *__restrict, size_t, const char *__restrict, ...);
 
     // Write to stdout and disable & disable colour output
-    if (NO_ESC)
+    if (CONFIG.noEsc)
     {
         writeOutput = snprintfStdout;
         colAccent = strdup("");
@@ -648,44 +580,35 @@ int main(int argc, char *argv[])
     else
     {
         writeOutput = snprintf;
-        colAccent = validateColour(COL_ACCENT);
+        colAccent = validateColour(CONFIG.colAccent);
         if (!colAccent)
         {
-            printf("ERROR: unrecognised colour \"%s\"\n", COL_ACCENT);
-            freeGlobals();
-            free(fields);
+            printf("ERROR: unrecognised colour \"%s\"\n", CONFIG.colAccent);
             return 1;
         }
-        colBullet = validateColour(COL_BULLET);
+        colBullet = validateColour(CONFIG.colBullet);
         if (!colBullet)
         {
-            printf("ERROR: unrecognised colour \"%s\"\n", COL_BULLET);
-            freeGlobals();
-            free(fields);
+            printf("ERROR: unrecognised colour \"%s\"\n", CONFIG.colBullet);
             return 1;
         }
-        colPctLow = validateColour(COL_PCT_LOW);
+        colPctLow = validateColour(CONFIG.colPctLow);
         if (!colPctLow)
         {
-            printf("ERROR: unrecognised colour \"%s\"\n", COL_PCT_LOW);
-            freeGlobals();
-            free(fields);
+            printf("ERROR: unrecognised colour \"%s\"\n", CONFIG.colPctLow);
             return 1;
         }
-        colPctMed = validateColour(COL_PCT_MED);
+        colPctMed = validateColour(CONFIG.colPctMed);
         if (!colPctMed)
         {
-            printf("ERROR: unrecognised colour \"%s\"\n", COL_PCT_MED);
-            freeGlobals();
-            free(fields);
+            printf("ERROR: unrecognised colour \"%s\"\n", CONFIG.colPctMed);
             return 1;
         }
-        colPctHigh = validateColour(COL_PCT_HIGH);
+        colPctHigh = validateColour(CONFIG.colPctHigh);
         if (!colPctHigh)
         {
-            printf("ERROR: unrecognised colour \"%s\"\n", COL_PCT_HIGH);
-            freeGlobals();
-            free(fields);
+            printf("ERROR: unrecognised colour \"%s\"\n",
+                CONFIG.colPctHigh);
             return 1;
         }
         colReset = (colAccent[0] == '\0') ? "" : "\033[" COL_RESET "m";
@@ -701,12 +624,12 @@ int main(int argc, char *argv[])
 
 
     // Validate which field to display
-    char *fieldsOrig = strdup(fields);
+    char *fieldsUsed = strdup(CONFIG.fields);
     char fieldsProcessed[MAX_FIELDS][5];
     int noFields = 0;
-    if (fields && fields[0] != '\0')
+    if (fieldsUsed && fieldsUsed[0] != '\0')
     {
-        char *currTok = strtok(fields, ",");
+        char *currTok = strtok(fieldsUsed, ",");
         while (currTok)
         {
             // Make sure current field is a known one
@@ -726,8 +649,6 @@ int main(int argc, char *argv[])
                 {
                     printf("ERROR: too many fields given (max %d)\n",
                         MAX_FIELDS);
-                    freeGlobals();
-                    free(fields);
                     return 1;
                 }
 
@@ -739,8 +660,6 @@ int main(int argc, char *argv[])
             else
             {
                 printf("ERROR: unrecognised field name \"%s\"\n", currTok);
-                freeGlobals();
-                free(fields);
                 return 1;
             }
 
@@ -750,7 +669,7 @@ int main(int argc, char *argv[])
         // If no-escape-codes mode, we need to string out colour palette
         // fields since they are not supported. For good measure, we also
         // remove any blank space padding above them.
-        if (NO_ESC)
+        if (CONFIG.noEsc)
         {
             int write = 0;
             for (int read = 0; read < noFields; read++)
@@ -777,8 +696,6 @@ int main(int argc, char *argv[])
     else
     {
         printf("ERROR: no field names were given to display\n");
-        freeGlobals();
-        free(fields);
         return 1;
     }
 
@@ -799,7 +716,7 @@ int main(int argc, char *argv[])
 
 
     // Print SHORK (if needed)
-    if (SHOW_SHORK && !NO_ESC)
+    if (!CONFIG.noArt && !CONFIG.noEsc)
     {
         printf("%s", colAccent);
         if (COMPACT)
@@ -838,21 +755,22 @@ int main(int argc, char *argv[])
 
     // Preprepared bullet icon to use if needed.
     char icon[16] = {0};
-    if (CHAR_BULLET != '\0')
-        snprintf(icon, 16, " %s%c%s ", colBullet, CHAR_BULLET, colReset);
+    if (CONFIG.charBullet != '\0')
+        snprintf(icon, 16, " %s%c%s ", colBullet, CONFIG.charBullet,
+            colReset);
 
     // Assemble output
     for (int i = 0; i < noFields; i++)
     {
         if (strcmp(fieldsProcessed[i], " ") == 0)
         {
-            if (NO_ESC) printShorkLine(0);
+            if (CONFIG.noEsc) printShorkLine(0);
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "\n");
         }
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
-            if (NO_ESC) printShorkLine(0);
+            if (CONFIG.noEsc) printShorkLine(0);
             for (int i = 0; i < headerWidth; i++)
                 outputPos += writeOutput(output + outputPos,
                     OUTPUT_LEN - outputPos, "-");
@@ -864,7 +782,7 @@ int main(int argc, char *argv[])
             if (username[0] != '\0' && hostname[0] != '\0')
             {
                 headerWidth = strlen(username) + 1 + strlen(hostname);
-                if (NO_ESC) printShorkLine(0);
+                if (CONFIG.noEsc) printShorkLine(0);
                 outputPos += writeOutput(output + outputPos,
                     OUTPUT_LEN - outputPos, "%s%s%s@%s%s%s\n", colAccent,
                     username, colReset, colAccent, hostname, colReset);
@@ -875,8 +793,8 @@ int main(int argc, char *argv[])
         {
             if (os && os[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -899,8 +817,8 @@ int main(int argc, char *argv[])
             char *kernel = getKernel(u, uStatus);
             if (kernel && kernel[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -924,8 +842,8 @@ int main(int argc, char *argv[])
             char *uptime = getUptime();
             if (uptime && uptime[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -949,8 +867,8 @@ int main(int argc, char *argv[])
             char *pkgs = getPackages(os);
             if (pkgs && pkgs[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -974,8 +892,8 @@ int main(int argc, char *argv[])
             LOCALES *locales = getLocales();
             if (locales && locales->locales)
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                     {
@@ -1013,9 +931,9 @@ int main(int argc, char *argv[])
             {
                 int pastFirst = 0;
                 char icon[100] = {0};
-                if (CHAR_BULLET != '\0')
+                if (CONFIG.charBullet != '\0')
                     snprintf(icon, sizeof(icon), " %s%c%s ", colBullet,
-                        CHAR_BULLET, colReset);
+                        CONFIG.charBullet, colReset);
 
                 for (int j = 0; j < noScreens; j++)
                 {
@@ -1023,8 +941,8 @@ int main(int argc, char *argv[])
 
                     if (screen && screen[0] != '\0')
                     {
-                        if (NO_ESC) printShorkLine(0);
-                        if (mode == NORMAL)
+                        if (CONFIG.noEsc) printShorkLine(0);
+                        if (CONFIG.mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -1088,8 +1006,8 @@ int main(int argc, char *argv[])
         {
             if (de && de != wm && de[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1111,7 +1029,7 @@ int main(int argc, char *argv[])
         {
             if (wm && wm[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
+                if (CONFIG.noEsc) printShorkLine(0);
                 char server[32] = "";
                 if (!COMPACT)
                 {
@@ -1120,7 +1038,7 @@ int main(int argc, char *argv[])
                     else if (X11_PRESENT)
                         snprintf(server, 32, " (X11)");
                 }
-                if (mode == NORMAL)
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1149,8 +1067,8 @@ int main(int argc, char *argv[])
             char *trm = getTerminal();
             if (trm)
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1178,8 +1096,8 @@ int main(int argc, char *argv[])
             // the console size
             else
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1212,8 +1130,8 @@ int main(int argc, char *argv[])
             char *shell = getShell();
             if (shell && shell[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1239,8 +1157,8 @@ int main(int argc, char *argv[])
                 char *cpuStr = interpretCPU(cpu);
                 if (cpuStr && cpuStr[0] != '\0')
                 {
-                    if (NO_ESC) printShorkLine(0);
-                    if (mode == NORMAL)
+                    if (CONFIG.noEsc) printShorkLine(0);
+                    if (CONFIG.mode == NORMAL)
                     {
                         if (!COMPACT)
                             outputPos += writeOutput(output + outputPos,
@@ -1270,9 +1188,9 @@ int main(int argc, char *argv[])
             {
                 int pastFirst = 0;
                 char icon[100] = {0};
-                if (CHAR_BULLET != '\0')
+                if (CONFIG.charBullet != '\0')
                     snprintf(icon, sizeof(icon), " %s%c%s ", colBullet,
-                        CHAR_BULLET, colReset);
+                        CONFIG.charBullet, colReset);
 
                 for (int j = 0; j < noGPUs; j++)
                 {
@@ -1280,8 +1198,8 @@ int main(int argc, char *argv[])
 
                     if (gpuStr && gpuStr[0] != '\0')
                     {
-                        if (NO_ESC) printShorkLine(0);
-                        if (mode == NORMAL)
+                        if (CONFIG.noEsc) printShorkLine(0);
+                        if (CONFIG.mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -1334,8 +1252,8 @@ int main(int argc, char *argv[])
             // we received a fallback found during CPU name processing
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1360,8 +1278,8 @@ int main(int argc, char *argv[])
                 colReset);
             if (ram)
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1393,8 +1311,8 @@ int main(int argc, char *argv[])
                 colReset);
             if (swap && swap[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1426,16 +1344,16 @@ int main(int argc, char *argv[])
             {
                 int pastFirst = 0;
                 char icon[100] = {0};
-                if (CHAR_BULLET != '\0')
+                if (CONFIG.charBullet != '\0')
                     snprintf(icon, sizeof(icon), " %s%c%s ", colBullet,
-                        CHAR_BULLET, colReset);
+                        CONFIG.charBullet, colReset);
 
                 for (int i = 0; i < disks->count; i++)
                 {
                     if (disks->disks[i][0] != '\0')
                     {
-                        if (NO_ESC) printShorkLine(0);
-                        if (mode == NORMAL)
+                        if (CONFIG.noEsc) printShorkLine(0);
+                        if (CONFIG.mode == NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -1498,8 +1416,8 @@ int main(int argc, char *argv[])
                 colReset);
             if (root && root[0] != '\0')
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1524,13 +1442,13 @@ int main(int argc, char *argv[])
             }
             free(root);
         }
-        else if (strcmp(fieldsProcessed[i], "lip") == 0 && !noIP)
+        else if (strcmp(fieldsProcessed[i], "lip") == 0 && !CONFIG.noIP)
         {
             char *localIP = getLocalIP();
             if (localIP)
             {
-                if (NO_ESC) printShorkLine(0);
-                if (mode == NORMAL)
+                if (CONFIG.noEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1557,7 +1475,7 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "clrs") == 0)
         {
-            ColourPalette palette = getColourPalette(SHOW_SHORK);
+            ColourPalette palette = getColourPalette();
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "%s\n", palette.baseCols);
             outputPos += writeOutput(output + outputPos,
@@ -1565,24 +1483,24 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "clba") == 0)
         {
-            ColourPalette palette = getColourPalette(SHOW_SHORK);
+            ColourPalette palette = getColourPalette();
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "%s\n", palette.baseCols);
         }
         else if (strcmp(fieldsProcessed[i], "clbr") == 0)
         {
-            ColourPalette palette = getColourPalette(SHOW_SHORK);
+            ColourPalette palette = getColourPalette();
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "%s\n", palette.brightCols);
         }
     }
 
     // Print buffered output
-    if (!NO_ESC)
+    if (!CONFIG.noArt)
     {
         int shorkWidth = SHORK_NORM_WIDTH;
         int shorkHeight = SHORK_NORM_HEIGHT;
-        if (!SHOW_SHORK)
+        if (CONFIG.noArt)
             shorkWidth = 0;
         else if (COMPACT)
         {
@@ -1591,7 +1509,7 @@ int main(int argc, char *argv[])
         }
 
         WORD_WRAPPED *data = NULL;
-        if (mode == BULLETS)
+        if (CONFIG.mode == BULLETS)
             data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
                 "   ", NULL, 1, 0);
         else
@@ -1605,7 +1523,7 @@ int main(int argc, char *argv[])
                     strlen(colReset);
                 char *prefixStr = malloc(prefixStrLen);
                 snprintf(prefixStr, prefixStrLen, " %s%c%s ", colBullet,
-                    CHAR_BULLET, colReset);
+                    CONFIG.charBullet, colReset);
                 data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
                     "          ", prefixStr, 1, 0);
                 free(prefixStr);
@@ -1614,7 +1532,7 @@ int main(int argc, char *argv[])
 
         if (data)
         {
-            if (SHOW_SHORK)
+            if (!CONFIG.noArt)
             {
                 printf("\033[%dA", shorkHeight);
                 printf("\033[%dC", shorkWidth);
@@ -1623,27 +1541,27 @@ int main(int argc, char *argv[])
             for (int i = 0; i < data->len; i++)
             {
                 putchar(data->str[i]);
-                if (SHOW_SHORK)
+                if (!CONFIG.noArt)
                 {
                     if (data->str[i] == '\n')
                         printf("\033[%dC", shorkWidth);
                 }
             }
 
-            if (SHOW_SHORK && data->lines < shorkHeight)
+            if (!CONFIG.noArt && data->lines < shorkHeight)
                 printf("\033[%dB", shorkHeight - data->lines);
 
             free(data->str);
             free(data);
 
-            if (SHOW_SHORK)
+            if (!CONFIG.noArt)
                 printf("\r");
         }
         else
             printf("ERROR: could not process output string\n");
     }
     // If needed, finish off printing the SHORK
-    else if (SHOW_SHORK)
+    else if (!CONFIG.noArt)
     {
         int target = SHORK_NORM_HEIGHT;
         if (COMPACT)
@@ -1656,18 +1574,14 @@ int main(int argc, char *argv[])
     }
 
     if (saveConf)
-        writeConf(CHAR_BULLET, COL_ACCENT, COL_BULLET, COL_PCT_HIGH,
-            COL_PCT_LOW, COL_PCT_MED, COMPACT, fieldsOrig, MAX_UNIT, mode,
-            NO_ESC, NO_IHA, noIP, SHOW_SHORK);
+        writeConf(CONFIG);
 
-    freeGlobals();
     free(colAccent);
     free(colBullet);
     free(colPctLow);
     free(colPctMed);
     free(colPctHigh);
-    free(fieldsOrig);
-    free(fields);
+    free(fieldsUsed);
     free(hostname);
     free(os);
     if (de != wm)

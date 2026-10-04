@@ -23,6 +23,6 @@ typedef struct {
 
 
 
-ColourPalette getColourPalette(const int);
+ColourPalette getColourPalette(void);
 
 #endif

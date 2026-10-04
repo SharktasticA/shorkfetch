@@ -16,7 +16,6 @@
 #include "../shorkcommon/general.h"
 
 #include "conf.h"
-#include "globals.h"
 
 #include <linux/limits.h>
 #include <sys/stat.h>
@@ -35,7 +34,8 @@
 int deleteConf(void)
 {
     char path[PATH_MAX];
-    snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
+    snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf",
+        getenv("HOME"));
 
     if (remove(path) != 0)
         return 0;
@@ -76,34 +76,18 @@ int launchConf(void)
 
 /**
  * Reads shorkfetch.conf.
- * @param charBullet
- * @param colAccent
- * @param colBullet
- * @param colPctHigh
- * @param colPctLow
- * @param colPctMed
- * @param compact
- * @param fields
- * @param maxUnit
- * @param mode
- * @param noEsc
- * @param noIHA
- * @param noIP
- * @param showShork
  */
-void readConf(char *charBullet, char **colAccent, char **colBullet, 
-    char **colPctHigh, char **colPctLow, char **colPctMed, int *compact, 
-    char **fields, char *maxUnit, VIEW_MODE *mode, int *noEsc, int *noIHA,
-    int *noIP, int *showShork)
+void readConf(Config *conf)
 {
     char path[PATH_MAX];
-    snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf", HOME);
+    snprintf(path, PATH_MAX, "%s/.config/shorkutils/shorkfetch.conf",
+        getenv("HOME"));
 
-    FILE *conf = fopen(path, "r");
-    if (conf)
+    FILE *stream = fopen(path, "r");
+    if (stream)
     {
         char line[512];
-        while (fgets(line, sizeof(line), conf))
+        while (fgets(line, sizeof(line), stream))
         {
             if (line[0] == '\n') continue;
             line[strcspn(line, "\n")] = '\0';
@@ -116,117 +100,78 @@ void readConf(char *charBullet, char **colAccent, char **colBullet,
             char *value = eq + 1;
 
             if (strcmp(key, "charBullet") == 0)
-                *charBullet = value[0];
+                conf->charBullet = value[0];
             else if (strcmp(key, "colAccent") == 0)
-            {
-                free(*colAccent);
-                *colAccent = strdup(value);
-            }
+                snprintf(conf->colAccent, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "colBullet") == 0)
-            {
-                free(*colBullet);
-                *colBullet = strdup(value);
-            }
+                snprintf(conf->colBullet, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "colPctHigh") == 0)
-            {
-                free(*colPctHigh);
-                *colPctHigh = strdup(value);
-            }
+                snprintf(conf->colPctHigh, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "colPctLow") == 0)
-            {
-                free(*colPctLow);
-                *colPctLow = strdup(value);
-            }
+                snprintf(conf->colPctLow, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "colPctMed") == 0)
-            {
-                free(*colPctMed);
-                *colPctMed = strdup(value);
-            }
+                snprintf(conf->colPctMed, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "compact") == 0)
-                *compact = atoi(value);
+                conf->compact = atoi(value);
             else if (strcmp(key, "fields") == 0)
-            {
-                free(*fields);
-                *fields = strdup(value);
-            }
+                snprintf(conf->fields, CONF_FIELDS_LEN, "%s", value);
             else if (strcmp(key, "maxUnit") == 0)
-                *maxUnit = value[0];
+                conf->maxUnit = value[0];
             else if (strcmp(key, "mode") == 0)
-                *mode = atoi(value);
+                conf->mode = atoi(value);
+            else if (strcmp(key, "noArt") == 0)
+                conf->noArt = atoi(value);
             else if (strcmp(key, "noEsc") == 0)
-                *noEsc = atoi(value);
+                conf->noEsc = atoi(value);
             else if (strcmp(key, "noIHA") == 0)
-                *noIHA = atoi(value);
+                conf->noIHA = atoi(value);
             else if (strcmp(key, "noIP") == 0)
-                *noIP = atoi(value);
-            else if (strcmp(key, "showShork") == 0)
-                *showShork = atoi(value);
+                conf->noIP = atoi(value);
         }
-        fclose(conf);
+        fclose(stream);
     }
 }
 
 /**
  * Writes shorkfetch.conf.
- * @param charBullet
- * @param colAccent
- * @param colBullet
- * @param colPctHigh
- * @param colPctLow
- * @param colPctMed
- * @param compact
- * @param fields
- * @param maxUnit
- * @param mode
- * @param noEsc
- * @param noIHA
- * @param noIP
- * @param showShork
  */
-void writeConf(char charBullet, char *colAccent, char *colBullet, 
-    char *colPctHigh, char *colPctLow, char *colPctMed, int compact, 
-    char *fields, char maxUnit, VIEW_MODE mode, int noEsc, int noIHA,
-    int noIP, int showShork)
+void writeConf(Config conf)
 {
     char path[PATH_MAX];
 
     // Create directory to store the conf file - this is broken into parts
     // in case the system does not have .config/
-    snprintf(path, PATH_MAX, "%s/.config/", HOME);
+    snprintf(path, PATH_MAX, "%s/.config/", getenv("HOME"));
     mkdir(path, 0755);
     strncat(path, "shorkutils/", PATH_MAX - strlen(path) - 1);
     mkdir(path, 0755);
 
     strncat(path, "shorkfetch.conf", PATH_MAX - strlen(path) - 1);
-    FILE *conf = fopen(path, "w");
-    if (conf)
+    FILE *stream = fopen(path, "w");
+    if (stream)
     {
-        fprintf(conf, "charBullet=%c\n", charBullet);
-        fprintf(conf, "colAccent=%s\n", colAccent);
-        fprintf(conf, "colBullet=%s\n", colBullet);
-        fprintf(conf, "colPctHigh=%s\n", colPctHigh);
-        fprintf(conf, "colPctLow=%s\n", colPctLow);
-        fprintf(conf, "colPctMed=%s\n", colPctMed);
-        fprintf(conf, "compact=%d\n", compact);
-        fprintf(conf, "fields=%s\n", fields);
-        fprintf(conf, "maxUnit=%c\n", maxUnit);
-        fprintf(conf, "mode=%d\n", mode);
-        fprintf(conf, "noEsc=%d\n", noEsc);
-        fprintf(conf, "noIHA=%d\n", noIHA);
-        fprintf(conf, "noIP=%d\n", noIP);
-        fprintf(conf, "showShork=%d\n", showShork);
-        fclose(conf);
+        fprintf(stream, "charBullet=%c\n", conf.charBullet);
+        fprintf(stream, "colAccent=%s\n", conf.colAccent);
+        fprintf(stream, "colBullet=%s\n", conf.colBullet);
+        fprintf(stream, "colPctHigh=%s\n", conf.colPctHigh);
+        fprintf(stream, "colPctLow=%s\n", conf.colPctLow);
+        fprintf(stream, "colPctMed=%s\n", conf.colPctMed);
+        fprintf(stream, "compact=%d\n", conf.compact);
+        fprintf(stream, "fields=%s\n", conf.fields);
+        fprintf(stream, "maxUnit=%c\n", conf.maxUnit);
+        fprintf(stream, "mode=%d\n", conf.mode);
+        fprintf(stream, "noArt=%d\n", conf.noArt);
+        fprintf(stream, "noEsc=%d\n", conf.noEsc);
+        fprintf(stream, "noIHA=%d\n", conf.noIHA);
+        fprintf(stream, "noIP=%d\n", conf.noIP);
+        fclose(stream);
     }
 }
 
 #else
 
-int deleteConf(void) { return NULL; }
-void readConf(char *bullet, char **colour, int *compact, char **fields,
-    VIEW_MODE *mode, int *noEsc, int *noIP, int *showShork)
-    { return NULL; }
-void writeConf(char bullet, char *colour, int compact, char *fields,
-    VIEW_MODE mode, int noEsc, int noIP, int showShork)
-    { return NULL; }
+int deleteConf(void) { return 1; }
+void readConf(Config *conf) { return; }
+void writeConf(Config *conf) { return; }
 
 #endif

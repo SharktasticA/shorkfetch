@@ -76,8 +76,8 @@ char *getRAM(MemInfo mi, char *colPctLow, char *colPctMed, char *colPctHigh,
     ram[0] = '\0';
 
     long used = mi.memTotal - mi.memAvailable;
-    char *usedStr = bytesToReadable("KiB", used, MAX_UNIT);
-    char *totalStr = bytesToReadable("KiB", mi.memTotal, MAX_UNIT);
+    char *usedStr = bytesToReadable("KiB", used, CONFIG.maxUnit);
+    char *totalStr = bytesToReadable("KiB", mi.memTotal, CONFIG.maxUnit);
 
     if (!COMPACT)
     {
@@ -119,8 +119,8 @@ char *getSwap(MemInfo mi, char *colPctLow, char *colPctMed,
     swap[0] = '\0';
 
     long used = mi.swapTotal - mi.swapFree;
-    char *usedStr = bytesToReadable("KiB", used, MAX_UNIT);
-    char *totalStr = bytesToReadable("KiB", mi.swapTotal, MAX_UNIT);
+    char *usedStr = bytesToReadable("KiB", used, CONFIG.maxUnit);
+    char *totalStr = bytesToReadable("KiB", mi.swapTotal, CONFIG.maxUnit);
 
     if (!COMPACT)
     {

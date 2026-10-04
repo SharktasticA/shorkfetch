@@ -17,6 +17,7 @@
 #include "../shorkcommon/general.h"
 #include "../shorkcommon/shorkmenu.h"
 
+#include "globals.h"
 #include "palette.h"
 
 #include <stdio.h>
@@ -28,13 +29,13 @@
  * @return ColourPalette struct containing completed strings for printing a
  *         "normal" and "bold" line of colours
  */
-ColourPalette getColourPalette(const int showShork)
+ColourPalette getColourPalette(void)
 {
     ColourPalette palette;
 
     // size = number of chars per colour box
     int size = 3;
-    if (showShork)
+    if (!CONFIG.noArt)
     {
         if ((COMPACT && TERM_SIZE.ws_col < 32) ||
             (!COMPACT && TERM_SIZE.ws_col < 35))

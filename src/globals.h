@@ -15,63 +15,19 @@
 #ifndef GLOBALS
 #define GLOBALS
 
+#include "conf.h"
 #include <sys/ioctl.h>
 #include <stdlib.h>
 
 
 
-typedef enum
-{
-    NORMAL,
-    BULLETS
-} VIEW_MODE;
-
-
-
-#define MAX_FIELDS  50
 #define OUTPUT_LEN  8192
 
-static const char *POSSIBLE_FIELDS[] =
-{
-    " ",    // Blank line
-    "---",  // Separator
-    "head", // user@host header
-    "os",   // Operating system
-    "krn",  // Kernel
-    "upt",  // Uptime
-    "pkgs", // Packages
-    "loc",  // Locale(s)
-    "scn",  // Screen(s)
-    "de",   // Desktop environment
-    "wm",   // Window manager and/or Wayland compositor
-    "trm",  // Terminal emulator/console size
-    "sh",   // Shell
-    "cpu",  // CPU
-    "gpu",  // GPU(s)
-    "ram",  // System memory
-    "swap", // Swap memory
-    "dsk",  // Disk size(s)
-    "root", // Root partition size
-    "lip",  // Local IP address
-    "clrs", // ANSI escape code 16-colour palette
-    "clba", // ANSI escape code base 8-colour palette
-    "clbr"  // ANSI escape code bright 8-colour palette
-};
-static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) /
-    sizeof(POSSIBLE_FIELDS[0]);
 
-extern char CHAR_BULLET;
-extern char *COL_ACCENT;
-extern char *COL_BULLET;
-extern char *COL_PCT_HIGH;
-extern char *COL_PCT_LOW;
-extern char *COL_PCT_MED;
+
+extern Config CONFIG;
 extern char *HOME;
-extern char MAX_UNIT;
-extern int NO_ESC;
-extern int NO_IHA;
 extern int SHORK_LINE;
-extern int SHOW_SHORK;
 extern int WAYLAND_PRESENT;
 extern int X11_PRESENT;
 extern char *XDG_CURRENT_DESKTOP;
