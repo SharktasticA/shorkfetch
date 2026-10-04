@@ -13,6 +13,8 @@
 
 
 
+#include "../shorkcommon/general.h"
+
 #include "conf.h"
 #include "globals.h"
 
@@ -39,6 +41,37 @@ int deleteConf(void)
         return 0;
     else
         return 1;
+}
+
+/**
+ * Launches SHORKFETCH Configurator (shorkfetch-conf).
+ * @return 0 if successful; 1 if not
+ */
+int launchConf(void)
+{
+    // Look for global shorkfetch-conf
+    if (isProgramInstalled("shorkfetch-conf", 1))
+    {
+        int result = runCmd("shorkfetch-conf", NULL);
+        return (result >= 0) ? result : 1;
+    }
+
+    // Look for shorkfetch-conf in shorkfetch's bin dir
+    char *binDir = getBinDir();
+    if (binDir)
+    {
+        char local[PATH_MAX];
+        snprintf(local, sizeof(local), "%sshorkfetch-conf", binDir);
+
+        if (isProgramInstalled(local, 1))
+        {
+            int result = runCmd(local, NULL);
+            return (result >= 0) ? result : 1;
+        }
+    }
+    
+    printf("ERROR: could not find shorkfetch-conf\n");
+    return 1;
 }
 
 /**

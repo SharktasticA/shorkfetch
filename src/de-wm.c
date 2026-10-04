@@ -13,8 +13,9 @@
 
 
 
+#include "../shorkcommon/general.h"
+
 #include "de-wm.h"
-#include "general.h"
 #include "globals.h"
 
 #include <stdlib.h>

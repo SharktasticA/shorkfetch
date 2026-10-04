@@ -1,3 +1,6 @@
 [submodule "cpuinfo-ds"]
 	path = cpuinfo-ds
 	url = https://github.com/SharktasticA/cpuinfo-ds
+[submodule "shorkcommon"]
+	path = shorkcommon
+	url = https://github.com/SharktasticA/shorkcommon

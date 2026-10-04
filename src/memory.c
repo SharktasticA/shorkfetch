@@ -13,8 +13,9 @@
 
 
 
-#include "colours.h"
-#include "general.h"
+#include "../shorkcommon/general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "globals.h"
 #include "memory.h"
 

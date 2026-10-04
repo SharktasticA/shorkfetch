@@ -69,6 +69,7 @@ Usage: shorkfetch [OPTIONS]
 * `-ac`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour
 * `-b`, `--bullet`: Specifies a custom character to use with bullet list mode and sublists; empty assignment allows lists with no bullet; no assignment returns the current character and exits
 * `-co`, `--compact`: Compacts field names and field values
+* `-cf`, `--conf`: Launches SHORKFETCH Configurator and exits
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields
 * `-h`, `--help`: Shows help information and exits
 * `-hc`, `--high-col`: Specifies a custom high percentage colour; no assignment returns the current colour and exits

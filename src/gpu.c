@@ -13,8 +13,10 @@
 
 
 
+#include "../shorkcommon/general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "exclusions.h"
-#include "general.h"
 #include "globals.h"
 #include "gpu.h"
 #ifndef NO_STR_CLEANING

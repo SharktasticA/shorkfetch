@@ -14,13 +14,15 @@
 
 
 
+#include "../shorkcommon/colours.h"
+#include "../shorkcommon/general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "art.h"
-#include "colours.h"
 #include "conf.h"
 #include "cpu.h"
 #include "de-wm.h"
 #include "disk.h"
-#include "general.h"
 #include "globals.h"
 #include "gpu.h"
 #include "hostname.h"
@@ -30,6 +32,7 @@
 #include "memory.h"
 #include "os.h"
 #include "packages.h"
+#include "palette.h"
 #include "screen.h"
 #include "shell.h"
 #include "terminal.h"
@@ -38,10 +41,6 @@
 #include "username.h"
 
 #include <stdarg.h>
-
-
-
-#define VERSION     "0.7-wip"
 
 
 
@@ -433,6 +432,13 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "-co") == 0 ||
             strcmp(argv[i], "--compact") == 0)
             COMPACT = 1;
+        else if (strcmp(argv[i], "-cf") == 0 ||
+            strcmp(argv[i], "--conf") == 0)
+        {
+            free(fields);
+            freeGlobals();
+            return launchConf();
+        }
         else if (strncmp(argv[i], "-f", 2) == 0 ||
             strncmp(argv[i], "--fields", 8) == 0)
         {

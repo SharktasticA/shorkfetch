@@ -13,7 +13,8 @@
 
 
 
-#include "globals.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "kernel.h"
 
 #include <stdlib.h>

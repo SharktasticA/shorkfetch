@@ -16,7 +16,8 @@
 #ifndef DE_WM
 #define DE_WM
 
-#include "general.h"
+#include "../shorkcommon/general.h"
+
 #include "globals.h"
 
 #include <stdlib.h>

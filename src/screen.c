@@ -12,12 +12,14 @@
 
 
 
-#include "general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "globals.h"
 #include "screen.h"
 
 #include <dirent.h>
 #include <linux/limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

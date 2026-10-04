@@ -20,8 +20,10 @@
 
 
 
+#include "../shorkcommon/general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "cpu.h"
-#include "general.h"
 #include "globals.h"
 #include "gpu.h"
 #ifndef NO_STR_CLEANING

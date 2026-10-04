@@ -26,12 +26,16 @@ RESET='\033[0m'
 
 
 if ! gcc --version >/dev/null 2>&1; then
-    echo -e "${RED}ERROR: GCC is required for compiling shorkfetch${RESET}"
+    echo -e "${RED}ERROR: GCC is required for compiling SHORKFETCH${RESET}"
+    exit 1
+fi
+if ! git --version >/dev/null 2>&1; then
+    echo -e "${RED}ERROR: Git is required for compiling SHORKFETCH${RESET}"
     exit 1
 fi
 
 if ! make --version >/dev/null 2>&1; then
-    echo -e "${RED}ERROR: make is required for compiling shorkfetch${RESET}"
+    echo -e "${RED}ERROR: make is required for compiling SHORKFETCH${RESET}"
     exit 1
 fi
 
@@ -41,28 +45,18 @@ cleanup()
 {
     echo -e "${YELLOW}Cleaning up...${RESET}"
     cd "$START_DIR"
-    rm -rf shorkfetch shorkfetch-main main.zip 2>/dev/null || true;
+    rm -rf shorkfetch 2>/dev/null || true;
 }
 trap cleanup EXIT
 
 
 
 if git --version >/dev/null 2>&1; then
-    echo -e "${YELLOW}Cloning shorkfetch repo...${RESET}"
+    echo -e "${YELLOW}Cloning SHORKFETCH repo...${RESET}"
     git clone https://github.com/SharktasticA/shorkfetch
     cd shorkfetch
 
-    echo -e "${YELLOW}Installing shorkfetch (you may be asked for sudo)...${RESET}"
-    sudo make install
-else
-    echo -e "${YELLOW}Downloading shorkfetch source...${RESET}"
-    wget https://github.com/SharktasticA/shorkfetch/archive/refs/heads/main.zip
-
-    echo -e "${YELLOW}Extracting shorkfetch source...${RESET}"
-    unzip main.zip
-    cd shorkfetch-main
-
-    echo -e "${YELLOW}Installing shorkfetch (you may be asked for sudo)...${RESET}"
+    echo -e "${YELLOW}Installing SHORKFETCH (you may be asked for sudo)...${RESET}"
     sudo make install
 fi
 

@@ -2,8 +2,8 @@
     ######################################################
     ##            SHORK UTILITY - SHORKFETCH            ##
     ######################################################
-    ## Functions for reading and writing user settings  ##
-    ## to a configuration file                          ##
+    ## Functions and data relating to handling ANSI     ##
+    ## escape code colour palettes                      ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################
@@ -13,18 +13,16 @@
 
 
 
-#ifndef CONF
-#define CONF
+#ifndef PALLETE
+#define PALLETE
 
-#include "globals.h"
+typedef struct {
+    char baseCols[128];
+    char brightCols[128];
+} ColourPalette;
 
 
 
-int deleteConf(void);
-int launchConf(void);
-void readConf(char*, char**, char**, char**, char**, char**, int*, char**,
-    char*, VIEW_MODE*, int*, int*, int*, int*);
-void writeConf(char, char*, char*, char*, char*, char*, int, char*,
-    char, VIEW_MODE, int, int, int, int);
+ColourPalette getColourPalette(const int);
 
 #endif

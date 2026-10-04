@@ -27,7 +27,7 @@
 char *getShell(void)
 {
     char *shell = getenv("SHELL");
-    if (!shell || shell[0] == '\0') 
+    if (!shell || shell[0] == '\0')
         shell = NULL;
     else
         shell = strdup(basename(shell));

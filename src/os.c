@@ -13,7 +13,9 @@
 
 
 
-#include "general.h"
+#include "../shorkcommon/general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "globals.h"
 #ifndef NO_STR_CLEANING
 #include "replacements.h"

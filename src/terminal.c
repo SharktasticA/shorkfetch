@@ -13,8 +13,10 @@
 
 
 
+#include "../shorkcommon/general.h"
+#include "../shorkcommon/shorkmenu.h"
+
 #include "exclusions.h"
-#include "general.h"
 #include "globals.h"
 #include "terminal.h"
 
