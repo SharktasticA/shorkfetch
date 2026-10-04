@@ -1496,7 +1496,7 @@ int main(int argc, char *argv[])
     }
 
     // Print buffered output
-    if (!CONFIG.noArt)
+    if (!CONFIG.noEsc)
     {
         int shorkWidth = SHORK_NORM_WIDTH;
         int shorkHeight = SHORK_NORM_HEIGHT;
