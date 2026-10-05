@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 
@@ -166,6 +167,7 @@ void writeConf(Config conf)
         fprintf(stream, "noIP=%d\n", conf.noIP);
         fclose(stream);
     }
+    sync();
 }
 
 #else

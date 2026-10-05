@@ -16,6 +16,7 @@
 #define GLOBALS
 
 #include "conf.h"
+
 #include <sys/ioctl.h>
 #include <stdlib.h>
 

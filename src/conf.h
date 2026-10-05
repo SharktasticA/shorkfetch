@@ -58,7 +58,8 @@ typedef struct
     int noArt;
     // No escape codes (default: 0)
     int noEsc;
-    // No Intel Hybrid Architecture-specific CPU core counting (default: 0)
+    // No Intel Hybrid Architecture-specific core/thread counting
+    // (default: 0)
     int noIHA;
     // No IP fields (default: 0)
     int noIP;

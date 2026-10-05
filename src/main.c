@@ -199,7 +199,7 @@ void showHelp(void)
     free(noEsc);
 
     WORD_WRAPPED *noIha = wordWrap("-nh, --no-iha      Disables Intel "
-        "Hybrid Architecture-specific CPU core counting\n",
+        "Hybrid Architecture-specific core/thread counting\n",
         TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", noIha->str);
     free(noIha->str);
@@ -611,7 +611,7 @@ int main(int argc, char *argv[])
                 CONFIG.colPctHigh);
             return 1;
         }
-        colReset = (colAccent[0] == '\0') ? "" : "\033[" COL_RESET "m";
+        colReset = (CONFIG.noEsc) ? "" : "\033[" COL_RESET "m";
     }
 
 #ifdef TESTS
