@@ -1741,10 +1741,12 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'y')
             {
-                // If we have a Cx486Dxxx with FPU, make sure 387 is
-                // included in the model name
+                // If we have a Cx486Dxxx or Cx486Sxxx with FPU, make sure
+                // 387 is included in the model name
                 if ((strstr(cpu->name, "Cx486DLC") ||
-                    strstr(cpu->name, "Cx486DRx2")) && hasFlag(cpu, "fpu"))
+                    strstr(cpu->name, "Cx486DRx2") ||
+                    strstr(cpu->name, "Cx486SLC") ||
+                    strstr(cpu->name, "Cx486SRx2")) && hasFlag(cpu, "fpu"))
                 {
                     char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN, "%s + 387", cpu->name);
@@ -1752,7 +1754,7 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->name = tmp;
                 }
                 // If we have a Cx486S with FPU, make sure 487 is included
-                // in the  model name
+                // in the model name
                 else if (strstr(cpu->name, "Cx486S") && hasFlag(cpu, "fpu"))
                 {
                     char *tmp = malloc(NAME_LEN);
