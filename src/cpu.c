@@ -1763,6 +1763,18 @@ char *interpretCPU(CPU_DATA *cpu)
                     cpu->name = tmp;
                 }
             }
+            // Most notably 86Box allows pairing a i486SX-S or i486SX2 with
+            // a 487SX. In the real world, the 487SX would disable the 486,
+            // but 86Box seems to treat it like adding on the x87 extensions
+            // to the SX.
+            if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n' &&
+                strstr(cpu->name, "486 SX") && hasFlag(cpu, "fpu"))
+            {
+                    char *tmp = malloc(NAME_LEN);
+                    snprintf(tmp, NAME_LEN, "%s + x87", cpu->name);
+                    free(cpu->name);
+                    cpu->name = tmp;
+            }
             else
             {
                 // If we have a vendorless and revisionless 486, we can at
