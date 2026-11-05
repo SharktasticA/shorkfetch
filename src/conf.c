@@ -100,7 +100,9 @@ void readConf(Config *conf)
             char *key = line;
             char *value = eq + 1;
 
-            if (strcmp(key, "charBullet") == 0)
+            if (strcmp(key, "ver") == 0)
+                snprintf(conf->ver, CONF_VER_LEN, "%s", value);
+            else if (strcmp(key, "charBullet") == 0)
                 conf->charBullet = value[0];
             else if (strcmp(key, "colAccent") == 0)
                 snprintf(conf->colAccent, CONF_COL_LEN, "%s", value);
@@ -247,6 +249,7 @@ void writeConf(Config conf)
     FILE *stream = fopen(path, "w");
     if (stream)
     {
+        fprintf(stream, "version=%s\n", VERSION);
         fprintf(stream, "charBullet=%c\n", conf.charBullet);
         fprintf(stream, "colAccent=%s\n", conf.colAccent);
         fprintf(stream, "colBullet=%s\n", conf.colBullet);

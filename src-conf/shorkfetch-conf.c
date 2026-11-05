@@ -25,6 +25,7 @@
 
 
 Config CONFIG = {
+    VERSION,
     '*',
     "bright_cyan",
     "cyan",

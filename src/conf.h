@@ -20,6 +20,7 @@
 
 #define CONF_COL_LEN        16
 #define CONF_FIELDS_LEN     350
+#define CONF_VER_LEN        10
 #define MAX_FIELDS          50
 
 
@@ -34,6 +35,8 @@ typedef enum
 
 typedef struct
 {
+    // Version (default: current SHORKFETCH version)
+    char ver[CONF_VER_LEN];
     // Bullet point characater (default: '*')
     char charBullet;
     // Accent colour (default: "bright_cyan")
