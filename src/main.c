@@ -82,9 +82,9 @@ int printShorkLine(int stopOnceDone)
 
 void showHelp(void)
 {
-    WORD_WRAPPED *desc = wordWrap("A tool that displays system, hardware "
-        "and environment information in a summarised format.\n",
-        TERM_SIZE.ws_col, NULL, NULL, 0, 0);
+    WORD_WRAPPED *desc = wordWrap("A cute, shark-themed Linux fetch tool "
+        "that displays system, hardware, and environment information in a "
+        "summarised format.\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s\n", desc->str);
     free(desc->str);
     free(desc);
@@ -131,6 +131,13 @@ void showHelp(void)
     printf("%s", compact->str);
     free(compact->str);
     free(compact);
+
+    WORD_WRAPPED *conf = wordWrap("-cf, --conf        Launches SHORKFETCH "
+        "Configurator and exits\n", TERM_SIZE.ws_col, "                   ",
+        NULL, 0, 0);
+    printf("%s", conf->str);
+    free(conf->str);
+    free(conf);
 
     WORD_WRAPPED *fields = wordWrap("-f, --fields       Specifies a custom "
         "fields list and order; no assignment returns list of current "
@@ -278,9 +285,9 @@ int main(int argc, char *argv[])
 
     readConf(&CONFIG);
 
+#ifndef SHORK_DISKETTE
     for (int i = 1; i < argc; i++)
     {
-#ifndef SHORK_DISKETTE
         if ((strcmp(argv[i], "-h") == 0) ||
             (strcmp(argv[i], "--help") == 0))
         {
@@ -317,10 +324,6 @@ int main(int argc, char *argv[])
         }
         else if (strncmp(argv[i], "-b", 2) == 0 ||
             strncmp(argv[i], "--bullet", 8) == 0)
-#else
-        if (strncmp(argv[i], "-b", 2) == 0 ||
-        strncmp(argv[i], "--bullet", 8) == 0)
-#endif
         {
             char *bulletChar = NULL;
             if (strncmp(argv[i], "-b=", 3) == 0)
@@ -514,7 +517,6 @@ int main(int argc, char *argv[])
         else if ((strcmp(argv[i], "-ne") == 0) ||
             (strcmp(argv[i], "--no-esc") == 0))
             CONFIG.noEsc = 1;
-#ifndef SHORK_DISKETTE
         else if ((strcmp(argv[i], "-nh") == 0) ||
             (strcmp(argv[i], "--no-iha") == 0))
             CONFIG.noIHA = 1;
@@ -535,7 +537,6 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "-s") == 0 ||
             strcmp(argv[i], "--save") == 0)
             saveConf = 1;
-#endif
         else if (strcmp(argv[i], "-v") == 0 ||
             strcmp(argv[i], "--version") == 0)
         {
@@ -548,6 +549,7 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+#endif
 
     // Field name accent colour escape sequence
     char *colAccent = NULL;
@@ -624,80 +626,16 @@ int main(int argc, char *argv[])
 
 
     // Validate which field to display
-    char *fieldsUsed = strdup(CONFIG.fields);
     char fieldsProcessed[MAX_FIELDS][5];
-    int noFields = 0;
-    if (fieldsUsed && fieldsUsed[0] != '\0')
-    {
-        char *currTok = strtok(fieldsUsed, ",");
-        while (currTok)
-        {
-            // Make sure current field is a known one
-            int valid = 0;
-            for (int i = 0; i < POSSIBLE_FIELDS_LEN; i++)
-            {
-                if (strcmp(currTok, POSSIBLE_FIELDS[i]) == 0)
-                {
-                    valid = 1;
-                    break;
-                }
-            }
-
-            if (valid)
-            {
-                if (noFields >= MAX_FIELDS)
-                {
-                    printf("ERROR: too many fields given (max %d)\n",
-                        MAX_FIELDS);
-                    return 1;
-                }
-
-                // Queue this field up
-                strncpy(fieldsProcessed[noFields], currTok, 4);
-                fieldsProcessed[noFields][4] = '\0';
-                noFields++;
-            }
-            else
-            {
-                printf("ERROR: unrecognised field name \"%s\"\n", currTok);
-                return 1;
-            }
-
-            currTok = strtok(NULL, ",");
-        }
-
-        // If no-escape-codes mode, we need to string out colour palette
-        // fields since they are not supported. For good measure, we also
-        // remove any blank space padding above them.
-        if (CONFIG.noEsc)
-        {
-            int write = 0;
-            for (int read = 0; read < noFields; read++)
-            {
-                // Skip clrs, clba or clbr
-                if (strcmp(fieldsProcessed[read], "clrs") == 0 ||
-                    strcmp(fieldsProcessed[read], "clba") == 0 ||
-                    strcmp(fieldsProcessed[read], "clbr") == 0)
-                    continue;
-                // Skip space if previous ele was clrs
-                if (strcmp(fieldsProcessed[read], " ") == 0 && read > 0 &&
-                    (strcmp(fieldsProcessed[read - 1], "clrs") == 0 ||
-                    strcmp(fieldsProcessed[read - 1], "clba") == 0 ||
-                    strcmp(fieldsProcessed[read - 1], "clbr") == 0))
-                    continue;
-                // Keep ele
-                if (write != read)
-                    strcpy(fieldsProcessed[write], fieldsProcessed[read]);
-                write++;
-            }
-            noFields = write;
-        }
-    }
-    else
+    int noFields = validateFields(CONFIG.fields, fieldsProcessed,
+        CONFIG.noEsc);
+    if (noFields == 0)
     {
         printf("ERROR: no field names were given to display\n");
         return 1;
     }
+    else if (noFields == -1)
+        return 1;
 
 
 
@@ -1581,7 +1519,6 @@ int main(int argc, char *argv[])
     free(colPctLow);
     free(colPctMed);
     free(colPctHigh);
-    free(fieldsUsed);
     free(hostname);
     free(os);
     if (de != wm)

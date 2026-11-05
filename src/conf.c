@@ -133,6 +133,102 @@ void readConf(Config *conf)
     }
 }
 
+#endif
+
+/**
+ * Validates the given CONFIG.fields string, breaking it up and putting it
+ * into the fieldsOut array.
+ * @param fields CONFIG.fields value
+ * @param fieldsOut Array to put the validated fields in (must be
+ *                  char[MAX_FIELDS][5])
+ * @param noEsc CONFIG.noEsc value
+ * @return Number of fields in fieldsOut; -1 if error
+ */
+int validateFields(const char *fields, char fieldsOut[][5], int noEsc)
+{
+    char *fieldsCopy = strdup(fields);
+    if (!fieldsCopy)
+    {
+        printf("ERROR: could not allocate memory to process fields\n");
+        return -1;
+    }
+    int noFields = 0;
+
+    if (fieldsCopy && fieldsCopy[0] != '\0')
+    {
+        char *currTok = strtok(fieldsCopy, ",");
+        while (currTok)
+        {
+            // Make sure current field is a known one
+            int valid = 0;
+            for (int i = 0; i < POSSIBLE_FIELDS_LEN; i++)
+            {
+                if (strcmp(currTok, POSSIBLE_FIELDS[i].id) == 0)
+                {
+                    valid = 1;
+                    break;
+                }
+            }
+
+            if (valid)
+            {
+                if (noFields >= MAX_FIELDS)
+                {
+                    free(fieldsCopy);
+                    printf("ERROR: too many fields given (max %d)\n",
+                        MAX_FIELDS);
+                    return -1;
+                }
+
+                // Queue this field up
+                strncpy(fieldsOut[noFields], currTok, 4);
+                fieldsOut[noFields][4] = '\0';
+                noFields++;
+            }
+            else
+            {
+                free(fieldsCopy);
+                printf("ERROR: unrecognised field name \"%s\"\n", currTok);
+                return -1;
+            }
+
+            currTok = strtok(NULL, ",");
+        }
+
+        // If no-escape-codes mode, we need to strip out colour palette
+        // fields since they are not supported. For good measure, we also
+        // remove any blank space padding above them.
+        if (noEsc)
+        {
+            int write = 0;
+            for (int read = 0; read < noFields; read++)
+            {
+                // Skip clrs, clba or clbr
+                if (strcmp(fieldsOut[read], "clrs") == 0 ||
+                    strcmp(fieldsOut[read], "clba") == 0 ||
+                    strcmp(fieldsOut[read], "clbr") == 0)
+                    continue;
+                // Skip space if previous ele was clrs
+                if (strcmp(fieldsOut[read], " ") == 0 && read > 0 &&
+                    (strcmp(fieldsOut[read - 1], "clrs") == 0 ||
+                    strcmp(fieldsOut[read - 1], "clba") == 0 ||
+                    strcmp(fieldsOut[read - 1], "clbr") == 0))
+                    continue;
+                // Keep ele
+                if (write != read)
+                    strcpy(fieldsOut[write], fieldsOut[read]);
+                write++;
+            }
+            noFields = write;
+        }
+    }
+
+    free(fieldsCopy);
+    return noFields;
+}
+
+#ifndef SHORK_DISKETTE
+
 /**
  * Writes shorkfetch.conf.
  */
@@ -173,6 +269,7 @@ void writeConf(Config conf)
 #else
 
 int deleteConf(void) { return 1; }
+void launchConf(Config *conf) { return; }
 void readConf(Config *conf) { return; }
 void writeConf(Config *conf) { return; }
 

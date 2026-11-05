@@ -62,9 +62,10 @@ Below are some optional parameters you can include when running `make` or `make 
 
 ## Running
 
-Usage: shorkfetch [OPTIONS]
+    Usage: shorkfetch [OPTIONS]
+    Usage: shorkfetch-conf [OPTIONS]
 
-### Options
+### SHORKFETCH Options
 
 * `-ac`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour
 * `-b`, `--bullet`: Specifies a custom character to use with bullet list mode and sublists; empty assignment allows lists with no bullet; no assignment returns the current character and exits
@@ -85,6 +86,13 @@ Usage: shorkfetch [OPTIONS]
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-v`, `--version`: Displays version number and exits
 
+
+### SHORKFETCH Configurator Options
+
+* `-h`, `--help`: Shows help information and exits
+* `-r`, `--reset`: Resets to default, deletes configuration file and exits
+* `-v`, `--version`: Displays version number and exits
+
 ### Colours
 
 Only one colour can be used at a time. "off" will use your system's/terminal emulator's typical text colour.
@@ -101,8 +109,8 @@ These are possible field names you can use with the `--fields` argument. You ent
 
 | Field | Description | Lines | Used by default |
 | ----- | ----------- | ----- | --------------- |
-| (single blank space) | Blank line | 1 | ✓ |
-| `---` | Separator | 1 | ✓ |
+| (single blank space) | (blank line) | 1 | ✓ |
+| `---` | (separator) | 1 | ✓ |
 | `head` | user@host header | 1 | ✓ |
 | `os` | Operating system | 1 | ✓ |
 | `krn` | Kernel | 1 | ✓ |

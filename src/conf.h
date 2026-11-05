@@ -26,8 +26,8 @@
 
 typedef enum
 {
-    NORMAL,
-    BULLETS
+    BULLETS,
+    NORMAL
 } VIEW_MODE;
 
 
@@ -65,33 +65,39 @@ typedef struct
     int noIP;
 } Config;
 
-
-
-static const char *POSSIBLE_FIELDS[] =
+typedef struct
 {
-    " ",    // Blank line
-    "---",  // Separator
-    "head", // user@host header
-    "os",   // Operating system
-    "krn",  // Kernel
-    "upt",  // Uptime
-    "pkgs", // Packages
-    "loc",  // Locale(s)
-    "scn",  // Screen(s)
-    "de",   // Desktop environment
-    "wm",   // Window manager and/or Wayland compositor
-    "trm",  // Terminal emulator/console size
-    "sh",   // Shell
-    "cpu",  // CPU
-    "gpu",  // GPU(s)
-    "ram",  // System memory
-    "swap", // Swap memory
-    "dsk",  // Disk size(s)
-    "root", // Root partition size
-    "lip",  // Local IP address
-    "clrs", // ANSI escape code 16-colour palette
-    "clba", // ANSI escape code base 8-colour palette
-    "clbr"  // ANSI escape code bright 8-colour palette
+    const char *id;
+    const char *name;
+} FieldInfo;
+
+
+
+static const FieldInfo POSSIBLE_FIELDS[] =
+{
+    { " ",      "(blank line)" },
+    { "---",    "(separator)" },
+    { "head",   "user@host header" },
+    { "os",     "Operating system" },
+    { "krn",    "Kernel" },
+    { "upt",    "Uptime" },
+    { "pkgs",   "Packages" },
+    { "loc",    "Locale(s)" },
+    { "scn",    "Screen(s)" },
+    { "de",     "Desktop environment" },
+    { "wm",     "Window manager and/or Wayland compositor" },
+    { "trm",    "Terminal emulator/console size" },
+    { "sh",     "Shell" },
+    { "cpu",    "CPU" },
+    { "gpu",    "GPU(s)" },
+    { "ram",    "Physical memory" },
+    { "swap",   "Swap memory" },
+    { "dsk",    "Disk size(s)" },
+    { "root",   "Root partition size" },
+    { "lip",    "Local IP address" },
+    { "clrs",   "ANSI escape code base & bright 16-colour palette" },
+    { "clba",   "ANSI escape code base 8-colour palette" },
+    { "clbr",   "ANSI escape code bright 8-colour palette" }
 };
 static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) /
     sizeof(POSSIBLE_FIELDS[0]);
@@ -101,6 +107,7 @@ static const int POSSIBLE_FIELDS_LEN = sizeof(POSSIBLE_FIELDS) /
 int deleteConf(void);
 int launchConf(void);
 void readConf(Config*);
+int validateFields(const char*, char fields[][5], int);
 void writeConf(Config);
 
 #endif

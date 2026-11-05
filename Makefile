@@ -28,7 +28,8 @@ ifdef X86_ONLY
 endif
 
 SRC = $(wildcard src/*.c) $(wildcard shorkcommon/*.c)
-SRC_CONF = $(wildcard src-conf/*.c) $(wildcard shorkcommon/*.c)
+SRC_CONF = $(wildcard src/conf.c) $(wildcard src-conf/*.c) \
+	$(wildcard shorkcommon/*.c)
 
 PROGS = shorkfetch
 ifndef SHORK_DISKETTE
