@@ -176,9 +176,16 @@ int validateFields(const char *fields, char fieldsOut[][5], int noEsc)
             {
                 if (noFields >= MAX_FIELDS)
                 {
+                    int total = noFields;
+                    while (currTok)
+                    {
+                        total++;
+                        currTok = strtok(NULL, ",");
+                    }
+
                     free(fieldsCopy);
-                    printf("ERROR: too many fields given (max %d)\n",
-                        MAX_FIELDS);
+                    printf("ERROR: too many fields given (max %d, given "
+                        "%d)\n", MAX_FIELDS, total);
                     return -1;
                 }
 
