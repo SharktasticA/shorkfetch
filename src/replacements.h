@@ -132,6 +132,7 @@ static const char *DELETIONS[] =
     " Ltd.",
     " processor",
     " Processor",
+    " SOC",
     " Technologies",                    // For VIA
     " Technology LLC",                  // For Loongson
     " 2x Core/Bus Clock",               // For Cyrix 6x86
