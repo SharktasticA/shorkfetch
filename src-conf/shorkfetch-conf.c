@@ -514,7 +514,7 @@ void ihaMenu(void)
  */
 int mainMenu(void)
 {
-    setupMenuSys();
+    setupMenuSys(42, 12);
     readConf(&CONFIG);
 
     MenuItem menu[] = {
