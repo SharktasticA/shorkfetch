@@ -80,7 +80,7 @@ static const FieldInfo POSSIBLE_FIELDS[] =
 {
     { " ",      "(blank line)" },
     { "---",    "(separator)" },
-    { "head",   "user@host header" },
+    { "log",    "Login (user@hostname)" },
     { "os",     "Operating system" },
     { "krn",    "Kernel" },
     { "upt",    "Uptime" },

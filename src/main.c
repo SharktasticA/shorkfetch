@@ -241,7 +241,7 @@ void showHelp(void)
     free(colours->str);
     free(colours);
 
-    WORD_WRAPPED *fieldNames = wordWrap("Fields: head (user@host), os, "
+    WORD_WRAPPED *fieldNames = wordWrap("Fields: log (user@hostname), os, "
         "krn, upt, pkgs, loc, scn, de, wm, trm, sh, cpu, gpu, ram, swap, "
         "dsk, root, lip, clrs, clba, clbr, --- (separator), single blank "
         "space (blank line)\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
@@ -715,16 +715,38 @@ int main(int argc, char *argv[])
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "\n");
         }
-        else if (strcmp(fieldsProcessed[i], "head") == 0)
+        else if (strcmp(fieldsProcessed[i], "log") == 0)
         {
             if (username[0] != '\0' && hostname[0] != '\0')
             {
                 headerWidth = strlen(username) + 1 + strlen(hostname);
                 if (CONFIG.noEsc) printShorkLine(0);
-                outputPos += writeOutput(output + outputPos,
-                    OUTPUT_LEN - outputPos, "%s%s%s@%s%s%s\n", colAccent,
-                    username, colReset, colAccent, hostname, colReset);
-                headerWidth = strlen(username) + 1 + strlen(hostname);
+                if (i == 0)
+                {
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, "%s%s%s@%s%s%s\n",
+                        colAccent, username, colReset, colAccent, hostname,
+                        colReset);
+                }
+                else
+                {
+                    if (CONFIG.mode == NORMAL)
+                    {
+                        if (!COMPACT)
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos,
+                                "%sLogin:%s    %s@%s\n",
+                                colAccent, colReset, username, hostname);
+                        else
+                            outputPos += writeOutput(output + outputPos,
+                                OUTPUT_LEN - outputPos, "%sLog:%s %s@%s\n",
+                                colAccent, colReset, username, hostname);
+                    }
+                    else
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%s%s@%s\n", icon,
+                            username, hostname);
+                    }
             }
         }
         else if (strcmp(fieldsProcessed[i], "os") == 0)

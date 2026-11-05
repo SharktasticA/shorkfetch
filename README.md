@@ -111,7 +111,7 @@ These are possible field names you can use with the `--fields` argument. You ent
 | ----- | ----------- | ----- | --------------- |
 | (single blank space) | (blank line) | 1 | ✓ |
 | `---` | (separator) | 1 | ✓ |
-| `head` | user@host header | 1 | ✓ |
+| `log` | Login (user@hostname) | 1 | ✓ |
 | `os` | Operating system | 1 | ✓ |
 | `krn` | Kernel | 1 | ✓ |
 | `upt` | Uptime | 1 | ✓ |
@@ -132,6 +132,14 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `clrs` | ANSI escape code base & bright 16-colour palette | 2 | ✓ |
 | `clba` | ANSI escape code base 8-colour palette | 1 | |
 | `clbr` | ANSI escape code bright 8-colour palette | 1 | |
+
+#### Regarding the login field
+
+When used as the first field, the login field becomes SHORKFETCH's header. It doesn't show a field name or a bullet point; instead, it uses the accent colour to distinguish itself. When used elsewhere, the login field becomes a standard field, showing the "Login:" or "Log:" field name or a bullet point.
+
+#### Regarding the cl* fields
+
+The ANSI escape code colour palette fields don't show a field name or a bullet point by design.
 
 ### Configuration
 
