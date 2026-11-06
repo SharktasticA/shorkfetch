@@ -1016,7 +1016,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         return NULL;
     }
 
-    if (!CONFIG.noIHA && result->arch == X86)
+    if (CONFIG.showIHA && result->arch == X86)
         getIntelHybridCPU(result);
 
 

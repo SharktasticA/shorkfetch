@@ -36,10 +36,10 @@ Config CONFIG = {
     "log,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
     'p',
     NORMAL,
-    0,
-    0,
-    0,
-    0
+    1,
+    1,
+    1,
+    1
 };
 char FIELDS[MAX_FIELDS][5];
 int NO_FIELDS = 0;
@@ -134,7 +134,7 @@ void asciiArtMenu(void)
     toggleOptionMenu("ASCII art",
         "Controls whether the ASCII art to the left of SHORKFETCH's output "
         "is displayed",
-        &CONFIG.noArt, 1);
+        &CONFIG.showArt, 0);
 }
 
 void bulletCharMenu(void)
@@ -509,7 +509,7 @@ void escCodesMenu(void)
         "programs that interpret and/or modify the output of another, but "
         "it will also disable SHORKFETCH's colour output, colour palette "
         "fields and word-wrapping for small terminals.",
-        &CONFIG.noEsc, 1);
+        &CONFIG.showEsc, 0);
 }
 
 void ihaMenu(void)
@@ -521,7 +521,7 @@ void ihaMenu(void)
             "core count for applicable CPUs. For example, the Intel Core "
             "Ultra 7 155H's core/thread count would be \"2L/8E/6P/22T\" "
             "instead of \"16C/22T\".",
-        &CONFIG.noIHA, 1);
+        &CONFIG.showIHA, 0);
 }
 
 /**
@@ -794,7 +794,7 @@ int populateFieldsMenu(MenuItem *menu, const int menuSize)
     memset(menu, 0, sizeof(MenuItem) * menuSize);
 
     // Validate CONFIG.fields and get an array of fields
-    NO_FIELDS = validateFields(CONFIG.fields, FIELDS, 0);
+    NO_FIELDS = validateFields(CONFIG.fields, FIELDS, 1);
     if (NO_FIELDS == -1)
         return -1;
 

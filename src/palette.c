@@ -35,7 +35,7 @@ ColourPalette getColourPalette(void)
 
     // size = number of chars per colour box
     int size = 3;
-    if (!CONFIG.noArt)
+    if (CONFIG.showArt)
     {
         if ((COMPACT && TERM_SIZE.ws_col < 32) ||
             (!COMPACT && TERM_SIZE.ws_col < 35))

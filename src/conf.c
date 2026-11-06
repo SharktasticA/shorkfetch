@@ -122,14 +122,14 @@ void readConf(Config *conf)
                 conf->maxUnit = value[0];
             else if (strcmp(key, "mode") == 0)
                 conf->mode = atoi(value);
-            else if (strcmp(key, "noArt") == 0)
-                conf->noArt = atoi(value);
-            else if (strcmp(key, "noEsc") == 0)
-                conf->noEsc = atoi(value);
-            else if (strcmp(key, "noIHA") == 0)
-                conf->noIHA = atoi(value);
-            else if (strcmp(key, "noIP") == 0)
-                conf->noIP = atoi(value);
+            else if (strcmp(key, "showArt") == 0)
+                conf->showArt = atoi(value);
+            else if (strcmp(key, "showEsc") == 0)
+                conf->showEsc = atoi(value);
+            else if (strcmp(key, "showIHA") == 0)
+                conf->showIHA = atoi(value);
+            else if (strcmp(key, "showIP") == 0)
+                conf->showIP = atoi(value);
         }
         fclose(stream);
     }
@@ -143,10 +143,10 @@ void readConf(Config *conf)
  * @param fields CONFIG.fields value
  * @param fieldsOut Array to put the validated fields in (must be
  *                  char[MAX_FIELDS][5])
- * @param noEsc CONFIG.noEsc value
+ * @param showEsc CONFIG.showEsc value
  * @return Number of fields in fieldsOut; -1 if error
  */
-int validateFields(const char *fields, char fieldsOut[][5], int noEsc)
+int validateFields(const char *fields, char fieldsOut[][5], int showEsc)
 {
     char *fieldsCopy = strdup(fields);
     if (!fieldsCopy)
@@ -207,7 +207,7 @@ int validateFields(const char *fields, char fieldsOut[][5], int noEsc)
         // If no-escape-codes mode, we need to strip out colour palette
         // fields since they are not supported. For good measure, we also
         // remove any blank space padding above them.
-        if (noEsc)
+        if (!showEsc)
         {
             int write = 0;
             for (int read = 0; read < noFields; read++)
@@ -267,10 +267,10 @@ void writeConf(Config conf)
         fprintf(stream, "fields=%s\n", conf.fields);
         fprintf(stream, "maxUnit=%c\n", conf.maxUnit);
         fprintf(stream, "mode=%d\n", conf.mode);
-        fprintf(stream, "noArt=%d\n", conf.noArt);
-        fprintf(stream, "noEsc=%d\n", conf.noEsc);
-        fprintf(stream, "noIHA=%d\n", conf.noIHA);
-        fprintf(stream, "noIP=%d\n", conf.noIP);
+        fprintf(stream, "showArt=%d\n", conf.showArt);
+        fprintf(stream, "showEsc=%d\n", conf.showEsc);
+        fprintf(stream, "showIHA=%d\n", conf.showIHA);
+        fprintf(stream, "showIP=%d\n", conf.showIP);
         fclose(stream);
     }
     sync();

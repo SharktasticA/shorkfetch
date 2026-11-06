@@ -53,7 +53,7 @@
  */
 int printShorkLine(int stopOnceDone)
 {
-    if (CONFIG.noArt)
+    if (!CONFIG.showArt)
         return 1;
 
     if (COMPACT)
@@ -513,16 +513,16 @@ int main(int argc, char *argv[])
         }
         else if ((strcmp(argv[i], "-na") == 0) ||
             (strcmp(argv[i], "--no-art") == 0))
-            CONFIG.noArt = 1;
+            CONFIG.showArt = 0;
         else if ((strcmp(argv[i], "-ne") == 0) ||
             (strcmp(argv[i], "--no-esc") == 0))
-            CONFIG.noEsc = 1;
+            CONFIG.showEsc = 0;
         else if ((strcmp(argv[i], "-nh") == 0) ||
             (strcmp(argv[i], "--no-iha") == 0))
-            CONFIG.noIHA = 1;
+            CONFIG.showIHA = 0;
         else if ((strcmp(argv[i], "-ni") == 0) ||
             (strcmp(argv[i], "--no-ip") == 0))
-            CONFIG.noIP = 1;
+            CONFIG.showIP = 0;
         else if ((strcmp(argv[i], "-r") == 0) ||
             (strcmp(argv[i], "--reset") == 0))
         {
@@ -568,7 +568,7 @@ int main(int argc, char *argv[])
         (char *__restrict, size_t, const char *__restrict, ...);
 
     // Write to stdout and disable & disable colour output
-    if (CONFIG.noEsc)
+    if (!CONFIG.showEsc)
     {
         writeOutput = snprintfStdout;
         colAccent = strdup("");
@@ -613,7 +613,7 @@ int main(int argc, char *argv[])
                 CONFIG.colPctHigh);
             return 1;
         }
-        colReset = (CONFIG.noEsc) ? "" : "\033[" COL_RESET "m";
+        colReset = (!CONFIG.showEsc) ? "" : "\033[" COL_RESET "m";
     }
 
 #ifdef TESTS
@@ -628,7 +628,7 @@ int main(int argc, char *argv[])
     // Validate which field to display
     char fieldsProcessed[MAX_FIELDS][5];
     int noFields = validateFields(CONFIG.fields, fieldsProcessed,
-        CONFIG.noEsc);
+        CONFIG.showEsc);
     if (noFields == 0)
     {
         printf("ERROR: no field names were given to display\n");
@@ -654,7 +654,7 @@ int main(int argc, char *argv[])
 
 
     // Print SHORK (if needed)
-    if (!CONFIG.noArt && !CONFIG.noEsc)
+    if (CONFIG.showArt && CONFIG.showEsc)
     {
         printf("%s", colAccent);
         if (COMPACT)
@@ -702,13 +702,13 @@ int main(int argc, char *argv[])
     {
         if (strcmp(fieldsProcessed[i], " ") == 0)
         {
-            if (CONFIG.noEsc) printShorkLine(0);
+            if (!CONFIG.showEsc) printShorkLine(0);
             outputPos += writeOutput(output + outputPos,
                 OUTPUT_LEN - outputPos, "\n");
         }
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
-            if (CONFIG.noEsc) printShorkLine(0);
+            if (!CONFIG.showEsc) printShorkLine(0);
             for (int i = 0; i < headerWidth; i++)
                 outputPos += writeOutput(output + outputPos,
                     OUTPUT_LEN - outputPos, "-");
@@ -720,7 +720,7 @@ int main(int argc, char *argv[])
             if (username[0] != '\0' && hostname[0] != '\0')
             {
                 headerWidth = strlen(username) + 1 + strlen(hostname);
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (i == 0)
                 {
                     outputPos += writeOutput(output + outputPos,
@@ -753,7 +753,7 @@ int main(int argc, char *argv[])
         {
             if (os && os[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -777,7 +777,7 @@ int main(int argc, char *argv[])
             char *kernel = getKernel(u, uStatus);
             if (kernel && kernel[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -802,7 +802,7 @@ int main(int argc, char *argv[])
             char *uptime = getUptime();
             if (uptime && uptime[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -827,7 +827,7 @@ int main(int argc, char *argv[])
             char *pkgs = getPackages(os);
             if (pkgs && pkgs[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -852,7 +852,7 @@ int main(int argc, char *argv[])
             LOCALES *locales = getLocales();
             if (locales && locales->locales)
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -901,7 +901,7 @@ int main(int argc, char *argv[])
 
                     if (screen && screen[0] != '\0')
                     {
-                        if (CONFIG.noEsc) printShorkLine(0);
+                        if (!CONFIG.showEsc) printShorkLine(0);
                         if (CONFIG.mode == NORMAL)
                         {
                             if (!COMPACT)
@@ -966,7 +966,7 @@ int main(int argc, char *argv[])
         {
             if (de && de != wm && de[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -989,7 +989,7 @@ int main(int argc, char *argv[])
         {
             if (wm && wm[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 char server[32] = "";
                 if (!COMPACT)
                 {
@@ -1027,7 +1027,7 @@ int main(int argc, char *argv[])
             char *trm = getTerminal();
             if (trm)
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1056,7 +1056,7 @@ int main(int argc, char *argv[])
             // the console size
             else
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1090,7 +1090,7 @@ int main(int argc, char *argv[])
             char *shell = getShell();
             if (shell && shell[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1117,7 +1117,7 @@ int main(int argc, char *argv[])
                 char *cpuStr = interpretCPU(cpu);
                 if (cpuStr && cpuStr[0] != '\0')
                 {
-                    if (CONFIG.noEsc) printShorkLine(0);
+                    if (!CONFIG.showEsc) printShorkLine(0);
                     if (CONFIG.mode == NORMAL)
                     {
                         if (!COMPACT)
@@ -1158,7 +1158,7 @@ int main(int argc, char *argv[])
 
                     if (gpuStr && gpuStr[0] != '\0')
                     {
-                        if (CONFIG.noEsc) printShorkLine(0);
+                        if (!CONFIG.showEsc) printShorkLine(0);
                         if (CONFIG.mode == NORMAL)
                         {
                             if (!COMPACT)
@@ -1212,7 +1212,7 @@ int main(int argc, char *argv[])
             // we received a fallback found during CPU name processing
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1238,7 +1238,7 @@ int main(int argc, char *argv[])
                 colReset);
             if (ram)
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1271,7 +1271,7 @@ int main(int argc, char *argv[])
                 colReset);
             if (swap && swap[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1312,7 +1312,7 @@ int main(int argc, char *argv[])
                 {
                     if (disks->disks[i][0] != '\0')
                     {
-                        if (CONFIG.noEsc) printShorkLine(0);
+                        if (!CONFIG.showEsc) printShorkLine(0);
                         if (CONFIG.mode == NORMAL)
                         {
                             if (!COMPACT)
@@ -1376,7 +1376,7 @@ int main(int argc, char *argv[])
                 colReset);
             if (root && root[0] != '\0')
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1402,12 +1402,12 @@ int main(int argc, char *argv[])
             }
             free(root);
         }
-        else if (strcmp(fieldsProcessed[i], "lip") == 0 && !CONFIG.noIP)
+        else if (strcmp(fieldsProcessed[i], "lip") == 0 && CONFIG.showIP)
         {
             char *localIP = getLocalIP();
             if (localIP)
             {
-                if (CONFIG.noEsc) printShorkLine(0);
+                if (!CONFIG.showEsc) printShorkLine(0);
                 if (CONFIG.mode == NORMAL)
                 {
                     if (!COMPACT)
@@ -1456,11 +1456,11 @@ int main(int argc, char *argv[])
     }
 
     // Print buffered output
-    if (!CONFIG.noEsc)
+    if (CONFIG.showEsc)
     {
         int shorkWidth = SHORK_NORM_WIDTH;
         int shorkHeight = SHORK_NORM_HEIGHT;
-        if (CONFIG.noArt)
+        if (!CONFIG.showArt)
             shorkWidth = 0;
         else if (COMPACT)
         {
@@ -1492,7 +1492,7 @@ int main(int argc, char *argv[])
 
         if (data)
         {
-            if (!CONFIG.noArt)
+            if (CONFIG.showArt)
             {
                 printf("\033[%dA", shorkHeight);
                 printf("\033[%dC", shorkWidth);
@@ -1501,27 +1501,27 @@ int main(int argc, char *argv[])
             for (int i = 0; i < data->len; i++)
             {
                 putchar(data->str[i]);
-                if (!CONFIG.noArt)
+                if (CONFIG.showArt)
                 {
                     if (data->str[i] == '\n')
                         printf("\033[%dC", shorkWidth);
                 }
             }
 
-            if (!CONFIG.noArt && data->lines < shorkHeight)
+            if (CONFIG.showArt && data->lines < shorkHeight)
                 printf("\033[%dB", shorkHeight - data->lines);
 
             free(data->str);
             free(data);
 
-            if (!CONFIG.noArt)
+            if (CONFIG.showArt)
                 printf("\r");
         }
         else
             printf("ERROR: could not process output string\n");
     }
     // If needed, finish off printing the SHORK
-    else if (!CONFIG.noArt)
+    else if (CONFIG.showArt)
     {
         int target = SHORK_NORM_HEIGHT;
         if (COMPACT)

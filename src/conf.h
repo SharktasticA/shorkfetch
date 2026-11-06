@@ -57,15 +57,15 @@ typedef struct
     char maxUnit;
     // View mode (default: NORMAL)
     VIEW_MODE mode;
-    // No SHORK ASCII art (default: 0)
-    int noArt;
-    // No escape codes (default: 0)
-    int noEsc;
-    // No Intel Hybrid Architecture-specific core/thread counting
-    // (default: 0)
-    int noIHA;
-    // No IP fields (default: 0)
-    int noIP;
+    // Show SHORK ASCII art (default: 1)
+    int showArt;
+    // Show escape codes (default: 1)
+    int showEsc;
+    // Show Intel Hybrid Architecture-specific core/thread counting
+    // (default: 1)
+    int showIHA;
+    // Show IP fields (default: 1)
+    int showIP;
 } Config;
 
 typedef struct
