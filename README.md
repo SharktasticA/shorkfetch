@@ -100,7 +100,7 @@ Below are some optional parameters you can include when running `make` or `make 
 
 ### Colours
 
-Only one colour can be used at a time. "off" will use your system's/terminal emulator's typical text colour.
+Below are the available colours for each colour-related option. "off" will use your terminal's foreground colour.
 
     black           blue            cyan            green  
     magenta         red             white           yellow
@@ -110,7 +110,7 @@ Only one colour can be used at a time. "off" will use your system's/terminal emu
 
 ### Fields
 
-These are possible field names you can use with the `--fields` argument. You enter them as a comma-separated list in double quotes. You can use any more than once and in any order, though there is a maximum of 50 fields.
+Below are possible field names you can use with the `--fields` argument. You enter them as a comma-separated list in double quotes. You can use any more than once and in any order, though there is a maximum of 50 fields.
 
 | Field | Description | Lines | Used by default |
 | ----- | ----------- | ----- | --------------- |

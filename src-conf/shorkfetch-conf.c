@@ -360,6 +360,7 @@ int fieldActionsMenu(char *name, const int ind)
         { "movD", "Move down", NULL, NULL, ind < (NO_FIELDS - 1), 0 },
         { "addA", "Add above", NULL, NULL, NO_FIELDS < MAX_FIELDS, 0 },
         { "addB", "Add below", NULL, NULL, NO_FIELDS < MAX_FIELDS, 0 },
+        { "rep", "Replace", NULL, NULL, 1, 0 },
         { "del", "Remove", NULL, NULL, 1, 0 }
     };
     int rawMenuSize = sizeof(rawMenu) / sizeof(rawMenu[0]);
@@ -454,8 +455,8 @@ void fieldsMenu(void)
     int fullRedraw = 1;
 
     char msg[200] = "The fields SHORKFETCH should try to display. You can "
-        "select a field to move it up/down, insert field above/below it, "
-        "or remove it. You may specify a total of 50 fields.";
+        "select a field to move it, insert around it, replace it, or "
+        "remove it. You may specify a total of 50 fields.";
 
     while (running)
     {
@@ -810,6 +811,15 @@ int modifyField(MenuItem action, const int ind)
         NO_FIELDS++;
 
         returnInd = pos;
+    }
+    else if (!strncmp(action.id, "rep", 3))
+    {
+        int selected = addField();
+        // -1 means user selected "Back", so just exit
+        if (selected == -1)
+            return returnInd;
+        snprintf(FIELDS[returnInd], sizeof(FIELDS[0]), "%s",
+            POSSIBLE_FIELDS[selected].id);
     }
     else if (!strcmp(action.id, "del"))
     {
