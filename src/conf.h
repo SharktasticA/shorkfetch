@@ -49,6 +49,8 @@ typedef struct
     char colPctLow[CONF_COL_LEN];
     // Medium % colour (default: "yellow")
     char colPctMed[CONF_COL_LEN];
+    // Separator colour (default: "off")
+    char colSep[CONF_COL_LEN];
     // Compact view (default: 0)
     int compact;
     // Fields

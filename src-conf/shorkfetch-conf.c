@@ -32,6 +32,7 @@ Config CONFIG = {
     "red",
     "green",
     "yellow",
+    "off",
     0,
     "log,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
     'p',
@@ -289,6 +290,12 @@ void colPchMenu(void)
     colMenu("Colour for high \%",
         "Sets the colour for a percentage when it is 80% or higher",
         CONFIG.colPctHigh);
+}
+
+void colSepMenu(void)
+{
+    colMenu("Colour for separators", "Sets the colour for all separators",
+        CONFIG.colSep);
 }
 
 void compViewMenu(void)
@@ -550,6 +557,7 @@ int mainMenu(void)
         { "pcl", "Colour for low \%", "", colPclMenu, 1, 0 },
         { "pcm", "Colour for medium \%", "", colPcmMenu, 1, 0 },
         { "pch", "Colour for high \%", "", colPchMenu, 1, 0 },
+        { "sep", "Colour for separators", "", colSepMenu, 1, 0 },
         { "com", "Compact view", "", compViewMenu, 1, 0 },
         { "esc", "Escape codes", "", escCodesMenu, 1, 0 },
         { "fld", "Fields", "", fieldsMenu, 1, 0 },

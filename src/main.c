@@ -50,7 +50,7 @@
 
 enum { OPT_NO_ART = 256, OPT_NO_ESC, OPT_NO_IHA, OPT_NO_IP };
 
-static const char *shortOpts = "ha::B::b::l::m::H::cCf::o::u::rsv";
+static const char *shortOpts = "ha::B::b::l::m::H::S::cCf::o::u::rsv";
 
 static const struct option longOpts[] = {
     { "help",       no_argument,        0,  'h' },
@@ -60,6 +60,7 @@ static const struct option longOpts[] = {
     { "low-col",    optional_argument,  0,  'l' },
     { "med-col",    optional_argument,  0,  'm' },
     { "high-col",   optional_argument,  0,  'H' },
+    { "sep-col",    optional_argument,  0,  'S' },
     { "compact",    no_argument,        0,  'c' },
     { "conf",       no_argument,        0,  'C' },
     { "fields",     optional_argument,  0,  'f' },
@@ -143,14 +144,6 @@ void showHelp(void)
     free(accentCol->str);
     free(accentCol);
 
-    WORD_WRAPPED *bulletCol = wordWrap("-B, --bullet-col  Specifies a "
-        "custom bullet-point colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
-        0, 0);
-    printf("%s", bulletCol->str);
-    free(bulletCol->str);
-    free(bulletCol);
-
     WORD_WRAPPED *bullet = wordWrap("-b, --bullet      Specifies a custom "
         "single-byte character to use with bulleted list mode and "
         "sublists; empty assignment allows lists with no bullet; no "
@@ -159,6 +152,14 @@ void showHelp(void)
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);
+
+    WORD_WRAPPED *bulletCol = wordWrap("-B, --bullet-col  Specifies a "
+        "custom bullet-point colour; no assignment returns the current "
+        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
+        0, 0);
+    printf("%s", bulletCol->str);
+    free(bulletCol->str);
+    free(bulletCol);
 
     WORD_WRAPPED *compact = wordWrap("-c, --compact     Compacts field "
         "names and field values\n", TERM_SIZE.ws_col, "                  ",
@@ -204,6 +205,15 @@ void showHelp(void)
     free(lowCol->str);
     free(lowCol);
 
+    WORD_WRAPPED *maxUnit = wordWrap("-u, --max-unit    Specifies the "
+        "largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, "
+        "[g]ibi, [t]ebi, [p]ebi (default); no assignment returns the "
+        "current unit and exits\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", maxUnit->str);
+    free(maxUnit->str);
+    free(maxUnit);
+
     WORD_WRAPPED *medCol = wordWrap("-m, --med-col     Specifies a custom "
         "medium percentage colour; no assignment returns the current "
         "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
@@ -219,29 +229,6 @@ void showHelp(void)
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
-
-    WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, "
-        "deletes configuration file and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
-    printf("%s", reset->str);
-    free(reset->str);
-    free(reset);
-
-    WORD_WRAPPED *save = wordWrap("-s, --save        Saves chosen options "
-        "to a configuration file\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
-    printf("%s", save->str);
-    free(save->str);
-    free(save);
-
-    WORD_WRAPPED *maxUnit = wordWrap("-u, --max-unit    Specifies the "
-        "largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, "
-        "[g]ibi, [t]ebi, [p]ebi (default); no assignment returns the "
-        "current unit and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
-    printf("%s", maxUnit->str);
-    free(maxUnit->str);
-    free(maxUnit);
 
     WORD_WRAPPED *noArt = wordWrap("    --no-art      Disables the SHORK "
         "ASCII art\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
@@ -269,6 +256,27 @@ void showHelp(void)
     printf("%s", noIp->str);
     free(noIp->str);
     free(noIp);
+
+    WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, "
+        "deletes configuration file and exits\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", reset->str);
+    free(reset->str);
+    free(reset);
+
+    WORD_WRAPPED *save = wordWrap("-s, --save        Saves chosen options "
+        "to a configuration file\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", save->str);
+    free(save->str);
+    free(save);
+
+    WORD_WRAPPED *sepCol = wordWrap("-S, --sep-col     Specifies a custom "
+        "separator colour; no assignment returns the current colour and "
+        "exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", sepCol->str);
+    free(sepCol->str);
+    free(sepCol);
 
     WORD_WRAPPED *version = wordWrap("-v, --version     Displays version "
         "number and exits\n\n", TERM_SIZE.ws_col, "                  ",
@@ -382,6 +390,15 @@ int main(int argc, char *argv[])
                 return 0;
             }
             snprintf(CONFIG.colPctHigh, CONF_COL_LEN, "%s", optarg);
+            break;
+
+        case 'S':
+            if (!optarg)
+            {
+                printf("%s\n", CONFIG.colSep);
+                return 0;
+            }
+            snprintf(CONFIG.colSep, CONF_COL_LEN, "%s", optarg);
             break;
 
         case 'b':
@@ -571,6 +588,8 @@ int main(int argc, char *argv[])
     char *colPctMed = NULL;
     // Colour escape sequence for percentages >= 80
     char *colPctHigh = NULL;
+    // Colour escape sequence for separators
+    char *colSep = NULL;
     // General colour reset escape sequence
     char *colReset = NULL;
     // Func* for selecting which *printf-style output backend to use
@@ -586,6 +605,7 @@ int main(int argc, char *argv[])
         colPctLow = strdup("");
         colPctMed = strdup("");
         colPctHigh = strdup("");
+        colSep = strdup("");
         colReset = "";
     }
     // Write to output buffer & permit colour output
@@ -621,6 +641,13 @@ int main(int argc, char *argv[])
         {
             printf("ERROR: unrecognised colour \"%s\"\n",
                 CONFIG.colPctHigh);
+            return 1;
+        }
+        colSep = validateColour(CONFIG.colSep);
+        if (!colSep)
+        {
+            printf("ERROR: unrecognised colour \"%s\"\n",
+                CONFIG.colSep);
             return 1;
         }
         colReset = (!CONFIG.showEsc) ? "" : "\033[" COL_RESET "m";
@@ -719,11 +746,13 @@ int main(int argc, char *argv[])
         else if (strcmp(fieldsProcessed[i], "---") == 0)
         {
             if (!CONFIG.showEsc) printShorkLine(0);
+            outputPos += writeOutput(output + outputPos,
+                OUTPUT_LEN - outputPos, colSep);
             for (int i = 0; i < headerWidth; i++)
                 outputPos += writeOutput(output + outputPos,
                     OUTPUT_LEN - outputPos, "-");
             outputPos += writeOutput(output + outputPos,
-                OUTPUT_LEN - outputPos, "\n");
+                OUTPUT_LEN - outputPos, "%s\n", colReset);
         }
         else if (strcmp(fieldsProcessed[i], "log") == 0)
         {
@@ -1582,6 +1611,7 @@ int main(int argc, char *argv[])
     free(colPctLow);
     free(colPctMed);
     free(colPctHigh);
+    free(colSep);
     free(hostname);
     free(os);
     if (de != wm)

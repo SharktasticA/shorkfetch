@@ -114,6 +114,8 @@ void readConf(Config *conf)
                 snprintf(conf->colPctLow, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "colPctMed") == 0)
                 snprintf(conf->colPctMed, CONF_COL_LEN, "%s", value);
+            else if (strcmp(key, "colSep") == 0)
+                snprintf(conf->colSep, CONF_COL_LEN, "%s", value);
             else if (strcmp(key, "compact") == 0)
                 conf->compact = atoi(value);
             else if (strcmp(key, "fields") == 0)
@@ -263,6 +265,7 @@ void writeConf(Config conf)
         fprintf(stream, "colPctHigh=%s\n", conf.colPctHigh);
         fprintf(stream, "colPctLow=%s\n", conf.colPctLow);
         fprintf(stream, "colPctMed=%s\n", conf.colPctMed);
+        fprintf(stream, "colSep=%s\n", conf.colSep);
         fprintf(stream, "compact=%d\n", conf.compact);
         fprintf(stream, "fields=%s\n", conf.fields);
         fprintf(stream, "maxUnit=%c\n", conf.maxUnit);

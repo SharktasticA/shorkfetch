@@ -25,6 +25,7 @@ Config CONFIG = {
     "red",
     "green",
     "yellow",
+    "off",
     0,
     "log,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
     'p',
