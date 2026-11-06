@@ -10,7 +10,7 @@ In terms of "cleaner output", SHORKFETCH has a comprehensive focus on providing 
 
 ## Help wanted!
 
-SHORKFETCH is young, and I would love to hear from you if you have tried SHORKFETCH and found that (in particular) the **CPU, DE, WM and/or GPU fields** were incorrect or imprecise, or in your opinion, were overly verbose, containing marks like "(R)", "TM", etc. and could likely be shortened without compromising understanding. Feel free to create an issue here or contact me via [email](https://sharktastica.co.uk/contact), Discord (@sharktastica) or Reddit (u/sharktastica), and I will take your feedback on board! Please include a screenshot of your SHORKFETCH's output, some context about your system's real specifications and environment, and especially the following depending on the issue:
+SHORKFETCH is young, and I would love to hear from you if you have tried SHORKFETCH and found that (in particular) the **CPU, DE, WM and/or GPU fields** were incorrect or imprecise, or in your opinion, were overly verbose, containing marks like "(R)", "TM", etc. and could likely be shortened without compromising understanding. Feel free to create an issue here or contact me via [email](https://sharktastica.co.uk/contact), Discord (@sharktastica) or Reddit (u/sharktastica), and I will take your feedback on board! Please include a screenshot of your SHORKFETCH's output, some context about your system's real specifications and environment, and especially the following, depending on the issue:
 
 * CPU: `cat /proc/cpuinfo`
 * DE/WM: `echo $XDG_CURRENT_DESKTOP`
@@ -40,7 +40,9 @@ SHORKFETCH is available on the [AUR](https://aur.archlinux.org/packages/shorkfet
 
 #### Requirements
 
-You will need a C compiler, `make` and libc. SHORKFETCH is often tested with GCC + glibc or musl.
+You will need a C compiler, `make` and libc. SHORKFETCH is most often tested with GCC + glibc or musl.
+
+For Fedora-based systems, it is also advised to have the `sqlite-libs` package installed to ensure RPM packages are counted quickly; otherwise, SHORKFETCH will fall back to a much slower `rpm` command output capture. 
 
 #### Quick/automated install
 
@@ -108,7 +110,7 @@ Only one colour can be used at a time. "off" will use your system's/terminal emu
 
 ### Fields
 
-These are possible field names you can use with the `--fields` argument. You enter then as a comma-separated list in double quotes. You can use any more than once and in any order, though there is a maximum of 50 fields.
+These are possible field names you can use with the `--fields` argument. You enter them as a comma-separated list in double quotes. You can use any more than once and in any order, though there is a maximum of 50 fields.
 
 | Field | Description | Lines | Used by default |
 | ----- | ----------- | ----- | --------------- |
@@ -147,17 +149,19 @@ The ANSI escape code colour palette fields don't show a field name or a bullet p
 
 ### Configuration
 
-When customising SHORKFETCH with the options above, you can use the `--save` option to store your choices in a configuration file. Subsequent saves will append the new options or replace existing ones. The configuration file (it is not recommended to modify this manually):
+There are two ways you can configure SHORKFETCH to your liking. As listed above, `shorkfetch` has options you can use for customisation. You can use the `--save` option to store your choices in a configuration file. Subsequent saves will append the new options or replace existing ones. The configuration file (it is not recommended to modify this manually):
 
     ~/.config/shorkutils/shorkfetch.conf
 
-To reset SHORKFETCH to its default configuration, simply run with the `--reset` option.
+The other way is using the SHORKFETCH Configurator, `shorkfetch-conf`, which is a menu-driven tool that saves as you go. It also provides more context for the available options, previews colour choices, and allows you to build your field list interactively.
+
+To reset SHORKFETCH to its default configuration, simply run `shorkfetch --reset` or `shorkfetch-conf --reset`.
 
 ### Notes
 
-#### Using with gay
+#### Using with gay & similar tools
 
-[gay](https://github.com/ms-jpq/gay) can be used to change the colour of stdout piped into it to a random or chosen LGBTQ+ flag. If you use it with SHORKFETCH as-is, you may notice it does not handle the ANSI escape codes SHORKFETCH uses to position its fields and construct colour palettes. You can use the `-ne`/`--no-esc` option to disable all ANSI escape codes to increase compatibility with `gay` and perhaps similar commands with the same issue, though note the aforementioned colour palettes will be disabled.
+[gay](https://github.com/ms-jpq/gay) can be used to change the colour of stdout piped into it to a random or chosen LGBTQ+ flag. If you use it with SHORKFETCH as-is, you may notice it does not handle the ANSI escape codes SHORKFETCH uses to position its fields and construct colour palettes. You can use the `--no-esc` option to disable all ANSI escape codes to increase compatibility with `gay` and perhaps similar commands with the same issue, though note the aforementioned colour palettes will be disabled.
 
 
 
@@ -179,6 +183,6 @@ To reset SHORKFETCH to its default configuration, simply run with the `--reset` 
 
 
 
-## AI policy
+## Generative AI policy
 
-SHORKFETCH is developed under a **no LLM-generated code or documentation** policy. PR requests that contain contributions from an LLM bot or are obviously LLM-generated/vibecoded will be denied. I cannot vouch this for third-party libraries, or that the tutorials I'm learning from and sources I'm reading weren't influenced by LLM content unbeknownst to me, but I will do my best to recognise such and ensure this doesn't affect the things I control. Even considering locally-trained models or limiting LLM usage to speeding up repetitive tasks (etc.), my wish is for the SHORK family (SHORK 486, SHORK Utilities and SHORK Entertainment) to be a human-made project. :)
+SHORKFETCH is developed under a policy of **no LLM-generated code or documentation, and no AI-generated images**. PR requests that contain contributions from an LLM bot or are obviously LLM-generated will be denied. I cannot vouch this for third-party libraries, or that the tutorials and sources I may be reading weren't influenced by generative AI content unbeknownst to me, but I will do my best to recognise such and ensure this doesn't affect the things I control. Whatever your views on this subject, I ask that you respect my wish for the SHORK family (SHORK itself, SHORK Utilities and SHORK Entertainment) to be free of such influence as far as is humanly possible.
