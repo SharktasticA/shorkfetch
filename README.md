@@ -67,23 +67,25 @@ Below are some optional parameters you can include when running `make` or `make 
 
 ### SHORKFETCH Options
 
-* `-ac`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour
+* `-a`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour and exits
+* `-B`, `--bullet-col`: Specifies a custom bullet colour; no assignment returns the current colour and exits
 * `-b`, `--bullet`: Specifies a custom single-byte character to use with bulleted list mode and sublists; empty assignment allows lists with no bullet; no assignment returns the current character and exits
-* `-co`, `--compact`: Compacts field names and field values
-* `-cf`, `--conf`: Launches SHORKFETCH Configurator and exits
-* `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields
+* `-c`, `--compact`: Compacts field names and field values
+* `-C`, `--conf`: Launches SHORKFETCH Configurator and exits
+* `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns the list of current fields and exits
 * `-h`, `--help`: Shows help information and exits
-* `-hc`, `--high-col`: Specifies a custom high percentage colour; no assignment returns the current colour and exits
-* `-lc`, `--low-col`: Specifies a custom low percentage colour; no assignment returns the current colour and exits
-* `-mc`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
-* `-mo`, `--mode`: Select which view mode to use: [n]ormal (default), [b]ullet list
-* `-mu`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default)
-* `-na`, `--no-art`: Disables the SHORK ASCII art
-* `-ne`, `--no-esc`: Disables all ANSI escape codes and colour features
-* `-nh`, `--no-iha`: Disables Intel Hybrid Architecture-specific core/thread counting
-    * For example, instead of `2L/8E/6P/22T` for Intel Core Ultra 7 155H, you will get `16C/22T`
+* `-H`, `--high-col`: Specifies a custom high percentage colour; no assignment returns the current colour and exits
+* `-l`, `--low-col`: Specifies a custom low percentage colour; no assignment returns the current colour and exits
+* `-m`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
+* `-o`, `--mode`: Selects which view mode to use: [n]ormal (default), [b]ullet list; no assignment returns the current mode and exits
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
+* `-u`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default); no assignment returns the current unit and exits
+* `--no-art`: Disables the SHORK ASCII art
+* `--no-esc`: Disables all ANSI escape codes and colour features
+* `--no-iha`: Disables Intel Hybrid Architecture-specific core/thread counting
+    * For example, instead of `2L/8E/6P/22T` for Intel Core Ultra 7 155H, you will get `16C/22T`
+* `--no-ip`: Disables any IP address display
 * `-v`, `--version`: Displays version number and exits
 
 

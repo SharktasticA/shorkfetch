@@ -44,6 +44,41 @@
 
 
 
+#ifndef SHORK_DISKETTE
+
+#include <getopt.h>
+
+enum { OPT_NO_ART = 256, OPT_NO_ESC, OPT_NO_IHA, OPT_NO_IP };
+
+static const char *shortOpts = "ha::B::b::l::m::H::cCf::o::u::rsv";
+
+static const struct option longOpts[] = {
+    { "help",       no_argument,        0,  'h' },
+    { "accent-col", optional_argument,  0,  'a' },
+    { "bullet-col", optional_argument,  0,  'B' },
+    { "bullet",     optional_argument,  0,  'b' },
+    { "low-col",    optional_argument,  0,  'l' },
+    { "med-col",    optional_argument,  0,  'm' },
+    { "high-col",   optional_argument,  0,  'H' },
+    { "compact",    no_argument,        0,  'c' },
+    { "conf",       no_argument,        0,  'C' },
+    { "fields",     optional_argument,  0,  'f' },
+    { "mode",       optional_argument,  0,  'o' },
+    { "max-unit",   optional_argument,  0,  'u' },
+    { "no-art",     no_argument,        0,  OPT_NO_ART },
+    { "no-esc",     no_argument,        0,  OPT_NO_ESC },
+    { "no-iha",     no_argument,        0,  OPT_NO_IHA },
+    { "no-ip",      no_argument,        0,  OPT_NO_IP },
+    { "reset",      no_argument,        0,  'r' },
+    { "save",       no_argument,        0,  's' },
+    { "version",    no_argument,        0,  'v' },
+    { 0, 0, 0, 0}
+};
+
+#endif
+
+
+
 /**
  * Prints a single line of the SHORK ASCII art. It is intended to be used
  * during the "assemble output" loop when in no-escape-codes mode.
@@ -101,133 +136,142 @@ void showHelp(void)
     free(options->str);
     free(options);
 
-    WORD_WRAPPED *accentCol = wordWrap("-ac, --accent-col  Specifies a "
+    WORD_WRAPPED *accentCol = wordWrap("-a, --accent-col  Specifies a "
         "custom accent colour; no assignment returns the current colour "
-        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
+        "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
     printf("%s", accentCol->str);
     free(accentCol->str);
     free(accentCol);
 
-    WORD_WRAPPED *bullet = wordWrap("-b, --bullet       Specifies a custom "
-        "single-byte character to use with bulleted list mode and "
-        "sublists; empty assignment allows lists with no bullet; no "
-        "assignment returns the current character and exits\n",
-        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
-    printf("%s", bullet->str);
-    free(bullet->str);
-    free(bullet);
-
-    WORD_WRAPPED *bulletCol = wordWrap("-bc, --bullet-col  Specifies a "
+    WORD_WRAPPED *bulletCol = wordWrap("-B, --bullet-col  Specifies a "
         "custom bullet-point colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
         0, 0);
     printf("%s", bulletCol->str);
     free(bulletCol->str);
     free(bulletCol);
 
-    WORD_WRAPPED *compact = wordWrap("-co, --compact     Compacts field "
-        "names and field values\n", TERM_SIZE.ws_col, "                   ",
+    WORD_WRAPPED *bullet = wordWrap("-b, --bullet      Specifies a custom "
+        "single-byte character to use with bulleted list mode and "
+        "sublists; empty assignment allows lists with no bullet; no "
+        "assignment returns the current character and exits\n",
+        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", bullet->str);
+    free(bullet->str);
+    free(bullet);
+
+    WORD_WRAPPED *compact = wordWrap("-c, --compact     Compacts field "
+        "names and field values\n", TERM_SIZE.ws_col, "                  ",
         NULL, 0, 0);
     printf("%s", compact->str);
     free(compact->str);
     free(compact);
 
-    WORD_WRAPPED *conf = wordWrap("-cf, --conf        Launches SHORKFETCH "
-        "Configurator and exits\n", TERM_SIZE.ws_col, "                   ",
+    WORD_WRAPPED *conf = wordWrap("-C, --conf        Launches SHORKFETCH "
+        "Configurator and exits\n", TERM_SIZE.ws_col, "                  ",
         NULL, 0, 0);
     printf("%s", conf->str);
     free(conf->str);
     free(conf);
 
-    WORD_WRAPPED *fields = wordWrap("-f, --fields       Specifies a custom "
+    WORD_WRAPPED *fields = wordWrap("-f, --fields      Specifies a custom "
         "fields list and order; no assignment returns list of current "
-        "fields and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        "fields and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
         0, 0);
     printf("%s", fields->str);
     free(fields->str);
     free(fields);
 
-    WORD_WRAPPED *help = wordWrap("-h, --help         Displays help "
-        "information and exits\n", TERM_SIZE.ws_col, "                   ",
+    WORD_WRAPPED *help = wordWrap("-h, --help        Displays help "
+        "information and exits\n", TERM_SIZE.ws_col, "                  ",
         NULL, 0, 0);
     printf("%s", help->str);
     free(help->str);
     free(help);
 
-    WORD_WRAPPED *highCol = wordWrap("-hc, --high-col    Specifies a "
+    WORD_WRAPPED *highCol = wordWrap("-H, --high-col    Specifies a "
         "custom high percentage colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
         0, 0);
     printf("%s", highCol->str);
     free(highCol->str);
     free(highCol);
 
-    WORD_WRAPPED *lowCol = wordWrap("-lc, --low-col     Specifies a custom "
+    WORD_WRAPPED *lowCol = wordWrap("-l, --low-col     Specifies a custom "
         "low percentage colour; no assignment returns the current colour "
-        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
+        "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
     printf("%s", lowCol->str);
     free(lowCol->str);
     free(lowCol);
 
-    WORD_WRAPPED *medCol = wordWrap("-mc, --med-col     Specifies a custom "
+    WORD_WRAPPED *medCol = wordWrap("-m, --med-col     Specifies a custom "
         "medium percentage colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
+        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
         0, 0);
     printf("%s", medCol->str);
     free(medCol->str);
     free(medCol);
 
-    WORD_WRAPPED *mode = wordWrap("-mo, --mode        Specifies which view "
-        "mode to use: [n]ormal (default), [b]ullet list\n",
-        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
+    WORD_WRAPPED *mode = wordWrap("-o, --mode        Specifies which view "
+        "mode to use: [n]ormal (default), [b]ullet list; no assignment "
+        "returns the current mode and exits\n",
+        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
 
-    WORD_WRAPPED *maxUnit = wordWrap("-mu, --max-unit    Specifies the "
-        "largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, "
-        "[g]ibi, [t]ebi, [p]ebi (default)\n", TERM_SIZE.ws_col,
-        "                   ", NULL, 0, 0);
-    printf("%s", maxUnit->str);
-    free(maxUnit->str);
-    free(maxUnit);
-
-    WORD_WRAPPED *noArt = wordWrap("-na, --no-art      Disables the SHORK "
-        "ASCII art\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
-    printf("%s", noArt->str);
-    free(noArt->str);
-    free(noArt);
-
-    WORD_WRAPPED *noEsc = wordWrap("-ne, --no-esc      Disables all ANSI "
-        "escape codes and colour features\n", TERM_SIZE.ws_col,
-        "                   ", NULL, 0, 0);
-    printf("%s", noEsc->str);
-    free(noEsc->str);
-    free(noEsc);
-
-    WORD_WRAPPED *noIha = wordWrap("-nh, --no-iha      Disables Intel "
-        "Hybrid Architecture-specific core/thread counting\n",
-        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
-    printf("%s", noIha->str);
-    free(noIha->str);
-    free(noIha);
-
-    WORD_WRAPPED *reset = wordWrap("-r, --reset        Resets to default, "
+    WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
-        "                   ", NULL, 0, 0);
+        "                  ", NULL, 0, 0);
     printf("%s", reset->str);
     free(reset->str);
     free(reset);
 
-    WORD_WRAPPED *save = wordWrap("-s, --save         Saves chosen options "
+    WORD_WRAPPED *save = wordWrap("-s, --save        Saves chosen options "
         "to a configuration file\n", TERM_SIZE.ws_col,
-        "                   ", NULL, 0, 0);
+        "                  ", NULL, 0, 0);
     printf("%s", save->str);
     free(save->str);
     free(save);
 
-    WORD_WRAPPED *version = wordWrap("-v, --version      Displays version "
-        "number and exits\n\n", TERM_SIZE.ws_col, "                   ",
+    WORD_WRAPPED *maxUnit = wordWrap("-u, --max-unit    Specifies the "
+        "largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, "
+        "[g]ibi, [t]ebi, [p]ebi (default); no assignment returns the "
+        "current unit and exits\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", maxUnit->str);
+    free(maxUnit->str);
+    free(maxUnit);
+
+    WORD_WRAPPED *noArt = wordWrap("    --no-art      Disables the SHORK "
+        "ASCII art\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", noArt->str);
+    free(noArt->str);
+    free(noArt);
+
+    WORD_WRAPPED *noEsc = wordWrap("    --no-esc      Disables all ANSI "
+        "escape codes and colour features\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", noEsc->str);
+    free(noEsc->str);
+    free(noEsc);
+
+    WORD_WRAPPED *noIha = wordWrap("    --no-iha      Disables Intel "
+        "Hybrid Architecture-specific core/thread counting\n",
+        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", noIha->str);
+    free(noIha->str);
+    free(noIha);
+
+    WORD_WRAPPED *noIp = wordWrap("    --no-ip       Disables any IP "
+        "address display\n", TERM_SIZE.ws_col, "                  ", NULL,
+        0, 0);
+    printf("%s", noIp->str);
+    free(noIp->str);
+    free(noIp);
+
+    WORD_WRAPPED *version = wordWrap("-v, --version     Displays version "
+        "number and exits\n\n", TERM_SIZE.ws_col, "                  ",
         NULL, 0, 0);
     printf("%s", version->str);
     free(version->str);
@@ -286,166 +330,100 @@ int main(int argc, char *argv[])
     readConf(&CONFIG);
 
 #ifndef SHORK_DISKETTE
-    for (int i = 1; i < argc; i++)
+    int opt;
+    while ((opt = getopt_long(argc, argv, shortOpts, longOpts, NULL)) != -1)
     {
-        if ((strcmp(argv[i], "-h") == 0) ||
-            (strcmp(argv[i], "--help") == 0))
+        switch (opt)
         {
+        case 'h':
             showHelp();
             return 0;
-        }
-        else if (strncmp(argv[i], "-ac", 3) == 0 ||
-            strncmp(argv[i], "--accent-col", 12) == 0)
-        {
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) 
+
+        case 'a':
+            if (!optarg)
             {
                 printf("%s\n", CONFIG.colAccent);
-                return 1;
+                return 0;
             }
+            snprintf(CONFIG.colAccent, CONF_COL_LEN, "%s", optarg);
+            break;
 
-            equalsNeedle++;
-            snprintf(CONFIG.colAccent, CONF_COL_LEN, "%s", equalsNeedle);
-        }
-        else if (strncmp(argv[i], "-bc", 3) == 0 ||
-            strncmp(argv[i], "--bullet-col", 12) == 0)
-        {
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) 
+        case 'B':
+            if (!optarg)
             {
                 printf("%s\n", CONFIG.colBullet);
-                return 1;
+                return 0;
             }
+            snprintf(CONFIG.colBullet, CONF_COL_LEN, "%s", optarg);
+            break;
 
-            equalsNeedle++;
-            snprintf(CONFIG.colBullet, CONF_COL_LEN, "%s", equalsNeedle);
-        }
-        else if (strncmp(argv[i], "-b", 2) == 0 ||
-            strncmp(argv[i], "--bullet", 8) == 0)
-        {
-            char *bulletChar = NULL;
-            if (strncmp(argv[i], "-b=", 3) == 0)
-                bulletChar = &argv[i][3];
-            else if (strncmp(argv[i], "--bullet=", 9) == 0)
-                bulletChar = &argv[i][10];
-
-            if (bulletChar)
+        case 'l':
+            if (!optarg)
             {
-                if (strlen(bulletChar) > 1 && bulletChar[1] != '\0')
-                {
-                    printf("ERROR: custom bullet point character can only "
-                        "be a single character\n");
-                    return 1;
-                }
-                CONFIG.charBullet = bulletChar[0];
+                printf("%s\n", CONFIG.colPctLow);
+                return 0;
             }
-            else
+            snprintf(CONFIG.colPctLow, CONF_COL_LEN, "%s", optarg);
+            break;
+
+        case 'm':
+            if (!optarg)
+            {
+                printf("%s\n", CONFIG.colPctMed);
+                return 0;
+            }
+            snprintf(CONFIG.colPctMed, CONF_COL_LEN, "%s", optarg);
+            break;
+
+        case 'H':
+            if (!optarg)
+            {
+                printf("%s\n", CONFIG.colPctHigh);
+                return 0;
+            }
+            snprintf(CONFIG.colPctHigh, CONF_COL_LEN, "%s", optarg);
+            break;
+
+        case 'b':
+            if (!optarg)
             {
                 printf("\"%c\"\n", CONFIG.charBullet);
                 return 0;
             }
-        }
-        else if (strncmp(argv[i], "-lc", 3) == 0 ||
-            strncmp(argv[i], "--low-col", 9) == 0)
-        {
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) 
+            if (strlen(optarg) > 1)
             {
-                printf("%s\n", CONFIG.colPctLow);
+                printf("ERROR: custom bullet point character can only "
+                    "be a single character\n");
                 return 1;
             }
+            CONFIG.charBullet = optarg[0];
+            break;
 
-            equalsNeedle++;
-            snprintf(CONFIG.colPctLow, CONF_COL_LEN, "%s", equalsNeedle);
-        }
-        else if (strncmp(argv[i], "-mc", 3) == 0 ||
-            strncmp(argv[i], "--med-col", 9) == 0)
-        {
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) 
-            {
-                printf("%s\n", CONFIG.colPctMed);
-                return 1;
-            }
-
-            equalsNeedle++;
-            snprintf(CONFIG.colPctMed, CONF_COL_LEN, "%s", equalsNeedle);
-        }
-        else if (strncmp(argv[i], "-hc", 3) == 0 ||
-            strncmp(argv[i], "--high-col", 10) == 0)
-        {
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) 
-            {
-                printf("%s\n", CONFIG.colPctHigh);
-                return 1;
-            }
-
-            equalsNeedle++;
-            snprintf(CONFIG.colPctHigh, CONF_COL_LEN, "%s", equalsNeedle);
-        }
-        else if (strcmp(argv[i], "-co") == 0 ||
-            strcmp(argv[i], "--compact") == 0)
+        case 'c':
             COMPACT = 1;
-        else if (strcmp(argv[i], "-cf") == 0 ||
-            strcmp(argv[i], "--conf") == 0)
+            break;
+
+        case 'C':
             return launchConf();
-        else if (strncmp(argv[i], "-f", 2) == 0 ||
-            strncmp(argv[i], "--fields", 8) == 0)
+
+        case 'f':
         {
-            // Find "=" as our needle
-            char *equalsNeedle = strchr(argv[i], '=');
-            if (!equalsNeedle) 
+            if (!optarg)
             {
                 printf("\"%s\"\n", CONFIG.fields);
                 return 0;
             }
-
-            equalsNeedle++;
-            snprintf(CONFIG.fields, CONF_FIELDS_LEN, "%s", equalsNeedle);
+            snprintf(CONFIG.fields, CONF_FIELDS_LEN, "%s", optarg);
 
             // Remove trailing comma if present
             int len = strlen(CONFIG.fields);
             if (len > 0 && CONFIG.fields[len - 1] == ',')
                 CONFIG.fields[len - 1] = '\0';
+            break;
         }
-        else if (strncmp(argv[i], "-mo", 3) == 0 ||
-            strncmp(argv[i], "--mode", 6) == 0)
-        {
-            char *modeVal = NULL;
-            if (strncmp(argv[i], "-mo=", 4) == 0)
-                modeVal = &argv[i][4];
-            else if (strncmp(argv[i], "--mode=", 7) == 0)
-                modeVal = &argv[i][7];
 
-            if (modeVal)
-            {
-                if (modeVal[0] == '\0')
-                {
-                    printf("ERROR: no mode given\n");
-                    return 1;
-                }
-                else if (strcmp(modeVal, "n") == 0 ||
-                    strcmp(modeVal, "N") == 0 ||
-                    strcmp(modeVal, "normal") == 0)
-                    CONFIG.mode = NORMAL;
-                else if (strcmp(modeVal, "b") == 0 ||
-                    strcmp(modeVal, "B") == 0 ||
-                    strcmp(modeVal, "bullet") == 0 ||
-                    strcmp(modeVal, "bullets") == 0)
-                    CONFIG.mode = BULLETS;
-                else
-                {
-                    printf("ERROR: unrecognised mode \"%s\"\n", modeVal);
-                    return 1;
-                }
-            }
-            else
+        case 'o':
+            if (!optarg)
             {
                 if (CONFIG.mode == NORMAL)
                     printf("\"normal\"\n");
@@ -453,101 +431,118 @@ int main(int argc, char *argv[])
                     printf("\"bullets\"\n");
                 return 0;
             }
-        }
-        else if (strncmp(argv[i], "-mu", 3) == 0 ||
-            strncmp(argv[i], "--max-unit", 10) == 0)
-        {
-            char *modeVal = NULL;
-            if (strncmp(argv[i], "-mu=", 4) == 0)
-                modeVal = &argv[i][4];
-            else if (strncmp(argv[i], "--max-unit=", 11) == 0)
-                modeVal = &argv[i][11];
-
-            if (modeVal)
+            if (optarg[0] == '\0')
             {
-                if (modeVal[0] == '\0')
-                {
-                    printf("ERROR: no unit given\n");
-                    return 1;
-                }
-                else if (strcmp(modeVal, "b") == 0 ||
-                    strcmp(modeVal, "B") == 0 ||
-                    strcmp(modeVal, "byte") == 0)
-                    CONFIG.maxUnit = 'b';
-                else if (strcmp(modeVal, "k") == 0 ||
-                    strcmp(modeVal, "K") == 0 ||
-                    strcmp(modeVal, "kibi") == 0 ||
-                    strcmp(modeVal, "Kibi") == 0)
-                    CONFIG.maxUnit = 'k';
-                else if (strcmp(modeVal, "m") == 0 ||
-                    strcmp(modeVal, "M") == 0 ||
-                    strcmp(modeVal, "mebi") == 0 ||
-                    strcmp(modeVal, "Mebi") == 0)
-                    CONFIG.maxUnit = 'm';
-                else if (strcmp(modeVal, "g") == 0 ||
-                    strcmp(modeVal, "G") == 0 ||
-                    strcmp(modeVal, "gibi") == 0 ||
-                    strcmp(modeVal, "Gibi") == 0)
-                    CONFIG.maxUnit = 'g';
-                else if (strcmp(modeVal, "t") == 0 ||
-                    strcmp(modeVal, "T") == 0 ||
-                    strcmp(modeVal, "tebi") == 0 ||
-                    strcmp(modeVal, "Tebi") == 0)
-                    CONFIG.maxUnit = 't';
-                else if (strcmp(modeVal, "p") == 0 ||
-                    strcmp(modeVal, "P") == 0 ||
-                    strcmp(modeVal, "pebi") == 0 ||
-                    strcmp(modeVal, "Pebi") == 0)
-                    CONFIG.maxUnit = 'p';
-                else
-                {
-                    printf("ERROR: unrecognised unit \"%s\"\n", modeVal);
-                    return 1;
-                }
+                printf("ERROR: no mode given\n");
+                return 1;
             }
+            else if (strcmp(optarg, "n") == 0 ||
+                strcmp(optarg, "N") == 0 ||
+                strcmp(optarg, "normal") == 0)
+                CONFIG.mode = NORMAL;
+            else if (strcmp(optarg, "b") == 0 ||
+                strcmp(optarg, "B") == 0 ||
+                strcmp(optarg, "bullet") == 0 ||
+                strcmp(optarg, "bullets") == 0)
+                CONFIG.mode = BULLETS;
             else
+            {
+                printf("ERROR: unrecognised mode \"%s\"\n", optarg);
+                return 1;
+            }
+            break;
+
+        case 'u':
+            if (!optarg)
             {
                 printf("'%c'\n", CONFIG.maxUnit);
                 return 0;
             }
-        }
-        else if ((strcmp(argv[i], "-na") == 0) ||
-            (strcmp(argv[i], "--no-art") == 0))
+            if (optarg[0] == '\0')
+            {
+                printf("ERROR: no unit given\n");
+                return 1;
+            }
+            else if (strcmp(optarg, "b") == 0 ||
+                strcmp(optarg, "B") == 0 ||
+                strcmp(optarg, "byte") == 0)
+                CONFIG.maxUnit = 'b';
+            else if (strcmp(optarg, "k") == 0 ||
+                strcmp(optarg, "K") == 0 ||
+                strcmp(optarg, "kibi") == 0 ||
+                strcmp(optarg, "Kibi") == 0)
+                CONFIG.maxUnit = 'k';
+            else if (strcmp(optarg, "m") == 0 ||
+                strcmp(optarg, "M") == 0 ||
+                strcmp(optarg, "mebi") == 0 ||
+                strcmp(optarg, "Mebi") == 0)
+                CONFIG.maxUnit = 'm';
+            else if (strcmp(optarg, "g") == 0 ||
+                strcmp(optarg, "G") == 0 ||
+                strcmp(optarg, "gibi") == 0 ||
+                strcmp(optarg, "Gibi") == 0)
+                CONFIG.maxUnit = 'g';
+            else if (strcmp(optarg, "t") == 0 ||
+                strcmp(optarg, "T") == 0 ||
+                strcmp(optarg, "tebi") == 0 ||
+                strcmp(optarg, "Tebi") == 0)
+                CONFIG.maxUnit = 't';
+            else if (strcmp(optarg, "p") == 0 ||
+                strcmp(optarg, "P") == 0 ||
+                strcmp(optarg, "pebi") == 0 ||
+                strcmp(optarg, "Pebi") == 0)
+                CONFIG.maxUnit = 'p';
+            else
+            {
+                printf("ERROR: unrecognised unit \"%s\"\n", optarg);
+                return 1;
+            }
+            break;
+
+        case OPT_NO_ART:
             CONFIG.showArt = 0;
-        else if ((strcmp(argv[i], "-ne") == 0) ||
-            (strcmp(argv[i], "--no-esc") == 0))
+            break;
+
+        case OPT_NO_ESC:
             CONFIG.showEsc = 0;
-        else if ((strcmp(argv[i], "-nh") == 0) ||
-            (strcmp(argv[i], "--no-iha") == 0))
+            break;
+
+        case OPT_NO_IHA:
             CONFIG.showIHA = 0;
-        else if ((strcmp(argv[i], "-ni") == 0) ||
-            (strcmp(argv[i], "--no-ip") == 0))
+            break;
+
+        case OPT_NO_IP:
             CONFIG.showIP = 0;
-        else if ((strcmp(argv[i], "-r") == 0) ||
-            (strcmp(argv[i], "--reset") == 0))
+            break;
+
+        case 'r':
         {
             int result = deleteConf();
             if (result)
                 printf("SHORKFETCH configuration reset\n");
             else
                 printf("WARNING: SHORKFETCH configuration already "
-                "default\n");
+                    "default\n");
             return 0;
         }
-        else if (strcmp(argv[i], "-s") == 0 ||
-            strcmp(argv[i], "--save") == 0)
+
+        case 's':
             saveConf = 1;
-        else if (strcmp(argv[i], "-v") == 0 ||
-            strcmp(argv[i], "--version") == 0)
-        {
+            break;
+
+        case 'v':
             printf("SHORKFETCH %s\n", VERSION);
             return 0;
-        }
-        else
-        {
-            printf("ERROR: unrecognised option \"%s\"\n", argv[i]);
+
+        default:
             return 1;
         }
+    }
+
+    if (optind < argc)
+    {
+        printf("ERROR: unrecognised option \"%s\"\n", argv[optind]);
+        return 1;
     }
 #else
     for (int i = 1; i < argc; i++)
