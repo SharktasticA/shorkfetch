@@ -279,8 +279,8 @@ void writeConf(Config conf)
 #else
 
 int deleteConf(void) { return 1; }
-void launchConf(Config *conf) { return; }
-void readConf(Config *conf) { return; }
-void writeConf(Config *conf) { return; }
+int launchConf(void) { return 0; }
+void readConf(Config *conf) { (void)conf; }
+void writeConf(Config conf) { (void)conf; }
 
 #endif

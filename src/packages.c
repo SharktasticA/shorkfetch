@@ -299,6 +299,6 @@ char *getPackages(const char *os)
 
 #else
 
-char *getPackages(const char *os) { return NULL; }
+char *getPackages(const char *os) { (void)os; return NULL; }
 
 #endif

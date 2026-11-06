@@ -168,6 +168,10 @@ char *getLocalIP(void)
 
 #else
 
+#include <stddef.h>
+
+
+
 char *getExternalIP(void) { return NULL; }
 char *getLocalIP(void) { return NULL; }
 

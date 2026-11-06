@@ -1,6 +1,6 @@
 # SHORKFETCH
 
-A cute, shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! SHORKFETCH is perhaps not as feature-rich as alternatives like neofetch and fastfetch, but instead focuses on being performant, providing cleaner output, and has text wrapping by default. It is the bundled fetch utility for SHORK Operating Systems like [SHORK 486](https://github.com/SharktasticA/SHORK-486), but is available for Linux systems in general.
+A cute, shark-themed Linux fetch tool made with speed, consistent output, and both vintage *and* modern hardware support in mind! SHORKFETCH is perhaps not as feature-rich as alternatives like neofetch and fastfetch, but instead focuses on being performant, providing cleaner output, and has text wrapping by default. It is the bundled fetch utility for SHORK Operating Systems like [SHORK 486 and 586](https://github.com/SharktasticA/SHORK-486), but is available for Linux systems in general.
 
 In terms of "cleaner output", SHORKFETCH has a comprehensive focus on providing clean and accurate CPU and GPU name reporting, especially for older hardware, non-x86 architectures, and Intel integrated graphics. It can override a generic, verbose or inaccurate name given by the Linux kernel and the hardware itself, in favour of a name closer to what you expect, even distinguishing generations if no model number that could do so is given. 
 
@@ -56,7 +56,7 @@ Below are some optional parameters you can include when running `make` or `make 
 
 * `NO_STR_CLEANING=1`: Configures SHORKFETCH to exclude most code relating to string replacement and cleaning to reduce the binary size by ~1MB and speed up processing time. It is useful for embedded systems and/or systems severely space constrained. It is presently used for SHORK DISKETTE's version of SHORKFETCH.
 
-* `X86_ONLY=1`: Configures SHORKFETCH to exclude any code relating to CPU architectures other than x86 to reduce the binary size by ~10KB and speed up processing time. This option is presently used for SHORK 486's, SHORK DISC's and SHORK DISKETTE's version of SHORKFETCH.
+* `X86_ONLY=1`: Configures SHORKFETCH to exclude any code relating to CPU architectures other than x86 to reduce the binary size by ~10KB and speed up processing time. This option is presently used for SHORK 486's, SHORK 586's, SHORK DISC's and SHORK DISKETTE's version of SHORKFETCH.
 
 
 

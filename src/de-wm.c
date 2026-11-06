@@ -138,6 +138,6 @@ char *getWM(char **de)
 #else
 
 char *getDE(void) { return NULL; }
-char *getWM(char **de)  { return NULL; }
+char *getWM(char **de)  { (void)de; return NULL; }
 
 #endif

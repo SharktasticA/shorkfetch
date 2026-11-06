@@ -885,7 +885,10 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 
 #else
 
-GPU_IDS* getGPUs(int *count) { return NULL; }
-char *interpretGPU(GPU_IDS *gpu, const char *os) { return NULL; }
+GPU_IDS* getGPUs(int *count) { (void)count; return NULL; }
+char *interpretGPU(GPU_IDS *gpu, const char *os)
+{
+    (void)gpu; (void)os; return NULL;
+}
 
 #endif

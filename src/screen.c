@@ -299,7 +299,7 @@ char *interpretScreen(Screen *screen)
 
 #else
 
-Screen *getScreens(int *count) { return NULL; }
-char *interpretScreen(Screen *screen) { return NULL; }
+Screen *getScreens(int *count) { (void)count; return NULL; }
+char *interpretScreen(Screen *screen) { (void)screen; return NULL; }
 
 #endif

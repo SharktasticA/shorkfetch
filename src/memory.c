@@ -143,6 +143,11 @@ char *getSwap(MemInfo mi, char *colPctLow, char *colPctMed,
 
 #else
 
-char *getSwap(MemInfo mi) { return NULL; }
+char *getSwap(MemInfo mi, char *colPctLow, char *colPctMed,
+    char *colPctHigh, const char *colReset)
+{
+    (void)mi; (void)colPctLow; (void)colPctMed; (void)colPctHigh;
+    (void)colReset; return NULL;
+}
 
 #endif
