@@ -2,6 +2,7 @@ CC ?= gcc
 AR ?= ar
 RANLIB ?= ranlib
 STRIP ?= strip
+LIBS ?=
 VERSION = 0.7-wip
 
 ifeq ($(wildcard shorkcommon/.git),)
@@ -13,6 +14,7 @@ CFLAGS += -DVERSION='"$(VERSION)"' -Wall -Wextra -D_GNU_SOURCE -std=gnu99 \
 
 ifdef SHORK_DISKETTE
 	CFLAGS += -DSHORK_DISKETTE
+    LIBS += -ldl
 endif
 
 ifdef NO_STR_CLEANING
@@ -41,7 +43,7 @@ endif
 all: $(PROGS)
 
 shorkfetch: $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o shorkfetch $(LDFLAGS)
+	$(CC) $(CFLAGS) $(SRC) -o shorkfetch $(LDFLAGS) $(LIBS)
 	$(STRIP) shorkfetch
 
 shorkfetch-conf: $(SRC_CONF)

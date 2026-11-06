@@ -20,6 +20,7 @@
 #include "packages.h"
 
 #include <dirent.h>
+#include <dlfcn.h>
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,14 +111,10 @@ char *getPackages(const char *os)
     }
 
     // Get Slackware-style packages by counting inside
-    // /var/lib/pkgtools/packages or /var/log/packages
-    const char *pkgtoolDirs[] = {
-        "/var/lib/pkgtools/packages",
-        "/var/log/packages"
-    };
-    for (int i = 0; i < 2; i++)
+    // known .../packages directories
+    for (int i = 0; i < PKGTOOL_DIRS_LEN; i++)
     {
-        DIR *pkgtoolDir = opendir(pkgtoolDirs[i]);
+        DIR *pkgtoolDir = opendir(PKGTOOL_DIRS[i]);
         if (!pkgtoolDir)
             continue;
 
@@ -131,10 +128,71 @@ char *getPackages(const char *os)
             break;
     }
 
-    // Get Fedora-style packages
-    if (isProgramInstalled("rpm", 0))
+    // Function pointers for dynamically-loaded SQLite functions
+    int (*sOpen)(const char *, void **, int, const char *) = NULL;
+    int (*sPrepare)(void *, const char *, int, void **,
+        const char **) = NULL;
+    int (*sStep)(void *) = NULL;
+    int (*sColumnInt)(void *, int) = NULL;
+    int (*sFinalize)(void *) = NULL;
+    int (*sClose)(void *) = NULL;
+
+    // Get Fedora-style packages by querying RPM databases with SQLite
+    for (int i = 0; i < RPM_DBS_LEN && rpmCount == 0; i++)
     {
-        // Try rpm for now (it's slow, we should find a better way...)
+        if (access(RPM_DBS[i], R_OK) != 0)
+            continue;
+
+        // Attempt to dynamically load libsqlite3
+        if (!sOpen)
+        {
+            void *lib = dlopen("libsqlite3.so.0", RTLD_LAZY);
+            if (!lib)
+                break;
+
+            sOpen = (int (*)(const char *, void **, int, const char *))
+                dlsym(lib, "sqlite3_open_v2");
+            sPrepare = (int (*)(void *, const char *, int, void **,
+                const char **))dlsym(lib, "sqlite3_prepare_v2");
+            sStep = (int (*)(void *))dlsym(lib, "sqlite3_step");
+            sColumnInt = (int (*)(void *, int))dlsym(lib,
+                "sqlite3_column_int");
+            sFinalize = (int (*)(void *))dlsym(lib, "sqlite3_finalize");
+            sClose = (int (*)(void *))dlsym(lib, "sqlite3_close");
+
+            if (!sOpen || !sPrepare || !sStep || !sColumnInt ||
+                !sFinalize || !sClose)
+                break;
+        }
+
+        char uri[PATH_MAX + 32];
+        int uriLen = snprintf(uri, sizeof(uri), "file:%s?immutable=1",
+            RPM_DBS[i]);
+        if (uriLen < 0 || (size_t)uriLen >= sizeof(uri))
+            continue;
+
+        void *db = NULL;
+        if (sOpen(uri, &db, SQL_OPEN_READONLY | SQL_OPEN_URI, NULL) !=
+            SQL_OK)
+        {
+            sClose(db);
+            continue;
+        }
+
+        void *stmt = NULL;
+        if (sPrepare(db, "SELECT COUNT(*) FROM Packages;", -1, &stmt,
+            NULL) == SQL_OK)
+        {
+            if (sStep(stmt) == SQL_ROW)
+                rpmCount = sColumnInt(stmt, 0);
+            sFinalize(stmt);
+        }
+        sClose(db);
+    }
+
+    // Get Fedora-style packages by capturing rpm's output (fallback)
+    if (rpmCount == 0 && isProgramInstalled("rpm", 0))
+    {
         FILE *fStream = popen("rpm -qa 2>/dev/null | wc -l", "r");
         if (fStream)
         {
@@ -242,11 +300,10 @@ char *getPackages(const char *os)
         }
     }
 
-    // Get Snap packages by counting inside /snap or /var/lib/snapd/snap
-    const char *snapDirs[] = {"/snap", "/var/lib/snapd/snap"};
-    for (int i = 0; i < 2; i++)
+    // Get Snap packages by counting inside snap directories
+    for (int i = 0; i < SNAP_DIRS_LEN; i++)
     {
-        DIR *snapDir = opendir(snapDirs[i]);
+        DIR *snapDir = opendir(SNAP_DIRS[i]);
         if (!snapDir)
             continue;
 
