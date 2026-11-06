@@ -109,10 +109,10 @@ void showHelp(void)
     free(accentCol);
 
     WORD_WRAPPED *bullet = wordWrap("-b, --bullet       Specifies a custom "
-        "character to use with bullet list mode and sublists; empty "
-        "assignment allows lists with no bullet; no assignment returns the "
-        "current character and exits\n", TERM_SIZE.ws_col,
-        "                   ", NULL, 0, 0);
+        "single-byte character to use with bulleted list mode and "
+        "sublists; empty assignment allows lists with no bullet; no "
+        "assignment returns the current character and exits\n",
+        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);

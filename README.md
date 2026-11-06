@@ -68,7 +68,7 @@ Below are some optional parameters you can include when running `make` or `make 
 ### SHORKFETCH Options
 
 * `-ac`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour
-* `-b`, `--bullet`: Specifies a custom character to use with bullet list mode and sublists; empty assignment allows lists with no bullet; no assignment returns the current character and exits
+* `-b`, `--bullet`: Specifies a custom single-byte character to use with bulleted list mode and sublists; empty assignment allows lists with no bullet; no assignment returns the current character and exits
 * `-co`, `--compact`: Compacts field names and field values
 * `-cf`, `--conf`: Launches SHORKFETCH Configurator and exits
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns list of current fields

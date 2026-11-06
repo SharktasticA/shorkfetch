@@ -137,6 +137,21 @@ void asciiArtMenu(void)
         &CONFIG.noArt, 1);
 }
 
+void bulletCharMenu(void)
+{
+    char msg[150] = {0};
+    snprintf(msg, 150, "Please type a single-byte character to use for "
+        "bullet points when in bulleted list mode and for sublists. "
+        "Current character: '%c'", CONFIG.charBullet);
+    int c = printCharInputScreen("Bullet character", msg);
+
+    if (c != -1)
+    {
+        CONFIG.charBullet = (char)c;
+        writeConf(CONFIG);
+    }
+}
+
 void colAccMenu(void)
 {
     colMenu("Colour for accents",
@@ -147,8 +162,8 @@ void colAccMenu(void)
 void colBulMenu(void)
 {
     colMenu("Colour for bullets",
-        "Sets the bullet character colour when in bullet mode and for "
-        "sublists",
+        "Sets the bullet character colour when in bulleted list mode and "
+            "for sublists",
         CONFIG.colBullet);
 }
 
@@ -520,6 +535,7 @@ int mainMenu(void)
 
     MenuItem menu[] = {
         { "art", "ASCII art", "", asciiArtMenu, 1, 0 },
+        { "bul", "Bullet character", "", bulletCharMenu, 1, 0 },
         { "acc", "Colour for accents", "", colAccMenu, 1, 0 },
         { "bul", "Colour for bullets", "", colBulMenu, 1, 0 },
         { "pcl", "Colour for low \%", "", colPclMenu, 1, 0 },
