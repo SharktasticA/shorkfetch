@@ -177,23 +177,57 @@ void colBulMenu(void)
 void colMenu(char *title, char *desc, char *val)
 {
     MenuItem menu[] = {
-        { "black", "Black", NULL, NULL, 1, 0 },
-        { "blue", "Blue", NULL, NULL, 1, 0 },
-        { "bright_blue", "Bright blue", NULL, NULL, 1, 0 },
-        { "bright_cyan", "Bright cyan", NULL, NULL, 1, 0 },
-        { "bright_green", "Bright green", NULL, NULL, 1, 0 },
-        { "bright_magenta", "Bright magenta", NULL, NULL, 1, 0 },
-        { "bright_red", "Bright red", NULL, NULL, 1, 0 },
-        { "bright_white", "Bright white", NULL, NULL, 1, 0 },
-        { "bright_yellow", "Bright yellow", NULL, NULL, 1, 0 },
-        { "cyan", "Cyan", NULL, NULL, 1, 0 },
-        { "green", "Green", NULL, NULL, 1, 0 },
-        { "grey", "Grey", NULL, NULL, 1, 0 },
-        { "magenta", "Magenta", NULL, NULL, 1, 0 },
-        { "red", "Red", NULL, NULL, 1, 0 },
-        { "white", "White", NULL, NULL, 1, 0 },
-        { "yellow", "Yellow", NULL, NULL, 1, 0 },
-        { "off", "Off (use terminal's foreground colour)", NULL, NULL, 1, 0 },
+        { "black",
+            "\033["COL_FOR_BLACK"mBlack\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "blue",
+            "\033["COL_FOR_BLUE"mBlue\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_blue",
+            "\033["COL_FOR_BRIGHT_BLUE"mBright blue\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_cyan",
+            "\033["COL_FOR_BRIGHT_CYAN"mBright cyan\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_green",
+            "\033["COL_FOR_BRIGHT_GREEN"mBright green\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_magenta",
+            "\033["COL_FOR_BRIGHT_MAGENTA"mBright magenta\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_red",
+            "\033["COL_FOR_BRIGHT_RED"mBright red\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_white",
+            "\033["COL_FOR_BRIGHT_WHITE"mBright white\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "bright_yellow",
+            "\033["COL_FOR_BRIGHT_YELLOW"mBright yellow\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "cyan",
+            "\033["COL_FOR_CYAN"mCyan\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "green",
+            "\033["COL_FOR_GREEN"mGreen\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "grey",
+            "\033["COL_FOR_GREY"mGrey\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "magenta",
+            "\033["COL_FOR_MAGENTA"mMagenta\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "red",
+            "\033["COL_FOR_RED"mRed\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "white",
+            "\033["COL_FOR_WHITE"mWhite\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "yellow",
+            "\033["COL_FOR_YELLOW"mYellow\033["COL_RESET"m",
+            NULL, NULL, 1, 0 },
+        { "off", 
+            "Off (use terminal's foreground colour)",
+            NULL, NULL, 1, 0 },
     };
     int menuSize = sizeof(menu) / sizeof(menu[0]);
 
@@ -212,7 +246,7 @@ void colMenu(char *title, char *desc, char *val)
             {
                 if (!strcmp(menu[i].id, val))
                 {
-                    markEntry(menu[i].name, COL_FOR_GREEN, 0);
+                    markEntry(menu[i].name, NULL, 0);
                     cursorY = i + 1;
                 }
                 else
