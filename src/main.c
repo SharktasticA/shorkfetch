@@ -243,8 +243,8 @@ void showHelp(void)
 
     WORD_WRAPPED *fieldNames = wordWrap("Fields: log (user@hostname), os, "
         "krn, upt, pkgs, loc, scn, de, wm, trm, sh, cpu, gpu, ram, swap, "
-        "dsk, root, lip, clrs, clba, clbr, --- (separator), single blank "
-        "space (blank line)\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
+        "dsk, root, lip, xip, clrs, clba, clbr, --- (separator), single"
+        "blank space (blank line)\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);
@@ -1431,6 +1431,37 @@ int main(int argc, char *argv[])
                             icon, localIP);
                 }
                 free(localIP);
+            }
+        }
+        else if (strcmp(fieldsProcessed[i], "xip") == 0 && CONFIG.showIP)
+        {
+            char *extIP = getExternalIP();
+            if (extIP)
+            {
+                if (!CONFIG.showEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
+                {
+                    if (!COMPACT)
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sExt. IP:%s  %s\n",
+                            colAccent, colReset, extIP);
+                    else
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sXIP:%s %s\n",
+                            colAccent, colReset, extIP);
+                }
+                else 
+                {
+                    if (!COMPACT)
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%s%s ext.\n",
+                            icon, extIP);
+                    else
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%s%s (X)\n",
+                            icon, extIP);
+                }
+                free(extIP);
             }
         }
         else if (strcmp(fieldsProcessed[i], "clrs") == 0)

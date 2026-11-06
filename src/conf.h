@@ -98,6 +98,7 @@ static const FieldInfo POSSIBLE_FIELDS[] =
     { "dsk",    "Disk size(s)" },
     { "root",   "Root partition size" },
     { "lip",    "Local IP address" },
+    { "xip",    "External IP address" },
     { "clrs",   "ANSI escape code base & bright 16-colour palette" },
     { "clba",   "ANSI escape code base 8-colour palette" },
     { "clbr",   "ANSI escape code bright 8-colour palette" }

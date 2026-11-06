@@ -129,6 +129,7 @@ These are possible field names you can use with the `--fields` argument. You ent
 | `dsk` | Disk size(s) | 1-10 | ✓ |
 | `root` | Root partition size | 1 | ✓ |
 | `lip` | Local IP address | 1 | ✓ |
+| `xip` | External IP address | 1 | |
 | `clrs` | ANSI escape code base & bright 16-colour palette | 2 | ✓ |
 | `clba` | ANSI escape code base 8-colour palette | 1 | |
 | `clbr` | ANSI escape code bright 8-colour palette | 1 | |
