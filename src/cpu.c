@@ -2851,6 +2851,10 @@ char *interpretCPU(CPU_DATA *cpu)
     // Compile our cores/threads substring
     char coresAndThreads[16] = "";
 
+    // Simple core/thread safety net
+    if (cpu->threads > 0 && cpu->cores > cpu->threads)
+        cpu->threads = cpu->cores;
+
     if (!COMPACT)
     {
         // If we don't have cores or threads, we use the processor index
