@@ -41,6 +41,7 @@ void escCodesMenu(void);
 int fieldActionsMenu(char*, const int);
 void fieldsMenu(void);
 void ihaMenu(void);
+void ipMenu(void);
 int mainMenu(void);
 void maxUnitMenu(void);
 int modifyField(MenuItem, const int);

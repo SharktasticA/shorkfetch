@@ -524,6 +524,15 @@ void ihaMenu(void)
         &CONFIG.showIHA, 0);
 }
 
+void ipMenu(void)
+{
+    toggleOptionMenu("IP addresses",
+        "Controls whether fields with IP addresses are shown. If you turn "
+            "this option off, it will override any IP address-related "
+            "fields you may have.",
+        &CONFIG.showIP, 0);
+}
+
 /**
  * Shows SHORKFETCH-CONF's main menu.
  * @returns 0 if exits normally
@@ -545,6 +554,7 @@ int mainMenu(void)
         { "esc", "Escape codes", "", escCodesMenu, 1, 0 },
         { "fld", "Fields", "", fieldsMenu, 1, 0 },
         { "iha", "Intel Hybrid Architecture support", "", ihaMenu, 1, 0 },
+        { "ipa", "IP addresses", "", ipMenu, 1, 0 },
         { "unt", "Maximum data unit", "", maxUnitMenu, 1, 0 },
         { "mde", "View mode", "", viewModeMenu, 1, 0 }
     };
