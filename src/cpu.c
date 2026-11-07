@@ -1843,7 +1843,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     else if (cpu->freq >= 420 && cpu->freq <= 450)
                         snprintf(tmp, NAME_LEN, "AMD Geode LX 700");
                     // LX 800 (500MHz)
-                    else if (cpu->freq >= 480 && cpu->freq <= 520)
+                    else if (cpu->freq >= 480 && cpu->freq <= 535)
                         snprintf(tmp, NAME_LEN, "AMD Geode LX 800");
                     // LX 900 (600MHz)
                     else if (cpu->freq >= 580 && cpu->freq <= 620)
