@@ -415,7 +415,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
  * CPU_DATA struct for future processing and interpretation.
  * @param cpuInfo A file path to a cpuinfo file to read
  * @param gpuFromCPU A pointer to a string for returning an extracted GPU
- *        name
+ *                   name
  * @return A CPU_DATA struct containing CPU data; NULL if no info found/
  *         error
  */
@@ -1331,10 +1331,12 @@ int hasFlag(const CPU_DATA *cpu, const char *flag)
  * corrections to handle quirks and edgecases, and tries to differentiate
  * processors with similar data.
  * @param cpu A pointer to a CPU_DATA struct containing the data to intepret
+ * @param gpuFromCPU A pointer to a string for returning an possible GPU
+ *                   name decided by a specific CPUs
  * @return String containing the CPU's name and core/thread specs; empty
  *         string if unknown/error
  */
-char *interpretCPU(CPU_DATA *cpu)
+char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
 {
     if (!cpu) return NULL;
 
@@ -2789,7 +2791,7 @@ char *interpretCPU(CPU_DATA *cpu)
         {
             if (cpu->vendor[0] == 'A')
             {
-                // Zambezi (1), Trinity (16), Godaveri (56)
+                // Zambezi (1), Trinity (16), Godavari (56)
                 if (cpu->model == 1 || cpu->model == 16 || cpu->model == 56)
                 {
                     // Some AMD As and FXs are reported with a physical ID
@@ -2801,6 +2803,17 @@ char *interpretCPU(CPU_DATA *cpu)
                     if (cpu->physIDs.noUniquePhysIDs == 1 &&
                         cpu->physIDs.maxPhysID > 1)
                         cpu->physIDs.maxPhysID = 1;
+                }
+                // Toronto
+                else if (cpu->model == 96)
+                {
+                    // Excavator-based Opterons are APUs, but they don't
+                    // report "Radeon" in their CPU model name like other
+                    // AMD APUs. If not already used, we use gpuFromCPU to
+                    // report this in case it's needed later.
+                    // See: AMD Opteron X3418
+                    if (!(*gpuFromCPU) && strstr(cpu->name, "APU"))
+                        (*gpuFromCPU) = strdup("AMD Radeon");
                 }
             }
         }

@@ -727,6 +727,9 @@ int main(int argc, char *argv[])
     char *wm = getWM(&de);
     char *gpuFromCPU = NULL;
     CPU_DATA *cpu = getCPU("/proc/cpuinfo", &gpuFromCPU);
+    char *cpuStr = NULL;
+    if (cpu)
+        cpuStr = interpretCPU(cpu, &gpuFromCPU);
 
     // Preprepared bullet icon to use if needed.
     char icon[16] = {0};
@@ -1151,32 +1154,27 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(fieldsProcessed[i], "cpu") == 0)
         {
-            if (cpu)
+            if (cpuStr && cpuStr[0] != '\0')
             {
-                char *cpuStr = interpretCPU(cpu);
-                if (cpuStr && cpuStr[0] != '\0')
+                if (!CONFIG.showEsc) printShorkLine(0);
+                if (CONFIG.mode == NORMAL)
                 {
-                    if (!CONFIG.showEsc) printShorkLine(0);
-                    if (CONFIG.mode == NORMAL)
-                    {
-                        if (!COMPACT)
-                            outputPos += writeOutput(output + outputPos,
-                                OUTPUT_LEN - outputPos,
-                                "%sCPU:%s      %s\n", colAccent, colReset,
-                                cpuStr);
-                        else
-                            outputPos += writeOutput(output + outputPos,
-                                OUTPUT_LEN - outputPos, "%sCPU:%s %s\n",
-                                colAccent, colReset, cpuStr);
-                    }
-                    else
-                    {
+                    if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
-                            OUTPUT_LEN - outputPos, "%s%s\n",  icon,
+                            OUTPUT_LEN - outputPos,
+                            "%sCPU:%s      %s\n", colAccent, colReset,
                             cpuStr);
-                    }
+                    else
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sCPU:%s %s\n",
+                            colAccent, colReset, cpuStr);
                 }
-                free(cpuStr);
+                else
+                {
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, "%s%s\n",  icon,
+                        cpuStr);
+                }
             }
         }
         else if (strcmp(fieldsProcessed[i], "gpu") == 0)
@@ -1629,6 +1627,8 @@ int main(int argc, char *argv[])
         free(cpu->vendor);
         free(cpu->name);
         free(cpu);
+        if (cpuStr)
+            free(cpuStr);
     }
 
     return 0;

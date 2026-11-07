@@ -95,7 +95,7 @@ void testGetCPU(void)
 
         char *gpuFromCPU = NULL;
         CPU_DATA *cpu = getCPU(cpuinfo, &gpuFromCPU);
-        char *cpuStr = interpretCPU(cpu);
+        char *cpuStr = interpretCPU(cpu, &gpuFromCPU);
 
         if (!showRaw)
         {

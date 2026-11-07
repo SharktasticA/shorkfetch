@@ -201,6 +201,6 @@ char *cleanCPUName(const CPU_ARCH, const char*, int);
 CPU_DATA *getCPU(char*, char**);
 int getIntelHybridCPU(CPU_DATA*);
 int hasFlag(const CPU_DATA*, const char*);
-char *interpretCPU(CPU_DATA*);
+char *interpretCPU(CPU_DATA*, char**);
 
 #endif
