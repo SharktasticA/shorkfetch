@@ -2787,19 +2787,21 @@ char *interpretCPU(CPU_DATA *cpu)
         // Bulldozer
         else if (cpu->family == 21)
         {
-            // Bulldozer proper
-            if (cpu->model == 1)
+            if (cpu->vendor[0] == 'A')
             {
-                // Some AMD FXs are reported with physical ID count that
-                // starts at 1 instead of 0, potentially flagging it as a
-                // multi-CPU config when it isn't... We can ensure that we
-                // aren't in such a config if the processor index count and
-                // per-CPU thread count are equal (impossible on a real
-                // multi-CPU config).
-                //  See: AMD FX-8150
-                if (cpu->physIDs.maxPhysID > 1 &&
-                    cpu->index == cpu->threads)
-                    cpu->physIDs.maxPhysID--;
+                // Zambezi (1), Trinity (16), Godaveri (56)
+                if (cpu->model == 1 || cpu->model == 16 || cpu->model == 56)
+                {
+                    // Some AMD As and FXs are reported with a physical ID
+                    // count that starts at 1 instead of 0, potentially
+                    // flagging it as  a multi-CPU config when it isn't...
+                    // We can ensure that we aren't in such a config if the
+                    // no. of unique physical IDs recorded is just 1.
+                    // See: AMD A10-5800K, AMD A10-7890K, AMD FX-8150
+                    if (cpu->physIDs.noUniquePhysIDs == 1 &&
+                        cpu->physIDs.maxPhysID > 1)
+                        cpu->physIDs.maxPhysID = 1;
+                }
             }
         }
     }
