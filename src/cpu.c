@@ -1026,6 +1026,16 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 
 
+    // Trim trailing whitespace from model name
+    if (result->name)
+    {
+        int len = strlen(result->name);
+        while (len > 0 && isspace((unsigned char)result->name[len - 1]))
+            result->name[--len] = '\0';
+    }
+
+
+
 #ifndef NO_STR_CLEANING
 
     if (result->arch == X86)
