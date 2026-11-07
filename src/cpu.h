@@ -170,6 +170,7 @@ extern const char *ARM_IMPLEMENTERS[];
 // Hardcoded search needles to use when looking for a GPU name inside a CPU
 // name
 static const char *GPU_FROM_CPU_NEEDLES[] = {
+    "with AMD Radeon",
     "with Radeon",
     "w/ Radeon",
     " RADEON",

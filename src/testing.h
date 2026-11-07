@@ -158,7 +158,7 @@ void testGetCPU(void)
             printf("    platform:           %s\n", cpu->platform ? cpu->platform : "(null)");
             printf("    machine:            %s\n", cpu->machine ? cpu->machine : "(null)");
 #endif
-            printf("    name:               %s\n", cpu->name   ? cpu->name   : "(null)");
+            printf("    name:               \"%s\"\n", cpu->name ? cpu->name : "(null)");
             printf("    family:             %d\n", cpu->family);
             printf("    model:              %d\n", cpu->model);
             printf("    stepping:           %d\n", cpu->stepping);
