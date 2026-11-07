@@ -59,11 +59,13 @@ typedef struct
     char maxUnit;
     // View mode (default: NORMAL)
     VIEW_MODE mode;
+    // Show AMD Bulldozer-specific core counting (default: 1)
+    int showABD;
     // Show SHORK ASCII art (default: 1)
     int showArt;
     // Show escape codes (default: 1)
     int showEsc;
-    // Show Intel Hybrid Architecture-specific core/thread counting
+    // Show Intel Hybrid Architecture-specific core counting
     // (default: 1)
     int showIHA;
     // Show IP fields (default: 1)

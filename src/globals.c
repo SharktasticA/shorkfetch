@@ -33,6 +33,7 @@ Config CONFIG = {
     1,
     1,
     1,
+    1,
     1
 };
 char *HOME;

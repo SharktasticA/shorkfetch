@@ -27,6 +27,7 @@ extern int NO_FIELDS;
 
 
 
+void abdMenu(void);
 int addField(void);
 void asciiArtMenu(void);
 void bulletCharMenu(void);

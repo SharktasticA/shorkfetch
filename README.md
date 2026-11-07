@@ -81,9 +81,11 @@ Below are some optional parameters you can include when running `make` or `make 
 * `-u`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default); no assignment returns the current unit and exits
 * `-m`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
 * `-o`, `--mode`: Selects which view mode to use: [n]ormal (default), [b]ullet list; no assignment returns the current mode and exits
+* `--no-abd`: Disables AMD Bulldozer family-specific core counting
+    * For example, instead of `4F/8I` for AMD FX-8350, you will get `4C/8T`
 * `--no-art`: Disables the SHORK ASCII art
 * `--no-esc`: Disables all ANSI escape codes and colour features
-* `--no-iha`: Disables Intel Hybrid Architecture-specific core/thread counting
+* `--no-iha`: Disables Intel Hybrid Architecture-specific core counting
     * For example, instead of `2L/8E/6P/22T` for Intel Core Ultra 7 155H, you will get `16C/22T`
 * `--no-ip`: Disables any IP address display
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits

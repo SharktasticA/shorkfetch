@@ -124,6 +124,8 @@ void readConf(Config *conf)
                 conf->maxUnit = value[0];
             else if (strcmp(key, "mode") == 0)
                 conf->mode = atoi(value);
+            else if (strcmp(key, "showABD") == 0)
+                conf->showABD = atoi(value);
             else if (strcmp(key, "showArt") == 0)
                 conf->showArt = atoi(value);
             else if (strcmp(key, "showEsc") == 0)
@@ -270,6 +272,7 @@ void writeConf(Config conf)
         fprintf(stream, "fields=%s\n", conf.fields);
         fprintf(stream, "maxUnit=%c\n", conf.maxUnit);
         fprintf(stream, "mode=%d\n", conf.mode);
+        fprintf(stream, "showABD=%d\n", conf.showABD);
         fprintf(stream, "showArt=%d\n", conf.showArt);
         fprintf(stream, "showEsc=%d\n", conf.showEsc);
         fprintf(stream, "showIHA=%d\n", conf.showIHA);

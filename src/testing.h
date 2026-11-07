@@ -171,6 +171,11 @@ void testGetCPU(void)
             printf("    maxPhysID:          %d\n", cpu->physIDs.maxPhysID);
             printf("    index:              %d\n", cpu->index);
             printf("    cores:              %d\n", cpu->cores);
+            printf("    lpeCores:           %d\n", cpu->lpeCores);
+            printf("    eCores:             %d\n", cpu->eCores);
+            printf("    pCores:             %d\n", cpu->pCores);
+            printf("    fUnits:             %d\n", cpu->fUnits);
+            printf("    iUnits:             %d\n", cpu->iUnits);
             printf("    threads:            %d\n", cpu->threads);
             printf("    cacheSize:          %d\n", cpu->cacheSize);
             printf("    flags:              %s\n", cpu->flags);

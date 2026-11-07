@@ -40,11 +40,25 @@ Config CONFIG = {
     1,
     1,
     1,
+    1,
     1
 };
 char FIELDS[MAX_FIELDS][5];
 int NO_FIELDS = 0;
 
+
+
+void abdMenu(void)
+{
+    toggleOptionMenu("AMD Bulldozer support",
+        "Controls whether AMD Bulldozer family-specific core counting is"
+            "used, which replaces the core/thread count with a "
+            "floating-point/integer unit count. This attempts to address "
+            "concerns with quantifying the components of AMD Bulldozer's "
+            "module design. For example, the AMD FX-8350's core count "
+            "would be \"4F/8I\" instead of \"4C/8T\".",
+        &CONFIG.showABD, 0);
+}
 
 /**
  * Shows a menu of possible field types to select.
@@ -557,7 +571,7 @@ void escCodesMenu(void)
 void ihaMenu(void)
 {
     toggleOptionMenu("Intel Hybrid Architecture support",
-        "Controls whether Intel Hybrid Architecture-specific core/thread "
+        "Controls whether Intel Hybrid Architecture-specific core "
             "counting is used, which distinguishes low-power efficient "
             "(L), efficient (E), and performance (P) cores from a combined "
             "core count for applicable CPUs. For example, the Intel Core "
@@ -585,21 +599,22 @@ int mainMenu(void)
     readConf(&CONFIG);
 
     MenuItem menu[] = {
+        { "fld", "Fields", "", fieldsMenu, 1, 0 },
+        { "mde", "View mode", "", viewModeMenu, 1, 0 },
+        { "com", "Compact view", "", compViewMenu, 1, 0 },
         { "art", "ASCII art", "", asciiArtMenu, 1, 0 },
         { "bul", "Bullet character", "", bulletCharMenu, 1, 0 },
+        { "esc", "Escape codes", "", escCodesMenu, 1, 0 },
+        { "ipa", "IP addresses", "", ipMenu, 1, 0 },
+        { "unt", "Maximum data unit", "", maxUnitMenu, 1, 0 },
+        { "abd", "AMD Bulldozer support", "", abdMenu, 1, 0 },
+        { "iha", "Intel Hybrid Architecture support", "", ihaMenu, 1, 0 },
         { "acc", "Colour for accents", "", colAccMenu, 1, 0 },
         { "bul", "Colour for bullets", "", colBulMenu, 1, 0 },
         { "pcl", "Colour for low \%", "", colPclMenu, 1, 0 },
         { "pcm", "Colour for medium \%", "", colPcmMenu, 1, 0 },
         { "pch", "Colour for high \%", "", colPchMenu, 1, 0 },
         { "sep", "Colour for separators", "", colSepMenu, 1, 0 },
-        { "com", "Compact view", "", compViewMenu, 1, 0 },
-        { "esc", "Escape codes", "", escCodesMenu, 1, 0 },
-        { "fld", "Fields", "", fieldsMenu, 1, 0 },
-        { "iha", "Intel Hybrid Architecture support", "", ihaMenu, 1, 0 },
-        { "ipa", "IP addresses", "", ipMenu, 1, 0 },
-        { "unt", "Maximum data unit", "", maxUnitMenu, 1, 0 },
-        { "mde", "View mode", "", viewModeMenu, 1, 0 }
     };
     int menuSize = sizeof(menu) / sizeof(menu[0]);
 

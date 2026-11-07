@@ -444,6 +444,11 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
             .maxPhysID = -1
         },
         .cores = -1,
+        .lpeCores = -1,
+        .eCores = -1,
+        .pCores = -1,
+        .fUnits = -1,
+        .iUnits = -1,
         .threads = -1,
         .cacheSize = -1,
         .flags[0] = '\0',
@@ -2791,6 +2796,20 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
         {
             if (cpu->vendor[0] == 'A')
             {
+                // Bulldozer CPUs are made up of modules containing two
+                // integer units but one floating-point unit and shared
+                // front-end and L2 cache. Linux reports this as difference
+                // between cores and threads as if this is SMT, but it isn't
+                // really. Thus, we offer the option to replace C/T with F/I
+                // to be more precise. In case of virtualisation mudding
+                // this, we only do this when we see thread count is double
+                // core count.
+                if (CONFIG.showABD && (cpu->threads / 2) == cpu->cores)
+                {
+                    cpu->fUnits = cpu->cores;
+                    cpu->iUnits = cpu->threads;
+                }
+
                 // Zambezi (1), Trinity (16), Godavari (56)
                 if (cpu->model == 1 || cpu->model == 16 || cpu->model == 56)
                 {
@@ -2886,14 +2905,6 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
 #endif
                 snprintf(coresAndThreads, 16, "%dC", cpu->index);
         }
-        // If we don't have cores but have threads, just show threads
-        else if (cpu->cores <= 0 && cpu->threads > 0)
-            snprintf(coresAndThreads, 16, "%dT", cpu->threads);
-        // If we have cores but no threads, show cores as threads because we
-        // can't determine if SMT and better to not suggest all processors
-        // counted are real cores
-        else if (cpu->cores > 0 && cpu->threads <= 0)
-            snprintf(coresAndThreads, 16, "%dT", cpu->cores);
         // If we any Intel Hybrid Architecture-specific counts, show each
         // found core type and threads
         else if (cpu->lpeCores > 0 || cpu->eCores > 0 || cpu->pCores > 0)
@@ -2905,6 +2916,22 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 snprintf(coresAndThreads, 16, "%dE/%dP/%dT", cpu->eCores,
                     cpu->pCores, cpu->threads);
         }
+        // If we have AMD Bulldozer module-specific counts, show
+        // floating-point and integer unit counts instead of cores and
+        // threads
+        else if (cpu->fUnits > 0 && cpu->iUnits > 0)
+        {
+            snprintf(coresAndThreads, 16, "%dF/%dI", cpu->fUnits,
+                cpu->iUnits);
+        }
+        // If we don't have cores but have threads, just show threads
+        else if (cpu->cores <= 0 && cpu->threads > 0)
+            snprintf(coresAndThreads, 16, "%dT", cpu->threads);
+        // If we have cores but no threads, show cores as threads because we
+        // can't determine if SMT and better to not suggest all processors
+        // counted are real cores
+        else if (cpu->cores > 0 && cpu->threads <= 0)
+            snprintf(coresAndThreads, 16, "%dT", cpu->cores);
         // If we have cores and threads, and they are the same value, just
         // show cores
         else if (cpu->cores > 0 && cpu->cores == cpu->threads)

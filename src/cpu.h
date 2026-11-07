@@ -129,12 +129,16 @@ typedef struct {
     PHYS_IDS physIDs;
     // Physical core count (x86)
     int cores;
-    // Physical low-power Efficient-core count (x86)
+    // Physical low-power Efficient-core count (x86-IHA)
     int lpeCores;
-    // Physical Efficient-core count (x86)
+    // Physical Efficient-core count (x86-IHA)
     int eCores;
-    // Physical Performance-core count (x86)
+    // Physical Performance-core count (x86-IHA)
     int pCores;
+    // Physical floating-point unit count (x86-CMT)
+    int fUnits;
+    // Physical integer unit count (x86-CMT)
+    int iUnits;
     // Logical thread count (RISC-V, x86)
     int threads;
     // Cache size in KB (x86)

@@ -48,7 +48,7 @@
 
 #include <getopt.h>
 
-enum { OPT_NO_ART = 256, OPT_NO_ESC, OPT_NO_IHA, OPT_NO_IP };
+enum { OPT_NO_ABD = 256, OPT_NO_ART, OPT_NO_ESC, OPT_NO_IHA, OPT_NO_IP };
 
 static const char *shortOpts = "ha::B::b::l::m::H::S::cCf::o::u::rsv";
 
@@ -66,6 +66,7 @@ static const struct option longOpts[] = {
     { "fields",     optional_argument,  0,  'f' },
     { "mode",       optional_argument,  0,  'o' },
     { "max-unit",   optional_argument,  0,  'u' },
+    { "no-abd",     no_argument,        0,  OPT_NO_ABD },
     { "no-art",     no_argument,        0,  OPT_NO_ART },
     { "no-esc",     no_argument,        0,  OPT_NO_ESC },
     { "no-iha",     no_argument,        0,  OPT_NO_IHA },
@@ -230,6 +231,13 @@ void showHelp(void)
     free(mode->str);
     free(mode);
 
+    WORD_WRAPPED *noAbd = wordWrap("    --no-abd      Disables AMD "
+        "Bulldozer family-specific core counting\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", noAbd->str);
+    free(noAbd->str);
+    free(noAbd);
+
     WORD_WRAPPED *noArt = wordWrap("    --no-art      Disables the SHORK "
         "ASCII art\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
     printf("%s", noArt->str);
@@ -244,8 +252,8 @@ void showHelp(void)
     free(noEsc);
 
     WORD_WRAPPED *noIha = wordWrap("    --no-iha      Disables Intel "
-        "Hybrid Architecture-specific core/thread counting\n",
-        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        "Hybrid Architecture-specific core counting\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
     printf("%s", noIha->str);
     free(noIha->str);
     free(noIha);
@@ -514,6 +522,10 @@ int main(int argc, char *argv[])
                 printf("ERROR: unrecognised unit \"%s\"\n", optarg);
                 return 1;
             }
+            break;
+
+        case OPT_NO_ABD:
+            CONFIG.showABD = 0;
             break;
 
         case OPT_NO_ART:
