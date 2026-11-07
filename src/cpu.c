@@ -2810,15 +2810,17 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     cpu->iUnits = cpu->threads;
                 }
 
-                // Zambezi (1), Trinity (16), Godavari (56)
-                if (cpu->model == 1 || cpu->model == 16 || cpu->model == 56)
+                // Zambezi (1), Trinity (16), Godavari (56), Carrizo (96)
+                if (cpu->model == 1 || cpu->model == 16 ||
+                    cpu->model == 56 || cpu->model == 96)
                 {
-                    // Some AMD As and FXs are reported with a physical ID
+                    // Some AMD APUs and FXs are reported with a physical ID
                     // count that starts at 1 instead of 0, potentially
                     // flagging it as  a multi-CPU config when it isn't...
                     // We can ensure that we aren't in such a config if the
                     // no. of unique physical IDs recorded is just 1.
-                    // See: AMD A10-5800K, AMD A10-7890K, AMD FX-8150
+                    // See: AMD A10-5800K, AMD A10-7890K,
+                    //      AMD Athlon X4 845, AMD FX-8150
                     if (cpu->physIDs.noUniquePhysIDs == 1 &&
                         cpu->physIDs.maxPhysID > 1)
                         cpu->physIDs.maxPhysID = 1;
