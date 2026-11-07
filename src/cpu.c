@@ -1043,7 +1043,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         GPU_FROM_CPU_NEEDLES[i]) + 1);
 
                     // Discard comma and after if present
-                    // See: AMD A4-9120e
+                    // See: AMD A4-9120e, AMD A9-9410, A10-7890K
                     char *commaNeedle = strchr(*gpuFromCPU, ',');
                     if (commaNeedle)
                         *commaNeedle = '\0';
@@ -1064,7 +1064,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     }
 
                     // Replace "RADEON" -> "Radeon"
-                    // See: AMD A4-9120e
+                    // See: AMD A4-9120e, AMD A9-9410
                     char *capsRadeonNeedle = strstr(*gpuFromCPU, "RADEON");
                     if (capsRadeonNeedle)
                         memcpy(capsRadeonNeedle, "Radeon", 6);

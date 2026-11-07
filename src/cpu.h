@@ -169,6 +169,7 @@ static const char *GPU_FROM_CPU_NEEDLES[] = {
     "with Radeon",
     "w/ Radeon",
     " RADEON",
+    " Radeon",
 };
 static const int GPU_FROM_CPU_NEEDLES_LEN = sizeof(GPU_FROM_CPU_NEEDLES) /
     sizeof(GPU_FROM_CPU_NEEDLES[0]);
