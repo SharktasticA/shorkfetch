@@ -136,18 +136,17 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
         char *at = hz;
         if (at > result && isalpha(*(at-1)))
             at--;
-        while (at > result && (isdigit(*(at-1)) || *(at-1) == '.'))
+        while (at > result && (isdigit(*(at-1)) || *(at-1) == '.' ||
+            *(at-1) == '+'))
             at--;
 
-        // Take into account possible " @ " or " " in front
+        // Take into account possible @ or " " in front
         if (at > result && *(at-1) == ' ')
-        {
             at--;
-            if (at > result && *(at-1) == '@')
-                at--;
-            if (at > result && *(at-1) == ' ')
-                at--;
-        }
+        if (at > result && *(at-1) == '@')
+            at--;
+        if (at > result && *(at-1) == ' ')
+            at--;
 
         char *leftBrac = strchr(hz + 2, '(');
         // If brackets for core/thread count present, selective removal
