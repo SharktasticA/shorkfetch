@@ -38,7 +38,7 @@ void testGetCPU(void)
     printf("## GET CPU TEST ##\n");
     printf("##################\n");
 
-    const int MAX_CPUINFOS = 550;
+    const int MAX_CPUINFOS = 600;
     char cpuinfos[MAX_CPUINFOS][PATH_MAX];
     int count = 0;
     int showRaw = 0;
@@ -99,8 +99,8 @@ void testGetCPU(void)
 
         if (!showRaw)
         {
-            int maxLeft = 40;
-            int maxRight = 52;
+            int maxLeft = 42;
+            int maxRight = 54;
             int colWidth = maxLeft + 1 + maxRight;
 
             int numCols;

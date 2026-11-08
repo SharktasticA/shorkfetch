@@ -92,22 +92,6 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
     result[inputSize - 1] = '\0';
     int strLen  = strlen(result);
 
-    // Collapse multiple contiguous spaces or tabs
-    char *src = result, *dst = result;
-    while (*src)
-    {
-        if (*src == ' ' || *src == '\t')
-        {
-            if (dst != result)
-                *dst++ = ' ';
-            while (*src == ' ' || *src == '\t')
-                src++;
-        }
-        else
-            *dst++ = *src++;
-    }
-    *dst = '\0';
-
     // Shorten " / " to "/"
     if (strstr(result, " / "))
     {
@@ -387,22 +371,6 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
     // Copy input string to result
     strncpy(result, input, inputSize - 1);
     result[inputSize - 1] = '\0';
-
-    // Collapse multiple contiguous spaces or tabs
-    char *src = result, *dst = result;
-    while (*src)
-    {
-        if (*src == ' ' || *src == '\t')
-        {
-            if (dst != result)
-                *dst++ = ' ';
-            while (*src == ' ' || *src == '\t')
-                src++;
-        }
-        else
-            *dst++ = *src++;
-    }
-    *dst = '\0';
 
     return result;
 }
@@ -1025,13 +993,24 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 
 
-    // Trim trailing whitespace from model name
-    if (result->name)
+    // Collapse multiple contiguous spaces or tabs
+    char *src = result->name, *dst = result->name;
+    while (*src)
     {
-        int len = strlen(result->name);
-        while (len > 0 && isspace((unsigned char)result->name[len - 1]))
-            result->name[--len] = '\0';
+        if (*src == ' ' || *src == '\t')
+        {
+            if (dst != result->name)
+                *dst++ = ' ';
+            while (*src == ' ' || *src == '\t')
+                src++;
+        }
+        else
+            *dst++ = *src++;
     }
+    *dst = '\0';
+    // Remove trailing space if present
+    if (dst != result->name && dst[-1] == ' ')
+        dst[-1] = '\0';
 
 
 
@@ -1057,7 +1036,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         GPU_FROM_CPU_NEEDLES[i]) + 1);
 
                     // Discard comma and after if present
-                    // See: AMD A4-9120e, AMD A9-9410, A10-7890K
+                    // See: A4-9120e, A9-9410, A10-7890K
                     char *commaNeedle = strchr(*gpuFromCPU, ',');
                     if (commaNeedle)
                         *commaNeedle = '\0';
@@ -1078,7 +1057,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     }
 
                     // Replace "RADEON" -> "Radeon"
-                    // See: AMD A4-9120e, AMD A9-9410
+                    // See: A4-9120e, A9-9410
                     char *capsRadeonNeedle = strstr(*gpuFromCPU, "RADEON");
                     if (capsRadeonNeedle)
                         memcpy(capsRadeonNeedle, "Radeon", 6);
@@ -2049,7 +2028,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     cpu->threads == -1)
                     cpu->cores = cpu->threads = 1;
 
-                // Klamath & Deschutes (OverDrive)
+                // Klamath and Deschutes (OverDrive)
                 if (cpu->model == 3)
                 {
                     // Pentium II OverDrive is actually a Deschutes core
@@ -2174,10 +2153,10 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         char *tmp = NULL;
                         if (cpu->cores == 1 || cpu->index == 1)
                             tmp = findReplace(cpu->name, NAME_LEN,
-                                "CPU           ", "Core Solo ");
+                                "CPU ", "Core Solo ");
                         else if (cpu->cores == 2 || cpu->index == 2)
                             tmp = findReplace(cpu->name, NAME_LEN,
-                            "CPU           ", "Core Duo ");
+                            "CPU ", "Core Duo ");
 
                         if (tmp)
                         {
@@ -2209,10 +2188,10 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         // Some Merom-based Pentium Dual-Cores have a rogue
                         // "Dual" in their name
                         // See: Pentium T3200
-                        if (strstr(cpu->name, "Dual  CPU"))
+                        if (strstr(cpu->name, "Dual CPU"))
                         {
                             char *tmp = findReplace(cpu->name, NAME_LEN,
-                                "Dual  CPU", " ");
+                                " Dual CPU", "");
                             if (tmp)
                             {
                                 free(cpu->name);
@@ -2225,7 +2204,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         else if (strstr(cpu->name, "2 CPU"))
                         {
                             char *tmp = findReplace(cpu->name, NAME_LEN,
-                                "CPU         ", "Duo ");
+                                "CPU ", "Duo ");
                             if (tmp)
                             {
                                 free(cpu->name);
@@ -2238,11 +2217,11 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         // See: Core 2 Duo E4400, Core 2 Duo E6300
                         if (cpu->stepping == 2)
                         {
-                            if (strstr(cpu->name, "Duo  4") ||
-                            strstr(cpu->name, "Duo  6"))
+                            if (strstr(cpu->name, "Duo 4") ||
+                                strstr(cpu->name, "Duo 6"))
                             {
                                 char *tmp = findReplace(cpu->name, NAME_LEN,
-                                    "Duo  ", "Duo E");
+                                    "Duo ", "Duo E");
                                 if (tmp)
                                 {
                                     free(cpu->name);
@@ -2255,28 +2234,30 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 // Penryn
                 else if (cpu->model == 23)
                 {
-                    if (cpu->stepping == 10)
+                    if (cpu->stepping == 6 || cpu->stepping == 10)
                     {
                         // ULV Pentium Dual-Core Mobile lacks both the
                         // "Pentium" branding and the "S" in their model
                         // number
                         // See: Pentium SU2700, Pentium SU4100
-                        if (strstr(cpu->name, "Intel(R) CPU           U"))
+                        if (strstr(cpu->name, "Intel(R) CPU U"))
                         {
                             char *tmp = findReplace(cpu->name, NAME_LEN,
-                                "(R) CPU           ", " Pentium S");
+                                "(R) CPU ", " Pentium S");
                             if (tmp)
                             {
                                 free(cpu->name);
                                 cpu->name = tmp;
                             }
                         }
-                        // LV Core 2 Duo lacks the "S" in their model number
-                        // See: Core 2 Duo SL9600
-                        else if (strstr(cpu->name, "Duo CPU     L"))
+                        // LV and ULV Core 2 Duo lacks the "S" in their
+                        // model number
+                        // See: Core 2 Duo SL9600, Core 2 Duo SU9300
+                        else if (strstr(cpu->name, "Duo CPU L") ||
+                            strstr(cpu->name, "Duo CPU U"))
                         {
                             char *tmp = findReplace(cpu->name, NAME_LEN,
-                                "CPU     ", "S");
+                                "CPU ", "S");
                             if (tmp)
                             {
                                 free(cpu->name);
@@ -2286,10 +2267,25 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     }
                 }
                 // Nehalem (Bloomfield (26), Clarksfield/Lynnfield (30))
-                // & Westmere (Arrandale/Clarkdale (37), Gulftown (44))
+                // and Westmere (Arrandale/Clarkdale (37), Gulftown (44))
                 else if (cpu->model == 26 || cpu->model == 30 ||
                     cpu->model == 37 || cpu->model == 44)
                 {
+                    // Bloomfield Core i7 Extremes do not call themselves
+                    // "Extreme"
+                    // See: Core i7-965 Extreme, Core i7-975 Extreme
+                    if (cpu->model == 26 && (strstr(cpu->name, "965") ||
+                        strstr(cpu->name, "975")))
+                    {
+                        char *needle = strrchr(cpu->name, '@');
+                        if (needle)
+                        {
+                            char *p = needle - 1;
+                            while (p > cpu->name && *p == ' ')
+                                p--;
+                            strcpy(p + 1, " Extreme");
+                        }
+                    }
                     // If present at all, Nehalem/Westmere has what should
                     // be the suffix as the prefix *and* Clarksfield
                     // specifically lacks the "M" to denote those are mobile
@@ -2297,31 +2293,31 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // See: Core i3-380UM, Core i5-540M, Core i5-750,
                     //      Core i7-640LM, Core i7-740QM, Core i7-860S,
                     //      Core i7-920XM, Core i7-980, Core i7-990X
-                    if ((cpu->stepping == 2 || cpu->stepping == 5) &&
+                    else if ((cpu->stepping == 2 || cpu->stepping == 5) &&
                         strstr(cpu->name, "Core"))
                     {
                         const char *suffix = NULL;
-                        if (strstr(cpu->name, "       M"))
+                        if (strstr(cpu->name, " M"))
                             suffix = "M";
-                        else if (strstr(cpu->name, "       Q"))
+                        else if (strstr(cpu->name, " Q"))
                             suffix = "QM";
-                        else if (strstr(cpu->name, "       X"))
+                        else if (strstr(cpu->name, " X"))
                             suffix = (cpu->model == 30) ? "XM" :
                                 (cpu->model == 44) ? "X" : suffix;
-                        else if (strstr(cpu->name, "       S"))
+                        else if (strstr(cpu->name, " S"))
                             suffix = "S";
-                        else if (strstr(cpu->name, "       K"))
+                        else if (strstr(cpu->name, " K"))
                             suffix = "K";
-                        else if (strstr(cpu->name, "       L"))
+                        else if (strstr(cpu->name, " L"))
                             suffix = "LM";
-                        else if (strstr(cpu->name, "       U"))
+                        else if (strstr(cpu->name, " U"))
                             suffix = "UM";
 
                         if (suffix)
                         {
                             // Remove the incorrect prefix
                             char search[32];
-                            snprintf(search, 32, " CPU       %c ",
+                            snprintf(search, 32, " CPU %c ",
                                 suffix[0]);
                             char *tmp = findReplace(cpu->name, NAME_LEN,
                                 search, "-");
@@ -2342,34 +2338,18 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                                 strcpy(p + 1, suffix);
                             }
                         }
-                        // If no suffix was found/chosen, we still need to
-                        // close the gap between "iX" and the model number
-                        else if (strstr(cpu->name, ") i") &&
-                            strstr(cpu->name, " CPU         "))
-                        {
-                            char *tmp = findReplace(cpu->name, NAME_LEN,
-                                " CPU         ", "-");
-                            if (tmp)
-                            {
-                                free(cpu->name);
-                                cpu->name = tmp;
-                            }
-                        }
                     }
 
-                    // Bloomfield Core i7 Extremes do not call themselves
-                    // "Extreme"
-                    // See: Core i7-965 Extreme Edition (etc.)
-                    if (cpu->model == 26 && (strstr(cpu->name, "965") ||
-                        strstr(cpu->name, "975")))
+                    // Close the gap between "iX" and the model number
+                    if (strstr(cpu->name, ") i") &&
+                        strstr(cpu->name, " CPU "))
                     {
-                        char *needle = strrchr(cpu->name, '@');
-                        if (needle)
+                        char *tmp = findReplace(cpu->name, NAME_LEN,
+                            " CPU ", "-");
+                        if (tmp)
                         {
-                            char *p = needle - 1;
-                            while (p > cpu->name && *p == ' ')
-                                p--;
-                            strcpy(p + 1, " Extreme");
+                            free(cpu->name);
+                            cpu->name = tmp;
                         }
                     }
                 }
@@ -2828,8 +2808,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // flagging it as  a multi-CPU config when it isn't...
                     // We can ensure that we aren't in such a config if the
                     // no. of unique physical IDs recorded is just 1.
-                    // See: AMD A10-5800K, AMD A10-7890K,
-                    //      AMD Athlon X4 845, AMD FX-8150
+                    // See: A10-5800K, A10-7890K, Athlon X4 845, FX-8150
                     if (cpu->physIDs.noUniquePhysIDs == 1 &&
                         cpu->physIDs.maxPhysID > 1)
                         cpu->physIDs.maxPhysID = 1;
@@ -2841,7 +2820,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // report "Radeon" in their CPU model name like other
                     // AMD APUs. If not already used, we use gpuFromCPU to
                     // report this in case it's needed later.
-                    // See: AMD Opteron X3418
+                    // See: Opteron X3418
                     if (!(*gpuFromCPU) && strstr(cpu->name, "APU"))
                         (*gpuFromCPU) = strdup("AMD Radeon");
                 }
