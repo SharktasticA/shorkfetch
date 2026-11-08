@@ -109,6 +109,10 @@ typedef struct {
     char *vendor;
     // Model or architecture name (all)
     char *name;
+#ifndef X86_ONLY
+    // Part name (ARM)
+    char *part;
+#endif
     // Family number (x86)
     int family;
     // Model number (x86)
@@ -151,6 +155,12 @@ typedef struct {
     int virtAddrSize;
 } CPU_DATA;
 
+// Maps an unsigned ID number to some name
+typedef struct {
+    unsigned id;
+    const char *name;
+} ID_NAME;
+
 // Maps a canonical/base CPU vendor name to an alias
 typedef struct {
     const char *canonical;
@@ -161,7 +171,70 @@ typedef struct {
 
 #ifndef X86_ONLY
 
-extern const char *ARM_IMPLEMENTERS[];
+// Hardcoded Apple M-series ARM CPU part numbers to allow specific model
+// identification
+// Sources: * https://github.com/AsahiLinux/m1n1/blob/main/src/midr.h
+//          * https://asahilinux.org/docs/hw/soc/soc-codenames/
+static const ID_NAME APPLE_M_PARTS[] = {
+    { 0x22, "M1" },             // T8103 Icestorm
+    { 0x23, "M1" },             // T8103 Firestorm
+    { 0x24, "M1 Pro" },         // T6000 Icestorm
+    { 0x25, "M1 Pro" },         // T6000 Firestorm
+    { 0x28, "M1 Max/Ultra" },   // T6001/T6002 Icestorm
+    { 0x29, "M1 Max/Ultra" },   // T6001/T6002 Firestorm
+    { 0x32, "M2" },             // T8112 Blizzard
+    { 0x33, "M2" },             // T8112 Avalanche
+    { 0x34, "M2 Pro" },         // T6020 Blizzard
+    { 0x35, "M2 Pro" },         // T6020 Avalanche
+    { 0x38, "M2 Max/Ultra" },   // T6021/T6022 Blizzard
+    { 0x39, "M2 Max/Ultra" },   // T6021/T6022 Avalanche
+    { 0x42, "M3" },             // T8122 Sawtooth
+    { 0x43, "M3" },             // T8122 Everest
+    { 0x44, "M3 Pro" },         // T6030 Sawtooth
+    { 0x45, "M3 Pro" },         // T6030 Everest
+    { 0x48, "M3 Max" },         // T6031/T6034 Sawtooth
+    { 0x49, "M3 Max" },         // T6031/T6034 Everest
+    { 0x52, "M4" },             // T8132 Donan E-core
+    { 0x53, "M4" },             // T8132 Donan P-core
+    { 0x54, "M4 Pro" },         // T6040 Brava Chop E-core
+    { 0x55, "M4 Pro" },         // T6040 Brava Chop P-core
+    { 0x58, "M4 Max" },         // T6041 Brava E-core
+    { 0x59, "M4 Max" },         // T6041 Brava P-core
+    { 0x62, "M5" },             // T8142 Hidra E-core
+    { 0x63, "M5" },             // T8142 Hidra P-core
+    { 0x64, "M5 Pro" },         // T6050 Sotra M-core
+    { 0x65, "M5 Pro" },         // T6050 Sotra P-core
+    { 0x68, "M5 Max" },         // T6051 Sotrac M-core
+    { 0x69, "M5 Max" }          // T6051 Sotrac P-core
+};
+static const int APPLE_M_PARTS_LEN = sizeof(APPLE_M_PARTS) /
+    sizeof(APPLE_M_PARTS[0]);
+
+// Hardcoded ARM CPU implementer values to allow basic ARM CPU vendor
+// identification
+static const ID_NAME ARM_IMPLEMENTERS[] = {
+    { 0x00, "Reserved" },
+    { 0x41, "Arm" },
+    { 0x42, "Broadcom" },
+    { 0x43, "Cavium" },
+    { 0x44, "DEC" },
+    { 0x46, "Fujitsu" },
+    { 0x48, "HiSilicon" },
+    { 0x49, "Infineon" },
+    { 0x4D, "Motorola/Freescale" },
+    { 0x4E, "NVIDIA" },
+    { 0x50, "AMCC/Ampere" },
+    { 0x51, "Qualcomm" },
+    { 0x56, "Marvell" },
+    { 0x61, "Apple" },
+    { 0x66, "Faraday" },
+    { 0x69, "Intel" },
+    { 0x6D, "Microsoft" },
+    { 0x70, "Phytium" },
+    { 0xC0, "Ampere" }
+};
+static const int ARM_IMPLEMENTERS_LEN = sizeof(ARM_IMPLEMENTERS) /
+    sizeof(ARM_IMPLEMENTERS[0]);
 
 #endif
 

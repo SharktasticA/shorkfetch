@@ -38,36 +38,6 @@
 
 
 
-#ifndef X86_ONLY
-
-// Hardcoded ARM CPU implementer values to allow basic ARM CPU vendor
-// identification
-const char *ARM_IMPLEMENTERS[193] = {
-    [0x00] = "Reserved",
-    [0x41] = "Arm",
-    [0x42] = "Broadcom",
-    [0x43] = "Cavium",
-    [0x44] = "DEC",
-    [0x46] = "Fujitsu",
-    [0x48] = "HiSilicon",
-    [0x49] = "Infineon",
-    [0x4D] = "Motorola/Freescale",
-    [0x4E] = "NVIDIA",
-    [0x50] = "AMCC/Ampere",
-    [0x51] = "Qualcomm",
-    [0x56] = "Marvell",
-    [0x61] = "Apple",
-    [0x66] = "Faraday",
-    [0x69] = "Intel",
-    [0x6D] = "Microsoft",
-    [0x70] = "Phytium",
-    [0xC0] = "Ampere"
-};
-
-#endif
-
-
-
 #ifndef NO_STR_CLEANING
 
 /**
@@ -475,22 +445,25 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 char *extract = extractFromPoint(buffer, 16, ':');
                 if (extract)
                 {
+                    long val = strtol(extract, NULL, 0);
+                    int i;
+
                     if (result->arch == CPU_ARCH_UNKNOWN)
                         result->arch = ARM;
 
-                    // Try to resolve the implementer name from the received
-                    // hex value
-                    char *end = NULL;
-                    long val = strtol(extract, &end, 0);
-                    if (end != extract && val >= 0 && val <= 193 &&
-                        ARM_IMPLEMENTERS[val])
+                    for (i = 0; i < ARM_IMPLEMENTERS_LEN; i++)
                     {
-                        result->vendor = malloc(VENDOR_LEN);
-                        strncpy(result->vendor, ARM_IMPLEMENTERS[val],
-                            VENDOR_LEN - 1);
-                        result->vendor[VENDOR_LEN - 1] = '\0';
-                        free(extract);
+                        if (ARM_IMPLEMENTERS[i].id == val)
+                        {
+                            result->vendor = malloc(VENDOR_LEN);
+                            strncpy(result->vendor,
+                                ARM_IMPLEMENTERS[i].name, VENDOR_LEN - 1);
+                            result->vendor[VENDOR_LEN - 1] = '\0';
+                            break;
+                        }
                     }
+
+                    free(extract);
                 }
             }
 #endif
@@ -558,6 +531,37 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->name = malloc(NAME_LEN);
                     strncpy(result->name, extract, NAME_LEN - 1);
                     result->name[NAME_LEN - 1] = '\0';
+                    free(extract);
+                }
+            }
+            // ARM: get part name
+            else if (!result->part &&
+                strncasecmp(buffer, "CPU part", 8) == 0)
+            {
+                char *extract = extractFromPoint(buffer, 9, ':');
+                if (extract)
+                {
+                    if (result->vendor &&
+                        strcmp(result->vendor, "Apple") == 0)
+                    {
+                        long val = strtol(extract, NULL, 0);
+                        int i;
+                        for (i = 0; i < APPLE_M_PARTS_LEN; i++)
+                        {
+                            if (APPLE_M_PARTS[i].id == val)
+                            {
+                                result->part = malloc(NAME_LEN);
+                                if (result->part)
+                                {
+                                    strncpy(result->part,
+                                        APPLE_M_PARTS[i].name,
+                                        NAME_LEN - 1);
+                                    result->part[NAME_LEN - 1] = '\0';
+                                }
+                                break;
+                            }
+                        }
+                    }
                     free(extract);
                 }
             }
@@ -981,6 +985,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         free(result->uarch);
         free(result->platform);
         free(result->machine);
+        free(result->part);
 #endif
         free(result->vendor);
         free(result->name);
@@ -988,10 +993,10 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         return NULL;
     }
 
+
+
     if (CONFIG.showIHA && result->arch == X86)
         getIntelHybridCPU(result);
-
-
 
     // Collapse multiple contiguous spaces or tabs
     if (result->name && result->name[0] != '\0')
@@ -1014,8 +1019,6 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
         if (dst != result->name && dst[-1] == ' ')
             dst[-1] = '\0';
     }
-
-
 
 #ifndef NO_STR_CLEANING
 
@@ -1391,8 +1394,17 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
         // it...
         if (ignoreName)
         {
+            // ...with the vendor and part name
+            if (cpu->vendor && cpu->part && cpu->part[0] != '\0')
+            {
+                if (!cpu->name)
+                    cpu->name = malloc(NAME_LEN);
+                if (cpu->name)
+                    snprintf(cpu->name, NAME_LEN, "%s %s", cpu->vendor,
+                        cpu->part);
+            }
             // ...with the processor name
-            if (!ignoreProcessor)
+            else if (!ignoreProcessor)
             {
                 if (!cpu->name)
                     cpu->name = malloc(NAME_LEN);
@@ -1421,6 +1433,11 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 cpu->name = tmp;
             }
 #endif
+
+            // Trim trailing spaces leftover from bracket removal (etc.)
+            size_t len = strlen(cpu->name);
+            while (len > 0 && cpu->name[len - 1] == ' ')
+                cpu->name[--len] = '\0';
 
             // If absent, add the revision number in
             if (cpu->revisionNo != -1 && !strstr(cpu->name, " rev "))

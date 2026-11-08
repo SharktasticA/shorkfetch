@@ -1635,6 +1635,7 @@ int main(int argc, char *argv[])
         free(cpu->uarch);
         free(cpu->platform);
         free(cpu->machine);
+        free(cpu->part);
 #endif
         free(cpu->vendor);
         free(cpu->name);

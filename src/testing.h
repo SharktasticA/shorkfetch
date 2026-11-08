@@ -151,20 +151,23 @@ void testGetCPU(void)
             else
                 printf("    arch:               CPU_ARCH_UNKNOWN\n");
 #ifndef X86_ONLY
-            printf("    uarch:              %s\n", cpu->uarch ? cpu->uarch : "(null)");
+            printf("    uarch:              \"%s\"\n", cpu->uarch ? cpu->uarch : "(null)");
 #endif
-            printf("    vendor:             %s\n", cpu->vendor ? cpu->vendor : "(null)");
+            printf("    vendor:             \"%s\"\n", cpu->vendor ? cpu->vendor : "(null)");
 #ifndef X86_ONLY
-            printf("    platform:           %s\n", cpu->platform ? cpu->platform : "(null)");
-            printf("    machine:            %s\n", cpu->machine ? cpu->machine : "(null)");
+            printf("    platform:           \"%s\"\n", cpu->platform ? cpu->platform : "(null)");
+            printf("    machine:            \"%s\"\n", cpu->machine ? cpu->machine : "(null)");
 #endif
             printf("    name:               \"%s\"\n", cpu->name ? cpu->name : "(null)");
+#ifndef X86_ONLY
+            printf("    part:               \"%s\"\n", cpu->part ? cpu->part : "(null)");
+#endif
             printf("    family:             %d\n", cpu->family);
             printf("    model:              %d\n", cpu->model);
             printf("    stepping:           %d\n", cpu->stepping);
 #ifndef X86_ONLY
             printf("    revisionNo:         %d\n", cpu->revisionNo);
-            printf("    revisionStr:        %s\n", cpu->revisionStr);
+            printf("    revisionStr:        \"%s\"\n", cpu->revisionStr ? cpu->revisionStr : "(null)");
 #endif
             printf("    freq:               %.0f\n", cpu->freq);
             printf("    noUniquePhysIDs:    %d\n", cpu->physIDs.noUniquePhysIDs);
@@ -178,7 +181,7 @@ void testGetCPU(void)
             printf("    iUnits:             %d\n", cpu->iUnits);
             printf("    threads:            %d\n", cpu->threads);
             printf("    cacheSize:          %d\n", cpu->cacheSize);
-            printf("    flags:              %s\n", cpu->flags);
+            printf("    flags:              \"%s\"\n", cpu->flags);
             printf("    physAddrSize:       %d\n", cpu->physAddrSize);
             printf("    virtAddrSize:       %d\n", cpu->virtAddrSize);
         }
@@ -188,6 +191,7 @@ void testGetCPU(void)
         free(cpu->uarch);
         free(cpu->platform);
         free(cpu->machine);
+        free(cpu->part);
 #endif
         free(cpu->vendor);
         free(cpu->name);
