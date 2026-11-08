@@ -994,23 +994,26 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 
     // Collapse multiple contiguous spaces or tabs
-    char *src = result->name, *dst = result->name;
-    while (*src)
+    if (result->name && result->name[0] != '\0')
     {
-        if (*src == ' ' || *src == '\t')
+        char *src = result->name, *dst = result->name;
+        while (*src)
         {
-            if (dst != result->name)
-                *dst++ = ' ';
-            while (*src == ' ' || *src == '\t')
-                src++;
+            if (*src == ' ' || *src == '\t')
+            {
+                if (dst != result->name)
+                    *dst++ = ' ';
+                while (*src == ' ' || *src == '\t')
+                    src++;
+            }
+            else
+                *dst++ = *src++;
         }
-        else
-            *dst++ = *src++;
+        *dst = '\0';
+        // Remove trailing space if present
+        if (dst != result->name && dst[-1] == ' ')
+            dst[-1] = '\0';
     }
-    *dst = '\0';
-    // Remove trailing space if present
-    if (dst != result->name && dst[-1] == ' ')
-        dst[-1] = '\0';
 
 
 
