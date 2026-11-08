@@ -130,6 +130,7 @@ static const char *DELETIONS[] =
     "Genuine ",
     " Graphics Adapter",
     " Ltd.",
+    " Mobile Technology",               // For AMD Turion 64 Mobile
     " processor",
     " Processor",
     " SOC",
