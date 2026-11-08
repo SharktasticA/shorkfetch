@@ -182,8 +182,9 @@ static const int IDT_REPLACES_LEN = sizeof(IDT_REPLACES) /
 
 
 static const struct REPLACEMENT VIA_REPLACES[] = {
-    { "Samuel", "Cyrix III",    0 },
-    { "Esther", "C7",           0 }     // See VIA C7-M (6-10-9)
+    { "Samuel",     "Cyrix III",    0 },
+    { "Nehemiah",   "C3/Eden-N",    0 },    // See VIA C3
+    { "Esther",     "C7",           0 }     // See VIA C7-M (6-10-9)
 };
 static const int VIA_REPLACES_LEN = sizeof(VIA_REPLACES) /
     sizeof(VIA_REPLACES[0]);
