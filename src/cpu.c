@@ -90,6 +90,11 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
         char *at = hz;
         if (at > result && isalpha(*(at-1)))
             at--;
+
+        // Allow a space between the number and the unit
+        if (at > result && *(at-1) == ' ')
+            at--;
+
         while (at > result && (isdigit(*(at-1)) || *(at-1) == '.' ||
             *(at-1) == '+'))
             at--;
@@ -330,6 +335,8 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
 
 char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
 {
+    (void)arch;
+
     if (!input || inputSize < 2)
         return strdup("");
 
@@ -1088,6 +1095,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 #endif
 
+    (void)gpuFromCPU;
     return result;
 }
 

@@ -600,6 +600,8 @@ char *cleanGPUName(const char *vendor, const char *device,
 char *cleanGPUName(const char *vendor, const char *device,
     const int isGPUFromCPU)
 {
+    (void)isGPUFromCPU;
+
     if (!vendor || !device)
         return strdup("");
 
