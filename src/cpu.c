@@ -1005,7 +1005,44 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
     if (CONFIG.showIHA && result->arch == X86)
         getIntelHybridCPU(result);
 
+    // Remove possible invisible word joiner characters
+    // See: AMD E2-1800
+    if (result->name)
+    {
+        char *src = result->name, *dst = result->name;
+        while (*src)
+        {
+            if ((unsigned char)src[0] == 0xE2 &&
+                (unsigned char)src[1] == 0x81 &&
+                (unsigned char)src[2] == 0xA0)
+                src += 3;
+            else
+                *dst++ = *src++;
+        }
+        *dst = '\0';
+    }
+
     // Collapse multiple contiguous spaces or tabs
+    if (result->vendor && result->vendor[0] != '\0')
+    {
+        char *src = result->vendor, *dst = result->vendor;
+        while (*src)
+        {
+            if (*src == ' ' || *src == '\t')
+            {
+                if (dst != result->vendor)
+                    *dst++ = ' ';
+                while (*src == ' ' || *src == '\t')
+                    src++;
+            }
+            else
+                *dst++ = *src++;
+        }
+        *dst = '\0';
+        // Remove trailing space if present
+        if (dst != result->vendor && dst[-1] == ' ')
+            dst[-1] = '\0';
+    }
     if (result->name && result->name[0] != '\0')
     {
         char *src = result->name, *dst = result->name;
@@ -1441,11 +1478,6 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 cpu->name = tmp;
             }
 #endif
-
-            // Trim trailing spaces leftover from bracket removal (etc.)
-            size_t len = strlen(cpu->name);
-            while (len > 0 && cpu->name[len - 1] == ' ')
-                cpu->name[--len] = '\0';
 
             // If absent, add the revision number in
             if (cpu->revisionNo != -1 && !strstr(cpu->name, " rev "))
@@ -2423,7 +2455,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         if (strstr(cpu->name, "E31"))
                         {
                             char *tmp = findReplace(cpu->name, NAME_LEN,
-                                "E31", " E3-1");
+                                "E31", "E3-1");
                             if (tmp)
                             {
                                 free(cpu->name);
@@ -2599,22 +2631,22 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // Willamette
                     if (cpu->model == 0 || cpu->model == 1)
                         tmp = findReplace(cpu->name, NAME_LEN, "CPU",
-                            " (Willamette)");
+                            "(Willamette)");
                     // Northwood
                     else if (cpu->model == 2)
                         tmp = findReplace(cpu->name, NAME_LEN, "CPU",
-                            " (Northwood)");
+                            "(Northwood)");
                     // Prescott
                     // See: B80546PE0561M, RK80546PG0881M, RK80546PG0961M
                     else if (cpu->model == 3 || cpu->model == 4)
                         tmp = findReplace(cpu->name, NAME_LEN, "CPU",
-                            " (Prescott)");
+                            "(Prescott)");
                     // Cedar Mill
                     // See: Pentium 4 631 (5), Pentium 4 641 (2),
                     //      Pentium 4 651 (4)
                     else if (cpu->model == 6)
                         tmp = findReplace(cpu->name, NAME_LEN, "CPU",
-                            " (Cedar Mill)");
+                            "(Cedar Mill)");
 
                     if (tmp)
                     {
