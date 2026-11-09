@@ -1333,7 +1333,7 @@ int getIntelHybridCPU(CPU_DATA *cpu)
 
         if (i == 0)
             cpu->lpeCores = cores;
-        if (i == 1)
+        else if (i == 1)
             cpu->eCores = cores;
         else
             cpu->pCores = cores;
