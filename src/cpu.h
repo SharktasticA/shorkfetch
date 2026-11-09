@@ -25,7 +25,7 @@
 // unreliable and should be ignored
 #define IGNORE_UNIQUE_PHYS_IDS  -1
 // CPU_DATA.flags string length
-#define FLAGS_LEN               1536
+#define FLAGS_LEN               2048
 // CPU_DATA.machine string length
 #define MACHINE_LEN             128
 // Highest processor index no. to try processing

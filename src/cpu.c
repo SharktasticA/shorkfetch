@@ -247,6 +247,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
+                    replaces++;
                 }
             }
         }
@@ -283,6 +284,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
+                    replaces++;
                 }
             }
         }
@@ -1171,6 +1173,7 @@ int getIntelHybridCPU(CPU_DATA *cpu)
     if (glob("/sys/devices/system/cpu/cpufreq/policy*", 0, NULL, &g) == 0)
     {
         cpu->threads = cpu->index = g.gl_pathc;
+        globfree(&g);
 
         const int bufferSize = 9;
         // The frequency for each thread type
@@ -2920,7 +2923,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     }
                 }
 
-                // Zambezi (1), Trinity (16), Godavari (56), Carrizo (96)
+                // Zambezi (1), Trinity (16), Godavari (56), Toronto/Carrizo
+                // (96)
                 if (cpu->model == 1 || cpu->model == 16 ||
                     cpu->model == 56 || cpu->model == 96)
                 {
@@ -2933,16 +2937,14 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     if (cpu->physIDs.noUniquePhysIDs == 1 &&
                         cpu->physIDs.maxPhysID > 1)
                         cpu->physIDs.maxPhysID = 1;
-                }
-                // Toronto
-                else if (cpu->model == 96)
-                {
+
                     // Excavator-based Opterons are APUs, but they don't
                     // report "Radeon" in their CPU model name like other
                     // AMD APUs. If not already used, we use gpuFromCPU to
                     // report this in case it's needed later.
                     // See: Opteron X3418
-                    if (!(*gpuFromCPU) && strstr(cpu->name, "APU"))
+                    if (cpu->model == 96 && strstr(cpu->name, "Opteron") &&
+                        !(*gpuFromCPU) && strstr(cpu->name, "APU"))
                         (*gpuFromCPU) = strdup("AMD Radeon");
                 }
             }
