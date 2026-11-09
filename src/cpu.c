@@ -147,57 +147,31 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
                 }
             }
 
+            // Remove possible "-Core", " Cores", etc. substrings from Zen
+            // model name
             if (strstr(result, "Ryzen") || strstr(result, "EPYC"))
             {
-                // Dynamically generate substrings like "16-Core" or "16
-                // Cores" to find and remove from AMD Ryzen or EPYC CPU
-                // names
-                int done = 0;
-                for (int i = 2; i <= 192; i += 2)
+                char *needle = strstr(result, "-Core");
+                if (!needle)
+                    needle = strstr(result, " Cores");
+
+                if (needle)
                 {
-                    if (done == 1)
-                        break;
+                    // Walk back over the digits
+                    char *start = needle;
+                    while (start > result &&
+                        isdigit((unsigned char)*(start - 1)))
+                        start--;
 
-                    char *withDash = malloc(10);
-                    char *withSpace = malloc(11);
-                    if (!withDash || !withSpace) 
+                    // If there were digits and a space before them, erase
+                    // it all
+                    if (start != needle && start > result &&
+                        *(start - 1) == ' ')
                     {
-                        free(withDash);
-                        free(withSpace);
-                        continue;
+                        char *end = needle + (*needle == '-' ? 5 : 6);
+                        memmove(start - 1, end, strlen(end) + 1);
                     }
-                    
-                    snprintf(withDash, 10, " %d%s", i, "-Core");
-                    snprintf(withSpace, 11, " %d%s", i, " Cores");
-
-                    if (strstr(result, withDash))
-                    {
-                        done = 1;
-                        char *tmp = findErase(result, inputSize, withDash);
-                        strncpy(result, tmp, inputSize - 1);
-                        result[inputSize - 1] = '\0';
-                        free(tmp);
-                    }
-                    else if (strstr(result, withSpace))
-                    {
-                        done = 1;
-                        char *tmp = findErase(result, inputSize, withSpace);
-                        strncpy(result, tmp, inputSize - 1);
-                        result[inputSize - 1] = '\0';
-                        free(tmp);
-                    }
-
-                    free(withDash);
-                    free(withSpace);
                 }
-            }
-            else if (strstr(result, "AMD [AMD/ATI]"))
-            {
-                char *tmp = findReplace(result, inputSize, "AMD [AMD/ATI]",
-                    "AMD/ATI");
-                strncpy(result, tmp, inputSize - 1);
-                result[inputSize - 1] = '\0';
-                free(tmp);
             }
         }
         // Apply Intel-specific replacements
