@@ -1816,7 +1816,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 }
             }
         }
-        // Pentium/P5 and K6
+        // Pentium/P5, K6 and Quark
         else if (cpu->family == 5)
         {
             if (cpu->vendor[0] == 'A')
@@ -1909,6 +1909,17 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     char *tmp = malloc(NAME_LEN);
                     snprintf(tmp, NAME_LEN,
                         "Intel Pentium OverDrive (P54C)");
+                    free(cpu->name);
+                    cpu->name = tmp;
+                }
+                // Model 9 @ ~400MHz with no meaningful name is most likely
+                // an Intel Quark X10xx series, so we override it.
+                // See: Intel Quark X1000
+                else if (cpu->model == 9 && cpu->freq >= 380 &&
+                    cpu->freq <= 420 && strstr(cpu->name, "05/09"))
+                {
+                    char *tmp = malloc(NAME_LEN);
+                    snprintf(tmp, NAME_LEN, "Intel Quark X10xx");
                     free(cpu->name);
                     cpu->name = tmp;
                 }
