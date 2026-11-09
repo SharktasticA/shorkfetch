@@ -1081,9 +1081,17 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 if (*gpuFromCPU)
                 {
                     const char *gpuVendor = "AMD";
+                    const char *gpuStart = found +
+                        (strchr(GPU_FROM_CPU_NEEDLES[i], ' ') -
+                        GPU_FROM_CPU_NEEDLES[i]) + 1;
+
+                    // In case the name we're about to extract already says
+                    // "AMD"
+                    if (strncmp(gpuStart, "AMD ", 4) == 0)
+                        gpuStart += 4;
+
                     snprintf(*gpuFromCPU, GPU_NAME_LEN, "%s %s", gpuVendor,
-                        found + (strchr(GPU_FROM_CPU_NEEDLES[i], ' ') -
-                        GPU_FROM_CPU_NEEDLES[i]) + 1);
+                        gpuStart);
 
                     // Discard comma and after if present
                     // See: A4-9120e, A9-9410, A10-7890K
