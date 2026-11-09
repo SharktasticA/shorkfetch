@@ -2654,9 +2654,9 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         cpu->name = tmp;
                     }
                 }
-                // Ditto for non-Extreme Pentium D
+                // Ditto for Pentium D
                 else if (!strstr(cpu->name, ") X") && cpu->cores == 2 &&
-                    cpu->model != 4 && cpu->stepping != 8)
+                    cpu->stepping != 8)
                 {
                     // Non-Extreme (no Hyper-Threading)
                     if (cpu->cores == cpu->threads)
