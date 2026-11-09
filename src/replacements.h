@@ -173,10 +173,7 @@ static const int INTEL_REPLACES_LEN = sizeof(INTEL_REPLACES) /
 
 
 
-static const struct REPLACEMENT IDT_REPLACES[] = {
-    { " 05/04",         " WinChip",     0 },
-    { "WinChip 2-3D",   "WinChip 2/3",  0 }
-};
+static const struct REPLACEMENT IDT_REPLACES[] = {};
 static const int IDT_REPLACES_LEN = sizeof(IDT_REPLACES) /
     sizeof(IDT_REPLACES[0]);
 

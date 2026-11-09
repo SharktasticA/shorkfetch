@@ -1926,14 +1926,33 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             }
             else if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'e')
             {
-                // If we have a supposed WinChip 2-3D, we may be able to
-                // tell if its a WinChip 2A from the stepping
-                if (cpu->model == 8 && cpu->stepping == 7)
+                // WinChip C6 probably has a meaningless model name, thus
+                // override it.
+                if (cpu->model == 4 && strstr(cpu->name, "05/04"))
                 {
                     char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "IDT WinChip 2A");
+                    snprintf(tmp, NAME_LEN, "IDT WinChip C6");
                     free(cpu->name);
                     cpu->name = tmp;
+                }
+                // WinChip 2 and 2A may be identified as a "2-3D", thus we
+                // override it based on stepping.
+                else if (cpu->model == 8)
+                {
+                    if (cpu->stepping == 0 || cpu->stepping == 5)
+                    {
+                        char *tmp = malloc(NAME_LEN);
+                        snprintf(tmp, NAME_LEN, "IDT WinChip 2");
+                        free(cpu->name);
+                        cpu->name = tmp;
+                    }
+                    else if (cpu->stepping == 7)
+                    {
+                        char *tmp = malloc(NAME_LEN);
+                        snprintf(tmp, NAME_LEN, "IDT WinChip 2A");
+                        free(cpu->name);
+                        cpu->name = tmp;
+                    }
                 }
             }
         }
