@@ -2820,11 +2820,34 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 // really. Thus, we offer the option to replace C/T with F/I
                 // to be more precise. In case of virtualisation mudding
                 // this, we only do this when we see thread count is double
-                // core count.
-                if (CONFIG.showABD && (cpu->threads / 2) == cpu->cores)
+                // core count or have the expected thread count for a given
+                // model name.
+                if (CONFIG.showABD)
                 {
-                    cpu->fUnits = cpu->cores;
-                    cpu->iUnits = cpu->threads;
+                    if ((cpu->threads / 2) == cpu->cores)
+                    {
+                        cpu->fUnits = cpu->cores;
+                        cpu->iUnits = cpu->threads;
+                    }
+                    else if (strstr(cpu->name, "FX(tm)-4") &&
+                        cpu->threads == 4)
+                    {
+                        cpu->fUnits = 2;
+                        cpu->iUnits = 4;
+                    }
+                    else if (strstr(cpu->name, "FX(tm)-6") &&
+                        cpu->threads == 6)
+                    {
+                        cpu->fUnits = 3;
+                        cpu->iUnits = 6;
+                    }
+                    else if ((strstr(cpu->name, "FX(tm)-8") ||
+                            strstr(cpu->name, "FX(tm)-9")) &&
+                        cpu->threads == 8)
+                    {
+                        cpu->fUnits = 4;
+                        cpu->iUnits = 8;
+                    }
                 }
 
                 // Zambezi (1), Trinity (16), Godavari (56), Carrizo (96)
