@@ -60,7 +60,6 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
     // Copy input string to result
     strncpy(result, input, inputSize - 1);
     result[inputSize - 1] = '\0';
-    int strLen  = strlen(result);
 
     // Shorten " / " to "/"
     if (strstr(result, " / "))
@@ -75,6 +74,8 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
     for (int i = 0; i < DELETIONS_LEN; i++)
     {
         const char *pattern = DELETIONS[i];
+        if (!strstr(result, pattern))
+            continue;
         char *tmp = findErase(result, inputSize, pattern);
         strncpy(result, tmp, inputSize - 1);
         result[inputSize - 1] = '\0';
@@ -194,11 +195,10 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
                             (suffix[0] == 't' && suffix[1] == 'h'))
                         {
                             // Walk back to find the ordinal
-                            char *digits = suffix - 1;
-                            while (digits >= result && *digits >= '0' &&
-                                *digits <= '9')
-                                digits--;
-                            char *ordinal = digits + 1;
+                            char *ordinal = suffix;
+                            while (ordinal > result &&
+                                isdigit((unsigned char)*(ordinal - 1)))
+                                ordinal--;
 
                             // Make the deletion
                             memmove(ordinal, needle + 5, strlen(needle + 5)
@@ -240,6 +240,7 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
                     strncpy(result, tmp, inputSize - 1);
                     result[inputSize - 1] = '\0';
                     free(tmp);
+                    replaces++;
                 }
             }
         }
@@ -285,10 +286,9 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
             }
         }
 
-        strLen = strlen(result);
-
         // Remove potential bracketed data at the end. Start by finding
         // first  non-null character...
+        int strLen  = strlen(result);
         while (strLen > 0 && result[strLen - 1] == ' ')
             strLen--;
         if (strLen > 0 && result[strLen - 1] == ')')
@@ -329,6 +329,26 @@ char *cleanCPUName(const CPU_ARCH arch, const char *input, int inputSize)
 }
 
 #endif
+
+/**
+ * Frees the memory of a given CPU_DATA struct and its children.
+ */
+void freeCPU(CPU_DATA *cpu)
+{
+    if (!cpu)
+        return;
+#ifndef X86_ONLY
+    free(cpu->processor);
+    free(cpu->uarch);
+    free(cpu->platform);
+    free(cpu->machine);
+    free(cpu->part);
+    free(cpu->revisionStr);
+#endif
+    free(cpu->vendor);
+    free(cpu->name);
+    free(cpu);
+}
 
 /**
  * Extracts CPU data from the given cpuinfo file and packs it into a
@@ -578,7 +598,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                 }
             }
             // POWER: get CPU name
-            else if (!result->name && strncmp(buffer, "cpu", 3) == 0)
+            else if (!result->name && strncmp(buffer, "cpu", 3) == 0 &&
+                buffer[3 + strspn(buffer + 3, " \t")] == ':')
             {
                 char *extract = extractFromPoint(buffer, NAME_LEN, ':');
                 // Strip the buffer of whitespace so we can double-check the
@@ -595,7 +616,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
                     result->name = malloc(NAME_LEN);
                     strncpy(result->name, extract, NAME_LEN - 1);
-                    free(extract);
+                    result->name[NAME_LEN - 1] = '\0';
 
                     // In cases like "..., altivec supported", we want to
                     // remove the comma and everything after
@@ -603,6 +624,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     if (comma)
                         *comma = '\0';
                 }
+                free(extract);
             }
             // RISC-V: get instruction set architecture (ISA)
             else if (!result->name && strncasecmp(buffer, "isa", 3) == 0)
@@ -617,6 +639,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     strncpy(result->name, "RISC-V", NAME_LEN - 1);
                     result->name[NAME_LEN - 1] = '\0';
                 }
+                free(extract);
             }
 #endif
             // x86: get model number
@@ -644,8 +667,8 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                         result->arch = X86;
 
                     result->stepping = atoi(extract);
-                    free(extract);
                 }
+                free(extract);
             }
             // x86: get clock frequency in MHz
             else if (result->freq < 0 &&
@@ -893,6 +916,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     result->platform = malloc(PLATFORM_LEN);
                     strncpy(result->platform, extract, PLATFORM_LEN - 1);
                     result->platform[PLATFORM_LEN - 1] = '\0';
+                    free(extract);
                 }
             }
             // POWER: get machine name
@@ -917,6 +941,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     strncpy(result->machine, extract, MACHINE_LEN - 1);
                     result->machine[MACHINE_LEN - 1] = '\0';
                 }
+                free(extract);
             }
             // POWER: get vendor name
             else if (!result->vendor &&
@@ -939,6 +964,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     strncpy(result->vendor, extract, VENDOR_LEN - 1);
                     result->vendor[VENDOR_LEN - 1] = '\0';
                 }
+                free(extract);
             }
             // POWER: get revision str
             else if (!result->revisionStr &&
@@ -955,6 +981,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
                     strncpy(result->revisionStr, extract,
                         REVISION_STR_LEN - 1);
                     result->revisionStr[REVISION_STR_LEN - 1] = '\0';
+                    free(extract);
                 }
             }
 #endif
@@ -963,16 +990,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
     }
     else 
     {
-#ifndef X86_ONLY
-        free(result->processor);
-        free(result->uarch);
-        free(result->platform);
-        free(result->machine);
-        free(result->part);
-#endif
-        free(result->vendor);
-        free(result->name);
-        free(result);
+        freeCPU(result);
         return NULL;
     }
 
@@ -1042,7 +1060,7 @@ CPU_DATA *getCPU(char *cpuInfo, char **gpuFromCPU)
 
 #ifndef NO_STR_CLEANING
 
-    if (result->arch == X86)
+    if (result->arch == X86 && result->name)
     {
         // If the model name has GPU name in it, we will extract it and save
         // if for later in case we need it as a fallback when GPU detection
@@ -1138,7 +1156,7 @@ int getIntelHybridCPU(CPU_DATA *cpu)
     int count[3] = {0};
     // The cpu index numbers for each thread found for each thread type.
     // Again, 0=LPE, 1=E, 2=P.
-    int indices[3][MAX_INDEX];
+    int indices[3][MAX_INDEX] = {{0}};
 
     glob_t g;
     // Primary: Count how many /sys/devices/systemd/cpu/cpufreq/policyX
@@ -1201,22 +1219,21 @@ int getIntelHybridCPU(CPU_DATA *cpu)
                 if (atoi(freq[b]) >= atoi(freq[a]))
                     continue;
 
-                int tmpIndices[MAX_INDEX];
-                char tmpRange[bufferSize];
-                int tmpCount = count[a];
+                int n = (count[a] > count[b]) ? count[a] : count[b];
+                for (int j = 0; j < n; j++)
+                {
+                    int t = indices[a][j];
+                    indices[a][j] = indices[b][j];
+                    indices[b][j] = t;
+                }
 
-                // A into tmp
-                memcpy(tmpIndices, indices[a], sizeof(tmpIndices));
-                memcpy(tmpRange, freq[a], bufferSize);
-
-                // B into A
-                memcpy(indices[a], indices[b], sizeof(tmpIndices));
+                char tmpFreq[bufferSize];
+                memcpy(tmpFreq, freq[a], bufferSize);
                 memcpy(freq[a], freq[b], bufferSize);
-                count[a] = count[b];
+                memcpy(freq[b], tmpFreq, bufferSize);
 
-                // tmp into B
-                memcpy(indices[b], tmpIndices, sizeof(tmpIndices));
-                memcpy(freq[b], tmpRange, bufferSize);
+                int tmpCount = count[a];
+                count[a] = count[b];
                 count[b] = tmpCount;
             }
         }
@@ -1373,6 +1390,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
     char *result = malloc(RESULT_LEN);
     if (!result) return NULL;
     result[0] = '\0';
+    result[RESULT_LEN - 1] = '\0';
 
 
 
@@ -1467,24 +1485,20 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             // If absent, add the revision number in
             if (cpu->revisionNo != -1 && !strstr(cpu->name, " rev "))
             {
-                char *tmp = malloc(NAME_LEN);
-                snprintf(tmp, NAME_LEN, "%s rev %d", cpu->name,
+                size_t len = strlen(cpu->name);
+                snprintf(cpu->name + len, NAME_LEN - len, " rev %d",
                     cpu->revisionNo);
-                free(cpu->name);
-                cpu->name = tmp;
             }
 
             // If the uarch name hasn't already been added, add it in
             // brackets
-            if (!uarchAdded &&
+            if (!uarchAdded && cpu->uarch && cpu->uarch[0] != '\0' &&
                 !strstr(cpu->name, "ARMv") &&
-                !strstr(cpu->name, cpu->uarch) &&
-                cpu->uarch && cpu->uarch[0] != '\0')
+                !strstr(cpu->name, cpu->uarch))
             {
-                char *tmp = malloc(NAME_LEN);
-                snprintf(tmp, NAME_LEN, "%s (%s)", cpu->name, cpu->uarch);
-                free(cpu->name);
-                cpu->name = tmp;
+                size_t len = strlen(cpu->name);
+                snprintf(cpu->name + len, NAME_LEN - len, " (%s)",
+                    cpu->uarch);
             }
         }
     }
@@ -1500,13 +1514,16 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
     if (cpu->arch == POWER)
     {
 #ifndef NO_STR_CLEANING
-        // Remove any existing bracketed content like "(gs)", "(raw)",
-        // "(architected)", etc.
-        char *tmp = removeBrackets(cpu->name, NAME_LEN);
-        if (tmp)
+        if (cpu->name && cpu->name[0] != '\0')
         {
-            free(cpu->name);
-            cpu->name = tmp;
+            // Remove any existing bracketed content like "(gs)", "(raw)",
+            // "(architected)", etc.
+            char *tmp = removeBrackets(cpu->name, NAME_LEN);
+            if (tmp)
+            {
+                free(cpu->name);
+                cpu->name = tmp;
+            }
         }
 #endif
 
@@ -1567,20 +1584,23 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
         else if ((cpu->vendor && strstr(cpu->vendor, "Motorola") != 0) ||
             (cpu->name && strcmp(cpu->name, "8xx") == 0))
         {
-            // Remove redundant "MCG" from vendor name if it already
-            // contains "Motorola"
-            char *tmp = findReplace(cpu->vendor, VENDOR_LEN, "Motorola MCG",
-                "Motorola");
-            if (tmp)
+            if (cpu->vendor && cpu->vendor[0] != '\0')
             {
-                free(cpu->vendor);
-                cpu->vendor = tmp;
+                // Remove redundant "MCG" from vendor name if it already
+                // contains "Motorola"
+                char *tmp = findReplace(cpu->vendor, VENDOR_LEN,
+                    "Motorola MCG", "Motorola");
+                if (tmp)
+                {
+                    free(cpu->vendor);
+                    cpu->vendor = tmp;
+                }
             }
 
             // If the machine name contains an "MCP" model number, we can
             // use it as the canonical model name
             // See: Motorola MCP750
-            if (cpu->machine)
+            if (cpu->machine && cpu->name)
             {
                 char *open = strchr(cpu->machine, '(');
                 char *close = strchr(cpu->machine, ')');
@@ -1612,7 +1632,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     if (tmp)
                     {
                         snprintf(tmp, NAME_LEN,
-                            "Motorola PowerQUICC (MCP%s)", cpu->name);
+                            "Motorola PowerQUICC (MCP%s)",
+                            cpu->name ? cpu->name : "");
                         free(cpu->name);
                         cpu->name = tmp;
                     }
@@ -1626,16 +1647,13 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
 
             // Put aside the existing model name, which should have the IBM-
             // nomenclature model number
-            const char *ibmModel = cpu->name;
-            if (ibmModel)
-            {
-                if (strncmp(ibmModel, "PPC", 3) == 0)
-                    ibmModel += 3;
-                else if (strncmp(ibmModel, "PowerPC", 7) == 0)
-                    ibmModel += 7;
-                while (isspace(*ibmModel))
-                    ibmModel++;
-            }
+            const char *ibmModel = cpu->name ? cpu->name : "";
+            if (strncmp(ibmModel, "PPC", 3) == 0)
+                ibmModel += 3;
+            else if (strncmp(ibmModel, "PowerPC", 7) == 0)
+                ibmModel += 7;
+            while (isspace(*ibmModel))
+                ibmModel++;
 
             // Infer the generation from the PVR value in the revision
             // string
@@ -1679,7 +1697,7 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             // single or dual-core, whereas everything else is single-core.
             if (gen == PPC_9XX)
             {
-                if (!strstr(cpu->name, "970MP"))
+                if (!strstr(ibmModel, "970MP"))
                     cpu->cores = cpu->threads = 1;
                 else
                     cpu->cores = cpu->threads = 2;
@@ -1744,6 +1762,14 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
     // x86-specific quirk fixing and customisations
     if (cpu->arch == X86)
     {
+        if (!cpu->name)
+            cpu->name = calloc(1, NAME_LEN);
+        if (!cpu->name)
+        {
+            free(result);
+            return NULL;
+        }
+
         // Physical IDs don't always seem to be sequential, so may defer to
         // our count of now many unique IDs were recorded instead of the
         // highest value recorded.
@@ -1787,21 +1813,13 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     strstr(cpu->name, "Cx486DRx2") ||
                     strstr(cpu->name, "Cx486SLC") ||
                     strstr(cpu->name, "Cx486SRx2")) && hasFlag(cpu, "fpu"))
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "%s + 387", cpu->name);
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                        strncat(cpu->name, " + 387",
+                            NAME_LEN - strlen(cpu->name) - 1);
                 // If we have a Cx486S with FPU, make sure 487 is included
                 // in the model name
                 else if (strstr(cpu->name, "Cx486S") && hasFlag(cpu, "fpu"))
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "%s + 487", cpu->name);
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                    strncat(cpu->name, " + 487",
+                        NAME_LEN - strlen(cpu->name) - 1);
             }
             // Most notably 86Box allows pairing a i486SX-S or i486SX2 with
             // a 487SX. In the real world, the 487SX would disable the 486,
@@ -1809,12 +1827,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             // to the SX.
             if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n' &&
                 strstr(cpu->name, "486 SX") && hasFlag(cpu, "fpu"))
-            {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "%s + x87", cpu->name);
-                    free(cpu->name);
-                    cpu->name = tmp;
-            }
+                    strncat(cpu->name, " + x87",
+                        NAME_LEN - strlen(cpu->name) - 1);
             else
             {
                 // If we have a vendorless and revisionless 486, we can at
@@ -1841,60 +1855,37 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 // If we have a K6, we will try to distinguish if it's a
                 // Model 6 or Model 7
                 if (cpu->model == 6)
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "AMD K6 (Model 6)");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                    snprintf(cpu->name, NAME_LEN, "AMD K6 (Model 6)");
                 else if (cpu->model == 7)
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "AMD K6 (Model 7)");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                    snprintf(cpu->name, NAME_LEN, "AMD K6 (Model 7)");
                 // If we have a Geode LX, we replace its long but unspecific
                 // name with the correct model based on frequency
                 else if (cpu->model == 10 && cpu->name[0] == 'G')
                 {
-                    char *tmp = malloc(NAME_LEN);
                     // LX 600 (366MHz)
                     if (cpu->freq >= 350 && cpu->freq <= 380)
-                        snprintf(tmp, NAME_LEN, "AMD Geode LX 600");
+                        snprintf(cpu->name, NAME_LEN, "AMD Geode LX 600");
                     // LX 700 (433MHz)
                     else if (cpu->freq >= 420 && cpu->freq <= 450)
-                        snprintf(tmp, NAME_LEN, "AMD Geode LX 700");
+                        snprintf(cpu->name, NAME_LEN, "AMD Geode LX 700");
                     // LX 800 (500MHz)
                     else if (cpu->freq >= 480 && cpu->freq <= 535)
-                        snprintf(tmp, NAME_LEN, "AMD Geode LX 800");
+                        snprintf(cpu->name, NAME_LEN, "AMD Geode LX 800");
                     // LX 900 (600MHz)
                     else if (cpu->freq >= 580 && cpu->freq <= 620)
-                        snprintf(tmp, NAME_LEN, "AMD Geode LX 900");
+                        snprintf(cpu->name, NAME_LEN, "AMD Geode LX 900");
                     // Generic fallback
                     else
-                        snprintf(tmp, NAME_LEN, "AMD Geode LX");
-                    free(cpu->name);
-                    cpu->name = tmp;
+                        snprintf(cpu->name, NAME_LEN, "AMD Geode LX");
                 }
                 // If we have a supposed K6-III, it may actually be a K6-2+
                 // or K6-III+, and we may be able to tell from the stepping
                 else if (cpu->model == 13)
                 {
                     if (cpu->stepping == 0)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN, "AMD K6-III+");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
+                        snprintf(cpu->name, NAME_LEN, "AMD K6-III+");
                     else if (cpu->stepping == 4)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN, "AMD K6-2+");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
+                        snprintf(cpu->name, NAME_LEN, "AMD K6-2+");
                 }
             }
             else if (cpu->vendor[0] == 'I' && cpu->vendor[1] == 'n')
@@ -1904,72 +1895,38 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                 // but we can use OverDrive's 100+MHz clockspeeds to tell
                 // them apart
                 if (cpu->model == 1 && cpu->freq >= 100)
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "Intel Pentium OverDrive (P5)");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                    snprintf(cpu->name, NAME_LEN,
+                        "Intel Pentium OverDrive (P5)");
                 else if (cpu->model == 2 && cpu->freq >= 100)
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN,
+                    snprintf(cpu->name, NAME_LEN,
                         "Intel Pentium OverDrive (P54C)");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
                 // The Pentium OverDrive for Socket 3 is guaranteed to be
                 // P54C, so let's report that to distinguish it from P5
                 // OverDrives for Socket 4
                 else if (cpu->model == 3 && cpu->freq < 84)
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN,
+                    snprintf(cpu->name, NAME_LEN,
                         "Intel Pentium OverDrive (P54C)");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
                 // Model 9 @ ~400MHz with no meaningful name is most likely
                 // an Intel Quark X10xx series, so we override it.
                 // See: Intel Quark X1000
                 else if (cpu->model == 9 && cpu->freq >= 380 &&
                     cpu->freq <= 420 && strstr(cpu->name, "05/09"))
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "Intel Quark X10xx");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                    snprintf(cpu->name, NAME_LEN, "Intel Quark X10xx");
             }
             else if (cpu->vendor[0] == 'C' && cpu->vendor[1] == 'e')
             {
                 // WinChip C6 probably has a meaningless model name, thus
                 // override it.
                 if (cpu->model == 4 && strstr(cpu->name, "05/04"))
-                {
-                    char *tmp = malloc(NAME_LEN);
-                    snprintf(tmp, NAME_LEN, "IDT WinChip C6");
-                    free(cpu->name);
-                    cpu->name = tmp;
-                }
+                    snprintf(cpu->name, NAME_LEN, "IDT WinChip C6");
                 // WinChip 2 and 2A may be identified as a "2-3D", thus we
                 // override it based on stepping.
                 else if (cpu->model == 8)
                 {
                     if (cpu->stepping == 0 || cpu->stepping == 5)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN, "IDT WinChip 2");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
+                        snprintf(cpu->name, NAME_LEN, "IDT WinChip 2");
                     else if (cpu->stepping == 7)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN, "IDT WinChip 2A");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
+                        snprintf(cpu->name, NAME_LEN, "IDT WinChip 2A");
                 }
             }
         }
@@ -2109,13 +2066,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // Pentium II OverDrive is actually a Deschutes core
                     // despite reporting the same model as Klamath
                     if (cpu->stepping == 2)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN,
+                        snprintf(cpu->name, NAME_LEN,
                             "Intel Pentium II OverDrive (Deschutes)");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
                 }
                 // Deschutes (non-OverDrive) & Covington
                 else if (cpu->model == 5)
@@ -2128,13 +2080,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // The 512KB Xeon cannot presently be distinguished,
                     // though...
                     if (cpu->cacheSize == 32)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN,
+                        snprintf(cpu->name, NAME_LEN,
                             "Intel Celeron (Covington)");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
                     else if (cpu->cacheSize == 512)
                     {
                         // Don't need to do anything, yet... At some point,
@@ -2142,12 +2089,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                         // Xeon at this cache amount
                     }
                     else if (cpu->cacheSize >= 1024)
-                    {
-                        char *tmp = malloc(NAME_LEN);
-                        snprintf(tmp, NAME_LEN, "Intel Pentium II Xeon");
-                        free(cpu->name);
-                        cpu->name = tmp;
-                    }
+                        snprintf(cpu->name, NAME_LEN,
+                            "Intel Pentium II Xeon");
                 }
                 // Banias
                 else if (cpu->model == 9)
@@ -2500,10 +2443,8 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     // has a non-descriptive name like "Intel 4000", thus we
                     // discard it and create a new model name
                     if (cpu->stepping == 8 && cpu->freq == 500)
-                    {
-                        free(cpu->name);
-                        cpu->name = strdup("Intel Atom Z34xx (Edison)");
-                    }
+                        snprintf(cpu->name, NAME_LEN,
+                            "Intel Atom Z34xx (Edison)");
                 }
 
                 // There are some examples of Intel Core processors with
@@ -2540,17 +2481,18 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             // instead
             if (!strstr(cpu->name, "Xeon"))
             {
-                free(cpu->name);
                 // Knights Ferry
                 if (cpu->model == 0)
-                    cpu->name = strdup("Intel Xeon Phi (Knights Ferry)");
+                    snprintf(cpu->name, NAME_LEN,
+                        "Intel Xeon Phi (Knights Ferry)");
                 // Knights Corner
                 // See: Xeon Phi 7110P
                 else if (cpu->model == 1)
-                    cpu->name = strdup("Intel Xeon Phi (Knights Corner)");
+                    snprintf(cpu->name, NAME_LEN,
+                        "Intel Xeon Phi (Knights Corner)");
                 // Fallback
                 else
-                    cpu->name = strdup("Intel Xeon Phi");
+                    snprintf(cpu->name, NAME_LEN, "Intel Xeon Phi");
             }
         }
         // NetBurst & K8
@@ -2704,8 +2646,11 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
                     {
                         tmp = findReplace(cpu->name, NAME_LEN,
                             "Intel(R) CPU", "Intel Xeon CPU");
-                        free(cpu->name);
-                        cpu->name = tmp;
+                        if (tmp)
+                        {
+                            free(cpu->name);
+                            cpu->name = tmp;
+                        }
                         tmp = NULL;
                     }
 
@@ -2953,17 +2898,17 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
 #ifndef X86_ONLY
         // For ARM with "Arm" implementer ID and a generic "ARMv..." name,
         // don't bother adding the vendor name
-        if (cpu->arch == ARM && strcmp(cpu->vendor, "Arm") == 0 &&
+        if (cpu->arch == ARM && cpu->name &&
+            strcmp(cpu->vendor, "Arm") == 0 &&
             strncmp(cpu->name, "ARMv", 4) == 0)
             proceed = 0;
 #endif
 
         if (proceed)
         {
-            char *tmp = malloc(RESULT_LEN);
+            char tmp[RESULT_LEN];
             snprintf(tmp, RESULT_LEN, "%s %s", cpu->vendor, result);
-            strncpy(result, tmp, RESULT_LEN-1);
-            free(tmp);
+            snprintf(result, RESULT_LEN, "%s", tmp);
         }
     }
 
@@ -3036,11 +2981,10 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             // cores/threads substring on the end
             if (result[0] != '\0')
             {
-                char *tmp = malloc(RESULT_LEN);
+                char tmp[RESULT_LEN];
                 snprintf(tmp, RESULT_LEN, "%s (%s)", result,
                     coresAndThreads);
-                strncpy(result, tmp, RESULT_LEN-1);
-                free(tmp);
+                snprintf(result, RESULT_LEN, "%s", tmp);
             }
             // If our result is blank, we make it our cores/threads
             // substring

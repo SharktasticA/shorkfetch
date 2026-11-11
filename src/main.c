@@ -1628,21 +1628,8 @@ int main(int argc, char *argv[])
         free(de);
     free(wm);
     free(gpuFromCPU);
-    if (cpu)
-    {
-#ifndef X86_ONLY
-        free(cpu->processor);
-        free(cpu->uarch);
-        free(cpu->platform);
-        free(cpu->machine);
-        free(cpu->part);
-#endif
-        free(cpu->vendor);
-        free(cpu->name);
-        free(cpu);
-        if (cpuStr)
-            free(cpuStr);
-    }
+    freeCPU(cpu);
+    free(cpuStr);
 
     return 0;
 }

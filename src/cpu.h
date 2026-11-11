@@ -276,6 +276,7 @@ static const int VENDOR_ALIASES_LEN = sizeof(VENDOR_ALIASES) /
 
 
 char *cleanCPUName(const CPU_ARCH, const char*, int);
+void freeCPU(CPU_DATA*);
 CPU_DATA *getCPU(char*, char**);
 int getIntelHybridCPU(CPU_DATA*);
 int hasFlag(const CPU_DATA*, const char*);

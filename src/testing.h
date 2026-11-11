@@ -186,16 +186,7 @@ void testGetCPU(void)
             printf("    virtAddrSize:       %d\n", cpu->virtAddrSize);
         }
 
-#ifndef X86_ONLY
-        free(cpu->processor);
-        free(cpu->uarch);
-        free(cpu->platform);
-        free(cpu->machine);
-        free(cpu->part);
-#endif
-        free(cpu->vendor);
-        free(cpu->name);
-        free(cpu);
+        freeCPU(cpu);
         free(gpuFromCPU);
     }
 }
