@@ -35,6 +35,7 @@ Config CONFIG = {
     1,
     1,
     1,
+    1,
     0
 };
 char *HOME;

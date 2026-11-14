@@ -30,10 +30,11 @@
 /**
  * @param u Parsed uname data
  * @param uStatus The status returned from uname attempt
+ * @param osArch OS architecture substr to add (can be NULL to skip)
  * @return String containing the OS/Linux distro's name; NULL if
  *         undetermined/error
  */
-char *getOS(struct utsname u, int uStatus)
+char *getOS(struct utsname u, int uStatus, char *osArch)
 {
     char *os = malloc(OS_LEN);
     if (!os)
@@ -120,7 +121,6 @@ char *getOS(struct utsname u, int uStatus)
         }
 
 #ifndef NO_STR_CLEANING
-
         int replaces = 0;
         for (int i = 0; i < COMPACT_OS_REPLACES_LEN; i++)
         {
@@ -137,10 +137,44 @@ char *getOS(struct utsname u, int uStatus)
                 replaces++;
             }
         }
-
 #endif
+    }
+    
+    // Append kernel architecture (if present)
+    if (osArch && osArch[0] != '\0')
+    {
+        size_t prevLen = strlen(os);
+        size_t newLen = prevLen + strlen(osArch) + 2;
 
+        char *tmp = realloc(os, newLen);
+        if (tmp)
+        {
+            os = tmp;
+            snprintf(os + prevLen, newLen - prevLen, " %s", osArch);
+        }
     }
 
     return os;
+}
+
+/**
+ * @param u Parsed uname data
+ * @param uStatus The status returned from uname attempt
+ * @return String containing the kernel's architecture; NULL if
+ *         undetermined/error
+ */
+char *getOSArch(struct utsname u, int uStatus)
+{
+    size_t len = 0;
+    if (uStatus == 0)
+        len = strnlen(u.machine, sizeof u.machine);
+
+    char *osArch = malloc(len + 1);
+    if (!osArch)
+        return NULL;
+
+    if (len > 0)
+        memcpy(osArch, u.machine, len);
+    osArch[len] = '\0';
+    return osArch;
 }

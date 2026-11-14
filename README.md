@@ -92,6 +92,7 @@ Below are some optional parameters you can include when running `make` or `make 
 * `-u`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default); no assignment returns the current unit and exits
 * `-m`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
 * `-o`, `--mode`: Selects which view mode to use: [n]ormal (default), [b]ullet list; no assignment returns the current mode and exits
+* `--os-arch=0|1`: Disable/enable OS architecture at the end of OS field's value; no assignment returns the current setting and exits
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `--rev=0|1`: Disable/enable showing ARM revision numbers; no assignment returns the current setting and exits
     * Only available for ARM

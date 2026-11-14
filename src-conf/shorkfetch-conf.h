@@ -59,6 +59,7 @@ void ipMenu(void);
 int mainMenu(void);
 void maxUnitMenu(void);
 int modifyField(MenuItem, const int);
+void osArchMenu(void);
 int populateFieldsMenu(MenuItem*, const int);
 void saveFields(void);
 void toggleOptionMenu(char*, char*, int*, int);

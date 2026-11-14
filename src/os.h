@@ -24,6 +24,7 @@
 
 
 
-char *getOS(struct utsname, int);
+char *getOS(struct utsname, int, char*);
+char *getOSArch(struct utsname, int);
 
 #endif

@@ -54,6 +54,7 @@ enum {
     OPT_ESC,
     OPT_IHA,
     OPT_IP,
+    OPT_OS_ARCH,
     OPT_REV
 };
 
@@ -82,6 +83,7 @@ static const struct option longOpts[] = {
     { "ip",         optional_argument,  0,  OPT_IP },
     { "mode",       optional_argument,  0,  'o' },
     { "max-unit",   optional_argument,  0,  'u' },
+    { "os-arch",    optional_argument,  0,  OPT_OS_ARCH },
 #if defined(__aarch64__) || defined(__arm__)
     { "rev",        optional_argument,  0,  OPT_REV },
 #endif
@@ -153,172 +155,181 @@ void showHelp(void)
     free(options);
 
 #if defined(__x86_64__) || defined(__i386__)
-    WORD_WRAPPED *abd = wordWrap("    --abd=0|1     Disable/enable AMD "
+    WORD_WRAPPED *abd = wordWrap("    --abd=0|1      Disable/enable AMD "
         "Bulldozer family-specific core counting; no assignment returns "
         "the current setting and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", abd->str);
     free(abd->str);
     free(abd);
 #endif
 
-    WORD_WRAPPED *accentCol = wordWrap("-a, --accent-col  Specifies a "
+    WORD_WRAPPED *accentCol = wordWrap("-a, --accent-col   Specifies a "
         "custom accent colour; no assignment returns the current colour "
-        "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", accentCol->str);
     free(accentCol->str);
     free(accentCol);
 
-    WORD_WRAPPED *art = wordWrap("    --art=0|1     Disable/enable SHORK "
+    WORD_WRAPPED *art = wordWrap("    --art=0|1      Disable/enable SHORK "
         "ASCII art; no assignment returns the current setting and exits\n",
-        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", art->str);
     free(art->str);
     free(art);
 
-    WORD_WRAPPED *bullet = wordWrap("-b, --bullet      Specifies a custom "
-        "single-byte character to use with bulleted list mode and "
+    WORD_WRAPPED *bullet = wordWrap("-b, --bullet       Specifies a "
+        "custom single-byte character to use with bulleted list mode and "
         "sublists; empty assignment allows lists with no bullet; no "
         "assignment returns the current character and exits\n",
-        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", bullet->str);
     free(bullet->str);
     free(bullet);
 
-    WORD_WRAPPED *bulletCol = wordWrap("-B, --bullet-col  Specifies a "
+    WORD_WRAPPED *bulletCol = wordWrap("-B, --bullet-col   Specifies a "
         "custom bullet-point colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
         0, 0);
     printf("%s", bulletCol->str);
     free(bulletCol->str);
     free(bulletCol);
 
-    WORD_WRAPPED *compact = wordWrap("-c, --compact     Compacts field "
-        "names and field values\n", TERM_SIZE.ws_col, "                  ",
+    WORD_WRAPPED *compact = wordWrap("-c, --compact      Compacts field "
+        "names and field values\n", TERM_SIZE.ws_col, "                   ",
         NULL, 0, 0);
     printf("%s", compact->str);
     free(compact->str);
     free(compact);
 
-    WORD_WRAPPED *conf = wordWrap("-C, --conf        Launches SHORKFETCH "
-        "Configurator and exits\n", TERM_SIZE.ws_col, "                  ",
+    WORD_WRAPPED *conf = wordWrap("-C, --conf         Launches SHORKFETCH "
+        "Configurator and exits\n", TERM_SIZE.ws_col, "                   ",
         NULL, 0, 0);
     printf("%s", conf->str);
     free(conf->str);
     free(conf);
 
-    WORD_WRAPPED *esc = wordWrap("    --esc=0|1     Disable/enable ANSI "
+    WORD_WRAPPED *esc = wordWrap("    --esc=0|1      Disable/enable ANSI "
         "escape codes and colour features; no assignment returns the "
         "current setting and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", esc->str);
     free(esc->str);
     free(esc);
 
-    WORD_WRAPPED *fields = wordWrap("-f, --fields      Specifies a custom "
+    WORD_WRAPPED *fields = wordWrap("-f, --fields       Specifies a custom "
         "fields list and order; no assignment returns list of current "
-        "fields and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
+        "fields and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
         0, 0);
     printf("%s", fields->str);
     free(fields->str);
     free(fields);
 
-    WORD_WRAPPED *help = wordWrap("-h, --help        Displays help "
-        "information and exits\n", TERM_SIZE.ws_col, "                  ",
+    WORD_WRAPPED *help = wordWrap("-h, --help         Displays help "
+        "information and exits\n", TERM_SIZE.ws_col, "                   ",
         NULL, 0, 0);
     printf("%s", help->str);
     free(help->str);
     free(help);
 
-    WORD_WRAPPED *highCol = wordWrap("-H, --high-col    Specifies a "
+    WORD_WRAPPED *highCol = wordWrap("-H, --high-col     Specifies a "
         "custom high percentage colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
         0, 0);
     printf("%s", highCol->str);
     free(highCol->str);
     free(highCol);
 
 #if defined(__x86_64__) || defined(__i386__)
-    WORD_WRAPPED *iha = wordWrap("    --iha=0|1     Disable/enable Intel "
+    WORD_WRAPPED *iha = wordWrap("    --iha=0|1      Disable/enable Intel "
         "Hybrid Architecture-specific core counting; no assignment returns "
         "the current setting and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", iha->str);
     free(iha->str);
     free(iha);
 #endif
 
-    WORD_WRAPPED *ip = wordWrap("    --ip=0|1      Disable/enable IP "
+    WORD_WRAPPED *ip = wordWrap("    --ip=0|1       Disable/enable IP "
         "address fields; no assignment returns the current setting and "
-        "exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        "exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", ip->str);
     free(ip->str);
     free(ip);
 
-    WORD_WRAPPED *lowCol = wordWrap("-l, --low-col     Specifies a custom "
+    WORD_WRAPPED *lowCol = wordWrap("-l, --low-col      Specifies a custom "
         "low percentage colour; no assignment returns the current colour "
-        "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", lowCol->str);
     free(lowCol->str);
     free(lowCol);
 
-    WORD_WRAPPED *maxUnit = wordWrap("-u, --max-unit    Specifies the "
+    WORD_WRAPPED *maxUnit = wordWrap("-u, --max-unit     Specifies the "
         "largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, "
         "[g]ibi, [t]ebi, [p]ebi (default); no assignment returns the "
         "current unit and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", maxUnit->str);
     free(maxUnit->str);
     free(maxUnit);
 
-    WORD_WRAPPED *medCol = wordWrap("-m, --med-col     Specifies a custom "
+    WORD_WRAPPED *medCol = wordWrap("-m, --med-col      Specifies a custom "
         "medium percentage colour; no assignment returns the current "
-        "colour and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
+        "colour and exits\n", TERM_SIZE.ws_col, "                   ", NULL,
         0, 0);
     printf("%s", medCol->str);
     free(medCol->str);
     free(medCol);
 
-    WORD_WRAPPED *mode = wordWrap("-o, --mode        Specifies which view "
+    WORD_WRAPPED *mode = wordWrap("-o, --mode         Specifies which view "
         "mode to use: [n]ormal (default), [b]ullet list; no assignment "
         "returns the current mode and exits\n",
-        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+        TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", mode->str);
     free(mode->str);
     free(mode);
 
-    WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, "
+    WORD_WRAPPED *osArch = wordWrap("    --os-arch=0|1  Disable/enable OS "
+        "architecture at the end of OS field's value; no assignment "
+        "returns the current setting and exits\n", TERM_SIZE.ws_col,
+        "                   ", NULL, 0, 0);
+    printf("%s", osArch->str);
+    free(osArch->str);
+    free(osArch);
+
+    WORD_WRAPPED *reset = wordWrap("-r, --reset        Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
+        "                   ", NULL, 0, 0);
     printf("%s", reset->str);
     free(reset->str);
     free(reset);
 
 #if defined(__aarch64__) || defined(__arm__)
-    WORD_WRAPPED *rev = wordWrap("    --rev=0|1     Disable/enable showing "
-        "ARM revision numbers; no assignment returns the current setting "
-        "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    WORD_WRAPPED *rev = wordWrap("    --rev=0|1      Disable/enable "
+        "showing ARM revision numbers; no assignment returns the current "
+        "setting and exits\n", TERM_SIZE.ws_col, "                   ",
+        NULL, 0, 0);
     printf("%s", rev->str);
     free(rev->str);
     free(rev);
 #endif
 
-    WORD_WRAPPED *save = wordWrap("-s, --save        Saves chosen options "
-        "to a configuration file\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
+    WORD_WRAPPED *save = wordWrap("-s, --save         Saves chosen "
+        "options to a configuration file\n", TERM_SIZE.ws_col,
+        "                   ", NULL, 0, 0);
     printf("%s", save->str);
     free(save->str);
     free(save);
 
-    WORD_WRAPPED *sepCol = wordWrap("-S, --sep-col     Specifies a custom "
-        "separator colour; no assignment returns the current colour and "
-        "exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    WORD_WRAPPED *sepCol = wordWrap("-S, --sep-col      Specifies a "
+        "custom separator colour; no assignment returns the current colour "
+        "and exits\n", TERM_SIZE.ws_col, "                   ", NULL, 0, 0);
     printf("%s", sepCol->str);
     free(sepCol->str);
     free(sepCol);
 
-    WORD_WRAPPED *version = wordWrap("-v, --version     Displays version "
-        "number and exits\n\n", TERM_SIZE.ws_col, "                  ",
+    WORD_WRAPPED *version = wordWrap("-v, --version      Displays version "
+        "number and exits\n\n", TERM_SIZE.ws_col, "                   ",
         NULL, 0, 0);
     printf("%s", version->str);
     free(version->str);
@@ -334,7 +345,7 @@ void showHelp(void)
 
     WORD_WRAPPED *fieldNames = wordWrap("Fields: log (user@hostname), os, "
         "krn, upt, pkgs, loc, scn, de, wm, trm, sh, cpu, gpu, ram, swap, "
-        "dsk, root, lip, xip, clrs, clba, clbr, --- (separator), single"
+        "dsk, root, lip, xip, clrs, clba, clbr, --- (separator), single "
         "blank space (blank line)\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
@@ -649,6 +660,24 @@ int main(int argc, char *argv[])
             }
             break;
 
+        case OPT_OS_ARCH:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showOSArch);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showOSArch = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showOSArch = 1;
+            else
+            {
+                printf("ERROR: --os-arch only accepts 0 (off) or 1 (on) "
+                    "(\"%s\" given)\n", optarg);
+                return 1;
+            }
+            break;
+
 #if defined(__aarch64__) || defined(__arm__)
         case OPT_REV:
             if (!optarg)
@@ -859,14 +888,13 @@ int main(int argc, char *argv[])
 
     // Some things are dependent on others, so we have to look them up
     // regardless
-    char *os = getOS(u, uStatus);
+    char *os = getOS(u, uStatus,
+        (CONFIG.showOSArch == 1) ? getOSArch(u, uStatus) : NULL);
     char *de = getDE();
     char *wm = getWM(&de);
     char *gpuFromCPU = NULL;
     CPU_DATA *cpu = getCPU("/proc/cpuinfo", &gpuFromCPU);
-    char *cpuStr = NULL;
-    if (cpu)
-        cpuStr = interpretCPU(cpu, &gpuFromCPU);
+    char *cpuStr = cpu ? interpretCPU(cpu, &gpuFromCPU) : NULL;
 
     // Preprepared bullet icon to use if needed.
     char icon[16] = {0};

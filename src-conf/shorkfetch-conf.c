@@ -42,6 +42,7 @@ Config CONFIG = {
     1,
     1,
     1,
+    1,
     0
 };
 char FIELDS[MAX_FIELDS][5];
@@ -620,6 +621,7 @@ int mainMenu(void)
         { "bul", "Bullet character", "", bulletCharMenu, 1, 0 },
         { "esc", "Escape codes", "", escCodesMenu, 1, 0 },
         { "ipa", "IP addresses", "", ipMenu, 1, 0 },
+        { "osa", "OS architecture", "", osArchMenu, 1, 0 },
         { "unt", "Maximum data unit", "", maxUnitMenu, 1, 0 },
 #if defined(__x86_64__) || defined(__i386__)
         { "abd", "AMD Bulldozer support", "", abdMenu, 1, 0 },
@@ -876,6 +878,16 @@ int modifyField(MenuItem action, const int ind)
 
     saveFields();
     return returnInd;
+}
+
+void osArchMenu(void)
+{
+    toggleOptionMenu("OS architecture",
+        "Controls whether the operating system's compiled architecture is "
+            "shown at the end of the OS field's value. This can differ to "
+            "the CPU's architecture (for example, running an i686-compiled "
+            "kernel on a x86_64 CPU).",
+        &CONFIG.showOSArch, 0);
 }
 
 /**

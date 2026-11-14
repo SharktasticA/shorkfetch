@@ -70,6 +70,8 @@ typedef struct
     int showIHA;
     // Show IP fields (default: 1)
     int showIP;
+    // Show architecture in OS (default: 1)
+    int showOSArch;
     // Show ARM revision number (default: 0)
     int showRev;
 } Config;
