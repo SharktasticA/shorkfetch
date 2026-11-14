@@ -29,12 +29,13 @@ Config CONFIG = {
     0,
     "log,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
     'p',
-    NORMAL,
+    VM_NORMAL,
     1,
     1,
     1,
     1,
-    1
+    1,
+    0
 };
 char *HOME;
 int SHORK_LINE = 0;

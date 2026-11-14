@@ -134,6 +134,8 @@ void readConf(Config *conf)
                 conf->showIHA = atoi(value);
             else if (strcmp(key, "showIP") == 0)
                 conf->showIP = atoi(value);
+            else if (strcmp(key, "showRev") == 0)
+                conf->showRev = atoi(value);
         }
         fclose(stream);
     }
@@ -277,6 +279,7 @@ void writeConf(Config conf)
         fprintf(stream, "showEsc=%d\n", conf.showEsc);
         fprintf(stream, "showIHA=%d\n", conf.showIHA);
         fprintf(stream, "showIP=%d\n", conf.showIP);
+        fprintf(stream, "showRev=%d\n", conf.showRev);
         fclose(stream);
     }
     sync();

@@ -1482,12 +1482,25 @@ char *interpretCPU(CPU_DATA *cpu, char **gpuFromCPU)
             }
 #endif
 
-            // If absent, add the revision number in
-            if (cpu->revisionNo != -1 && !strstr(cpu->name, " rev "))
+            // If absent and desired, add the revision number in
+            if (CONFIG.showRev && cpu->revisionNo != -1 &&
+                !strstr(cpu->name, " rev "))
             {
                 size_t len = strlen(cpu->name);
                 snprintf(cpu->name + len, NAME_LEN - len, " rev %d",
                     cpu->revisionNo);
+            }
+            // If revision numbers aren't desired, remove the existing one
+            else if (!CONFIG.showRev)
+            {
+                char *needle = strstr(cpu->name, " rev ");
+                if (needle)
+                {
+                    char *end = needle + strlen(" rev ");
+                    while (*end >= '0' && *end <= '9')
+                        end++;
+                    memmove(needle, end, strlen(end) + 1);
+                }
             }
 
             // If the uarch name hasn't already been added, add it in

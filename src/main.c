@@ -48,7 +48,14 @@
 
 #include <getopt.h>
 
-enum { OPT_NO_ABD = 256, OPT_NO_ART, OPT_NO_ESC, OPT_NO_IHA, OPT_NO_IP };
+enum {
+    OPT_NO_ABD = 256,
+    OPT_NO_ART,
+    OPT_NO_ESC,
+    OPT_NO_IHA,
+    OPT_NO_IP,
+    OPT_NO_REV
+};
 
 static const char *shortOpts = "ha::B::b::l::m::H::S::cCf::o::u::rsv";
 
@@ -66,11 +73,18 @@ static const struct option longOpts[] = {
     { "fields",     optional_argument,  0,  'f' },
     { "mode",       optional_argument,  0,  'o' },
     { "max-unit",   optional_argument,  0,  'u' },
+#if defined(__x86_64__) || defined(__i386__)
     { "no-abd",     no_argument,        0,  OPT_NO_ABD },
+#endif
     { "no-art",     no_argument,        0,  OPT_NO_ART },
     { "no-esc",     no_argument,        0,  OPT_NO_ESC },
+#if defined(__x86_64__) || defined(__i386__)
     { "no-iha",     no_argument,        0,  OPT_NO_IHA },
+#endif
     { "no-ip",      no_argument,        0,  OPT_NO_IP },
+#if defined(__aarch64__) || defined(__arm__)
+    { "no-rev",     no_argument,        0,  OPT_NO_REV },
+#endif
     { "reset",      no_argument,        0,  'r' },
     { "save",       no_argument,        0,  's' },
     { "version",    no_argument,        0,  'v' },
@@ -231,12 +245,14 @@ void showHelp(void)
     free(mode->str);
     free(mode);
 
+#if defined(__x86_64__) || defined(__i386__)
     WORD_WRAPPED *noAbd = wordWrap("    --no-abd      Disables AMD "
         "Bulldozer family-specific core counting\n", TERM_SIZE.ws_col,
         "                  ", NULL, 0, 0);
     printf("%s", noAbd->str);
     free(noAbd->str);
     free(noAbd);
+#endif
 
     WORD_WRAPPED *noArt = wordWrap("    --no-art      Disables the SHORK "
         "ASCII art\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
@@ -251,12 +267,14 @@ void showHelp(void)
     free(noEsc->str);
     free(noEsc);
 
+#if defined(__x86_64__) || defined(__i386__)
     WORD_WRAPPED *noIha = wordWrap("    --no-iha      Disables Intel "
         "Hybrid Architecture-specific core counting\n", TERM_SIZE.ws_col,
         "                  ", NULL, 0, 0);
     printf("%s", noIha->str);
     free(noIha->str);
     free(noIha);
+#endif
 
     WORD_WRAPPED *noIp = wordWrap("    --no-ip       Disables any IP "
         "address display\n", TERM_SIZE.ws_col, "                  ", NULL,
@@ -264,6 +282,15 @@ void showHelp(void)
     printf("%s", noIp->str);
     free(noIp->str);
     free(noIp);
+
+#if defined(__aarch64__) || defined(__arm__)
+    WORD_WRAPPED *noRev = wordWrap("    --no-rev      Disables showing an "
+        "ARM revision number\n", TERM_SIZE.ws_col, "                  ",
+        NULL, 0, 0);
+    printf("%s", noRev->str);
+    free(noRev->str);
+    free(noRev);
+#endif
 
     WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
@@ -450,9 +477,9 @@ int main(int argc, char *argv[])
         case 'o':
             if (!optarg)
             {
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                     printf("\"normal\"\n");
-                else if (CONFIG.mode == BULLETS)
+                else if (CONFIG.mode == VM_BULLETS)
                     printf("\"bullets\"\n");
                 return 0;
             }
@@ -464,12 +491,12 @@ int main(int argc, char *argv[])
             else if (strcmp(optarg, "n") == 0 ||
                 strcmp(optarg, "N") == 0 ||
                 strcmp(optarg, "normal") == 0)
-                CONFIG.mode = NORMAL;
+                CONFIG.mode = VM_NORMAL;
             else if (strcmp(optarg, "b") == 0 ||
                 strcmp(optarg, "B") == 0 ||
                 strcmp(optarg, "bullet") == 0 ||
                 strcmp(optarg, "bullets") == 0)
-                CONFIG.mode = BULLETS;
+                CONFIG.mode = VM_BULLETS;
             else
             {
                 printf("ERROR: unrecognised mode \"%s\"\n", optarg);
@@ -524,9 +551,11 @@ int main(int argc, char *argv[])
             }
             break;
 
+#if defined(__x86_64__) || defined(__i386__)
         case OPT_NO_ABD:
             CONFIG.showABD = 0;
             break;
+#endif
 
         case OPT_NO_ART:
             CONFIG.showArt = 0;
@@ -536,13 +565,21 @@ int main(int argc, char *argv[])
             CONFIG.showEsc = 0;
             break;
 
+#if defined(__x86_64__) || defined(__i386__)
         case OPT_NO_IHA:
             CONFIG.showIHA = 0;
             break;
+#endif
 
         case OPT_NO_IP:
             CONFIG.showIP = 0;
             break;
+
+#if defined(__aarch64__) || defined(__arm__)
+        case OPT_NO_REV:
+            CONFIG.showRev = 0;
+            break;
+#endif
 
         case 'r':
         {
@@ -784,7 +821,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    if (CONFIG.mode == NORMAL)
+                    if (CONFIG.mode == VM_NORMAL)
                     {
                         if (!COMPACT)
                             outputPos += writeOutput(output + outputPos,
@@ -808,7 +845,7 @@ int main(int argc, char *argv[])
             if (os && os[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -832,7 +869,7 @@ int main(int argc, char *argv[])
             if (kernel && kernel[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -857,7 +894,7 @@ int main(int argc, char *argv[])
             if (uptime && uptime[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -882,7 +919,7 @@ int main(int argc, char *argv[])
             if (pkgs && pkgs[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -907,7 +944,7 @@ int main(int argc, char *argv[])
             if (locales && locales->locales)
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                     {
@@ -956,7 +993,7 @@ int main(int argc, char *argv[])
                     if (screen && screen[0] != '\0')
                     {
                         if (!CONFIG.showEsc) printShorkLine(0);
-                        if (CONFIG.mode == NORMAL)
+                        if (CONFIG.mode == VM_NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -1021,7 +1058,7 @@ int main(int argc, char *argv[])
             if (de && de != wm && de[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1052,7 +1089,7 @@ int main(int argc, char *argv[])
                     else if (X11_PRESENT)
                         snprintf(server, 32, " (X11)");
                 }
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1082,7 +1119,7 @@ int main(int argc, char *argv[])
             if (trm)
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1111,7 +1148,7 @@ int main(int argc, char *argv[])
             else
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1145,7 +1182,7 @@ int main(int argc, char *argv[])
             if (shell && shell[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1169,7 +1206,7 @@ int main(int argc, char *argv[])
             if (cpuStr && cpuStr[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1208,7 +1245,7 @@ int main(int argc, char *argv[])
                     if (gpuStr && gpuStr[0] != '\0')
                     {
                         if (!CONFIG.showEsc) printShorkLine(0);
-                        if (CONFIG.mode == NORMAL)
+                        if (CONFIG.mode == VM_NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -1262,7 +1299,7 @@ int main(int argc, char *argv[])
             else if (gpuFromCPU && gpuFromCPU[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1288,7 +1325,7 @@ int main(int argc, char *argv[])
             if (ram)
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1321,7 +1358,7 @@ int main(int argc, char *argv[])
             if (swap && swap[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1362,7 +1399,7 @@ int main(int argc, char *argv[])
                     if (disks->disks[i][0] != '\0')
                     {
                         if (!CONFIG.showEsc) printShorkLine(0);
-                        if (CONFIG.mode == NORMAL)
+                        if (CONFIG.mode == VM_NORMAL)
                         {
                             if (!COMPACT)
                             {
@@ -1426,7 +1463,7 @@ int main(int argc, char *argv[])
             if (root && root[0] != '\0')
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1457,7 +1494,7 @@ int main(int argc, char *argv[])
             if (localIP)
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1488,7 +1525,7 @@ int main(int argc, char *argv[])
             if (extIP)
             {
                 if (!CONFIG.showEsc) printShorkLine(0);
-                if (CONFIG.mode == NORMAL)
+                if (CONFIG.mode == VM_NORMAL)
                 {
                     if (!COMPACT)
                         outputPos += writeOutput(output + outputPos,
@@ -1549,7 +1586,7 @@ int main(int argc, char *argv[])
         }
 
         WORD_WRAPPED *data = NULL;
-        if (CONFIG.mode == BULLETS)
+        if (CONFIG.mode == VM_BULLETS)
             data = wordWrap(output, TERM_SIZE.ws_col - shorkWidth,
                 "   ", NULL, 1, 0);
         else

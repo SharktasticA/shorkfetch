@@ -27,8 +27,8 @@
 
 typedef enum
 {
-    BULLETS,
-    NORMAL
+    VM_BULLETS,
+    VM_NORMAL
 } VIEW_MODE;
 
 
@@ -57,7 +57,7 @@ typedef struct
     char fields[CONF_FIELDS_LEN];
     // Maximum data unit (default: 'p')
     char maxUnit;
-    // View mode (default: NORMAL)
+    // View mode (default: VM_NORMAL)
     VIEW_MODE mode;
     // Show AMD Bulldozer-specific core counting (default: 1)
     int showABD;
@@ -70,6 +70,8 @@ typedef struct
     int showIHA;
     // Show IP fields (default: 1)
     int showIP;
+    // Show ARM revision number (default: 0)
+    int showRev;
 } Config;
 
 typedef struct

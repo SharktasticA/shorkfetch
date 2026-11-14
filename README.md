@@ -82,12 +82,16 @@ Below are some optional parameters you can include when running `make` or `make 
 * `-m`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
 * `-o`, `--mode`: Selects which view mode to use: [n]ormal (default), [b]ullet list; no assignment returns the current mode and exits
 * `--no-abd`: Disables AMD Bulldozer family-specific core counting
+    * Only available for x86
     * For example, instead of `4F/8I` for AMD FX-8350, you will get `4C/8T`
 * `--no-art`: Disables the SHORK ASCII art
 * `--no-esc`: Disables all ANSI escape codes and colour features
 * `--no-iha`: Disables Intel Hybrid Architecture-specific core counting
+    * Only available for x86
     * For example, instead of `2L/8E/6P/22T` for Intel Core Ultra 7 155H, you will get `16C/22T`
 * `--no-ip`: Disables any IP address display
+* `--no-rev`: Disables showing an ARM revision number
+    * Only available for ARM
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-S`, `--sep-col`: Specifies a custom separator colour; no assignment returns the current colour and exits

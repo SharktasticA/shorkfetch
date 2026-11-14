@@ -36,18 +36,20 @@ Config CONFIG = {
     0,
     "log,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
     'p',
-    NORMAL,
+    VM_NORMAL,
     1,
     1,
     1,
     1,
-    1
+    1,
+    0
 };
 char FIELDS[MAX_FIELDS][5];
 int NO_FIELDS = 0;
 
 
 
+#if defined(__x86_64__) || defined(__i386__)
 void abdMenu(void)
 {
     toggleOptionMenu("AMD Bulldozer support",
@@ -59,6 +61,7 @@ void abdMenu(void)
             "would be \"4F/8I\" instead of \"4C/8T\".",
         &CONFIG.showABD, 0);
 }
+#endif
 
 /**
  * Shows a menu of possible field types to select.
@@ -143,6 +146,15 @@ int addField(void)
 
     return -1;
 }
+
+#if defined(__aarch64__) || defined(__arm__)
+void armRevMenu(void)
+{
+    toggleOptionMenu("ARM revision number",
+        "Controls whether the ARM revision number is shown",
+        &CONFIG.showRev, 0);
+}
+#endif
 
 void asciiArtMenu(void)
 {
@@ -568,6 +580,7 @@ void escCodesMenu(void)
         &CONFIG.showEsc, 0);
 }
 
+#if defined(__x86_64__) || defined(__i386__)
 void ihaMenu(void)
 {
     toggleOptionMenu("Intel Hybrid Architecture support",
@@ -579,6 +592,7 @@ void ihaMenu(void)
             "instead of \"16C/22T\".",
         &CONFIG.showIHA, 0);
 }
+#endif
 
 void ipMenu(void)
 {
@@ -607,8 +621,15 @@ int mainMenu(void)
         { "esc", "Escape codes", "", escCodesMenu, 1, 0 },
         { "ipa", "IP addresses", "", ipMenu, 1, 0 },
         { "unt", "Maximum data unit", "", maxUnitMenu, 1, 0 },
+#if defined(__x86_64__) || defined(__i386__)
         { "abd", "AMD Bulldozer support", "", abdMenu, 1, 0 },
+#endif
+#if defined(__aarch64__) || defined(__arm__)
+        { "rev", "ARM revision number", "", armRevMenu, 1, 0 },
+#endif
+#if defined(__x86_64__) || defined(__i386__)
         { "iha", "Intel Hybrid Architecture support", "", ihaMenu, 1, 0 },
+#endif
         { "acc", "Colour for accents", "", colAccMenu, 1, 0 },
         { "bul", "Colour for bullets", "", colBulMenu, 1, 0 },
         { "pcl", "Colour for low \%", "", colPclMenu, 1, 0 },

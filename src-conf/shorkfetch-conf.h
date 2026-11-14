@@ -27,8 +27,16 @@ extern int NO_FIELDS;
 
 
 
+#if defined(__x86_64__) || defined(__i386__)
 void abdMenu(void);
+#endif
+
 int addField(void);
+
+#if defined(__aarch64__) || defined(__arm__)
+void armRevMenu(void);
+#endif
+
 void asciiArtMenu(void);
 void bulletCharMenu(void);
 void colAccMenu(void);
@@ -42,7 +50,11 @@ void compViewMenu(void);
 void escCodesMenu(void);
 int fieldActionsMenu(char*, const int);
 void fieldsMenu(void);
+
+#if defined(__x86_64__) || defined(__i386__)
 void ihaMenu(void);
+#endif
+
 void ipMenu(void);
 int mainMenu(void);
 void maxUnitMenu(void);
