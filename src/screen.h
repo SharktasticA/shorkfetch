@@ -15,6 +15,10 @@
 #ifndef SCREEN
 #define SCREEN
 
+#define SCREEN_LEN  128
+
+
+
 typedef struct {
     // Connector name (e.g., DP-1)
     char *connector;

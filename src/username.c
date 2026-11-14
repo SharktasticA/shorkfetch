@@ -19,8 +19,8 @@
 
 
 /**
- * @return String containing the current username;"unknown" if undetermined/
- *         error
+ * @return String containing the current username; "unknown" if
+ *         undetermined/error
  */
 char *getUsername(void)
 {

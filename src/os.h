@@ -20,6 +20,10 @@
 
 
 
+#define OS_LEN              128
+
+
+
 char *getOS(struct utsname, int);
 
 #endif

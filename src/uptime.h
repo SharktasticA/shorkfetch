@@ -16,6 +16,10 @@
 #ifndef UPTIME
 #define UPTIME
 
+#define UPTIME_LEN  128
+
+
+
 char *getUptime(void);
 
 #endif

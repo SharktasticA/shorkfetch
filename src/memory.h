@@ -16,6 +16,10 @@
 #ifndef MEMORY
 #define MEMORY
 
+#define RAM_LEN     64
+
+
+
 typedef struct {
     long memTotal;
     long memFree;

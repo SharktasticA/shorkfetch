@@ -69,8 +69,7 @@ MemInfo getMemInfo(void)
 char *getRAM(MemInfo mi, char *colPctLow, char *colPctMed, char *colPctHigh,
     const char *colReset)
 {
-    const int ramSize = 64;
-    char *ram = malloc(ramSize);
+    char *ram = malloc(RAM_LEN);
     if (!ram)
         return NULL;
     ram[0] = '\0';
@@ -87,11 +86,11 @@ char *getRAM(MemInfo mi, char *colPctLow, char *colPctMed, char *colPctHigh,
             col = colPctHigh;
         else if (pct >= 50)
             col = colPctMed;
-        snprintf(ram, ramSize, "%s / %s (%s%d%%%s)", usedStr, totalStr, col,
+        snprintf(ram, RAM_LEN, "%s / %s (%s%d%%%s)", usedStr, totalStr, col,
             pct, colReset);
     }
     else
-        snprintf(ram, ramSize, "%s / %s", usedStr, totalStr);
+        snprintf(ram, RAM_LEN, "%s / %s", usedStr, totalStr);
     
     free(usedStr);
     free(totalStr);
@@ -112,8 +111,7 @@ char *getSwap(MemInfo mi, char *colPctLow, char *colPctMed,
     if (mi.swapTotal == 0)
         return strdup("");
 
-    const int swapSize = 64;
-    char *swap = malloc(swapSize);
+    char *swap = malloc(RAM_LEN);
     if (!swap)
         return strdup("");
     swap[0] = '\0';
@@ -130,10 +128,10 @@ char *getSwap(MemInfo mi, char *colPctLow, char *colPctMed,
             col = colPctHigh;
         else if (pct >= 50)
             col = colPctMed;
-        snprintf(swap, swapSize, "%s / %s (%s%d%%%s)", usedStr, totalStr,
+        snprintf(swap, RAM_LEN, "%s / %s (%s%d%%%s)", usedStr, totalStr,
             col, pct, colReset);
     }
-    else snprintf(swap, swapSize, "%s / %s", usedStr, totalStr);
+    else snprintf(swap, RAM_LEN, "%s / %s", usedStr, totalStr);
 
     free(usedStr);
     free(totalStr);

@@ -26,20 +26,19 @@
 /**
  * @param u Parsed uname data
  * @param uStatus The status returned from uname attempt
- * @return String containing the kernel version or "unknown" if
- *         undetermined/error
+ * @return String containing the kernel version; NULL if undetermined/error
  */
 char *getKernel(struct utsname u, int uStatus)
 {
     if (uStatus != 0)
-        return strdup("unknown");
+        return NULL;
     const char *src = u.release;
 
     if (!COMPACT)
     {
         char *release = malloc(strlen(src) + 1);
         if (!release)
-            return strdup("unknown");
+            return NULL;
         strcpy(release, u.release);
         return release; 
     }
@@ -57,7 +56,7 @@ char *getKernel(struct utsname u, int uStatus)
 
         char *release = malloc(i + 1);
         if (!release)
-            return strdup("unknown");
+            return NULL;
         memcpy(release, src, i);
         release[i] = '\0';
         return release;

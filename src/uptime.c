@@ -15,6 +15,8 @@
 
 #include "../shorkcommon/shorkmenu.h"
 
+#include "uptime.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,12 +25,13 @@
 
 
 /**
- * @return String containing uptime or "unknown" if undetermined/error
+ * @return String containing uptime; NULL if undetermined/error
  */
 char *getUptime(void)
 {
-    char *uptime = malloc(128);
-    if (!uptime) return strdup("unknown");
+    char *uptime = malloc(UPTIME_LEN);
+    if (!uptime)
+        return NULL;
     uptime[0] = '\0'; 
 
     FILE *fStream = fopen("/proc/uptime", "r");
@@ -45,27 +48,27 @@ char *getUptime(void)
             if (!COMPACT)
             {
                 if (days > 0)
-                    snprintf(uptime, 128, "%dd, %dh, %dm", days, hours,
-                    minutes);
+                    snprintf(uptime, UPTIME_LEN, "%dd, %dh, %dm", days,
+                        hours, minutes);
                 else if (hours > 0)
-                    snprintf(uptime, 128, "%dh, %dm", hours, minutes);
+                    snprintf(uptime, UPTIME_LEN, "%dh, %dm", hours,
+                        minutes);
                 else
-                    snprintf(uptime, 128, "%dm", minutes);
+                    snprintf(uptime, UPTIME_LEN, "%dm", minutes);
             }
             else
             {
                 if (days > 0)
-                    snprintf(uptime, 128, "%dd:%dh:%dm", days, hours,
+                    snprintf(uptime, UPTIME_LEN, "%dd:%dh:%dm", days, hours,
                     minutes);
                 else if (hours > 0)
-                    snprintf(uptime, 128, "%dh:%dm", hours, minutes);
+                    snprintf(uptime, UPTIME_LEN, "%dh:%dm", hours, minutes);
                 else
-                    snprintf(uptime, 128, "%dm", minutes);
+                    snprintf(uptime, UPTIME_LEN, "%dm", minutes);
             }
         }
         fclose(fStream);
     }
-    else strcpy(uptime, "unknown");
 
     return uptime;
 }

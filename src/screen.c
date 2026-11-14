@@ -247,8 +247,7 @@ char *interpretScreen(Screen *screen)
     if (screen->resX <= 0 || screen->resY <= 0)
         return NULL;
 
-    const int SCREEN_SIZE = 128;
-    char *screenStr = malloc(SCREEN_SIZE);
+    char *screenStr = malloc(SCREEN_LEN);
 
     // Prepare physical screen size (NOT PRESENTLY USED PENDING ACCURACY
     // IMPROVEMENTS)
@@ -288,10 +287,10 @@ char *interpretScreen(Screen *screen)
 
     // Assemble the string
     if (!COMPACT)
-        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s%s", screen->resX,
+        snprintf(screenStr, SCREEN_LEN, "%dx%d%s%s", screen->resX,
             screen->resY, refresh, connector);
     else
-        snprintf(screenStr, SCREEN_SIZE, "%dx%d%s", screen->resX,
+        snprintf(screenStr, SCREEN_LEN, "%dx%d%s", screen->resX,
             screen->resY, refresh);
 
     return screenStr;

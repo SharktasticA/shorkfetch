@@ -30,28 +30,27 @@
 /**
  * @param u Parsed uname data
  * @param uStatus The status returned from uname attempt
- * @return String containing the OS/Linux distro's name or "unknown" if
+ * @return String containing the OS/Linux distro's name; NULL if
  *         undetermined/error
  */
 char *getOS(struct utsname u, int uStatus)
 {
-    const int osSize = 128;
-    char *os = malloc(osSize);
+    char *os = malloc(OS_LEN);
     if (!os)
-        return strdup("unknown");
+        return NULL;
     os[0] = '\0';
 
     // Try os-release
     FILE *fStream = fopen("/etc/os-release", "r");
     if (fStream)
     {
-        char buffer[128];
+        char buffer[OS_LEN];
         while (fgets(buffer, sizeof(buffer), fStream))
         {
             if (strncmp(buffer, "PRETTY_NAME=", 12) == 0)
             {
-                char *extract = extractFromPoint(buffer, osSize, '=');
-                strncpy(os, extract, osSize - 1);
+                char *extract = extractFromPoint(buffer, OS_LEN, '=');
+                strncpy(os, extract, OS_LEN - 1);
                 free(extract);
                 break;
             }
@@ -65,7 +64,7 @@ char *getOS(struct utsname u, int uStatus)
         fStream = fopen("/etc/issue", "r");
         if (fStream)
         {
-            char buffer[osSize];
+            char buffer[OS_LEN];
             if (fgets(buffer, sizeof(buffer), fStream))
             {
                 int len = strlen(buffer);
@@ -74,8 +73,8 @@ char *getOS(struct utsname u, int uStatus)
                 char *p = strchr(buffer, '\\');
                 if (p)
                     *p = '\0';
-                strncpy(os, buffer, osSize - 1);
-                os[osSize - 1] = '\0';
+                strncpy(os, buffer, OS_LEN - 1);
+                os[OS_LEN - 1] = '\0';
             }
             fclose(fStream);
         }
@@ -84,11 +83,14 @@ char *getOS(struct utsname u, int uStatus)
     // Try uname -o
     if (os[0] == '\0')
         if (uStatus == 0)
-            strncpy(os, u.sysname, osSize - 1);
+            strncpy(os, u.sysname, OS_LEN - 1);
 
     // Fallback
     if (os[0] == '\0')
-        strcpy(os, "unknown");
+    {
+        free(os);
+        return NULL;
+    }
 
     // If the name is wrapped in apostrophes, remove them
     if (os[0] == '\'')
@@ -126,11 +128,11 @@ char *getOS(struct utsname u, int uStatus)
                 continue;
             else if (strstr(os, COMPACT_OS_REPLACES[i].match))
             {
-                char *tmp = findReplace(os, osSize,
+                char *tmp = findReplace(os, OS_LEN,
                     COMPACT_OS_REPLACES[i].match,
                     COMPACT_OS_REPLACES[i].replacement);
-                strncpy(os, tmp, osSize - 1);
-                os[osSize - 1] = '\0';
+                strncpy(os, tmp, OS_LEN - 1);
+                os[OS_LEN - 1] = '\0';
                 free(tmp);
                 replaces++;
             }

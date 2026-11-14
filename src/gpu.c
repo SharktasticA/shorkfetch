@@ -711,7 +711,7 @@ char *interpretGPU(GPU_IDS *gpu, const char *os)
 {
     char *gpuStr = malloc(GPU_NAME_LEN);
     if (!gpuStr)
-        return strdup("unknown");
+        return NULL;
     gpuStr[0] = '\0';
 
 
