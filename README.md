@@ -69,34 +69,35 @@ Below are some optional parameters you can include when running `make` or `make 
 
 ### SHORKFETCH Options
 
+* `--abd=0|1`: Disable/enable AMD Bulldozer family-specific core counting; no assignment returns the current setting and exits
+    * Only available for x86
+    * Enabled: (e.g.) `AMD FX-8350 (4F/8I)`
+    * Disabled: (e.g.) `AMD FX-8350 (4C/8T)`
 * `-a`, `--accent-col`: Specifies a custom accent colour; no assignment returns the current colour and exits
+* `--art=0|1`: Disable/enable SHORK ASCII art; no assignment returns the current setting and exits
 * `-b`, `--bullet`: Specifies a custom single-byte character to use with bulleted list mode and sublists; empty assignment allows lists with no bullet; no assignment returns the current character and exits
 * `-B`, `--bullet-col`: Specifies a custom bullet colour; no assignment returns the current colour and exits
 * `-c`, `--compact`: Compacts field names and field values
 * `-C`, `--conf`: Launches SHORKFETCH Configurator and exits
+* `--esc=0|1`: Disable/enable ANSI escape codes and colour features; no assignment returns the current setting and exits
 * `-f`, `--fields`: Specifies a custom fields list and order; no assignment returns the list of current fields and exits
 * `-h`, `--help`: Shows help information and exits
 * `-H`, `--high-col`: Specifies a custom high percentage colour; no assignment returns the current colour and exits
+* `--iha=0|1`: Disable/enable Intel Hybrid Architecture-specific core counting; no assignment returns the current setting and exits
+    * Only available for x86
+    * Enabled: (e.g.) `Intel Core Ultra 7 155H (2L/8E/6P/22T)`
+    * Disabled: (e.g.) `Intel Core Ultra 7 155H (16C/22T)`
+* `--ip=0|1`: Disable/enable IP address fields; no assignment returns the current setting and exits
 * `-l`, `--low-col`: Specifies a custom low percentage colour; no assignment returns the current colour and exits
 * `-u`, `--max-unit`: Specifies the largest data unit that can be displayed: [b]ytes, [k]ibi, [m]ebi, [g]ibi, [t]ebi, [p]ebi (default); no assignment returns the current unit and exits
 * `-m`, `--med-col`: Specifies a custom medium percentage colour; no assignment returns the current colour and exits
 * `-o`, `--mode`: Selects which view mode to use: [n]ormal (default), [b]ullet list; no assignment returns the current mode and exits
-* `--no-abd`: Disables AMD Bulldozer family-specific core counting
-    * Only available for x86
-    * For example, instead of `4F/8I` for AMD FX-8350, you will get `4C/8T`
-* `--no-art`: Disables the SHORK ASCII art
-* `--no-esc`: Disables all ANSI escape codes and colour features
-* `--no-iha`: Disables Intel Hybrid Architecture-specific core counting
-    * Only available for x86
-    * For example, instead of `2L/8E/6P/22T` for Intel Core Ultra 7 155H, you will get `16C/22T`
-* `--no-ip`: Disables any IP address display
-* `--no-rev`: Disables showing an ARM revision number
-    * Only available for ARM
 * `-r`, `--reset`: Resets to default, deletes configuration file and exits
+* `--rev=0|1`: Disable/enable showing ARM revision numbers; no assignment returns the current setting and exits
+    * Only available for ARM
 * `-s`, `--save`: Saves chosen options to a configuration file
 * `-S`, `--sep-col`: Specifies a custom separator colour; no assignment returns the current colour and exits
 * `-v`, `--version`: Displays version number and exits
-
 
 ### SHORKFETCH Configurator Options
 

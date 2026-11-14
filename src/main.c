@@ -49,19 +49,23 @@
 #include <getopt.h>
 
 enum {
-    OPT_NO_ABD = 256,
-    OPT_NO_ART,
-    OPT_NO_ESC,
-    OPT_NO_IHA,
-    OPT_NO_IP,
-    OPT_NO_REV
+    OPT_ABD = 256,
+    OPT_ART,
+    OPT_ESC,
+    OPT_IHA,
+    OPT_IP,
+    OPT_REV
 };
 
 static const char *shortOpts = "ha::B::b::l::m::H::S::cCf::o::u::rsv";
 
 static const struct option longOpts[] = {
     { "help",       no_argument,        0,  'h' },
+#if defined(__x86_64__) || defined(__i386__)
+    { "abd",        optional_argument,  0,  OPT_ABD },
+#endif
     { "accent-col", optional_argument,  0,  'a' },
+    { "art",        optional_argument,  0,  OPT_ART },
     { "bullet-col", optional_argument,  0,  'B' },
     { "bullet",     optional_argument,  0,  'b' },
     { "low-col",    optional_argument,  0,  'l' },
@@ -70,20 +74,16 @@ static const struct option longOpts[] = {
     { "sep-col",    optional_argument,  0,  'S' },
     { "compact",    no_argument,        0,  'c' },
     { "conf",       no_argument,        0,  'C' },
+    { "esc",        optional_argument,  0,  OPT_ESC },
     { "fields",     optional_argument,  0,  'f' },
+#if defined(__x86_64__) || defined(__i386__)
+    { "iha",        optional_argument,  0,  OPT_IHA },
+#endif
+    { "ip",         optional_argument,  0,  OPT_IP },
     { "mode",       optional_argument,  0,  'o' },
     { "max-unit",   optional_argument,  0,  'u' },
-#if defined(__x86_64__) || defined(__i386__)
-    { "no-abd",     no_argument,        0,  OPT_NO_ABD },
-#endif
-    { "no-art",     no_argument,        0,  OPT_NO_ART },
-    { "no-esc",     no_argument,        0,  OPT_NO_ESC },
-#if defined(__x86_64__) || defined(__i386__)
-    { "no-iha",     no_argument,        0,  OPT_NO_IHA },
-#endif
-    { "no-ip",      no_argument,        0,  OPT_NO_IP },
 #if defined(__aarch64__) || defined(__arm__)
-    { "no-rev",     no_argument,        0,  OPT_NO_REV },
+    { "rev",        optional_argument,  0,  OPT_REV },
 #endif
     { "reset",      no_argument,        0,  'r' },
     { "save",       no_argument,        0,  's' },
@@ -152,12 +152,29 @@ void showHelp(void)
     free(options->str);
     free(options);
 
+#if defined(__x86_64__) || defined(__i386__)
+    WORD_WRAPPED *abd = wordWrap("    --abd=0|1     Disable/enable AMD "
+        "Bulldozer family-specific core counting; no assignment returns "
+        "the current setting and exits\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", abd->str);
+    free(abd->str);
+    free(abd);
+#endif
+
     WORD_WRAPPED *accentCol = wordWrap("-a, --accent-col  Specifies a "
         "custom accent colour; no assignment returns the current colour "
         "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
     printf("%s", accentCol->str);
     free(accentCol->str);
     free(accentCol);
+
+    WORD_WRAPPED *art = wordWrap("    --art=0|1     Disable/enable SHORK "
+        "ASCII art; no assignment returns the current setting and exits\n",
+        TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", art->str);
+    free(art->str);
+    free(art);
 
     WORD_WRAPPED *bullet = wordWrap("-b, --bullet      Specifies a custom "
         "single-byte character to use with bulleted list mode and "
@@ -190,6 +207,14 @@ void showHelp(void)
     free(conf->str);
     free(conf);
 
+    WORD_WRAPPED *esc = wordWrap("    --esc=0|1     Disable/enable ANSI "
+        "escape codes and colour features; no assignment returns the "
+        "current setting and exits\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", esc->str);
+    free(esc->str);
+    free(esc);
+
     WORD_WRAPPED *fields = wordWrap("-f, --fields      Specifies a custom "
         "fields list and order; no assignment returns list of current "
         "fields and exits\n", TERM_SIZE.ws_col, "                  ", NULL,
@@ -212,6 +237,23 @@ void showHelp(void)
     printf("%s", highCol->str);
     free(highCol->str);
     free(highCol);
+
+#if defined(__x86_64__) || defined(__i386__)
+    WORD_WRAPPED *iha = wordWrap("    --iha=0|1     Disable/enable Intel "
+        "Hybrid Architecture-specific core counting; no assignment returns "
+        "the current setting and exits\n", TERM_SIZE.ws_col,
+        "                  ", NULL, 0, 0);
+    printf("%s", iha->str);
+    free(iha->str);
+    free(iha);
+#endif
+
+    WORD_WRAPPED *ip = wordWrap("    --ip=0|1      Disable/enable IP "
+        "address fields; no assignment returns the current setting and "
+        "exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", ip->str);
+    free(ip->str);
+    free(ip);
 
     WORD_WRAPPED *lowCol = wordWrap("-l, --low-col     Specifies a custom "
         "low percentage colour; no assignment returns the current colour "
@@ -245,59 +287,21 @@ void showHelp(void)
     free(mode->str);
     free(mode);
 
-#if defined(__x86_64__) || defined(__i386__)
-    WORD_WRAPPED *noAbd = wordWrap("    --no-abd      Disables AMD "
-        "Bulldozer family-specific core counting\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
-    printf("%s", noAbd->str);
-    free(noAbd->str);
-    free(noAbd);
-#endif
-
-    WORD_WRAPPED *noArt = wordWrap("    --no-art      Disables the SHORK "
-        "ASCII art\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
-    printf("%s", noArt->str);
-    free(noArt->str);
-    free(noArt);
-
-    WORD_WRAPPED *noEsc = wordWrap("    --no-esc      Disables all ANSI "
-        "escape codes and colour features\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
-    printf("%s", noEsc->str);
-    free(noEsc->str);
-    free(noEsc);
-
-#if defined(__x86_64__) || defined(__i386__)
-    WORD_WRAPPED *noIha = wordWrap("    --no-iha      Disables Intel "
-        "Hybrid Architecture-specific core counting\n", TERM_SIZE.ws_col,
-        "                  ", NULL, 0, 0);
-    printf("%s", noIha->str);
-    free(noIha->str);
-    free(noIha);
-#endif
-
-    WORD_WRAPPED *noIp = wordWrap("    --no-ip       Disables any IP "
-        "address display\n", TERM_SIZE.ws_col, "                  ", NULL,
-        0, 0);
-    printf("%s", noIp->str);
-    free(noIp->str);
-    free(noIp);
-
-#if defined(__aarch64__) || defined(__arm__)
-    WORD_WRAPPED *noRev = wordWrap("    --no-rev      Disables showing an "
-        "ARM revision number\n", TERM_SIZE.ws_col, "                  ",
-        NULL, 0, 0);
-    printf("%s", noRev->str);
-    free(noRev->str);
-    free(noRev);
-#endif
-
     WORD_WRAPPED *reset = wordWrap("-r, --reset       Resets to default, "
         "deletes configuration file and exits\n", TERM_SIZE.ws_col,
         "                  ", NULL, 0, 0);
     printf("%s", reset->str);
     free(reset->str);
     free(reset);
+
+#if defined(__aarch64__) || defined(__arm__)
+    WORD_WRAPPED *rev = wordWrap("    --rev=0|1     Disable/enable showing "
+        "ARM revision numbers; no assignment returns the current setting "
+        "and exits\n", TERM_SIZE.ws_col, "                  ", NULL, 0, 0);
+    printf("%s", rev->str);
+    free(rev->str);
+    free(rev);
+#endif
 
     WORD_WRAPPED *save = wordWrap("-s, --save        Saves chosen options "
         "to a configuration file\n", TERM_SIZE.ws_col,
@@ -552,32 +556,116 @@ int main(int argc, char *argv[])
             break;
 
 #if defined(__x86_64__) || defined(__i386__)
-        case OPT_NO_ABD:
-            CONFIG.showABD = 0;
+        case OPT_ABD:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showABD);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showABD = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showABD = 1;
+            else
+            {
+                printf("ERROR: --abd takes either 0 or 1, not \"%s\"\n",
+                    optarg);
+                return 1;
+            }
             break;
 #endif
 
-        case OPT_NO_ART:
-            CONFIG.showArt = 0;
+        case OPT_ART:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showArt);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showArt = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showArt = 1;
+            else
+            {
+                printf("ERROR: --art takes either 0 or 1, not \"%s\"\n",
+                    optarg);
+                return 1;
+            }
             break;
 
-        case OPT_NO_ESC:
-            CONFIG.showEsc = 0;
+        case OPT_ESC:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showEsc);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showEsc = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showEsc = 1;
+            else
+            {
+                printf("ERROR: --esc only accepts 0 (off) or 1 (on) "
+                    "(\"%s\" given)\n", optarg);
+                return 1;
+            }
             break;
 
 #if defined(__x86_64__) || defined(__i386__)
-        case OPT_NO_IHA:
-            CONFIG.showIHA = 0;
+        case OPT_IHA:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showIHA);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showIHA = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showIHA = 1;
+            else
+            {
+                printf("ERROR: --iha only accepts 0 (off) or 1 (on) "
+                    "(\"%s\" given)\n", optarg);
+                return 1;
+            }
             break;
 #endif
 
-        case OPT_NO_IP:
-            CONFIG.showIP = 0;
+        case OPT_IP:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showIP);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showIP = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showIP = 1;
+            else
+            {
+                printf("ERROR: --ip only accepts 0 (off) or 1 (on) "
+                    "(\"%s\" given)\n", optarg);
+                return 1;
+            }
             break;
 
 #if defined(__aarch64__) || defined(__arm__)
-        case OPT_NO_REV:
-            CONFIG.showRev = 0;
+        case OPT_REV:
+            if (!optarg)
+            {
+                printf("%d\n", CONFIG.showRev);
+                return 0;
+            }
+            if (strcmp(optarg, "0") == 0)
+                CONFIG.showRev = 0;
+            else if (strcmp(optarg, "1") == 0)
+                CONFIG.showRev = 1;
+            else
+            {
+                printf("ERROR: --rev only accepts 0 (off) or 1 (on) "
+                    "(\"%s\" given)\n", optarg);
+                return 1;
+            }
             break;
 #endif
 
