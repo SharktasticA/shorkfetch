@@ -204,8 +204,8 @@ int validateFields(const char *fields, char fieldsOut[][5], int showEsc)
             }
             else
             {
-                free(fieldsCopy);
                 printf("ERROR: unrecognised field name \"%s\"\n", currTok);
+                free(fieldsCopy);
                 return -1;
             }
 
