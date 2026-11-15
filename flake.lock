@@ -1,12 +1,28 @@
 {
   "nodes": {
+    "cpuinfo-ds": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794187409,
+        "narHash": "sha256-8PvFHD5bG2728Wcw9/1Ybvs85J8ZQ+NR+4YEp7qxMEM=",
+        "owner": "SharktasticA",
+        "repo": "cpuinfo-ds",
+        "rev": "c45125f71ae38ab04af3e2338b591645f2d2b1d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "SharktasticA",
+        "repo": "cpuinfo-ds",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1779560665,
-        "narHash": "sha256-tpyBcxPpcQb8ukyNF7DoCwfSY3VPsxHoYwj00Cayv5o=",
+        "lastModified": 1794537146,
+        "narHash": "sha256-Wpz/7x/YWnDIBu7yj6ixe8j6fIMsidd9Y+o1PqPF3iM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "64c08a7ca051951c8eae34e3e3cb1e202fe36786",
+        "rev": "d5cc6833999746cffdfe0598f7bc801a57b887a9",
         "type": "github"
       },
       "original": {
@@ -18,7 +34,25 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "cpuinfo-ds": "cpuinfo-ds",
+        "nixpkgs": "nixpkgs",
+        "shorkcommon": "shorkcommon"
+      }
+    },
+    "shorkcommon": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794708188,
+        "narHash": "sha256-jH4NSDORUbA83RKZ1XMbuXYlcZKxM3yg0kbvoCS6be8=",
+        "owner": "SharktasticA",
+        "repo": "shorkcommon",
+        "rev": "22078d5e08a7e8a7b1fee5bee334918d703d7e6f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "SharktasticA",
+        "repo": "shorkcommon",
+        "type": "github"
       }
     }
   },
