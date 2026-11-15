@@ -13,13 +13,9 @@ sync_dir()
     URL="$2"
     COMMIT="$3"
 
-    if [ "$(cat "$DIR/.commit" 2>/dev/null)" = "$COMMIT" ]; then
-        return
-    fi
-
     TARBALL="$(mktemp)"
     trap 'rm -f "$TARBALL"' EXIT
-    wget -q -O "$TARBALL" "$URL/archive/$COMMIT.tar.gz"
+    wget -O "$TARBALL" "$URL/archive/$COMMIT.tar.gz"
 
     rm -rf "$DIR"
     mkdir -p "$DIR"

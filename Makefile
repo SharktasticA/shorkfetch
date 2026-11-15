@@ -2,7 +2,7 @@ CC ?= gcc
 AR ?= ar
 RANLIB ?= ranlib
 STRIP ?= strip
-LIBS ?=
+LIBS ?= -ldl
 VERSION = 0.7-wip
 
 ifeq ($(SKIP_SUBMODULE_SYNC),)
