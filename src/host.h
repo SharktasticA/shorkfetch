@@ -25,7 +25,8 @@ static const char *DMI_JUNK[] = {
     "To be filled by O.E.M.",
     "Not Available",
     "None",
-    "No Asset Tag"
+    "No Asset Tag",
+    "Default string"
 };
 static const int DMI_JUNK_LEN = sizeof(DMI_JUNK) / sizeof(DMI_JUNK[0]);
 
