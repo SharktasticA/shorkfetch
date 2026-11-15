@@ -81,6 +81,7 @@ static const struct REPLACEMENT COMPANY_REPLACES[] = {
     { "ASUSTeK COMPUTER",           "ASUS",     0 },
     { "LENOVO",                     "Lenovo",   0 },
     { "Micro-Star International",   "MSI",      0 },
+    { "SAMSUNG ELECTRONICS",        "Samsung",  0 }
 };
 static const int COMPANY_REPLACES_LEN = sizeof(COMPANY_REPLACES) /
     sizeof(COMPANY_REPLACES[0]);
