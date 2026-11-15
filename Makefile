@@ -6,7 +6,7 @@ LIBS ?=
 VERSION = 0.7-wip
 
 ifeq ($(wildcard shorkcommon/.git),)
-$(shell git submodule update --init shorkcommon)
+    _ := $(shell git submodule update --init shorkcommon >&2)
 endif
 
 CFLAGS += -DVERSION='"$(VERSION)"' -Wall -Wextra -D_GNU_SOURCE -std=gnu99 \
@@ -64,6 +64,6 @@ uninstall:
 	rm -f /home/$(SUDO_USER)/.config/shorkutils/shorkfetch.conf
 
 clean:
-	rm -f shorkfetch shorkfetch-conf
+	rm -rf shorkfetch shorkfetch-conf shorkcommon
 
 .PHONY: all install uninstall clean
