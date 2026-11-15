@@ -66,7 +66,8 @@ static const char *EXCLUDED_TERMINAL_PROCS[] = {
     "xinit",
     "cinnamon",
     "tmux",
-    "screen"
+    "screen",
+    "Relay"
 };
 static const int EXCLUDED_TERMINAL_PROCS_LEN = 
     sizeof(EXCLUDED_TERMINAL_PROCS) / sizeof(EXCLUDED_TERMINAL_PROCS[0]);
