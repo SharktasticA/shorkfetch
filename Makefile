@@ -5,38 +5,38 @@ STRIP ?= strip
 LIBS ?=
 VERSION = 0.7-wip
 
-ifeq ($(wildcard shorkcommon/.git),)
-    _ := $(shell git submodule update --init shorkcommon >&2)
+ifeq ($(SKIP_SUBMODULE_SYNC),)
+    _ := $(shell sh ./sync-submodules.sh >&2)
 endif
 
 CFLAGS += -DVERSION='"$(VERSION)"' -Wall -Wextra -D_GNU_SOURCE -std=gnu99 \
-	-I. -O3 -flto=auto -fno-plt
+    -I. -O3 -flto=auto -fno-plt
 
 ifdef SHORK_DISKETTE
-	CFLAGS += -DSHORK_DISKETTE
+    CFLAGS += -DSHORK_DISKETTE
     LIBS += -ldl
 endif
 
 ifdef NO_STR_CLEANING
-	CFLAGS += -DNO_STR_CLEANING
+    CFLAGS += -DNO_STR_CLEANING
 endif
 
 ifdef TESTS
-	CFLAGS += -DTESTS
+    CFLAGS += -DTESTS
 endif
 
 ifdef X86_ONLY
-	CFLAGS += -DX86_ONLY
+    CFLAGS += -DX86_ONLY
 endif
 
 SRC = $(wildcard src/*.c) $(wildcard shorkcommon/*.c)
 SRC_CONF = $(wildcard src/conf.c) $(wildcard src-conf/*.c) \
-	$(wildcard shorkcommon/*.c)
+    $(wildcard shorkcommon/*.c)
 
 PROGS = shorkfetch
 ifndef SHORK_DISKETTE
 ifndef TESTS
-	PROGS += shorkfetch-conf
+    PROGS += shorkfetch-conf
 endif
 endif
 
@@ -64,6 +64,9 @@ uninstall:
 	rm -f /home/$(SUDO_USER)/.config/shorkutils/shorkfetch.conf
 
 clean:
-	rm -rf shorkfetch shorkfetch-conf shorkcommon
+	rm -f shorkfetch shorkfetch-conf
 
-.PHONY: all install uninstall clean
+distclean: clean
+	rm -rf cpuinfo-ds shorkcommon
+
+.PHONY: all install uninstall clean distclean
