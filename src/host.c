@@ -34,66 +34,65 @@ char *getHost(void)
     host[0] = '\0';
 
     size_t len = 0;
-    char valBuffer[VAL_BUFFER_LEN];
-    int gotVendor = 0;
-    int gotName = 0;
+    char venderBuffer[VAL_BUFFER_LEN] = { '\0' };
+    char prodFamilyBuffer[VAL_BUFFER_LEN] = { '\0' };
+    char boardNameBuffer[VAL_BUFFER_LEN] = { '\0' };
 
     // Try system vendor
-    if (readFile("/sys/class/dmi/id/sys_vendor", valBuffer,
+    if (readFile("/sys/class/dmi/id/sys_vendor", venderBuffer,
             VAL_BUFFER_LEN) == 0 &&
-        !isDMIValJunk(valBuffer))
+        !isDMIValJunk(venderBuffer))
     {
-        len += snprintf(host + len, HOST_LEN - len, "%s", valBuffer);
+        len += snprintf(host + len, HOST_LEN - len, "%s", venderBuffer);
         if (len > HOST_LEN - 1)
             len = HOST_LEN - 1;
-        gotVendor = 1;
     }
 
     // Try board vendor
-    if (!gotVendor && readFile("/sys/class/dmi/id/board_vendor", valBuffer,
-            VAL_BUFFER_LEN) == 0 &&
-        !isDMIValJunk(valBuffer))
+    if (len == 0 && readFile("/sys/class/dmi/id/board_vendor",
+            venderBuffer, VAL_BUFFER_LEN) == 0 &&
+        !isDMIValJunk(venderBuffer))
     {
-        len += snprintf(host + len, HOST_LEN - len, "%s", valBuffer);
+        len += snprintf(host + len, HOST_LEN - len, "%s", venderBuffer);
         if (len > HOST_LEN - 1)
             len = HOST_LEN - 1;
-        gotVendor = 1;
     }
 
-    // Try product family
-    if (readFile("/sys/class/dmi/id/product_family", valBuffer,
-            VAL_BUFFER_LEN) == 0 &&
-        !isDMIValJunk(valBuffer))
-    {
-        len += snprintf(host + len, HOST_LEN - len, "%s%s", len ? " " : "",
-            valBuffer);
-        if (len > HOST_LEN - 1)
-            len = HOST_LEN - 1;
-        gotName = 1;
-    }
+    // Get both product family and board name so we can compare them
+    readFile("/sys/class/dmi/id/product_family", prodFamilyBuffer,
+        VAL_BUFFER_LEN);
+    int prodFamilyJunk = isDMIValJunk(prodFamilyBuffer);
+    readFile("/sys/class/dmi/id/board_name", boardNameBuffer,
+        VAL_BUFFER_LEN);
+    int boardNameJunk = isDMIValJunk(boardNameBuffer);
 
-    // Try board name
-    if (!gotName && readFile("/sys/class/dmi/id/board_name", valBuffer,
-            VAL_BUFFER_LEN) == 0 &&
-        !isDMIValJunk(valBuffer))
+    if (!prodFamilyJunk && boardNameJunk)
     {
         len += snprintf(host + len, HOST_LEN - len, "%s%s", len ? " " : "",
-            valBuffer);
+            prodFamilyBuffer);
         if (len > HOST_LEN - 1)
             len = HOST_LEN - 1;
-        gotName = 1;
     }
-
-    // Try product name
-    if (!gotName && readFile("/sys/class/dmi/id/product_name", valBuffer,
-            VAL_BUFFER_LEN) == 0 &&
-        !isDMIValJunk(valBuffer))
+    else if (prodFamilyJunk && !boardNameJunk)
     {
         len += snprintf(host + len, HOST_LEN - len, "%s%s", len ? " " : "",
-            valBuffer);
+            boardNameBuffer);
         if (len > HOST_LEN - 1)
             len = HOST_LEN - 1;
-        gotName = 1;
+    }
+    // If both aren't "junk", we see if they are similar then pick the
+    // longest. Otherwise we default to product family.
+    else if (!prodFamilyJunk && !boardNameJunk)
+    {
+        const char *chosenBuffer = prodFamilyBuffer;
+        if (strncasecmp(prodFamilyBuffer, boardNameBuffer, 4) == 0 &&
+            strlen(boardNameBuffer) > strlen(prodFamilyBuffer))
+            chosenBuffer = boardNameBuffer;
+
+        len += snprintf(host + len, HOST_LEN - len, "%s%s", len ? " " : "",
+            chosenBuffer);
+        if (len > HOST_LEN - 1)
+            len = HOST_LEN - 1;
     }
 
 #ifndef NO_STR_CLEANING
@@ -140,10 +139,13 @@ char *getHost(void)
 /**
  * Tests if a given /sys/class/dmi/id/... value is "junk".
  * @param str String to test
- * @return 1 if junk; 0 if not
+ * @return 1 if junk or empty; 0 if not
  */
 int isDMIValJunk(const char *str)
 {
+    if (!str || str[0] == '\0')
+        return 1;
+
     for (int i = 0; i < DMI_JUNK_LEN; i++)
         if (strcasecmp(str, DMI_JUNK[i]) == 0)
             return 1;

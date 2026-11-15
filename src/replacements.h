@@ -130,7 +130,6 @@ static const char *DELETIONS[] =
     "(R)",
     "(tm)",
     "(tm )",                            // For AMD Duron
-    "tm",
     "(TM)",
     "™",
     " APU",
@@ -150,6 +149,7 @@ static const char *DELETIONS[] =
     " processor",
     " Processor",
     " SOC",
+    " Technology",                      // For Gigabyte
     " Technologies",                    // For VIA
     " Technology LLC",                  // For Loongson
     " 2x Core/Bus Clock",               // For Cyrix 6x86
