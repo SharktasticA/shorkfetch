@@ -137,13 +137,16 @@ static const char *DELETIONS[] =
     "-compatible",                      // For ARM
     " Controller",
     " Corporation",
+    " CO.,",
     " Co.,",
+    " CO.",
     " Co.",
     " CPU",
     " family",
     " Family",
     "Genuine ",
     " Graphics Adapter",
+    " LTD.",
     " Ltd.",
     " Ltd",
     " Mobile Technology",               // For AMD Turion 64 Mobile
