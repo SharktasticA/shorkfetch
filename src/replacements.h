@@ -78,7 +78,9 @@ static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) /
 
 
 static const struct REPLACEMENT COMPANY_REPLACES[] = {
-    { "Micro-Star International",   "MSI",  0 },
+    { "ASUSTeK COMPUTER",           "ASUS",     0 },
+    { "LENOVO",                     "Lenovo",   0 },
+    { "Micro-Star International",   "MSI",      0 },
 };
 static const int COMPANY_REPLACES_LEN = sizeof(COMPANY_REPLACES) /
     sizeof(COMPANY_REPLACES[0]);
@@ -123,6 +125,7 @@ static const char *DELETIONS[] =
     ", Inc.",
     ", Inc",
     " Inc",
+    " INC.",
     "(R)",
     "(tm)",
     "(tm )",                            // For AMD Duron

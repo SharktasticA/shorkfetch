@@ -344,10 +344,11 @@ void showHelp(void)
     free(colours->str);
     free(colours);
 
-    WORD_WRAPPED *fieldNames = wordWrap("Fields: log (user@hostname), os, "
-        "krn, upt, pkgs, loc, scn, de, wm, trm, sh, cpu, gpu, ram, swap, "
-        "dsk, root, lip, xip, clrs, clba, clbr, --- (separator), single "
-        "blank space (blank line)\n", TERM_SIZE.ws_col, NULL, NULL, 0, 0);
+    WORD_WRAPPED *fieldNames = wordWrap("Fields: log (user@hostname), "
+        "host, os, krn, upt, pkgs, loc, scn, de, wm, trm, sh, cpu, gpu, "
+        "ram, swap, dsk, root, lip, xip, clrs, clba, clbr, "
+        "--- (separator), single blank space (blank line)\n",
+        TERM_SIZE.ws_col, NULL, NULL, 0, 0);
     printf("%s", fieldNames->str);
     free(fieldNames->str);
     free(fieldNames);

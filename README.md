@@ -12,8 +12,13 @@ In terms of "cleaner output", SHORKFETCH has a comprehensive focus on providing 
 
 SHORKFETCH is young, and I would love to hear from you if you have tried SHORKFETCH and found that (in particular) the **CPU, DE, WM and/or GPU fields** were incorrect or imprecise, or in your opinion, were overly verbose, containing marks like "(R)", "TM", etc. and could likely be shortened without compromising understanding. Feel free to create an issue here or contact me via [email](https://sharktastica.co.uk/contact), Discord (@sharktastica) or Reddit (u/sharktastica), and I will take your feedback on board! Please include a screenshot of your SHORKFETCH's output, some context about your system's real specifications and environment, and especially the following, depending on the issue:
 
-* CPU: `cat /proc/cpuinfo`
+* Host:
+    * `cat /sys/class/dmi/id/sys_vendor`
+    * `cat /sys/class/dmi/id/board_vendor`
+    * `cat /sys/class/dmi/id/product_family`
+    * `cat /sys/class/dmi/id/board_name`
 * DE/WM: `echo $XDG_CURRENT_DESKTOP`
+* CPU: `cat /proc/cpuinfo`
 * GPU: `lspci -nn | grep 0300`
 
 
