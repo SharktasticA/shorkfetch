@@ -2,9 +2,9 @@
 
 set -e
 
-SHORKCOMMON_URL="https://github.com/SharktasticA/shorkcommon.git"
+SHORKCOMMON_URL="https://github.com/SharktasticA/shorkcommon"
 SHORKCOMMON_COMMIT="22078d5e08a7e8a7b1fee5bee334918d703d7e6f"
-CPUINFO_DS_URL="https://github.com/SharktasticA/cpuinfo-ds.git"
+CPUINFO_DS_URL="https://github.com/SharktasticA/cpuinfo-ds"
 CPUINFO_DS_COMMIT="c45125f71ae38ab04af3e2338b591645f2d2b1d4"
 
 sync_dir()
@@ -13,13 +13,21 @@ sync_dir()
     URL="$2"
     COMMIT="$3"
 
-    if [ "$(git -C "$DIR" rev-parse HEAD 2>/dev/null)" = "$COMMIT" ]; then
+    if [ "$(cat "$DIR/.commit" 2>/dev/null)" = "$COMMIT" ]; then
         return
     fi
 
+    TARBALL="$(mktemp)"
+    trap 'rm -f "$TARBALL"' EXIT
+    wget -q -O "$TARBALL" "$URL/archive/$COMMIT.tar.gz"
+
     rm -rf "$DIR"
-    git clone -q "$URL" "$DIR"
-    git -C "$DIR" checkout -q "$COMMIT"
+    mkdir -p "$DIR"
+    tar -xzf "$TARBALL" -C "$DIR" --strip-components=1
+    echo "$COMMIT" > "$DIR/.commit"
+
+    rm -f "$TARBALL"
+    trap - EXIT
 }
 
 if [ -e .git ]; then
