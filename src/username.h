@@ -2,8 +2,8 @@
     ######################################################
     ##            SHORK UTILITY - SHORKFETCH            ##
     ######################################################
-    ## Functions and data relating to handle the user's ##
-    ## username                                         ##
+    ## Functions and data relating to handling the      ##
+    ## user's username                                  ##
     ######################################################
     ## Licence: GNU GENERAL PUBLIC LICENSE Version 3    ##
     ######################################################

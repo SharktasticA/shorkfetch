@@ -27,7 +27,7 @@ Config CONFIG = {
     "yellow",
     "off",
     0,
-    "log,---,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
+    "log,---,host,os,krn,upt,pkgs,loc,scn,de,wm,trm,sh,cpu,gpu,ram,swap,dsk,root,lip, ,clrs, ",
     'p',
     VM_NORMAL,
     1,

@@ -25,6 +25,7 @@
 #include "disk.h"
 #include "globals.h"
 #include "gpu.h"
+#include "host.h"
 #include "hostname.h"
 #include "ip.h"
 #include "kernel.h"
@@ -955,6 +956,29 @@ int main(int argc, char *argv[])
                             username, hostname);
                     }
             }
+        }
+        else if (strcmp(fieldsProcessed[i], "host") == 0)
+        {
+            char *host = getHost();
+            if (host && host[0] != '\0')
+            {
+                if (!CONFIG.showEsc) printShorkLine(0);
+                if (CONFIG.mode == VM_NORMAL)
+                {
+                    if (!COMPACT)
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sHost:%s     %s\n",
+                            colAccent, colReset, host);
+                    else
+                        outputPos += writeOutput(output + outputPos,
+                            OUTPUT_LEN - outputPos, "%sHst:%s %s\n",
+                            colAccent, colReset, host);
+                }
+                else
+                    outputPos += writeOutput(output + outputPos,
+                        OUTPUT_LEN - outputPos, "%s%s\n", icon, host);
+            }
+            free(host);
         }
         else if (strcmp(fieldsProcessed[i], "os") == 0)
         {

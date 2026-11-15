@@ -77,6 +77,14 @@ static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) /
 
 
 
+static const struct REPLACEMENT COMPANY_REPLACES[] = {
+    { "Micro-Star International",   "MSI",  0 },
+};
+static const int COMPANY_REPLACES_LEN = sizeof(COMPANY_REPLACES) /
+    sizeof(COMPANY_REPLACES[0]);
+
+
+
 static const struct REPLACEMENT COMPACT_GPU_REPLACES[] = {
     { " Adapter",               "",             0 },
     { "Express ",               "",             0 },
@@ -125,12 +133,15 @@ static const char *DELETIONS[] =
     "-compatible",                      // For ARM
     " Controller",
     " Corporation",
+    " Co.,",
+    " Co.",
     " CPU",
     " family",
     " Family",
     "Genuine ",
     " Graphics Adapter",
     " Ltd.",
+    " Ltd",
     " Mobile Technology",               // For AMD Turion 64 Mobile
     " processor",
     " Processor",
