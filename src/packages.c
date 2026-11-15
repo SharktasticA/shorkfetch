@@ -33,7 +33,7 @@
 
 /**
  * Gets a count of various Linux package standards including dpkg, emerge,
- * pacman, pkgtool, rpm, flat and snap.
+ * pacman, pkgtool, rpm, nix, flat and snap.
  * @return String containing all of the found/applicable package counts
  */
 char *getPackages(const char *os)
@@ -52,6 +52,7 @@ char *getPackages(const char *os)
     int pacmanCount = 0;
     int pkgtoolCount = 0;
     int rpmCount = 0;
+    int nixCount = 0;
     int flatCount = 0;
     int snapCount = 0;
 
@@ -201,6 +202,18 @@ char *getPackages(const char *os)
         }
     }
 
+    // Get Nix packages by capturing nix-store's output
+    if (isProgramInstalled("nix-store", 0))
+    {
+        FILE *fStream = popen("nix-store -q --references "
+            "/run/current-system/sw 2>/dev/null | wc -l", "r");
+        if (fStream)
+        {
+            fscanf(fStream, "%d", &nixCount);
+            pclose(fStream);
+        }
+    }
+
     // Get Flatpak packages
     if (isProgramInstalled("flatpak", 0))
     {
@@ -334,6 +347,9 @@ char *getPackages(const char *os)
     if (rpmCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
             COMPACT ? ":%d(R)" : ", %d (rpm)", rpmCount);
+    if (nixCount > 0)
+        snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
+            COMPACT ? ":%d(N)" : ", %d (nix)", nixCount);
     if (flatCount > 0)
         snprintf(pkgs + strlen(pkgs), PACKAGES_LEN - strlen(pkgs),
             COMPACT ? ":%d(F)" : ", %d (flat)", flatCount);
