@@ -125,8 +125,9 @@ static const char *DELETIONS[] =
 {
     ", Inc.",
     ", Inc",
-    " Inc",
     " INC.",
+    " Inc.",
+    " Inc",
     "(R)",
     "(tm)",
     "(tm )",                            // For AMD Duron
