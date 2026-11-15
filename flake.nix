@@ -1,6 +1,8 @@
 {
-    description = "A cute shark-themed Linux fetch tool designed with speed, consistent output and vintage PC CPU & GPU support in mind";
+    description = "A cute, shark-themed Linux fetch tool that displays system, hardware, and environment information in a summarised format";
     inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    inputs.self.submodules = true;
+
     outputs = { nixpkgs, ... }:
     {
         packages = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "i686-linux" ]
@@ -13,12 +15,12 @@
                     src = ./.;
 
                     nativeBuildInputs = [
-                        pkgs.gcc 
-                        pkgs.gnumake 
+                        pkgs.gcc
+                        pkgs.gnumake
                     ];
 
                     buildInputs = [
-                        pkgs.glibc 
+                        pkgs.glibc
                     ];
 
                     makeFlags = [ "PREFIX=$(out)" ];
