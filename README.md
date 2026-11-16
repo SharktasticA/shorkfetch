@@ -130,6 +130,7 @@ Below are possible field names you can use with the `--fields` argument. You ent
 | (single blank space) | (blank line) | 1 | ✓ |
 | `---` | (separator) | 1 | ✓ |
 | `log` | Login (user@hostname) | 1 | ✓ |
+| `host` | Host computer | 1 | ✓ |
 | `os` | Operating system | 1 | ✓ |
 | `krn` | Kernel | 1 | ✓ |
 | `upt` | Uptime | 1 | ✓ |
