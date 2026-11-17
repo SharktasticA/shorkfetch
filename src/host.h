@@ -33,6 +33,7 @@ static const int DMI_JUNK_LEN = sizeof(DMI_JUNK) / sizeof(DMI_JUNK[0]);
 
 
 char *getHost(void);
+int inWSL(void);
 int isDMIValJunk(const char*);
 
 #endif

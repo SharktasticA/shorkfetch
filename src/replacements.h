@@ -101,7 +101,8 @@ static const int COMPACT_GPU_REPLACES_LEN = sizeof(COMPACT_GPU_REPLACES) /
 
 
 static const struct REPLACEMENT COMPACT_HOST_REPLACES[] = {
-    { "virtual machine", "VM",     0 },
+    { "Windows Subsystem for Linux",    "WSL",      0 },
+    { "virtual machine",                "VM",       0 },
 };
 static const int COMPACT_HOST_REPLACES_LEN = sizeof(COMPACT_HOST_REPLACES) /
     sizeof(COMPACT_HOST_REPLACES[0]);
