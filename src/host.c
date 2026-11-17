@@ -58,6 +58,13 @@ char *getHost(void)
             len = HOST_LEN - 1;
     }
 
+    // Check if we're in a virtualisation platform
+    if (!strncasecmp(host, "vmware", 6))
+    {
+        snprintf(host, HOST_LEN, "VMware virtual machine");
+        return host;
+    }
+
     // Get both product family and board name so we can compare them
     readFile("/sys/class/dmi/id/product_family", prodFamilyBuffer,
         VAL_BUFFER_LEN);
@@ -129,6 +136,24 @@ char *getHost(void)
             strncpy(host, tmp, HOST_LEN - 1);
             host[HOST_LEN - 1] = '\0';
             free(tmp);
+        }
+    }
+
+    // Apply compact replacements
+    replaces = 0;
+    for (int i = 0; i < COMPACT_HOST_REPLACES_LEN; i++)
+    {
+        if (COMPACT_HOST_REPLACES[i].standalone && replaces > 0)
+            continue;
+        else if (strstr(host, COMPACT_HOST_REPLACES[i].match))
+        {
+            char *tmp = findReplace(host, HOST_LEN,
+                COMPACT_HOST_REPLACES[i].match,
+                COMPACT_HOST_REPLACES[i].replacement);
+            strncpy(host, tmp, HOST_LEN - 1);
+            host[HOST_LEN - 1] = '\0';
+            free(tmp);
+            replaces++;
         }
     }
 #endif

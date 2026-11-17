@@ -77,17 +77,6 @@ static const int COMPACT_CPU_REPLACES_LEN = sizeof(COMPACT_CPU_REPLACES) /
 
 
 
-static const struct REPLACEMENT COMPANY_REPLACES[] = {
-    { "ASUSTeK COMPUTER",           "ASUS",     0 },
-    { "LENOVO",                     "Lenovo",   0 },
-    { "Micro-Star International",   "MSI",      0 },
-    { "SAMSUNG ELECTRONICS",        "Samsung",  0 }
-};
-static const int COMPANY_REPLACES_LEN = sizeof(COMPANY_REPLACES) /
-    sizeof(COMPANY_REPLACES[0]);
-
-
-
 static const struct REPLACEMENT COMPACT_GPU_REPLACES[] = {
     { " Adapter",               "",             0 },
     { "Express ",               "",             0 },
@@ -111,6 +100,14 @@ static const int COMPACT_GPU_REPLACES_LEN = sizeof(COMPACT_GPU_REPLACES) /
 
 
 
+static const struct REPLACEMENT COMPACT_HOST_REPLACES[] = {
+    { "virtual machine", "VM",     0 },
+};
+static const int COMPACT_HOST_REPLACES_LEN = sizeof(COMPACT_HOST_REPLACES) /
+    sizeof(COMPACT_HOST_REPLACES[0]);
+
+
+
 static const struct REPLACEMENT COMPACT_OS_REPLACES[] = {
     { " GNU/Linux", "",     0 },
     { " INDEV",     "",     0 },
@@ -118,6 +115,17 @@ static const struct REPLACEMENT COMPACT_OS_REPLACES[] = {
 };
 static const int COMPACT_OS_REPLACES_LEN = sizeof(COMPACT_OS_REPLACES) /
     sizeof(COMPACT_OS_REPLACES[0]);
+
+
+
+static const struct REPLACEMENT COMPANY_REPLACES[] = {
+    { "ASUSTeK COMPUTER",           "ASUS",     0 },
+    { "LENOVO",                     "Lenovo",   0 },
+    { "Micro-Star International",   "MSI",      0 },
+    { "SAMSUNG ELECTRONICS",        "Samsung",  0 }
+};
+static const int COMPANY_REPLACES_LEN = sizeof(COMPANY_REPLACES) /
+    sizeof(COMPANY_REPLACES[0]);
 
 
 
@@ -142,6 +150,7 @@ static const char *DELETIONS[] =
     " CO.",
     " Co.",
     " CPU",
+    " Desktop Reference Platform",      // For VMware
     " family",
     " Family",
     "Genuine ",
