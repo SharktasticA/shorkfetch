@@ -251,6 +251,12 @@ void testInterpretGPU(void)
             0xC1
         },
         {
+            "Intel 82810 (CGC) Chipset Graphics Controller",
+            0x8086,
+            0x7121,
+            -1
+        },
+        {
             "NV11 [GeForce2 MX/MX 400]",
             0x10de,
             0x0110,

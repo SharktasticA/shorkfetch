@@ -82,6 +82,9 @@ const char *INTEL_IGPUS[] = {
     //[0d2b] = "UNKNOWN Crystal Well GT3 workstation",  // 
     //[0d2e] = "UNKNOWN Crystal Well GT3 desktop",      // 
     //[0d36] = "UNKNOWN Crystal Well",                  // 
+
+    [0x1132] = "i815 Graphics",                         // 
+
     //[1602] = "UNKNOWN Broadwell-U",                   // 
     [0x1606] = "HD Graphics for 5th Gen",               // Celeron 3205U
     //[160a] = "UNKNOWN Broadwell-U",                   // 
@@ -238,6 +241,11 @@ const char *INTEL_IGPUS[] = {
     [0x5927] = "Iris Plus Graphics 650",                // Core i7-7567U
     [0x5a84] = "HD Graphics 505",                       // Pentium J4205/N4200
     [0x5a85] = "HD Graphics 500",                       // Celeron N3350/N3450
+
+    [0x7121] = "i810 Graphics",                         // 
+    [0x7123] = "i810 Graphics (DC-100)",                // 
+    [0x7125] = "i810E Graphics (DC-133)",               // 
+
     [0x87c0] = "UHD Graphics 617",                      // Core i5-8210Y
     [0x87ca] = "UHD Graphics 617",                      // Core i5-10310Y
     [0x8a51] = "Iris Plus Graphics",                    // Core i5-1030G7
