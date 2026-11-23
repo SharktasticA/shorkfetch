@@ -525,6 +525,16 @@ char *cleanGPUName(const char *vendor, const char *device,
         if (cleanedDeviceBrac)
             snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
     }
+    // Neomagic Corporation
+    else if (vendor[0] == 'N' && strncmp(vendor, "Neomagic", 8) == 0)
+    {
+        cleanedVendor = strdup("Neomagic");
+
+        // If we have bracketed info, we discard the norm (usually just
+        // containing the core name like NM2160)
+        if (cleanedDeviceBrac)
+            snprintf(cleanedDevice, GPU_NAME_LEN, "%s", cleanedDeviceBrac);
+    }
     // S3 Graphics Ltd.
     else if (vendor[0] == 'S' && strncmp(vendor, "S3 ", 3) == 0)
     {
